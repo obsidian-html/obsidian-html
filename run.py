@@ -1,4 +1,5 @@
 import sys                  # commandline arguments
+import shutil               # used to remove a non-empty directory
 import re                   # regex string finding/replacing
 from pathlib import Path    # 
 import frontmatter          # remove yaml frontmatter from md files
@@ -10,6 +11,11 @@ import markdown             # convert markdown to html
 # ------------------------------------------
 root_folder = sys.argv[1]   # first folder that contains all markdown files
 entrypoint = sys.argv[2]    # The note that will be used as the index.html
+
+# Config
+# ------------------------------------------
+md_output_dir   = Path('output/md')
+html_output_dir = Path('output/html')
 
 # Preprocess
 # ------------------------------------------
@@ -26,6 +32,15 @@ with open('src/template.html') as f:
     html_template = f.read()
 
 
+# Remove previous output
+output_dir = Path('output')
+if output_dir.exists():
+    shutil.rmtree(output_dir)
+
+# Recreate tree
+md_output_dir.mkdir(parents=True, exist_ok=True)
+html_output_dir.mkdir(parents=True, exist_ok=True)
+
 def ConvertPage(page_path):
     # ^ This function creates a proper markdown version of the Obsidian note, 
     #   an html page, and it will recursively call itself on any links in the note.
@@ -39,6 +54,10 @@ def ConvertPage(page_path):
     # If the frontmatter needs to be used at a later date: the frontmatter is loaded into dict keys, 
     # e.g. page['tags']
     page = frontmatter.load(page_path)
+
+    # We need to change "file.md" links to "file.html" for the html version of the output,
+    # but only for internal links. Doing this later would be pretty complex.
+    # So do all steps below twice, except for some minor differences.
     md_page = page.content
     html_page = page.content
 
@@ -49,6 +68,7 @@ def ConvertPage(page_path):
     # Replace Obsidian links with proper markdown
     for l in links:
         # A link in Obsidian can have the format 'filename|alias'
+        # If a link does not have an alias, the link name will function as the alias.
         parts = l.split('|')
         filename = parts[0].split('/')[-1]
         alias = filename
@@ -83,14 +103,9 @@ def ConvertPage(page_path):
 
     # Save file
     relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
-    md_filepath = Path('output/md' + relative_path)
-    html_filepath = Path('output/html' + relative_path.replace('.md', '.html'))
+    md_filepath = Path(md_output_dir + relative_path)
+    html_filepath = Path(html_output_dir + relative_path.replace('.md', '.html'))
     
-    folderpath = md_filepath.parent
-    folderpath.mkdir(parents=True, exist_ok=True) # create dir structure if needed
-    folderpath = html_filepath.parent
-    folderpath.mkdir(parents=True, exist_ok=True) # create dir structure if needed    
-
     # Write markdown
     with open(md_filepath, 'w') as f:
         f.write(md_page)
@@ -146,3 +161,5 @@ with open('src/main.css') as f :
 with open('src/not_created.html') as f :
     with open ('output/html/not_created.html', 'w') as t:
         t.write(html_template.replace('{content}', f.read()))
+
+
