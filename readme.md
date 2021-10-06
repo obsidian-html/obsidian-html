@@ -30,6 +30,10 @@ The script then writes converted (standard format) markdown files to `output/md`
 To test the html files, run `python -m http.server --directory output/html` then open [http://localhost:8000]()
 
 # Features
+## Not supported
+- Tags (you can use them in Obsidian, but they are ignored in the conversion)
+- Possibly a lot more
+
 ## Conversion of Obsidian type links
 - `[[Page Link]]` is converted to the standard `[Page Link](correct_path_to_file.html)` link format
 - `[[Page Link|Alias]]` is converted to `[Alias](correct_path_to_file.html)`

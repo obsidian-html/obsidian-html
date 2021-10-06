@@ -65,7 +65,20 @@ def ConvertPage(page_path):
     # This is any string in between [[ and ]], e.g. [[My Note]]
     links = re.findall("(?<=\[\[).+?(?=\])", md_page)
 
+    # Convert proper markdown links from .md to .html in html output, as long as they are .md links that are internal
+    # ----
+    # Must begin with ](, must end with ) (do not include in match)
+    # Must not have \\ or // in the matched string anywhere
+    for l in re.findall("(?<=\]\()((?!(.*\/\/|.*\\\\)).*\.md)(?=\))", md_page):
+        # remove .md at the end, and add .html
+        new_link = ']('+str(l[0][:-3])+'.html)'
+        # Replace link in document
+        print('-------', l)
+        safe_link = re.escape(']('+l[0]+')')
+        html_page = re.sub(f"(?<![\[\(])({safe_link})", new_link, html_page)
+
     # Replace Obsidian links with proper markdown
+    # ----
     for l in links:
         # A link in Obsidian can have the format 'filename|alias'
         # If a link does not have an alias, the link name will function as the alias.
@@ -95,23 +108,39 @@ def ConvertPage(page_path):
     html_page = html_page.replace("\n", "   \n")
 
     # Insert markdown links for bare http(s) links (those without the [name](link) format).
-    for l in re.findall("(?<![\[\(])(http.[^\s]*)", md_page):
+    # ----
+    # Cannot start with [, (, nor "
+    for l in re.findall("(?<![\[\(\"])(http.[^\s]*)", md_page):
         new_md_link = f"[{l}]({l})"
         safe_link = re.escape(l)
         md_page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, md_page)
         html_page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, html_page)
 
+    # Remove inline tags, like #ThisIsATag
+    # ----
+    # Inline tags are # connected to text (so no whitespace)
+    
+    for l in re.findall("#\S+", md_page):
+        new_str = f"**{l[1:]}**"
+        safe_str = re.escape(l)
+        md_page = re.sub(safe_str, new_str, md_page)
+        html_page = re.sub(safe_str, new_str, html_page)
+
     # Save file
     relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
-    md_filepath = Path(md_output_dir + relative_path)
-    html_filepath = Path(html_output_dir + relative_path.replace('.md', '.html'))
+    md_filepath = Path('output/md/' + relative_path)
+    html_filepath = Path('output/html/' + relative_path.replace('.md', '.html'))
+
+    # Create folder if necessary
+    md_filepath.parent.mkdir(parents=True, exist_ok=True)
+    html_filepath.parent.mkdir(parents=True, exist_ok=True)
     
     # Write markdown
-    with open(md_filepath, 'w') as f:
+    with open(md_filepath, 'w', encoding="utf-8") as f:
         f.write(md_page)
 
     # Write html
-    with open(html_filepath, 'w') as f:
+    with open(html_filepath, 'w', encoding="utf-8") as f:
         # Convert markdown to html
         html_body = markdown.markdown(html_page, extensions=['extra'])
 
@@ -155,11 +184,11 @@ ConvertPage(entrypoint)
 # Add Extra stuff to the output directories
 # ------------------------------------------
 with open('src/main.css') as f :
-    with open ('output/html/main.css', 'w') as t:
+    with open ('output/html/main.css', 'w', encoding="utf-8") as t:
         t.write(f.read())
 
 with open('src/not_created.html') as f :
-    with open ('output/html/not_created.html', 'w') as t:
+    with open ('output/html/not_created.html', 'w', encoding="utf-8") as t:
         t.write(html_template.replace('{content}', f.read()))
 
 
