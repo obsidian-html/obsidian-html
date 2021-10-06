@@ -39,10 +39,12 @@ def ConvertPage(page_path):
     # If the frontmatter needs to be used at a later date: the frontmatter is loaded into dict keys, 
     # e.g. page['tags']
     page = frontmatter.load(page_path)
+    md_page = page.content
+    html_page = page.content
 
     # Get obsidian links. 
     # This is any string in between [[ and ]], e.g. [[My Note]]
-    links = re.findall("(?<=\[\[).+?(?=\])", page.content)
+    links = re.findall("(?<=\[\[).+?(?=\])", md_page)
 
     # Replace Obsidian links with proper markdown
     for l in links:
@@ -61,31 +63,26 @@ def ConvertPage(page_path):
             # Obtain the full path of the file in the directory tree
             # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
             full_path = files[filename+'.md']['fullpath']
-
-            # Replace any links pointing to the entrypoint to point to '/index.html'
-            if (full_path == entrypoint):
-                relative_path = '/index.md'
-            else:
-                # Convert full Windows(!) path to url link, e.g: 
-                # 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md' --> .replace(root_folder, '') -->
-                # '\Work\Harbor Docs.md' --> .replace('\\', '/') -->
-                # '/Work/Harbor Docs.md' 
-                relative_path = full_path.replace(root_folder, '').replace('\\', '/')
+            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, root_folder, entrypoint)
 
         # Replace Obsidian link with proper markdown link
         url_path = relative_path.replace(' ', '%20')
-        page.content = page.content.replace('[['+l+']]', f"[{alias}]({url_path})")
+        md_page = md_page.replace('[['+l+']]', f"[{alias}]({url_path})")
+        html_page = html_page.replace('[['+l+']]', f"[{alias}]({url_path.replace('.md', '.html')})")
 
     # Fix newline issue by adding three spaces before any newline
-    page.content = page.content.replace("\n", "   \n")
+    md_page = md_page.replace("\n", "   \n")
+    html_page = html_page.replace("\n", "   \n")
 
     # Insert markdown links for bare http(s) links (those without the [name](link) format).
-    for l in re.findall("(?<![\[\(])(http.[^\s]*)", page.content):
+    for l in re.findall("(?<![\[\(])(http.[^\s]*)", md_page):
         new_md_link = f"[{l}]({l})"
         safe_link = re.escape(l)
-        page.content = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, page.content)
+        md_page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, md_page)
+        html_page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, html_page)
 
     # Save file
+    relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
     md_filepath = Path('output/md' + relative_path)
     html_filepath = Path('output/html' + relative_path.replace('.md', '.html'))
     
@@ -96,14 +93,13 @@ def ConvertPage(page_path):
 
     # Write markdown
     with open(md_filepath, 'w') as f:
-        f.write(page.content)
+        f.write(md_page)
 
     # Write html
     with open(html_filepath, 'w') as f:
         # Convert markdown to html
-        html_body = markdown.markdown(page.content, extensions=['extra'])
-        # change links to xxx.md to xxx.html 
-        html_body = html_body.replace('.md">', '.html">')
+        html_body = markdown.markdown(html_page, extensions=['extra'])
+
         # Wrap body html in valid html structure from template
         html = html_template.replace('{content}', html_body)
         f.write(html)    
@@ -125,6 +121,15 @@ def ConvertPage(page_path):
         # Convert the note that is linked to
         print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
         ConvertPage(files[link_path]['fullpath'])
+
+def ConvertFullWindowsPathToRelativeMarkdownPath(fullwindowspath, root_folder, entrypoint):
+    # Convert full Windows path to url link, e.g: 
+    # 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md' --> .replace(root_folder, '') -->
+    # '\Work\Harbor Docs.md' --> .replace('\\', '/') -->
+    # '/Work/Harbor Docs.md' 
+    if fullwindowspath == entrypoint:
+        return '/index.md'
+    return fullwindowspath.replace(root_folder, '').replace('\\', '/')
 
 # Convert files
 # ------------------------------------------
