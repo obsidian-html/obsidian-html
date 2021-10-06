@@ -12,6 +12,10 @@ import markdown             # convert markdown to html
 root_folder = sys.argv[1]   # first folder that contains all markdown files
 entrypoint = sys.argv[2]    # The note that will be used as the index.html
 
+if root_folder[-1] == '\\':
+    root_folder = root_folder[:-1]
+
+
 # Config
 # ------------------------------------------
 md_output_dir   = Path('output/md')
@@ -118,9 +122,8 @@ def ConvertPage(page_path):
 
     # Remove inline tags, like #ThisIsATag
     # ----
-    # Inline tags are # connected to text (so no whitespace)
-    
-    for l in re.findall("#\S+", md_page):
+    # Inline tags are # connected to text (so no whitespace nor another #)
+    for l in re.findall("#[^\s#]+", md_page):
         new_str = f"**{l[1:]}**"
         safe_str = re.escape(l)
         md_page = re.sub(safe_str, new_str, md_page)
