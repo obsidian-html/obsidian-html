@@ -1,5 +1,7 @@
 # Obsidian-html
-An application to export Obsidian notes to an html based website
+An application to export Obsidian notes to an html based website.
+
+> Note, this code has not been tested fully yet. Work in progress. Issues and/or pull requests are welcomed!
 
 # Installation
 First install python 3, then:
@@ -21,3 +23,31 @@ This application is only tested on Windows, though it should be relatively easy 
 The script then writes converted (standard) markdown files to `output/md`, and the html files to `output/html`.
 
 To test the html files, run `python -m http.server --directory output/html` then open [http://localhost:8000]()
+
+# Features
+## Conversion of Obsidian type links
+- `[[Page Link]]` is converted to standard `[Page Link](correct_path_to_file.html)`
+- `[[Page Link|Alias]]` is converted to standard `[Alias](correct_path_to_file.html)`
+- When the determined path is the same as the entrypoint note, the link will be `[Page Link](/)` (i.e. the index.html)
+
+Here, it doesn't matter if the target file is in another folder, as long as all the notes are in the root folder somewhere.
+
+## Conversion of Obsidian newline behavior
+Three spaces are added behind every newline to simulate Obsidian's "enter = new line" behavior. Note that not all markdown readers comply with this standard, but python-markdown does.
+
+## Conversion of Obsidian 'bare links'
+If you type `http(s)://....` in Obsidian, it will automatically convert it to a link. Any string that:
+- Starts with "http"
+- Ends with a space or newline
+- Is **not** preceeded by an '[' or '('
+
+will be converted to `[matched value](matched value)`
+
+## Basic Templating
+All generated html code will be wrapped by the html code in `src/template.html`. This template points to `src/main.css`. 
+Change this code *in the `/src` folder to have the changes persist across runs of the code (output will be overwritten).
+
+Links that point to non-existent notes will be redirected to `output/html/not_created.html`, the base code for this is located at `/src/not_created.html`.
+
+# Future developments
+- This code would make a good python-markdown extension, might build that in the future.
