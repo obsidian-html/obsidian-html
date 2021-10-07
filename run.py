@@ -1,4 +1,5 @@
 import sys                  # commandline arguments
+import os                   #
 import shutil               # used to remove a non-empty directory, copy files
 import re                   # regex string finding/replacing
 from pathlib import Path    # 
@@ -172,7 +173,11 @@ def ConvertPage(page_path):
     # Compile HTML and other HTML specific transformations
     # ----
     # Convert markdown to html
-    html_body = markdown.markdown(html_page, extensions=['extra'])
+    extension_configs = {
+    'codehilite ': {
+        'linenums': True
+    }}
+    html_body = markdown.markdown(html_page, extensions=['extra', 'codehilite'], extension_configs=extension_configs)
 
     # Tag external links
     for l in re.findall(r'(?<=\<a href=")(.*)(?=")', html_body):
@@ -242,8 +247,10 @@ ConvertPage(entrypoint)
 
 # Add Extra stuff to the output directories
 # ------------------------------------------
+os.makedirs('output/html/static', exist_ok=True)
 shutil.copyfile('src/main.css', 'output/html/main.css')
 shutil.copyfile('src/external.svg', 'output/html/external.svg')
+shutil.copyfile('src/fonts/SourceCodePro-Regular.ttf', 'output/html/static/SourceCodePro-Regular.ttf')
 
 
 with open('src/not_created.html') as f :

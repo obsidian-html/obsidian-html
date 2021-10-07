@@ -11,8 +11,7 @@ First install python 3, then:
 
 ``` bash
 python -m pip install --upgrade pip
-pip install markdown
-pip install python-frontmatter
+pip install markdown python-frontmatter pygments
 ```
 
 # Useage
