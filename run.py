@@ -80,29 +80,24 @@ def ConvertPage(page_path):
         # remove .md at the end, and add .html
         new_link = ']('+str(l[0][:-3])+'.html)'
         # Replace link in document
-        print('-------', l)
         safe_link = re.escape(']('+l[0]+')')
         html_page = re.sub(f"(?<![\[\(])({safe_link})", new_link, html_page)
 
     # Handle local image links (copy them over to output)
     # ----
-    for l in re.findall("(?<=\!\[\]\()((?!(.*\/\/|.*\\\\)).*)(?=\))", md_page):
-        # We have two search groups, so a tuple is returned.
-        # The first element should have the link of interest
-        link = l[0]
+    for link in re.findall("(?<=\!\[\]\()(.*)(?=\))", md_page):
+        # Only handle local image files (images located in the root folder)
+        if urllib.parse.unquote(link) not in files.keys():
+            continue
 
+        # Build relative paths
         filepath = files[urllib.parse.unquote(link)]['fullpath']
-        print(filepath)
-
         relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")
-        print(relative_path)
 
         md_filepath = Path('output/md/' + relative_path)
         html_filepath = Path('output/html/' + relative_path)
 
-        print(html_filepath)
-
-        # Create folder if necessary
+        # Create folders if necessary
         md_filepath.parent.mkdir(parents=True, exist_ok=True)
         html_filepath.parent.mkdir(parents=True, exist_ok=True)
 
