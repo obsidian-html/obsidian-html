@@ -5,3 +5,45 @@ table, th, td {
 table {
     border-collapse: collapse;
 }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    color: rgb(51, 51, 51);
+}
+.container {
+    max-width: 36rem;
+    padding: 1rem;
+    height: calc(100vh - 3rem);
+    overflow: scroll;
+}
+h1 {
+    font-size: 28px;
+    line-height: 34px;
+    margin-top: 0px;
+    margin-bottom: 16px;
+    color: inherit;
+    font-weight: 600;
+}
+ /* unvisited link */
+ a:link {
+    color: rgb(10, 132, 255);
+    text-decoration: none;
+  }
+  
+  /* visited link */
+  a:visited {
+    color: rgb(60, 158, 255);
+    text-decoration: none;
+  }
+  
+  /* mouse over link */
+  a:hover {
+    color: rgb(10, 132, 255);
+    text-decoration: underline;
+  }
+  
+  /* selected link */
+  a:active {
+    color: blue;
+    text-decoration: none;
+  } 

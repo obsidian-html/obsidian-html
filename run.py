@@ -1,9 +1,11 @@
 import sys                  # commandline arguments
-import shutil               # used to remove a non-empty directory
+import shutil               # used to remove a non-empty directory, copy files
 import re                   # regex string finding/replacing
 from pathlib import Path    # 
 import frontmatter          # remove yaml frontmatter from md files
 import markdown             # convert markdown to html
+import urllib.parse         # convert link characters like %
+
  
 # python run.py 'C:\Users\Installer\OneDrive\Obsidian\Notes' 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work.md'
 
@@ -20,13 +22,14 @@ if root_folder[-1] == '\\':
 # ------------------------------------------
 md_output_dir   = Path('output/md')
 html_output_dir = Path('output/html')
+image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp']
 
 # Preprocess
 # ------------------------------------------
 # Load all filenames in the root folder.
 # This data will be used to convert implicit Obsidian links to proper markdown links. 
 files = {}
-for path in Path(root_folder).rglob('*.md'):
+for path in Path(root_folder).rglob('*'):
     files[path.name] = {'fullpath': str(path), 'processed': False}  
     # ^ the 'processed' switch helps us to avoid infinite loops
 
@@ -81,6 +84,42 @@ def ConvertPage(page_path):
         safe_link = re.escape(']('+l[0]+')')
         html_page = re.sub(f"(?<![\[\(])({safe_link})", new_link, html_page)
 
+    # Handle local image links (copy them over to output)
+    # ----
+    for l in re.findall("(?<=\!\[\]\()((?!(.*\/\/|.*\\\\)).*)(?=\))", md_page):
+        # We have two search groups, so a tuple is returned.
+        # The first element should have the link of interest
+        link = l[0]
+
+        filepath = files[urllib.parse.unquote(link)]['fullpath']
+        print(filepath)
+
+        relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")
+        print(relative_path)
+
+        md_filepath = Path('output/md/' + relative_path)
+        html_filepath = Path('output/html/' + relative_path)
+
+        print(html_filepath)
+
+        # Create folder if necessary
+        md_filepath.parent.mkdir(parents=True, exist_ok=True)
+        html_filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        # Copy file over
+        shutil.copyfile(filepath, md_filepath)
+        shutil.copyfile(filepath, html_filepath)
+
+        # Adjust link in page
+        new_link = '![]('+relative_path+')'
+        safe_link = re.escape('![]('+link+')')
+        md_page = re.sub(safe_link, new_link, md_page)
+        html_page = re.sub(safe_link, new_link, html_page)
+        print(safe_link)
+        print(new_link)
+
+
+
     # Replace Obsidian links with proper markdown
     # ----
     for l in links:
@@ -105,7 +144,11 @@ def ConvertPage(page_path):
         # Replace Obsidian link with proper markdown link
         url_path = relative_path.replace(' ', '%20')
         md_page = md_page.replace('[['+l+']]', f"[{alias}]({url_path})")
-        html_page = html_page.replace('[['+l+']]', f"[{alias}]({url_path.replace('.md', '.html')})")
+
+        html_url = urllib.parse.unquote(url_path)
+        html_url = html_url.replace('.md', '.html')
+        html_url = urllib.parse.quote(html_url)
+        html_page = html_page.replace('[['+l+']]', f"[{alias}]({html_url})")
 
     # Fix newline issue by adding three spaces before any newline
     md_page = md_page.replace("\n", "   \n")
