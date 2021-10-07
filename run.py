@@ -161,11 +161,13 @@ def ConvertPage(page_path):
     # Remove inline tags, like #ThisIsATag
     # ----
     # Inline tags are # connected to text (so no whitespace nor another #)
-    for l in re.findall("#[^\s#]+", md_page):
-        new_str = f"**{l[1:]}**"
+    for l in re.findall("#[^\s#`]+", md_page):
+        tag = l.replace('.', '').replace('#', '')
+        new_md_str = f"**{tag}**"
+        new_html_str = f"<span class=\"tag\">{tag}</span>"
         safe_str = re.escape(l)
-        md_page = re.sub(safe_str, new_str, md_page)
-        html_page = re.sub(safe_str, new_str, html_page)
+        md_page = re.sub(safe_str, new_md_str, md_page)
+        html_page = re.sub(safe_str, new_html_str, html_page)
 
     # Compile HTML and other HTML specific transformations
     # ----

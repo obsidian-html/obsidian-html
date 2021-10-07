@@ -76,3 +76,9 @@ h1 {
     margin-left: 1rem;
   }
   
+
+  span.tag {
+    font-weight: 600;
+    color: rgb(222, 22, 251);
+    text-transform: capitalize;
+  }
