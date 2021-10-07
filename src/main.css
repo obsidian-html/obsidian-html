@@ -10,18 +10,24 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     color: rgb(51, 51, 51);
     margin: 0rem;
+    margin-top: 3.5rem;
+    overflow-y: hidden;
+    overflow-x: scroll;
 }
 .container {
     max-width: 40rem;
     padding: 2rem;
     height: calc(100vh - 3rem);
     overflow: scroll;
+    float: left;
 }
 .header {
     width: 100vw;
     padding: 1rem;
     padding-left: 2rem;
     border-bottom: 3px solid #f0f0f0;
+    position:fixed;
+    top:0px;
 }
 h1 {
     font-size: 28px;

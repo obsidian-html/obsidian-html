@@ -4,8 +4,8 @@
 
         <head>
                 <!-- Page information -->
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="shortcut icon" href="/favicon.ico" />
 
                 <!-- Set title -->
@@ -15,11 +15,109 @@
                 <link rel="stylesheet" href="/main.css" />
         </head>
 
-<body>
-<div class="header">
-        <a href="/"><em>Devfruits</em>/Notes</a>
+<body onload="SetLinks(0);">
+<div id="header" class="header">
+        <a href="/" id="homelink"><em>Devfruits</em>/Notes</a>
 </div>
 <div class="container">
 {content}
+<!-- end content -->
 </div>
+
+<script>
+        // Change link operation
+        function SetLinks(level){
+                console.log('loaded');
+                var links = document.getElementsByTagName('a');
+                console.log(links);
+                for (let i=0; i < links.length; i++){
+                        let l = links[i];
+                        if (l.id == 'homelink'){
+                                continue;
+                        }
+                        if (l.onclick != null){
+                                continue;
+                        }
+                        l.onclick = function () { 
+                                httpGetAsync(this.href, ReceiveCall, level+1); return false; };
+                }
+        }   
+        
+        function httpGetAsync(theUrl, callback, level)
+        {
+
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() { 
+                        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                        callback(xmlHttp, level);
+                }
+                console.log(theUrl);
+                xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+                xmlHttp.send(null);
+        }
+
+        function ReceiveCall(xmlHttp, level){
+                console.log('receive', level);
+                respUrl = xmlHttp.responseURL;
+                responseText = xmlHttp.responseText;
+
+                // Set body width to level * 40 rem
+                document.body.style.width = (level * 40 + 100) + 'rem';                
+
+                // Get html
+                let text = responseText.split('<div class="container">')[1];
+                text =  text.split('<!-- end content -->')[0];
+
+                // Close all containers with level below given
+                CloseUpperContainers(level);                                
+
+                // Test if container for this level already exists
+                // otherwise create
+                let levelcont = document.getElementById('level-'+level);
+                let isNew = false
+                if (levelcont == null) {
+                        isNew = true;
+                        levelcont = document.createElement('div');
+                        levelcont.className = 'container';
+                        levelcont.id = 'level-'+level;
+                }
+
+                // Update content of div
+                levelcont.innerHTML = text;
+
+                if (isNew){
+                        document.body.appendChild(levelcont);
+                }
+
+                // Scroll into view
+                levelcont = document.getElementById('level-'+level);
+                levelcont.scrollIntoView(true);
+                window.scrollTo(window.visualViewport.pageLeft, 0);
+               
+
+                // Arm new links
+                SetLinks(level);
+
+
+        }
+
+        function CloseUpperContainers(level){
+                console.log('close', level);
+                let cns = document.getElementsByClassName("container");
+                console.log(cns);
+                for (let i=0; i<cns.length; i++){
+                        console.log(cns[i].id);
+                        if (cns[i].id){
+                                console.log(cns[i].id);
+                                if (cns[i].id.split('-')[1] > level){
+                                        console.log('remove', cns[i].id);
+                                        cns[i].remove();
+                                        CloseUpperContainers(level);
+                                        return;
+                                }
+                        }
+                }
+        }
+</script>      
 </body>
+</html>

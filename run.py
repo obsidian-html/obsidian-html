@@ -77,9 +77,20 @@ def ConvertPage(page_path):
     # ----
     # Must begin with ](, must end with ) (do not include in match)
     # Must not have \\ or // in the matched string anywhere
-    for l in re.findall("(?<=\]\()((?!(.*\/\/|.*\\\\)).*\.md)(?=\))", md_page):
+    proper_links = re.findall("(?<=\]\()((?!(.*\/\/|.*\\\\)).*\.md)(?=\))", md_page)
+    for l in proper_links:
+        file_name = urllib.parse.unquote(l[0][:-3])
+        links.append(file_name)
+        print('---', file_name)
+
         # remove .md at the end, and add .html
-        new_link = ']('+str(l[0][:-3])+'.html)'
+        new_link = ']('+file_name+'.html)'
+
+        if file_name in files.keys():
+            filepath = files[file_name]['fullpath']
+            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")
+            new_link = ']('+relative_path+')'
+
         # Replace link in document
         safe_link = re.escape(']('+l[0]+')')
         html_page = re.sub(f"(?<![\[\(])({safe_link})", new_link, html_page)
