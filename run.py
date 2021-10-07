@@ -180,7 +180,7 @@ def ConvertPage(page_path):
     html_body = markdown.markdown(html_page, extensions=['extra', 'codehilite'], extension_configs=extension_configs)
 
     # Tag external links
-    for l in re.findall(r'(?<=\<a href=")(.*)(?=")', html_body):
+    for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
         if l[0] == '/':
             # Internal link, skip
             continue

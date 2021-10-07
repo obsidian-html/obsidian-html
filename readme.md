@@ -57,5 +57,8 @@ Change this code *in the `/src` folder* to have the changes persist across runs 
 
 Links that point to non-existent notes will be redirected to `output/html/not_created.html`, the base code for this is located at `/src/not_created.html`.
 
+## Other (expected) features
+- Syntax highlighting built-in
+
 # Future developments
 - This code would make a good python-markdown extension, might build that in the future.

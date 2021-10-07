@@ -35,6 +35,12 @@ h2 {
     font-size: 14pt;
     color: inherit;
 }
+li {
+    margin-bottom: 0.3rem;
+}
+
+
+
  /* unvisited link */
  a:link {
     color: rgb(10, 132, 255);
@@ -72,7 +78,6 @@ a.nonexistent-link:visited {
 .header a:visited {
     color: rgb(117, 114, 114);
 }
-
 
   .external-link::after {
     background: transparent url(/external.svg) 0 0 no-repeat;
