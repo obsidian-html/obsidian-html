@@ -11,7 +11,7 @@ body {
     color: rgb(51, 51, 51);
 }
 .container {
-    max-width: 36rem;
+    max-width: 38rem;
     padding: 1rem;
     height: calc(100vh - 3rem);
     overflow: scroll;
@@ -47,3 +47,32 @@ h1 {
     color: blue;
     text-decoration: none;
   } 
+
+  
+  a.nonexistent-link:link  ,
+  a.nonexistent-link:hover,
+  a.nonexistent-link:active,
+  a.nonexistent-link:visited {
+    color:rgb(156, 156, 156);
+}
+
+  .external-link::after {
+    background: transparent url(/external.svg) 0 0 no-repeat;
+    background-size: auto;
+    background-size: 16px;
+    content: "";
+    height: 16px;
+    margin-left: 3px;
+    width: 16px;
+    display: inline-block;
+    filter: invert(90%) sepia(6%) saturate(9%) hue-rotate(14deg) brightness(90%) contrast(93%);
+  }
+
+
+  blockquote {
+    background-color: #e6e6e6;
+    padding: 0.1rem 1rem 0.1rem 1rem;
+    margin: 0rem;
+    margin-left: 1rem;
+  }
+  

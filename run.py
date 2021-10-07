@@ -167,6 +167,27 @@ def ConvertPage(page_path):
         md_page = re.sub(safe_str, new_str, md_page)
         html_page = re.sub(safe_str, new_str, html_page)
 
+    # Compile HTML and other HTML specific transformations
+    # ----
+    # Convert markdown to html
+    html_body = markdown.markdown(html_page, extensions=['extra'])
+
+    # Tag external links
+    for l in re.findall(r'(?<=\<a href=")(.*)(?=")', html_body):
+        if l[0] == '/':
+            # Internal link, skip
+            continue
+
+        new_str = f"<a href=\"{l}\" class=\"external-link\""
+        safe_str = re.escape(f"<a href=\"{l}\"")
+        html_body = re.sub(safe_str, new_str, html_body)
+
+    # Tag not created links
+    html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
+
+    # Wrap body html in valid html structure from template
+    html = html_template.replace('{content}', html_body)
+
     # Save file
     relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
     md_filepath = Path('output/md/' + relative_path)
@@ -182,11 +203,6 @@ def ConvertPage(page_path):
 
     # Write html
     with open(html_filepath, 'w', encoding="utf-8") as f:
-        # Convert markdown to html
-        html_body = markdown.markdown(html_page, extensions=['extra'])
-
-        # Wrap body html in valid html structure from template
-        html = html_template.replace('{content}', html_body)
         f.write(html)    
     
     # Recurse for every link in the current page
@@ -224,9 +240,9 @@ ConvertPage(entrypoint)
 
 # Add Extra stuff to the output directories
 # ------------------------------------------
-with open('src/main.css') as f :
-    with open ('output/html/main.css', 'w', encoding="utf-8") as t:
-        t.write(f.read())
+shutil.copyfile('src/main.css', 'output/html/main.css')
+shutil.copyfile('src/external.svg', 'output/html/external.svg')
+
 
 with open('src/not_created.html') as f :
     with open ('output/html/not_created.html', 'w', encoding="utf-8") as t:
