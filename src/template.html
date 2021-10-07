@@ -35,6 +35,9 @@
                         if (l.id == 'homelink'){
                                 continue;
                         }
+                        if (l.classList.contains('external-link')){
+                                continue;
+                        }
                         if (l.onclick != null){
                                 continue;
                         }
