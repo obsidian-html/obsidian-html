@@ -23,6 +23,7 @@ if root_folder[-1] == '\\':
 # ------------------------------------------
 # Toggles
 toggle_compile_html = True
+allow_duplicate_filenames_in_root = False
 
 # Paths
 md_to_html_input_dir = 'output\md'
@@ -33,6 +34,9 @@ html_output_dir = Path('output\html')
 
 # Lookup tables
 image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp']
+
+class DuplicateFileNameInRoot(Exception):
+    pass
 
 # Preprocess
 # ------------------------------------------
@@ -366,6 +370,9 @@ def ConvertFullWindowsPathToRelativeMarkdownPath(fullwindowspath, root_folder, e
 # It's clear that no two files can be allowed to have the same file name.
 files = {}
 for path in Path(root_folder).rglob('*'):
+    if path.name in files.keys() and allow_duplicate_filenames_in_root == False:
+        raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
+
     files[path.name] = {'fullpath': str(path), 'processed': False}  
 
 # Start conversion with entrypoint.
@@ -389,6 +396,9 @@ if toggle_compile_html:
     # This data is used to check which links are local
     files = {}
     for path in Path(root_folder).rglob('*'):
+        if path.name in files.keys() and allow_duplicate_filenames_in_root == False:
+            raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")        
+
         files[path.name] = {'fullpath': str(path), 'processed': False}  
 
     print(files.keys())
