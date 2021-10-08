@@ -23,6 +23,7 @@ if root_folder[-1] == '\\':
 # ------------------------------------------
 # Toggles
 toggle_compile_html = True
+toggle_compile_md = True
 allow_duplicate_filenames_in_root = False
 
 # Paths
@@ -41,9 +42,14 @@ class DuplicateFileNameInRoot(Exception):
 # Preprocess
 # ------------------------------------------
 # Remove previous output
-output_dir = Path('output')
-if output_dir.exists():
-    shutil.rmtree(output_dir)
+if toggle_compile_md:
+    output_dir = Path('output')
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+else:
+    output_dir = Path('output/html')
+    if output_dir.exists():
+        shutil.rmtree(output_dir)    
 
 # Recreate tree
 md_output_dir.mkdir(parents=True, exist_ok=True)
@@ -268,9 +274,6 @@ def ConvertMarkdownPageToHtmlPage(page_path):
             full_link_path = page_path.parent.joinpath(urllib.parse.unquote(l)).resolve()
             rel_path = full_link_path.relative_to(md_to_html_input_dir)
 
-            if page_path.name == 'Obsidian.md':
-                print(f"'>>>>\n{page_path.parent}\n{l}\n{full_link_path}\n{rel_path.as_posix()}")       
-
             # Not local clause
             if rel_path.as_posix() not in files.keys():
                 continue
@@ -287,13 +290,10 @@ def ConvertMarkdownPageToHtmlPage(page_path):
 
     # Handle local image links (copy them over to output)
     # ----
-    
-    for link in re.findall("(?<=\!\[\]\()(.*)(?=\))", html_page):
+    for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", html_page):
         l = urllib.parse.unquote(link)
-        full_link_path = page_path.parent.joinpath(l)
-        rel_path = full_link_path.relative_to(page_path.parent)
-
-        print('img >>>>', page_path, l, full_link_path, rel_path, rel_path.name, rel_path.as_posix())
+        full_link_path = page_path.parent.joinpath(l).resolve()
+        rel_path = full_link_path.relative_to(md_to_html_input_dir)
 
         # Only handle local image files (images located in the root folder)
         if rel_path.as_posix() not in files.keys():
@@ -301,14 +301,13 @@ def ConvertMarkdownPageToHtmlPage(page_path):
 
         # Copy src to dst
         dst_path = html_output_dir.joinpath(rel_path)
-        full_link_path.parent.mkdir(parents=True, exist_ok=True)
+        dst_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(full_link_path, dst_path)
 
         # Adjust link in page
-        new_link = '![]('+rel_path.as_posix()+')'
-        safe_link = re.escape('![]('+link+')')
+        new_link = '![]('+urllib.parse.quote(rel_path.as_posix())+')'
+        safe_link = re.escape('![](/'+link+')')
         html_page = re.sub(safe_link, new_link, html_page)
-
 
     # Restore codeblocks/-lines
     # ----
@@ -394,7 +393,8 @@ for path in Path(root_folder).rglob('*'):
 
 # Start conversion with entrypoint.
 # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
-ConvertObsidianPageToMarkdownPage(entrypoint)
+if toggle_compile_md:
+    ConvertObsidianPageToMarkdownPage(entrypoint)
 
 
 # Convert Markdown to Html
