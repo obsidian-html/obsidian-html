@@ -1,7 +1,7 @@
 # Smart Note Taking    
 In terms of technology, what matters is not “computer-support note-taking” but “computer supported thinking.” The goal is not to take notes—the goal is to think effectively.   
    
-A great way to start with effective note taking is through reading up on [Evergreen Notes](../../Private/Education/Evergreen%2520Notes.md).   
+A great way to start with effective note taking is through reading up on [Evergreen Notes](../../Private/Education/Evergreen%20Notes.md).   
    
    
 # References   

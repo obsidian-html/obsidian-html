@@ -1,3 +1,3 @@
 # ETCD   
-[Install ETCD](Install%2520ETCD.md)   
-[Basic Usage ETCD](Basic%2520Usage%2520ETCD.md)
+[Install ETCD](Install%20ETCD.md)   
+[Basic Usage ETCD](Basic%20Usage%20ETCD.md)

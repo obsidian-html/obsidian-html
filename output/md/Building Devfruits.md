@@ -1,5 +1,5 @@
 # Building Devfruits   
-This website started when I read about [Smart note taking](../../Private/Education/Smart%2520note%2520taking.md) and decided to try out [Obsidian](../../Private/Obsidian/Obsidian.md). I really enjoy the way this system works for making notes. It's a very fluent way of working. Note taking should be quick and painless in my opinion.   
+This website started when I read about [Smart note taking](../../Private/Education/Smart%20note%20taking.md) and decided to try out [Obsidian](../../Private/Obsidian/Obsidian.md). I really enjoy the way this system works for making notes. It's a very fluent way of working. Note taking should be quick and painless in my opinion.   
    
 > It might be clear that this website's design is heavily inspired by [this website](https://notes.andymatuschak.org/Evergreen_notes). And actually, I'm still planning on stealing it's click-through dynamic. Can't improve on perfect, and that website is perfection in my book. **Edit** Okay I stole that too now.   
    

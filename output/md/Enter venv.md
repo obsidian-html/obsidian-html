@@ -12,5 +12,5 @@ function enter { source ~/venvs/${1}/bin/activate; }
 Usage: `enter py1`   
    
    
-[Create venv](Create%2520venv.md)   
-[Exit venv](Exit%2520venv.md)
+[Create venv](Create%20venv.md)   
+[Exit venv](Exit%20venv.md)

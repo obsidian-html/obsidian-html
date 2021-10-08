@@ -3,5 +3,5 @@ The proces in which you start something and something inside of you keeps pullin
    
 Going down the rabbithole is often linked with activities that expand or alter our sense of reality, like uncovering how things really work, and dabbling in conspiracy theories.   
    
-Related: [Strange Moods](../High%2520Concepts/Strange%2520Moods.md).   
-Related: [TV Tropes](../Misc/TV%2520Tropes.md).
+Related: [Strange Moods](../High%20Concepts/Strange%20Moods.md).   
+Related: [TV Tropes](../Misc/TV%20Tropes.md).

@@ -1,5 +1,5 @@
 # Local Git Configuration   
-Configuring git users and ssh key authentication is a [Recurring Configuration Task](/not_created.md), and one of the first steps of [Setting up a new workspace](Setting%2520up%2520a%2520new%2520workspace.md).    
+Configuring git users and ssh key authentication is a [Recurring Configuration Task](/not_created.md), and one of the first steps of [Setting up a new workspace](Setting%20up%20a%20new%20workspace.md).    
    
 ## Avoid Global settings   
 If you work with multiple git users, and need to use different ssh keys, the best option is to not set global configurations at all. This way you will always be warned when you haven't set your local git config, and this avoids the risk of using the wrong user when committing and pushing.   

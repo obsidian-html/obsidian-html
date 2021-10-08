@@ -92,7 +92,7 @@ def ConvertObsidianPageToMarkdownPage(page_path):
             filepath = files[file_name]['fullpath']
             relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")[1:]
             relative_path = '../' * (relative_path.count('/')) + relative_path
-            new_link = ']('+urllib.parse.quote(relative_path)+')'
+            new_link = ']('+relative_path+')'
 
             safe_link = re.escape(']('+l[0]+')')
             md_page = re.sub(f"(?<![\[\(])({safe_link})", new_link, md_page)
@@ -145,8 +145,7 @@ def ConvertObsidianPageToMarkdownPage(page_path):
             relative_path = '../' * (relative_path.count('/')) + relative_path
 
         # Replace Obsidian link with proper markdown link
-        url_path = relative_path.replace(' ', '%20')
-        md_page = md_page.replace('[['+l+']]', f"[{alias}]({urllib.parse.quote(url_path)})")
+        md_page = md_page.replace('[['+l+']]', f"[{alias}]({urllib.parse.quote(relative_path)})")
 
         
     # Fix newline issue by adding three spaces before any newline

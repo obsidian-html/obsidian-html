@@ -1,4 +1,4 @@
 # Pip   
    
-[Create venv](Create%2520venv.md)   
-[Pip behind a proxy](Pip%2520behind%2520a%2520proxy.md)
+[Create venv](Create%20venv.md)   
+[Pip behind a proxy](Pip%20behind%20a%20proxy.md)

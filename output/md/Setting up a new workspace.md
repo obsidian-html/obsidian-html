@@ -7,8 +7,8 @@ This note lists all the steps for a core development server, and for a gui manag
 - [Installing and configuring VS Code](/not_created.md)   
 - [Installing Git](/not_created.md)   
 - [Generating new SSH keypair](/not_created.md)   
-- [Local Git Configuration](Local%2520Git%2520Configuration.md)   
+- [Local Git Configuration](Local%20Git%20Configuration.md)   
    
 ## Linux core development server   
 - [Generating new SSH keypair](/not_created.md)   
-- Git is often already installed, and when not, installing git is trivial on Linux. You do need to setup [Local Git Configuration](Local%2520Git%2520Configuration.md) though.
+- Git is often already installed, and when not, installing git is trivial on Linux. You do need to setup [Local Git Configuration](Local%20Git%20Configuration.md) though.
