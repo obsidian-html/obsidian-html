@@ -74,6 +74,10 @@ def ConvertObsidianPageToMarkdownPage(page_path):
     # So do all steps below twice, except for some minor differences.
     md_page = page.content
 
+    # Get page depth
+    page_rel_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, "")[1:]
+    page_folder_depth = page_rel_path.count('/')
+    print('page_path:', page_rel_path, page_folder_depth)
     # Get obsidian links. 
     # This is any string in between [[ and ]], e.g. [[My Note]]
     links = re.findall("(?<=\[\[).+?(?=\])", md_page)
@@ -91,7 +95,7 @@ def ConvertObsidianPageToMarkdownPage(page_path):
         if file_name in files.keys():
             filepath = files[file_name]['fullpath']
             relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")[1:]
-            relative_path = '../' * (relative_path.count('/')) + relative_path
+            relative_path = ('../' * page_folder_depth) + relative_path
             new_link = ']('+relative_path+')'
 
             safe_link = re.escape(']('+l[0]+')')
@@ -142,7 +146,7 @@ def ConvertObsidianPageToMarkdownPage(page_path):
             # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
             full_path = files[filename+'.md']['fullpath']
             relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, root_folder, "")[1:]
-            relative_path = '../' * (relative_path.count('/')) + relative_path
+            relative_path = ('../' * page_folder_depth) +  relative_path
 
         # Replace Obsidian link with proper markdown link
         md_page = md_page.replace('[['+l+']]', f"[{alias}]({urllib.parse.quote(relative_path)})")

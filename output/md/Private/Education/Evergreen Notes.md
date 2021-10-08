@@ -1,11 +1,11 @@
 # Evergreen Notes   
 Evergreen notes is a method in [Smart note taking](Smart%20note%20taking.md).   
    
-> In short, create notes that read like [TV Tropes](../Misc/TV%20Tropes.md).   
+> In short, create notes that read like [TV Tropes](../../Misc/TV%20Tropes.md).   
    
-Great resource on the subject: [%AndyMatuschak Evergreen Notes](%25AndyMatuschak%20Evergreen%20Notes.md).   
+Great resource on the subject: [%AndyMatuschak Evergreen Notes](../../%25AndyMatuschak%20Evergreen%20Notes.md).   
    
-Evergreen notes should be [Densely Linked](Densely%20Linked.md).   
+Evergreen notes should be [Densely Linked](../../Densely%20Linked.md).   
    
 ## Balance in atomization   
 There are two core (conflicting) concepts to Evergreen notes:   
