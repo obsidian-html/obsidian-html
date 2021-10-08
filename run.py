@@ -65,6 +65,17 @@ def ConvertObsidianPageToMarkdownPage(page_path):
     # So do all steps below twice, except for some minor differences.
     md_page = page.content
 
+    # Replace code blocks with placeholders so they aren't altered
+    # They will be restored at the end
+    cbmatches = re.findall("^```([\s\S]*?)```$", md_page, re.MULTILINE)
+    for i, match in enumerate(cbmatches):
+        md_page = md_page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
+        
+    clmatches = re.findall("`(.*?)`", md_page)
+    for i, match in enumerate(clmatches):
+        md_page = md_page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
+        i += 1   
+
     # Get page depth
     page_rel_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, "")[1:]
     page_folder_depth = page_rel_path.count('/')
@@ -162,7 +173,15 @@ def ConvertObsidianPageToMarkdownPage(page_path):
         safe_str = re.escape(l)
         md_page = re.sub(safe_str, new_md_str, md_page)
 
+    # Restore codeblocks/-lines
+    # ----
+    for i, value in enumerate(cbmatches):
+        md_page = md_page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```")
+    for i, value in enumerate(clmatches):
+        md_page = md_page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")  
+
     # Save file
+    # ----
     relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
     md_filepath = Path('output/md/' + relative_path)
     
@@ -206,6 +225,17 @@ def ConvertMarkdownPageToHtmlPage(page_path):
     # but only for internal links. Doing this later would be pretty complex.
     # So do all steps below twice, except for some minor differences.
     html_page = page.content
+
+    # Replace code blocks with placeholders so they aren't altered
+    # They will be restored at the end
+    cbmatches = re.findall("^```([\s\S]*?)```$", html_page, re.MULTILINE)
+    for i, match in enumerate(cbmatches):
+        html_page = html_page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
+        
+    clmatches = re.findall("`(.*?)`", html_page)
+    for i, match in enumerate(clmatches):
+        html_page = html_page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
+        i += 1      
 
     # Get all markdown links. 
     # This is any string in between '](' and  ')'
@@ -257,7 +287,15 @@ def ConvertMarkdownPageToHtmlPage(page_path):
         html_page = re.sub(safe_link, new_link, html_page)
 
 
+    # Restore codeblocks/-lines
+    # ----
+    for i, value in enumerate(cbmatches):
+        html_page = html_page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```")
+    for i, value in enumerate(clmatches):
+        html_page = html_page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`") 
+
     # Convert markdown to html
+    # ----
     extension_configs = {
     'codehilite ': {
         'linenums': True
@@ -281,6 +319,7 @@ def ConvertMarkdownPageToHtmlPage(page_path):
     html = html_template.replace('{content}', html_body)
 
     # Save file
+    # ----
     relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
     html_filepath = Path('output/html/' + relative_path[:-3] + '.html')    
     html_filepath.parent.mkdir(parents=True, exist_ok=True)    
@@ -323,11 +362,11 @@ def ConvertFullWindowsPathToRelativeMarkdownPath(fullwindowspath, root_folder, e
 # Convert Obsidian to markdown
 # ------------------------------------------
 # Load all filenames in the root folder.
-# This data will be used to convert implicit Obsidian links to proper markdown links. 
+# This data will be used to check which files are local, and to get their full path
+# It's clear that no two files can be allowed to have the same file name.
 files = {}
 for path in Path(root_folder).rglob('*'):
     files[path.name] = {'fullpath': str(path), 'processed': False}  
-
 
 # Start conversion with entrypoint.
 # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
@@ -336,12 +375,12 @@ ConvertObsidianPageToMarkdownPage(entrypoint)
 
 # Convert Markdown to Html
 # ------------------------------------------
-# Get html template code. Every note will become a html page, where the body comes from the note's 
-# markdown, and the wrapper code from this template.
-with open('src/template.html') as f:
-    html_template = f.read()
-
 if toggle_compile_html:
+    # Get html template code. Every note will become a html page, where the body comes from the note's 
+    # markdown, and the wrapper code from this template.
+    with open('src/template.html') as f:
+        html_template = f.read()
+
     # Reload files
     root_folder = md_to_html_input_dir
     entrypoint = md_to_html_entrypoint
@@ -357,9 +396,8 @@ if toggle_compile_html:
     # Start conversion from the entrypoint
     ConvertMarkdownPageToHtmlPage(entrypoint)
 
-# Add Extra stuff to the output directories
-# ------------------------------------------
-if toggle_compile_html:
+    # Add Extra stuff to the output directories
+    # ------------------------------------------
     os.makedirs('output/html/static', exist_ok=True)
     shutil.copyfile('src/main.css', 'output/html/main.css')
     shutil.copyfile('src/external.svg', 'output/html/external.svg')
