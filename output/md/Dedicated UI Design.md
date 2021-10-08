@@ -4,4 +4,4 @@ Dedicated UI design is when an app uses an uncommon UI that is especially design
 This approach often goes wrong, because using universal UI can greatly reduce the barrier to entry, and they exist for a reason. But every once in a while a UI pops up that is just incredibly good at what it needs to do.  It always helps when a UI is also predictable/elegant/simple.   
    
 Good examples of Dedicated UI designs:   
-- [%AndyMatuschak Evergreen Notes](%AndyMatuschak%20Evergreen%20Notes.md)
+- [%AndyMatuschak Evergreen Notes](%25AndyMatuschak%2520Evergreen%2520Notes.md)

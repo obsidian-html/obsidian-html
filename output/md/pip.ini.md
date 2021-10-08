@@ -8,4 +8,4 @@ Put in .bashrc:
 And then put your pip.ini file there.   
    
 # pip.ini uses   
-[Pip behind a proxy](Pip%20behind%20a%20proxy.md)
+[Pip behind a proxy](Pip%2520behind%2520a%2520proxy.md)

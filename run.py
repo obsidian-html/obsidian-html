@@ -90,7 +90,8 @@ def ConvertObsidianPageToMarkdownPage(page_path):
         # Change the link in the markdown to link to the relative path
         if file_name in files.keys():
             filepath = files[file_name]['fullpath']
-            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")
+            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")[1:]
+            relative_path = '../' * (relative_path.count('/')) + relative_path
             new_link = ']('+urllib.parse.quote(relative_path)+')'
 
             safe_link = re.escape(']('+l[0]+')')
@@ -140,11 +141,12 @@ def ConvertObsidianPageToMarkdownPage(page_path):
             # Obtain the full path of the file in the directory tree
             # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
             full_path = files[filename+'.md']['fullpath']
-            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, md_filePath(page_path).path.parent, entrypoint)
+            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, root_folder, "")[1:]
+            relative_path = '../' * (relative_path.count('/')) + relative_path
 
         # Replace Obsidian link with proper markdown link
         url_path = relative_path.replace(' ', '%20')
-        md_page = md_page.replace('[['+l+']]', f"[{alias}]({url_path})")
+        md_page = md_page.replace('[['+l+']]', f"[{alias}]({urllib.parse.quote(url_path)})")
 
         
     # Fix newline issue by adding three spaces before any newline
@@ -171,10 +173,8 @@ def ConvertObsidianPageToMarkdownPage(page_path):
     relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
     md_filepath = Path('output/md/' + relative_path)
     
-
     # Create folder if necessary
     md_filepath.parent.mkdir(parents=True, exist_ok=True)
-    
     
     # Write markdown
     with open(md_filepath, 'w', encoding="utf-8") as f:

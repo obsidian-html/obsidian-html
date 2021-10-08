@@ -8,7 +8,7 @@ Table creation is pretty easy with [Advanced Tables](Advanced%20Tables.md)
 - Use Ctrl+Backspace to go back (previous page)   
 - Use Ctrl+O to open the quick switcher   
    
-![Advanced Tables](Private/Obsidian/Advanced%20Tables.md)   
+![Advanced Tables](../../Private/Obsidian/Advanced%2520Tables.md)   
    
 ## Templates   
 - The default template is located under `Resources/Templates`.   
@@ -17,7 +17,7 @@ Table creation is pretty easy with [Advanced Tables](Advanced%20Tables.md)
 ![Edit Obsidian CSS**Edit** Obsidian CSS](/not_created.md)   
    
 ## Embed atomic note   
-Most notes should be [Evergreen Notes](Private/Education/Evergreen%20Notes.md), meaning they can be refenced by many other subjects and are often short and to the point. If **embedding** a note makes sense, you can use this format:    
+Most notes should be [Evergreen Notes](../../Private/Education/Evergreen%2520Notes.md), meaning they can be refenced by many other subjects and are often short and to the point. If **embedding** a note makes sense, you can use this format:    
    
 ```md   
 ![Obsidian**What** is Obsidian](/not_created.md)   

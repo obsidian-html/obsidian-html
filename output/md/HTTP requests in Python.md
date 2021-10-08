@@ -1,12 +1,12 @@
 # HTTP requests in Python   
-Before installing pip packages, be sure to enable a venv: [Using Venvs](Using%20Venvs.md).   
+Before installing pip packages, be sure to enable a venv: [Using Venvs](Using%2520Venvs.md).   
    
 ## Install prerequisites   
 ``` bash   
 pip install requests   
 ```   
    
-> If you are behind a proxy, you might need to [configure pip to work with a proxy](Pip%20behind%20a%20proxy.md).   
+> If you are behind a proxy, you might need to [configure pip to work with a proxy](Pip%2520behind%2520a%2520proxy.md).   
    
 # Get requests   
 ## Example scripts   
@@ -24,4 +24,4 @@ print(response.text)
    
    
 # Related   
-[HTTP Requests](HTTP%20Requests.md)
+[HTTP Requests](HTTP%2520Requests.md)

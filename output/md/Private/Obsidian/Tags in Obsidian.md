@@ -3,7 +3,7 @@ This is a **tag**
    
 For a tag, the `#` is right next to the word. For a heading, there is a space between the `#` and the word.   
    
-You can add tags to an entire page by adding [Frontmatter](Coding/Frontmatter.md) at the top of the page, like so:   
+You can add tags to an entire page by adding [Frontmatter](../Coding/Frontmatter.md) at the top of the page, like so:   
    
 ```   
 ---   

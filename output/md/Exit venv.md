@@ -9,5 +9,5 @@ Shorthand (for in .bashrc)
 alias leave="deactivate"   
 ```   
    
-[Create venv](Create%20venv.md)   
-[Enter venv](Enter%20venv.md)
+[Create venv](Create%2520venv.md)   
+[Enter venv](Enter%2520venv.md)
