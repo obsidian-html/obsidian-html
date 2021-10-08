@@ -21,8 +21,14 @@ if root_folder[-1] == '\\':
 
 # Config
 # ------------------------------------------
+# Toggles
+toggle_compile_html = False
+
+# Paths
 md_output_dir   = Path('output/md')
 html_output_dir = Path('output/html')
+
+# Lookup tables
 image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp']
 
 # Preprocess
@@ -49,7 +55,7 @@ if output_dir.exists():
 md_output_dir.mkdir(parents=True, exist_ok=True)
 html_output_dir.mkdir(parents=True, exist_ok=True)
 
-def ConvertPage(page_path):
+def ConvertObsidianPageToMarkdownPage(page_path):
     # ^ This function creates a proper markdown version of the Obsidian note, 
     #   an html page, and it will recursively call itself on any links in the note.
 
@@ -67,33 +73,28 @@ def ConvertPage(page_path):
     # but only for internal links. Doing this later would be pretty complex.
     # So do all steps below twice, except for some minor differences.
     md_page = page.content
-    html_page = page.content
 
     # Get obsidian links. 
     # This is any string in between [[ and ]], e.g. [[My Note]]
     links = re.findall("(?<=\[\[).+?(?=\])", md_page)
 
-    # Convert proper markdown links from .md to .html in html output, as long as they are .md links that are internal
-    # ----
-    # Must begin with ](, must end with ) (do not include in match)
-    # Must not have \\ or // in the matched string anywhere
+    # Proper markdown links can also be used, add these too
+    # And while we are busy, change the path to point to the full relative path
     proper_links = re.findall("(?<=\]\()((?!(.*\/\/|.*\\\\)).*\.md)(?=\))", md_page)
     for l in proper_links:
+        # Because of a double matchgroup, we need to take the first element from the tuple
+        # Then remove the '.md' suffix and convert things like %20 to ' '
         file_name = urllib.parse.unquote(l[0][:-3])
         links.append(file_name)
-        print('---', file_name)
 
-        # remove .md at the end, and add .html
-        new_link = ']('+file_name+'.html)'
-
+        # Change the link in the markdown to link to the relative path
         if file_name in files.keys():
             filepath = files[file_name]['fullpath']
             relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")
-            new_link = ']('+relative_path+')'
+            new_link = ']('+urllib.parse.quote(relative_path)+')'
 
-        # Replace link in document
-        safe_link = re.escape(']('+l[0]+')')
-        html_page = re.sub(f"(?<![\[\(])({safe_link})", new_link, html_page)
+            safe_link = re.escape(']('+l[0]+')')
+            md_page = re.sub(f"(?<![\[\(])({safe_link})", new_link, md_page)
 
     # Handle local image links (copy them over to output)
     # ----
@@ -107,24 +108,17 @@ def ConvertPage(page_path):
         relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")
 
         md_filepath = Path('output/md/' + relative_path)
-        html_filepath = Path('output/html/' + relative_path)
 
         # Create folders if necessary
         md_filepath.parent.mkdir(parents=True, exist_ok=True)
-        html_filepath.parent.mkdir(parents=True, exist_ok=True)
 
         # Copy file over
         shutil.copyfile(filepath, md_filepath)
-        shutil.copyfile(filepath, html_filepath)
 
         # Adjust link in page
         new_link = '![]('+relative_path+')'
         safe_link = re.escape('![]('+link+')')
         md_page = re.sub(safe_link, new_link, md_page)
-        html_page = re.sub(safe_link, new_link, html_page)
-        print(safe_link)
-        print(new_link)
-
 
 
     # Replace Obsidian links with proper markdown
@@ -146,20 +140,15 @@ def ConvertPage(page_path):
             # Obtain the full path of the file in the directory tree
             # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
             full_path = files[filename+'.md']['fullpath']
-            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, root_folder, entrypoint)
+            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, md_filePath(page_path).path.parent, entrypoint)
 
         # Replace Obsidian link with proper markdown link
         url_path = relative_path.replace(' ', '%20')
         md_page = md_page.replace('[['+l+']]', f"[{alias}]({url_path})")
 
-        html_url = urllib.parse.unquote(url_path)
-        html_url = html_url.replace('.md', '.html')
-        html_url = urllib.parse.quote(html_url)
-        html_page = html_page.replace('[['+l+']]', f"[{alias}]({html_url})")
-
+        
     # Fix newline issue by adding three spaces before any newline
     md_page = md_page.replace("\n", "   \n")
-    html_page = html_page.replace("\n", "   \n")
 
     # Insert markdown links for bare http(s) links (those without the [name](link) format).
     # ----
@@ -168,7 +157,6 @@ def ConvertPage(page_path):
         new_md_link = f"[{l}]({l})"
         safe_link = re.escape(l)
         md_page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, md_page)
-        html_page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, html_page)
 
     # Remove inline tags, like #ThisIsATag
     # ----
@@ -176,52 +164,24 @@ def ConvertPage(page_path):
     for l in re.findall("#[^\s#`]+", md_page):
         tag = l.replace('.', '').replace('#', '')
         new_md_str = f"**{tag}**"
-        new_html_str = f"<span class=\"tag\">{tag}</span>"
         safe_str = re.escape(l)
         md_page = re.sub(safe_str, new_md_str, md_page)
-        html_page = re.sub(safe_str, new_html_str, html_page)
-
-    # Compile HTML and other HTML specific transformations
-    # ----
-    # Convert markdown to html
-    extension_configs = {
-    'codehilite ': {
-        'linenums': True
-    }}
-    html_body = markdown.markdown(html_page, extensions=['extra', 'codehilite'], extension_configs=extension_configs)
-
-    # Tag external links
-    for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
-        if l[0] == '/':
-            # Internal link, skip
-            continue
-
-        new_str = f"<a href=\"{l}\" class=\"external-link\""
-        safe_str = re.escape(f"<a href=\"{l}\"")
-        html_body = re.sub(safe_str, new_str, html_body)
-
-    # Tag not created links
-    html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
-
-    # Wrap body html in valid html structure from template
-    html = html_template.replace('{content}', html_body)
 
     # Save file
     relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
     md_filepath = Path('output/md/' + relative_path)
-    html_filepath = Path('output/html/' + relative_path.replace('.md', '.html'))
+    
 
     # Create folder if necessary
     md_filepath.parent.mkdir(parents=True, exist_ok=True)
-    html_filepath.parent.mkdir(parents=True, exist_ok=True)
+    
     
     # Write markdown
     with open(md_filepath, 'w', encoding="utf-8") as f:
         f.write(md_page)
 
-    # Write html
-    with open(html_filepath, 'w', encoding="utf-8") as f:
-        f.write(html)    
+    # Compile HTML
+    #CompileHTML(md_page, links, page_path)
     
     # Recurse for every link in the current page
     for l in links:
@@ -239,7 +199,7 @@ def ConvertPage(page_path):
 
         # Convert the note that is linked to
         print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
-        ConvertPage(files[link_path]['fullpath'])
+        ConvertObsidianPageToMarkdownPage(files[link_path]['fullpath'])
 
 def ConvertFullWindowsPathToRelativeMarkdownPath(fullwindowspath, root_folder, entrypoint):
     # Convert full Windows path to url link, e.g: 
@@ -254,18 +214,18 @@ def ConvertFullWindowsPathToRelativeMarkdownPath(fullwindowspath, root_folder, e
 # ------------------------------------------
 # Start conversion with entrypoint.
 # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
-ConvertPage(entrypoint)
+ConvertObsidianPageToMarkdownPage(entrypoint)
 
 # Add Extra stuff to the output directories
 # ------------------------------------------
-os.makedirs('output/html/static', exist_ok=True)
-shutil.copyfile('src/main.css', 'output/html/main.css')
-shutil.copyfile('src/external.svg', 'output/html/external.svg')
-shutil.copyfile('src/fonts/SourceCodePro-Regular.ttf', 'output/html/static/SourceCodePro-Regular.ttf')
+if toggle_compile_html:
+    os.makedirs('output/html/static', exist_ok=True)
+    shutil.copyfile('src/main.css', 'output/html/main.css')
+    shutil.copyfile('src/external.svg', 'output/html/external.svg')
+    shutil.copyfile('src/fonts/SourceCodePro-Regular.ttf', 'output/html/static/SourceCodePro-Regular.ttf')
 
-
-with open('src/not_created.html') as f :
-    with open ('output/html/not_created.html', 'w', encoding="utf-8") as t:
-        t.write(html_template.replace('{content}', f.read()))
+    with open('src/not_created.html') as f :
+        with open ('output/html/not_created.html', 'w', encoding="utf-8") as t:
+            t.write(html_template.replace('{content}', f.read()))
 
 
