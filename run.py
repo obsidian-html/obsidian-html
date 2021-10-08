@@ -130,7 +130,7 @@ def ConvertObsidianPageToMarkdownPage(page_path):
         filepath = files[file_name]['fullpath']
         relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")[1:]
         relative_path = ('../' * page_folder_depth) + relative_path
-        new_link = '![]('+relative_path+')'
+        new_link = '![]('+urllib.parse.quote(relative_path)+')'
         safe_link = re.escape('![]('+link+')')
         md_page = re.sub(safe_link, new_link, md_page)
 
