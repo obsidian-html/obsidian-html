@@ -27,22 +27,27 @@
 <script>
         // Change link operation
         function SetLinks(level){
-                console.log('loaded');
-                var links = document.getElementsByTagName('a');
-                console.log(links);
-                for (let i=0; i < links.length; i++){
-                        let l = links[i];
-                        if (l.id == 'homelink'){
-                                continue;
+                size_of_rem = getComputedStyle(document.documentElement).fontSize.split("px")[0]
+                console.log(window.visualViewport.width, (1.7 * 40 * size_of_rem));
+                if (window.visualViewport.width > (1.7 * 40 * size_of_rem))
+                {
+                        console.log('rewriting links');
+                        var links = document.getElementsByTagName('a');
+                        console.log(links);
+                        for (let i=0; i < links.length; i++){
+                                let l = links[i];
+                                if (l.id == 'homelink'){
+                                        continue;
+                                }
+                                if (l.classList.contains('external-link')){
+                                        continue;
+                                }
+                                if (l.onclick != null){
+                                        continue;
+                                }
+                                l.onclick = function () { 
+                                        httpGetAsync(this.href, ReceiveCall, level+1); return false; };
                         }
-                        if (l.classList.contains('external-link')){
-                                continue;
-                        }
-                        if (l.onclick != null){
-                                continue;
-                        }
-                        l.onclick = function () { 
-                                httpGetAsync(this.href, ReceiveCall, level+1); return false; };
                 }
         }   
         

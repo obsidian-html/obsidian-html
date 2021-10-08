@@ -17,10 +17,26 @@ body {
 .container {
     max-width: 40rem;
     padding: 2rem;
-    height: calc(100vh - 3rem);
+    height: calc(100vh - 5rem);
     overflow: scroll;
     float: left;
 }
+.container:after {
+    content: "\a";
+    white-space: pre;
+}
+@media (max-width: 800px) {
+    .container {
+        float: none;
+        width: calc(100vw - 4rem);
+    }
+    .container:after {
+        content: "\a\a\a\a\a";
+        white-space: pre;
+    }    
+}
+
+
 .header {
     width: 100vw;
     padding: 1rem;
