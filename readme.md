@@ -40,6 +40,11 @@ To test the html files, run `python -m http.server --directory output/html` then
 
 Here, it doesn't matter if the target file is in another folder, as long as all the notes are in the root folder somewhere.
 
+## Conversion of Obsidian type image links
+- `![[image.png]]` is converted to the standard `![](rel/path/to/image.png)`
+
+Confusingly, code inclusions use the same format, but point to .md files. There is a simple test if the string ends in a common image suffix and if not the Obsidian code inclusion is handled (not supported yet), otherwise the link is converted to a standard image link.
+
 ## Conversion of Obsidian 'bare links'
 If you type `http(s)://....` in Obsidian, it will automatically convert it to a link. Any string that:
 - Starts with "http"
@@ -49,7 +54,7 @@ If you type `http(s)://....` in Obsidian, it will automatically convert it to a 
 will be converted to `[matched value](matched value)`
 
 ## Conversion of Obsidian newline behavior
-Three spaces are added behind every newline to simulate Obsidian's "enter = new line" behavior. Note that not all markdown readers comply with this standard, but python-markdown does.
+Three spaces are added behind every newline to simulate Obsidian's "enter = new line" behavior. Note that not all markdown readers comply with this standard, but python-markdown does, so the outputted HTML is as expected.
 
 ## Basic Templating
 All generated html code will be wrapped by the html code in `src/template.html`. This template points to `src/main.css`. 
@@ -59,6 +64,7 @@ Links that point to non-existent notes will be redirected to `output/html/not_cr
 
 ## Other (expected) features
 - Syntax highlighting built-in
+- [Very clean html + minor javascript website output](https://www.devfruits.com)
 
 # Future developments
 - This code would make a good python-markdown extension, might build that in the future.
