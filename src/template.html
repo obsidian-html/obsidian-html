@@ -46,10 +46,28 @@
                                         continue;
                                 }
                                 l.onclick = function () { 
-                                        httpGetAsync(this.href, ReceiveCall, level+1); return false; };
+                                        httpGetAsync(this.href, ReceiveCall, level+1); return false; 
+                                };
                         }
                 }
-        }   
+        }  
+        
+        function SetContainer(container)
+        {
+                cb = document.createElement('div');
+                cb.className = 'container-clickback';
+                cb.id = 'cb' + container.id;
+                container.appendChild(cb);
+                
+                cb.onclick = function () { 
+                        cont = document.getElementById(this.id.slice(2))
+                        window.scrollTo(Math.max(window.visualViewport.pageLeft - (70 - cont.getBoundingClientRect().left), 0), 0)
+                };
+        }
+        // Init
+        FirstContainer = document.getElementsByClassName('container')[0];
+        FirstContainer.id = 'level-0';
+        SetContainer(FirstContainer);
         
         function httpGetAsync(theUrl, callback, level)
         {
@@ -70,7 +88,7 @@
                 responseText = xmlHttp.responseText;
 
                 // Set body width to level * 40 rem
-                document.body.style.width = (level * 40 + 100) + 'rem';                
+                document.body.style.width = (level * 40 + 200) + 'rem';                
 
                 // Get html
                 let text = responseText.split('<div class="container">')[1];
@@ -105,9 +123,9 @@
 
                 // Arm new links
                 SetLinks(level);
-
-
+                SetContainer(levelcont);
         }
+
 
         function CloseUpperContainers(level){
                 console.log('close', level);
