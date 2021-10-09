@@ -6,7 +6,7 @@ from pathlib import Path    #
 import frontmatter          # remove yaml frontmatter from md files
 import markdown             # convert markdown to html
 import urllib.parse         # convert link characters like %
-
+import warnings
  
 # python run.py 'C:\Users\Installer\OneDrive\Obsidian\Notes' 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work.md'
 
@@ -18,30 +18,39 @@ entrypoint = sys.argv[2]    # The note that will be used as the index.html
 if root_folder[-1] == '\\':
     root_folder = root_folder[:-1]
 
+root_folder_path = Path(root_folder).resolve()
+entrypoint_path = Path(entrypoint).resolve()
+
+verbose_printout = False
+if '-v' in sys.argv:
+    verbose_printout = True
+
+
 
 # Config
 # ------------------------------------------
 # Toggles
 toggle_compile_html = True
 toggle_compile_md = True
+
 allow_duplicate_filenames_in_root = False
+warn_on_skipped_image = True
 
 # Paths
 md_to_html_input_dir = Path('output/md').resolve()
-md_to_html_entrypoint = Path('output/md/index.md').resolve()
+md_to_html_entrypoint_path = Path('output/md/index.md').resolve()
 
-md_output_dir   = Path('output\md').resolve()
-html_output_dir = Path('output\html').resolve()
+md_output_folder_path   = Path('output/md').resolve()
+html_output_folder_path = Path('output/html').resolve()
 
 # Lookup tables
 image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp']
 
-class DuplicateFileNameInRoot(Exception):
-    pass
 
 # Preprocess
 # ------------------------------------------
 # Remove previous output
+print('> CLEARING OUTPUT FOLDERS')
 if toggle_compile_md:
     output_dir = Path('output')
     if output_dir.exists():
@@ -52,98 +61,142 @@ else:
         shutil.rmtree(output_dir)    
 
 # Recreate tree
-md_output_dir.mkdir(parents=True, exist_ok=True)
-html_output_dir.mkdir(parents=True, exist_ok=True)
+print('> CREATING OUTPUT FOLDERS')
+md_output_folder_path.mkdir(parents=True, exist_ok=True)
+html_output_folder_path.mkdir(parents=True, exist_ok=True)
 
 
-def ConvertObsidianPageToMarkdownPage(page_path):
-    # ^ This function creates a proper markdown version of the Obsidian note, 
-    #   an html page, and it will recursively call itself on any links in the note.
+class DuplicateFileNameInRoot(Exception):
+    pass
 
-    # Links can be made in Obsidian without creating the note. 
-    # In this case we don't have to do anything.
-    if Path(page_path).exists() == False:
+class MarkdownPage:
+    page = None            # Pure markdown code read from src file
+    yaml = None             # Yaml is stripped from the src file and saved here
+    codeblocks = None       # used to safely store ```codeblock content
+    codelines = None        # Used to safely store `codeline` content
+    links = None            # Used to recurse to any page linked to by this page
+
+    src_path  = None        # Path() object of src file
+    rel_src_path  = None    # Path() object relative to given markdown root folder (src_folder_path)
+    src_folder_path = None  # Path() object of given markdown root folder
+    dst_path = None         # Path() object of destination file
+
+    def __init__(self, src_path, src_folder_path):
+        self.src_path = src_path
+        self.src_folder_path = src_folder_path
+        self.rel_src_path = self.src_path.relative_to(src_folder_path)
+
+        self.links = []
+        self.codeblocks = []
+        self.codelines = []
+        
+        # Load contents of entrypoint and strip frontmatter yaml.
+        page = frontmatter.load(str(src_path))
+        self.page = page.content
+        self.yaml = page
+
+    def SetDestinationPath(self, dst_folder_path, entrypoint_src_path):
+        if entrypoint_src_path == self.src_path:
+            self.dst_path = dst_folder_path.joinpath('index.md')
+        else:
+            self.dst_path = dst_folder_path.joinpath(self.rel_src_path.as_posix())
+        self.rel_dst_path = self.dst_path.relative_to(dst_folder_path)
+
+    def StripCodeSections(self):
+        self.codeblocks = re.findall("^```([\s\S]*?)```$", self.page, re.MULTILINE)
+        for i, match in enumerate(self.codeblocks):
+            self.page = self.page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
+            
+        self.codelines = re.findall("`(.*?)`", self.page)
+        for i, match in enumerate(self.codelines):
+            self.page = self.page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
+           
+    def RestoreCodeSections(self):
+        for i, value in enumerate(self.codeblocks):
+            self.page = self.page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```\n")
+        for i, value in enumerate(self.codelines):
+            self.page = self.page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")    
+
+
+def ConvertObsidianPageToMarkdownPage(page_path_str):
+    page_path = Path(page_path_str).resolve()
+
+    if page_path.exists() == False:
+        return
+    if page_path.suffix != '.md':
         return
 
-    # Load contents of entrypoint and strip frontmatter yaml.
-    # If the frontmatter needs to be used at a later date: the frontmatter is loaded into dict keys, 
-    # e.g. page['tags']
-    page = frontmatter.load(page_path)
+    # -- Load contents
+    md = MarkdownPage(page_path, root_folder_path)
+    md.SetDestinationPath(md_output_folder_path, entrypoint_path)
 
-    # We need to change "file.md" links to "file.html" for the html version of the output,
-    # but only for internal links. Doing this later would be pretty complex.
-    # So do all steps below twice, except for some minor differences.
-    md_page = page.content
+    # -- Get page depth
+    page_folder_depth = md.rel_src_path.as_posix().count('/')
 
-    # Replace code blocks with placeholders so they aren't altered
+    # -- Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
-    cbmatches = re.findall("^```([\s\S]*?)```$", md_page, re.MULTILINE)
-    for i, match in enumerate(cbmatches):
-        md_page = md_page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
-        
-    clmatches = re.findall("`(.*?)`", md_page)
-    for i, match in enumerate(clmatches):
-        md_page = md_page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
-        i += 1   
+    md.StripCodeSections() 
 
-    # Get page depth
-    page_rel_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, "")[1:]
-    page_folder_depth = page_rel_path.count('/')
+    # -- Convert Obsidian type links to proper md image links
+    # Further conversion will be done in the block below
+    for link in re.findall("(?<=\!\[\[)(.*?)(?=\])", md.page):
+        new_link = '![]('+link+')'
 
-    # Get obsidian links. 
-    # This is any string in between [[ and ]], e.g. [[My Note]]
-    links = re.findall("(?<=\[\[).+?(?=\])", md_page)
+        # Obsidian page inclusions use the same tag...
+        # These are not implemented yet
+        if len(link.split('.')) == 1 or link.split('.')[-1] not in image_suffixes:
+            new_link = f'\n> **obsidian-html error:** Obsidian type page inclusion(({link})) (not implemented yet)\n'
 
-    # Proper markdown links can also be used, add these too
-    # And while we are busy, change the path to point to the full relative path
-    proper_links = re.findall("(?<=[^\[]\]\().+?(?=\))", md_page)
-    for l in proper_links:
-        # Remove the .md suffix to get the key
-        file_name = urllib.parse.unquote(l)
-        links.append(file_name)
+        safe_link = re.escape('![['+link+']]')
+        md.page = re.sub(safe_link, new_link, md.page)
 
-        # Change the link in the markdown to link to the relative path
-        if file_name.split('/')[-1] in files.keys():
-            filepath = files[file_name]['fullpath']
-            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")[1:]
-            relative_path = ('../' * page_folder_depth) + relative_path
-            new_link = ']('+relative_path+')'
-
-            safe_link = re.escape(']('+l+')')
-            md_page = re.sub(f"(?<![\[\(])({safe_link})", new_link, md_page)
-
-    # Handle local image links (copy them over to output)
-    # ----
-    for link in re.findall("(?<=\!\[\]\()(.*)(?=\))", md_page):
+    # -- Handle local image links (copy them over to output)
+    for link in re.findall("(?<=\!\[\]\()(.*)(?=\))", md.page):
         # Only handle local image files (images located in the root folder)
-        if urllib.parse.unquote(link) not in files.keys():
+        if urllib.parse.unquote(link).split('/')[-1] not in files.keys():
             continue
 
         # Build relative paths
-        filepath = files[urllib.parse.unquote(link)]['fullpath']
-        relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")
-
-        md_filepath = Path('output/md/' + relative_path)
+        src_file_path_str = files[urllib.parse.unquote(link)]['fullpath']
+        relative_path = Path(src_file_path_str).relative_to(root_folder_path)
+        dst_file_path = md_output_folder_path.joinpath(relative_path)
 
         # Create folders if necessary
-        md_filepath.parent.mkdir(parents=True, exist_ok=True)
+        dst_file_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Copy file over
-        shutil.copyfile(filepath, md_filepath)
+        shutil.copyfile(src_file_path_str, dst_file_path)
 
         # Adjust link in page
         file_name = urllib.parse.unquote(link)
-        filepath = files[file_name]['fullpath']
-        relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(filepath, root_folder, "")[1:]
+        relative_path = relative_path.as_posix()
         relative_path = ('../' * page_folder_depth) + relative_path
         new_link = '![]('+urllib.parse.quote(relative_path)+')'
         safe_link = re.escape('![]('+link+')')
-        md_page = re.sub(safe_link, new_link, md_page)
+        md.page = re.sub(safe_link, new_link, md.page)
 
+    # -- Proper markdown links can also be used, add these too
+    # And while we are busy, change the path to point to the full relative path
+    proper_links = re.findall("(?<=[^\[]\]\().+?(?=\))", md.page)
+    for l in proper_links:
+        # Remove the .md suffix to get the key
+        file_name = urllib.parse.unquote(l)
+        md.links.append(file_name)
 
-    # Replace Obsidian links with proper markdown
-    # ----
-    for l in links:
+        # Change the link in the markdown to link to the relative path
+        if file_name.split('/')[-1] in files.keys():
+            filepath = files[file_name.split('/')[-1]]['fullpath']
+            relative_path_posix = Path(filepath).relative_to(root_folder_path).as_posix()
+            relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
+            new_link = ']('+relative_path_posix+')'
+
+            safe_link = re.escape(']('+l+')')
+            md.page = re.sub(f"(?<![\[\(])({safe_link})", new_link, md.page)
+        
+    # -- Replace Obsidian links with proper markdown
+    # This is any string in between [[ and ]], e.g. [[My Note]]
+    md.links = re.findall("(?<=\[\[).+?(?=\])", md.page)
+    for l in md.links:
         # A link in Obsidian can have the format 'filename|alias'
         # If a link does not have an alias, the link name will function as the alias.
         parts = l.split('|')
@@ -155,59 +208,50 @@ def ConvertObsidianPageToMarkdownPage(page_path):
         # Links can be made in Obsidian without creating the note.
         # When we link to a nonexistant note, link to the not_created.md placeholder instead.
         if filename+'.md' not in files.keys():
-            relative_path = '/not_created.md'
+            relative_path_posix = '/not_created.md'
         else:
             # Obtain the full path of the file in the directory tree
             # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
             full_path = files[filename+'.md']['fullpath']
-            relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, root_folder, "")[1:]
-            relative_path = ('../' * page_folder_depth) +  relative_path
+            #relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, root_folder, "")[1:]
+            relative_path_posix = Path(full_path).relative_to(root_folder_path).as_posix()
+            relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
 
         # Replace Obsidian link with proper markdown link
-        md_page = md_page.replace('[['+l+']]', f"[{alias}]({urllib.parse.quote(relative_path)})")
+        md.page = md.page.replace('[['+l+']]', f"[{alias}]({urllib.parse.quote(relative_path_posix)})")
 
-        
-    # Fix newline issue by adding three spaces before any newline
-    md_page = md_page.replace("\n", "   \n")
 
-    # Insert markdown links for bare http(s) links (those without the [name](link) format).
-    # ----
+    # -- Fix newline issue by adding three spaces before any newline
+    md.page = md.page.replace("\n", "   \n")
+
+    # -- Insert markdown links for bare http(s) links (those without the [name](link) format).
     # Cannot start with [, (, nor "
-    for l in re.findall("(?<![\[\(\"])(http.[^\s]*)", md_page):
+    for l in re.findall("(?<![\[\(\"])(http.[^\s]*)", md.page):
         new_md_link = f"[{l}]({l})"
         safe_link = re.escape(l)
-        md_page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, md_page)
+        md.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, md.page)
 
-    # Remove inline tags, like #ThisIsATag
-    # ----
+    # -- Remove inline tags, like #ThisIsATag
     # Inline tags are # connected to text (so no whitespace nor another #)
-    for l in re.findall("#[^\s#`]+", md_page):
+    for l in re.findall("#[^\s#`]+", md.page):
         tag = l.replace('.', '').replace('#', '')
         new_md_str = f"**{tag}**"
         safe_str = re.escape(l)
-        md_page = re.sub(safe_str, new_md_str, md_page)
+        md.page = re.sub(safe_str, new_md_str, md.page)
 
-    # Restore codeblocks/-lines
-    # ----
-    for i, value in enumerate(cbmatches):
-        md_page = md_page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```")
-    for i, value in enumerate(clmatches):
-        md_page = md_page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")  
+    # -- Restore codeblocks/-lines
+    md.RestoreCodeSections()
 
-    # Save file
-    # ----
-    relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(page_path, root_folder, entrypoint)
-    md_filepath = Path('output/md/' + relative_path)
-    
+    # -- Save file
     # Create folder if necessary
-    md_filepath.parent.mkdir(parents=True, exist_ok=True)
+    md.dst_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Write markdown
-    with open(md_filepath, 'w', encoding="utf-8") as f:
-        f.write(md_page)
+    with open(md.dst_path, 'w', encoding="utf-8") as f:
+        f.write(md.page)
 
-    # Recurse for every link in the current page
-    for l in links:
+    # -- Recurse for every link in the current page
+    for l in md.links:
         # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
         link_path = l.split('|')[0].split('/')[-1]+'.md'
         
@@ -221,46 +265,31 @@ def ConvertObsidianPageToMarkdownPage(page_path):
         files[link_path]['processed'] = True         
 
         # Convert the note that is linked to
-        print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
+        if verbose_printout:
+            print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
         ConvertObsidianPageToMarkdownPage(files[link_path]['fullpath'])
 
 
-def ConvertMarkdownPageToHtmlPage(page_path):
-    page_path = Path(page_path).resolve()
+def ConvertMarkdownPageToHtmlPage(page_path_str):
+    page_path = Path(page_path_str).resolve()
+    links = []
 
     if page_path.exists() == False:
         return
     if page_path.suffix != '.md':
         return
 
-    rel_page_path = page_path.relative_to(md_to_html_input_dir)
-    page_dst_path_posix = html_output_dir.joinpath(rel_page_path).as_posix()[:-3]+'.html'    
-    page_dst_path = Path(page_dst_path_posix).resolve()
-    page_dst_rel_path = page_dst_path.relative_to(html_output_dir) 
-
-    # Load contents of entrypoint and strip frontmatter yaml.
-    page = frontmatter.load(str(page_path))
-
-    # We need to change "file.md" links to "file.html" for the html version of the output,
-    # but only for internal links. Doing this later would be pretty complex.
-    # So do all steps below twice, except for some minor differences.
-    html_page = page.content
+    # Load contents 
+    md = MarkdownPage(page_path, md_output_folder_path)
+    md.SetDestinationPath(html_output_folder_path, md_to_html_entrypoint_path)
 
     # Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
-    cbmatches = re.findall("^```([\s\S]*?)```$", html_page, re.MULTILINE)
-    for i, match in enumerate(cbmatches):
-        html_page = html_page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
-        
-    clmatches = re.findall("`(.*?)`", html_page)
-    for i, match in enumerate(clmatches):
-        html_page = html_page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
-        i += 1      
+    md.StripCodeSections()     
 
     # Get all markdown links. 
     # This is any string in between '](' and  ')'
-    links =[]
-    proper_links = re.findall("(?<=\]\().+?(?=\))", html_page)
+    proper_links = re.findall("(?<=\]\().+?(?=\))", md.page)
     for l in proper_links:
         # Wrong link type parsed
         if urllib.parse.unquote(l)[-3:] != '.md':
@@ -286,35 +315,36 @@ def ConvertMarkdownPageToHtmlPage(page_path):
 
         # Update link
         safe_link = re.escape(']('+l+')')
-        html_page = re.sub(safe_link, new_link, html_page)
+        md.page = re.sub(safe_link, new_link, md.page)
 
     # Handle local image links (copy them over to output)
     # ----
-    for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", html_page):
+    for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", md.page):
         l = urllib.parse.unquote(link)
         full_link_path = page_path.parent.joinpath(l).resolve()
         rel_path = full_link_path.relative_to(md_to_html_input_dir)
 
         # Only handle local image files (images located in the root folder)
+        # Doublecheck, who knows what some weird '../../folder/..' does...
         if rel_path.as_posix() not in files.keys():
+            if warn_on_skipped_image:
+                warnings.warn(f"Image {str(full_link_path)} treated as external and not imported in html")            
             continue
 
         # Copy src to dst
-        dst_path = html_output_dir.joinpath(rel_path)
+        dst_path = html_output_folder_path.joinpath(rel_path)
         dst_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(full_link_path, dst_path)
 
         # Adjust link in page
         new_link = '![]('+urllib.parse.quote(rel_path.as_posix())+')'
         safe_link = re.escape('![](/'+link+')')
-        html_page = re.sub(safe_link, new_link, html_page)
+        md.page = re.sub(safe_link, new_link, md.page)
+   
 
     # Restore codeblocks/-lines
     # ----
-    for i, value in enumerate(cbmatches):
-        html_page = html_page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```")
-    for i, value in enumerate(clmatches):
-        html_page = html_page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`") 
+    md.RestoreCodeSections()
 
     # Convert markdown to html
     # ----
@@ -322,7 +352,7 @@ def ConvertMarkdownPageToHtmlPage(page_path):
     'codehilite ': {
         'linenums': True
     }}
-    html_body = markdown.markdown(html_page, extensions=['extra', 'codehilite'], extension_configs=extension_configs)
+    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite'], extension_configs=extension_configs)
 
     # Tag external links
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
@@ -342,10 +372,11 @@ def ConvertMarkdownPageToHtmlPage(page_path):
 
     # Save file
     # ---- 
-    page_dst_path.parent.mkdir(parents=True, exist_ok=True)    
+    md.dst_path.parent.mkdir(parents=True, exist_ok=True)   
+    html_dst_path_posix = md.dst_path.as_posix()[:-3] + '.html' 
 
     # Write html
-    with open(page_dst_path_posix, 'w', encoding="utf-8") as f:
+    with open(html_dst_path_posix, 'w', encoding="utf-8") as f:
         f.write(html)   
 
     # Recurse for every link in the current page
@@ -365,18 +396,10 @@ def ConvertMarkdownPageToHtmlPage(page_path):
         files[link_path]['processed'] = True  
 
         # Convert the note that is linked to
-        print(f"html: converting {files[link_path]['fullpath']} (parent {page_path})")
-        ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'])  
+        if verbose_printout:
+            print("html: converting ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
-
-def ConvertFullWindowsPathToRelativeMarkdownPath(fullwindowspath, root_folder, entrypoint):
-    # Convert full Windows path to url link, e.g: 
-    # 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md' --> .replace(root_folder, '') -->
-    # '\Work\Harbor Docs.md' --> .replace('\\', '/') -->
-    # '/Work/Harbor Docs.md' 
-    if fullwindowspath == entrypoint:
-        return '/index.md'
-    return fullwindowspath.replace(root_folder, '').replace('\\', '/')
+        hmm = ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'])  
 
 
 # Convert Obsidian to markdown
@@ -394,30 +417,29 @@ for path in Path(root_folder).rglob('*'):
 # Start conversion with entrypoint.
 # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
 if toggle_compile_md:
-    ConvertObsidianPageToMarkdownPage(entrypoint)
+    print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(entrypoint_path)})')
+    ConvertObsidianPageToMarkdownPage(str(entrypoint_path))
 
 
 # Convert Markdown to Html
 # ------------------------------------------
 if toggle_compile_html:
+    print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(md_to_html_entrypoint_path)})')
+
     # Get html template code. Every note will become a html page, where the body comes from the note's 
     # markdown, and the wrapper code from this template.
     with open('src/template.html') as f:
         html_template = f.read()
 
-    # Reload files
-    root_folder = md_to_html_input_dir
-    entrypoint = md_to_html_entrypoint
-
     # Load all filenames in the markdown folder
     # This data is used to check which links are local
     files = {}
-    for path in Path(root_folder).rglob('*'):
-        rel_path_posix = path.relative_to(root_folder).as_posix()
+    for path in Path(md_to_html_input_dir).rglob('*'):
+        rel_path_posix = path.relative_to(md_to_html_input_dir).as_posix()
         files[rel_path_posix] = {'fullpath': str(path.resolve()), 'processed': False}  
 
     # Start conversion from the entrypoint
-    ConvertMarkdownPageToHtmlPage(entrypoint)
+    ConvertMarkdownPageToHtmlPage(str(md_to_html_entrypoint_path))
 
     # Add Extra stuff to the output directories
     # ------------------------------------------
@@ -430,4 +452,4 @@ if toggle_compile_html:
         with open ('output/html/not_created.html', 'w', encoding="utf-8") as t:
             t.write(html_template.replace('{content}', f.read()))
 
-
+print('> DONE')
