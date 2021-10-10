@@ -16,7 +16,7 @@
 
                 <script>
                         // add prefix to hash to avoid scrolling
-                        if (window.location.hash.substr(1)[0] != '!'){
+                        if (window.location.hash != '' && window.location.hash.substr(1)[0] != '!'){
                                 window.location.hash = '!' + window.location.hash.substr(1);
                         }
                 </script>
