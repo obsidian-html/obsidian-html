@@ -13,6 +13,13 @@
 
                 <!-- Includes -->
                 <link rel="stylesheet" href="/main.css" />
+
+                <script>
+                        // add prefix to hash to avoid scrolling
+                        if (window.location.hash.substr(1)[0] != '!'){
+                                window.location.hash = '!' + window.location.hash.substr(1);
+                        }
+                </script>
         </head>
 
 <body onload="SetLinks(0);">
@@ -26,8 +33,12 @@
 
 
 <script>
+        // Scroll container to #header link
         if (window.location.hash != ''){
-                document.getElementById('header').style.display = 'none';
+                let el = document.getElementById(window.location.hash.substr(2));
+                if (el){
+                        el.parentElement.scrollTop = el.offsetTop - 20;
+                }
         }
 
         // Change link operation
@@ -76,22 +87,21 @@
         
         function httpGetAsync(theUrl, callback, level)
         {
-
                 var xmlHttp = new XMLHttpRequest();
                 xmlHttp.onreadystatechange = function() { 
                         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-                        callback(xmlHttp, level);
+                        callback(xmlHttp, level, theUrl);
                 }
-                console.log(theUrl);
                 xmlHttp.open("GET", theUrl, true); // true for asynchronous 
                 xmlHttp.send(null);
         }
 
-        function ReceiveCall(xmlHttp, level){
+        function ReceiveCall(xmlHttp, level, theUrl){
                 console.log('receive', level);
                 respUrl = xmlHttp.responseURL;
                 responseText = xmlHttp.responseText;
 
+                // Restore header if it has been hidden because of an anchor link
                 document.getElementById('header').style.display = 'block';
 
                 // Set body width to level * 40 rem
@@ -126,7 +136,16 @@
                 levelcont = document.getElementById('level-'+level);
                 levelcont.scrollIntoView(true);
                 window.scrollTo(window.visualViewport.pageLeft, 0);
-               
+
+                // Scroll container to #header link
+                if (theUrl.split('#').length > 1){
+                        console.log(theUrl.split('#')[1]);
+                        var el = document.getElementById(theUrl.split('#')[1]);
+                        if (el){
+                                el.parentElement.scrollTop = el.offsetTop - 20;
+                        }
+                }
+                
                 // Arm new links
                 SetLinks(level);
                 SetContainer(levelcont);
