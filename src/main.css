@@ -13,6 +13,10 @@ body {
     margin-top: 3.5rem;
     overflow-y: hidden;
     overflow-x: scroll;
+}
+.flex {
+    width: 100vw;
+    height: 100vh;
     display: flex;
 }
 .container {
@@ -20,7 +24,7 @@ body {
     padding: 2rem;
     height: calc(100vh - 5rem);
     overflow: scroll;
-    position: relative;
+    position: relative;   
 }
 .container:after {
     content: "\a";

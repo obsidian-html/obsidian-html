@@ -10,60 +10,6 @@ import warnings
  
 # python run.py 'C:\Users\Installer\OneDrive\Obsidian\Notes' 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work.md'
 
-# Input
-# ------------------------------------------
-root_folder = sys.argv[1]   # first folder that contains all markdown files
-entrypoint = sys.argv[2]    # The note that will be used as the index.html
-
-if root_folder[-1] == '\\':
-    root_folder = root_folder[:-1]
-
-root_folder_path = Path(root_folder).resolve()
-entrypoint_path = Path(entrypoint).resolve()
-
-verbose_printout = False
-if '-v' in sys.argv:
-    verbose_printout = True
-
-
-
-# Config
-# ------------------------------------------
-# Toggles
-toggle_compile_html = True
-toggle_compile_md = True
-
-allow_duplicate_filenames_in_root = False
-warn_on_skipped_image = True
-
-# Paths
-md_to_html_input_dir = Path('output/md').resolve()
-md_to_html_entrypoint_path = Path('output/md/index.md').resolve()
-
-md_output_folder_path   = Path('output/md').resolve()
-html_output_folder_path = Path('output/html').resolve()
-
-# Lookup tables
-image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp']
-
-
-# Preprocess
-# ------------------------------------------
-# Remove previous output
-print('> CLEARING OUTPUT FOLDERS')
-if toggle_compile_md:
-    output_dir = Path('output')
-    if output_dir.exists():
-        shutil.rmtree(output_dir)
-else:
-    output_dir = Path('output/html')
-    if output_dir.exists():
-        shutil.rmtree(output_dir)    
-
-# Recreate tree
-print('> CREATING OUTPUT FOLDERS')
-md_output_folder_path.mkdir(parents=True, exist_ok=True)
-html_output_folder_path.mkdir(parents=True, exist_ok=True)
 
 
 class DuplicateFileNameInRoot(Exception):
@@ -116,6 +62,96 @@ class MarkdownPage:
             self.page = self.page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```\n")
         for i, value in enumerate(self.codelines):
             self.page = self.page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")    
+
+class MarkdownLink:
+    url = ''
+    
+    isValid = True
+    isExternal = False
+    inRoot = False
+    suffix = ''
+
+    src_path = None
+    rel_src_path = None
+    rel_src_path_posix = None
+    page_path = None
+    root_path = None
+
+    query_delimiter = ''
+    query = ''
+
+    def __repr__(self):
+        return f"MarkdownLink(\n\turl = \"{self.url}\", \n\tsuffix = '{self.suffix}', \n\tisValid = {self.isValid}, \n\tisExternal = {self.isExternal}, \n\tinRoot = {self.inRoot}, \n\tsrc_path = {self.src_path}, \n\trel_src_path = {self.rel_src_path}, \n\trel_src_path_posix = {self.rel_src_path_posix}, \n\tpage_path = {self.page_path}, \n\troot_path = {self.root_path} \n)"    
+
+    def __init__(self, url, page_path, root_path, url_unquote=False):
+        self.url = url
+        if url_unquote:
+            self.url = urllib.parse.unquote(self.url)
+        self.SplitQuery()
+
+        self.page_path = page_path
+        self.root_path = root_path
+        
+        self.TestisValid()
+        self.ParseType()
+        self.TestIsExternal()
+        
+        if self.isValid and self.isExternal == False:
+            self.ParsePaths()
+
+    def SplitQuery(self):
+        url = self.url
+        
+        if len(url.split('#')) > 1:
+            self.url = url.split('#')[0]
+            self.query = url.split('#', 1)[1]
+            self.query_delimiter = '#'
+            return
+        if len(url.split('?')) > 1:
+            self.url = url.split('?')[0]
+            self.query = url.split('?', 1)[1]
+            self.query_delimiter = '?'
+            return     
+
+    def TestisValid(self):
+        if self.url == '':
+            self.isValid = False
+            return
+
+    def TestIsExternal(self):
+        # Test if \\ // S:\ http(s)://
+        if '\\\\' in self.url:
+            self.isExternal = True
+        if '://' in self.url:
+            self.isExternal = True
+        if ':\\' in self.url:
+            self.isExternal = True
+
+    def ParseType(self):                        
+        self.suffix = Path(self.url).suffix
+
+        # Convert path/file to path/file.md
+        if self.suffix == '':
+            self.url += '.md'
+            self.suffix = '.md'
+
+    def ParsePaths(self):
+        # /path/file.md --> root_path + url
+        # path/file.md --> page_path + url
+        if self.url[0] == '/':
+            self.src_path = self.root_path.joinpath(self.url[1:]).resolve()
+        else:
+            self.src_path = self.page_path.parent.joinpath(self.url).resolve()
+            
+        # Determine if relative to root
+        if self.src_path.is_relative_to(self.root_path):
+            self.inRoot = True
+        else:
+            return
+
+        # Determine relative path
+        self.rel_src_path = self.src_path.relative_to(self.root_path)
+        self.rel_src_path_posix = self.rel_src_path.as_posix()
 
 
 def ConvertObsidianPageToMarkdownPage(page_path_str):
@@ -233,7 +269,7 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
 
     # -- Remove inline tags, like #ThisIsATag
     # Inline tags are # connected to text (so no whitespace nor another #)
-    for l in re.findall("#[^\s#`]+", md.page):
+    for l in re.findall("(?<!\S)#[^\s#`]+", md.page):
         tag = l.replace('.', '').replace('#', '')
         new_md_str = f"**{tag}**"
         safe_str = re.escape(l)
@@ -272,7 +308,6 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
 
 def ConvertMarkdownPageToHtmlPage(page_path_str):
     page_path = Path(page_path_str).resolve()
-    links = []
 
     if page_path.exists() == False:
         return
@@ -291,27 +326,31 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
     # This is any string in between '](' and  ')'
     proper_links = re.findall("(?<=\]\().+?(?=\))", md.page)
     for l in proper_links:
-        # Wrong link type parsed
-        if urllib.parse.unquote(l)[-3:] != '.md':
+        # Init link
+        link = MarkdownLink(l, page_path, md_to_html_input_dir, url_unquote=True)
+
+        # Don't process in the following cases
+        if link.isValid == False or link.isExternal == True or link.suffix != '.md':
             continue        
 
         # Not created clause
-        if urllib.parse.unquote(l).split('/')[-1] == 'not_created.md':
+        if link.url.split('/')[-1] == 'not_created.md':
             new_link = '](/not_created.html)'
         else:
-            # Determine relative path
-            full_link_path = page_path.parent.joinpath(urllib.parse.unquote(l)).resolve()
-            rel_path = full_link_path.relative_to(md_to_html_input_dir)
-
-            # Not local clause
-            if rel_path.as_posix() not in files.keys():
+            if link.rel_src_path_posix not in files.keys():
                 continue
 
             # Add to links for crawling at the end of the function
-            links.append(rel_path.as_posix())
+            md.links.append(link.rel_src_path_posix)
 
             # Local link found, update link suffix from .md to .html
-            new_link = f'](/{rel_path.as_posix()[:-3]}.html)'
+            query_part = ''
+            if link.query != '':
+                query_part = link.query_delimiter + link.query 
+                print(query_part)
+            new_link = f'](/{link.rel_src_path_posix[:-3]}.html{query_part})'
+            
+            
 
         # Update link
         safe_link = re.escape(']('+l+')')
@@ -352,7 +391,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
     'codehilite ': {
         'linenums': True
     }}
-    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite'], extension_configs=extension_configs)
+    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc'], extension_configs=extension_configs)
 
     # Tag external links
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
@@ -361,8 +400,8 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
             continue
 
         new_str = f"<a href=\"{l}\" class=\"external-link\""
-        safe_str = re.escape(f"<a href=\"{l}\"")
-        html_body = re.sub(safe_str, new_str, html_body)
+        safe_str = f"<a href=\"{l}\""
+        html_body = html_body.replace(safe_str, new_str)
 
     # Tag not created links
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
@@ -380,7 +419,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         f.write(html)   
 
     # Recurse for every link in the current page
-    for l in links:
+    for l in md.links:
         # these are of type rel_path_posix
         link_path = l
         
@@ -400,6 +439,82 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
             print("html: converting ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
         hmm = ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'])  
+
+
+# Config
+# ------------------------------------------
+# Toggles
+toggle_compile_html = True
+toggle_compile_md = True
+verbose_printout = False
+allow_duplicate_filenames_in_root = False
+warn_on_skipped_image = True
+
+# Paths
+md_to_html_input_dir = Path('output/md').resolve()
+md_to_html_entrypoint_path = Path('output/md/index.md').resolve()
+
+md_output_folder_path   = Path('output/md').resolve()
+html_output_folder_path = Path('output/html').resolve()
+
+# Lookup tables
+image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp']
+
+# Input
+# ------------------------------------------
+if '-h' in sys.argv or len(sys.argv) < 3:
+    print('[Obsidian-html]')
+    print('- Convert obsidian to html: \n\tpython run.py <path to obsidian notes> <path to entrypoint>\n')
+    print('- Convert md to html: \n\tpython run.py <path to md files> <path to md entrypoint> -md\n')
+    print('- Add -v for verbose output')
+    print('- Add -h to get helptext')
+    exit()
+
+if '-v' in sys.argv:
+    verbose_printout = True
+
+root_folder = sys.argv[1]   # first folder that contains all markdown files
+entrypoint = sys.argv[2]    # The note that will be used as the index.html
+
+root_folder_path = Path(root_folder).resolve()
+entrypoint_path = Path(entrypoint).resolve()
+
+if '-md' in sys.argv:
+    toggle_compile_md = False
+    md_to_html_input_dir = root_folder_path
+    md_to_html_entrypoint_path = entrypoint_path
+
+if '-t' in sys.argv:
+    link = MarkdownLink('ETCD.md', Path('output/md/index.md').resolve(), Path('output/md/').resolve(), url_unquote=False )
+
+    print('url', link.url)
+    print('external', link.isExternal)
+    print('in root', link.inRoot)
+    print(link.src_path)
+    print(link.rel_src_path)
+    print(link.page_path)
+    print(link.root_path)
+    print(repr(link))
+    exit()
+
+
+# Preprocess
+# ------------------------------------------
+# Remove previous output
+print('> CLEARING OUTPUT FOLDERS')
+if toggle_compile_md:
+    output_dir = Path('output')
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+else:
+    output_dir = Path('output/html')
+    if output_dir.exists():
+        shutil.rmtree(output_dir)    
+
+# Recreate tree
+print('> CREATING OUTPUT FOLDERS')
+md_output_folder_path.mkdir(parents=True, exist_ok=True)
+html_output_folder_path.mkdir(parents=True, exist_ok=True)
 
 
 # Convert Obsidian to markdown

@@ -19,12 +19,18 @@
 <div id="header" class="header">
         <a href="/" id="homelink"><em>Devfruits</em>/Notes</a>
 </div>
+<div class="flex">
 <div class="container">
 {content}
 <!-- end content -->
 </div>
+</div>
 
 <script>
+        if (window.location.hash != ''){
+                document.getElementById('header').style.display = 'none';
+        }
+
         // Change link operation
         function SetLinks(level){
                 size_of_rem = getComputedStyle(document.documentElement).fontSize.split("px")[0]
@@ -87,8 +93,12 @@
                 respUrl = xmlHttp.responseURL;
                 responseText = xmlHttp.responseText;
 
+                flex = document.getElementsByClassName('flex')[0];
+                document.getElementById('header').style.display = 'block';
+
                 // Set body width to level * 40 rem
-                document.body.style.width = (level * 40 + 200) + 'rem';                
+                document.body.style.width = (level * 40 + 200) + 'rem';  
+                flex.width = (level * 40 + 200) + 'rem';             
 
                 // Get html
                 let text = responseText.split('<div class="container">')[1];
@@ -112,7 +122,7 @@
                 levelcont.innerHTML = text;
 
                 if (isNew){
-                        document.body.appendChild(levelcont);
+                        flex.appendChild(levelcont);
                 }
 
                 // Scroll into view
