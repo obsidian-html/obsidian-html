@@ -23,8 +23,12 @@ body {
     max-width: 40rem;
     padding: 2rem;
     height: calc(100vh - 5rem);
-    overflow: scroll;
-    position: relative;   
+    overflow: scroll;  
+}
+.container-wrapper {
+    max-width: calc(40rem + 3rem);
+    position: relative;  
+    overflow: visible;
 }
 .container:after {
     content: "\a";
@@ -36,7 +40,7 @@ body {
     width: 2.0rem;
     height: 1.1rem;
     top: 0px;
-    right: 0px;
+    right: 1rem;
     border-radius: 0 0 0 1rem;
     cursor: pointer;
 }

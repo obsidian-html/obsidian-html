@@ -26,9 +26,11 @@
 <div id="header" class="header">
         <a href="/" id="homelink"><em>Devfruits</em>/Notes</a>
 </div>
-<div class="container">
-{content}
-<!-- end content -->
+<div class="container-wrapper">
+        <div class="container">
+        {content}
+        <!-- end content -->
+        </div>
 </div>
 
 
@@ -73,7 +75,7 @@
                 cb = document.createElement('div');
                 cb.className = 'container-clickback';
                 cb.id = 'cb' + container.id;
-                container.appendChild(cb);
+                container.parentElement.appendChild(cb);
                 
                 cb.onclick = function () { 
                         cont = document.getElementById(this.id.slice(2))
@@ -120,6 +122,11 @@
                 let isNew = false
                 if (levelcont == null) {
                         isNew = true;
+                        wrappercont = document.createElement('div');
+                        wrappercont.className = 'container-wrapper';
+                        wrappercont.id = 'wrapperlevel-'+level;
+                        document.body.appendChild(wrappercont);
+
                         levelcont = document.createElement('div');
                         levelcont.className = 'container';
                         levelcont.id = 'level-'+level;
@@ -129,7 +136,7 @@
                 levelcont.innerHTML = text;
 
                 if (isNew){
-                        document.body.appendChild(levelcont);
+                        document.getElementById('wrapperlevel-'+level).appendChild(levelcont);
                 }
 
                 // Scroll into view
@@ -154,7 +161,7 @@
 
         function CloseUpperContainers(level){
                 console.log('close', level);
-                let cns = document.getElementsByClassName("container");
+                let cns = document.getElementsByClassName("container-wrapper");
                 console.log(cns);
                 for (let i=0; i<cns.length; i++){
                         console.log(cns[i].id);
