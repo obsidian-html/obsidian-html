@@ -35,6 +35,8 @@
 
 
 <script>
+        // Init
+        // ----------------------------------------------------------------------------
         // Scroll container to #header link
         if (window.location.hash != ''){
                 let el = document.getElementById(window.location.hash.substr(2));
@@ -42,16 +44,44 @@
                         el.parentElement.scrollTop = el.offsetTop - 20;
                 }
         }
+        
+        // Init starting container
+        FirstContainer = document.getElementsByClassName('container')[0];
+        FirstContainer.id = 'level-0';
+        SetContainer(FirstContainer);    
+        
+        // Open the path on loading the page
+        // This is everything after ?path=
+        var href = window.location.href;
+        var path_to_open = [];
+        if (href.includes('?path=')){
+                path_to_open = href.split('?path=')[1].split('/');
+                for (let i = 0; i < path_to_open.length; i++){
+                        path_to_open[i] = decodeURIComponent(path_to_open[i]);
+                }
+        }        
+        OpenPath(1);
 
+
+        // FUNCTIONS 
+        // ----------------------------------------------------------------------------
+
+        function OpenPath(level){
+                if (path_to_open.length > 0){
+                        let path = path_to_open.shift();
+                        if (path != ''){
+                                httpGetAsync(path, ReceiveCall, level, true);
+                        }
+                        
+                }       
+        }
+        
         // Change link operation
         function SetLinks(level){
                 size_of_rem = getComputedStyle(document.documentElement).fontSize.split("px")[0]
-                console.log(window.visualViewport.width, (1.7 * 40 * size_of_rem));
                 if (window.visualViewport.width > (1.7 * 40 * size_of_rem))
                 {
-                        console.log('rewriting links');
                         var links = document.getElementsByTagName('a');
-                        console.log(links);
                         for (let i=0; i < links.length; i++){
                                 let l = links[i];
                                 if (l.id == 'homelink'){
@@ -64,7 +94,8 @@
                                         continue;
                                 }
                                 l.onclick = function () { 
-                                        httpGetAsync(this.href, ReceiveCall, level+1); return false; 
+                                        httpGetAsync(encodeURI(this.attributes.href.nodeValue), ReceiveCall, level+1, false); 
+                                        return false; 
                                 };
                         }
                 }
@@ -72,6 +103,10 @@
         
         function SetContainer(container)
         {
+                // This function is called on every (newly created) container. 
+                // One container holds one tab
+                
+                // Create clickback element
                 cb = document.createElement('div');
                 cb.className = 'container-clickback';
                 cb.id = 'cb' + container.id;
@@ -82,24 +117,20 @@
                         window.scrollTo(Math.max(window.visualViewport.pageLeft - (70 - cont.getBoundingClientRect().left), 0), 0)
                 };
         }
-        // Init
-        FirstContainer = document.getElementsByClassName('container')[0];
-        FirstContainer.id = 'level-0';
-        SetContainer(FirstContainer);
         
-        function httpGetAsync(theUrl, callback, level)
+        function httpGetAsync(theUrl, callback, level, callbackpath)
         {
                 var xmlHttp = new XMLHttpRequest();
                 xmlHttp.onreadystatechange = function() { 
                         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-                        callback(xmlHttp, level, theUrl);
+                        callback(xmlHttp, level, theUrl, callbackpath);
                 }
+                console.log('---', theUrl);
                 xmlHttp.open("GET", theUrl, true); // true for asynchronous 
                 xmlHttp.send(null);
         }
 
-        function ReceiveCall(xmlHttp, level, theUrl){
-                console.log('receive', level);
+        function ReceiveCall(xmlHttp, level, theUrl, callbackpath){
                 respUrl = xmlHttp.responseURL;
                 responseText = xmlHttp.responseText;
 
@@ -145,8 +176,8 @@
                 window.scrollTo(window.visualViewport.pageLeft, 0);
 
                 // Scroll container to #header link
+                theUrl = decodeURI(theUrl);
                 if (theUrl.split('#').length > 1){
-                        console.log(theUrl.split('#')[1]);
                         var el = document.getElementById(theUrl.split('#')[1]);
                         if (el){
                                 el.parentElement.scrollTop = el.offsetTop - 20;
@@ -156,19 +187,42 @@
                 // Arm new links
                 SetLinks(level);
                 SetContainer(levelcont);
+
+                // Continue path opening (if started with path opening)
+                if (callbackpath){
+                        OpenPath(level + 1);
+                }
+                else {
+                        // Start to build new href like https://localhost:8000/?path=
+                        let new_href = window.location.pathname + '?path=';
+
+                        // Remove https://localhost:8000/ from link name
+                        let new_tab = theUrl.replace(window.location.origin+'/', '');
+
+                        // Add in existing path until the tab where was clicked
+                        let tab_links = window.location.href.split('?path=');
+                        if (tab_links.length > 1){
+                                path_to_open = tab_links[1].split('/');
+                                for (let i = 0; i < (level - 1); i++){
+                                        new_href += path_to_open[i] + '/'
+                                }
+                        }
+                        
+                        // Add in new tab
+                        new_href += encodeURIComponent(new_tab) + '/';
+
+                        // Set
+                        window.history.pushState({}, "", new_href);
+                }
         }
 
-
         function CloseUpperContainers(level){
-                console.log('close', level);
+                // Close all containers that are higher in level than the level
+                // of the container in which a link was clicked
                 let cns = document.getElementsByClassName("container-wrapper");
-                console.log(cns);
                 for (let i=0; i<cns.length; i++){
-                        console.log(cns[i].id);
                         if (cns[i].id){
-                                console.log(cns[i].id);
                                 if (cns[i].id.split('-')[1] > level){
-                                        console.log('remove', cns[i].id);
                                         cns[i].remove();
                                         CloseUpperContainers(level);
                                         return;
@@ -176,6 +230,6 @@
                         }
                 }
         }
-</script>      
+</script>           
 </body>
 </html>
