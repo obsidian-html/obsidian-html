@@ -105,7 +105,7 @@
         {
                 // This function is called on every (newly created) container. 
                 // One container holds one tab
-                
+
                 // Create clickback element
                 cb = document.createElement('div');
                 cb.className = 'container-clickback';
@@ -209,7 +209,7 @@
                         }
                         
                         // Add in new tab
-                        new_href += encodeURIComponent(new_tab) + '/';
+                        new_href += encodeURIComponent(encodeURI(new_tab)) + '/';
 
                         // Set
                         window.history.pushState({}, "", new_href);
