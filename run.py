@@ -223,7 +223,7 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
 
             if relative_path_posix == rel_entrypoint_path.as_posix():
                 print(f'found entrypoint link {relative_path_posix}')      
-                relative_path_posix = md_folder_path.joinpath('index.md').as_posix()
+                relative_path_posix = 'index.md'
 
             relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
             new_link = ']('+relative_path_posix+')'
@@ -251,13 +251,14 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
             # Obtain the full path of the file in the directory tree
             # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
             full_path = files[filename+'.md']['fullpath']
-            #relative_path = ConvertFullWindowsPathToRelativeMarkdownPath(full_path, root_folder, "")[1:]
             relative_path_posix = Path(full_path).relative_to(root_folder_path).as_posix()
+            if relative_path_posix == rel_entrypoint_path.as_posix():
+                print(f'found entrypoint link {relative_path_posix}')      
+                relative_path_posix = 'index.md'
+
             relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
 
-        if relative_path_posix == rel_entrypoint_path.as_posix():
-            print(f'found entrypoint link {relative_path_posix}')      
-            relative_path_posix = md_folder_path.joinpath('index.md').as_posix()
+
               
 
         # Replace Obsidian link with proper markdown link
