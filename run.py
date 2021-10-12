@@ -139,7 +139,10 @@ class MarkdownLink:
         if self.url[0] == '/':
             self.src_path = self.root_path.joinpath(self.url[1:]).resolve()
         else:
-            self.src_path = self.page_path.parent.joinpath(self.url).resolve()
+            if relative_path_md:
+                self.src_path = self.page_path.parent.joinpath(self.url).resolve()
+            else:
+                self.src_path = self.root_path.joinpath(self.url).resolve()
             
         # Determine if relative to root
         if self.src_path.is_relative_to(self.root_path):
@@ -379,10 +382,20 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         if link.isValid == False or link.isExternal == True: 
             continue
 
+        isMd = False
+        filename = link.src_path.name
+        if filename[-3:] == '.md':
+            isMd = True
+        if Path(filename).suffix == '':
+            isMd = True
+            #link.url += '.md'
+            #link.ParsePaths()
+            filename += '.md'
+
         # Copy non md files over wholesale, then we're done for that kind of file
         if link.suffix != '.md' and link.suffix not in image_suffixes:
             html_output_folder_path.joinpath(link.rel_src_path).parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(link.src_path, html_output_folder_path.joinpath(link.rel_src_path))
+                shutil.copyfile(link.src_path, html_output_folder_path.joinpath(link.rel_src_path))
             continue        
 
         # Not created clause
@@ -392,7 +405,6 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
             if link.rel_src_path_posix not in files.keys():
                 continue
 
-            # Add to links for crawling at the end of the function
             md.links.append(link.rel_src_path_posix)
 
             # Local link found, update link suffix from .md to .html
@@ -444,6 +456,8 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
 
     # Tag external links
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
+        if l == '':
+            continue
         if l[0] == '/':
             # Internal link, skip
             continue
@@ -499,6 +513,7 @@ verbose_printout = False
 allow_duplicate_filenames_in_root = False
 warn_on_skipped_image = True
 no_clean = False
+relative_path_md = True                        # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
 
 # Lookup tables
 image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp']
@@ -560,17 +575,17 @@ html_output_folder_path.mkdir(parents=True, exist_ok=True)
 # Load all filenames in the root folder.
 # This data will be used to check which files are local, and to get their full path
 # It's clear that no two files can be allowed to have the same file name.
-files = {}
-for path in root_folder_path.rglob('*'):
-    if path.name in files.keys() and allow_duplicate_filenames_in_root == False:
-        raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
-
-    files[path.name] = {'fullpath': str(path), 'processed': False}  
-
-
-# Start conversion with entrypoint.
-# Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
 if toggle_compile_md:
+    files = {}
+    for path in root_folder_path.rglob('*'):
+        if path.name in files.keys() and allow_duplicate_filenames_in_root == False:
+            raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
+
+        files[path.name] = {'fullpath': str(path), 'processed': False}  
+
+
+    # Start conversion with entrypoint.
+    # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
     print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(entrypoint_path)})')
     ConvertObsidianPageToMarkdownPage(str(entrypoint_path))
 
