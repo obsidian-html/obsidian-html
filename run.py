@@ -193,7 +193,7 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
             continue
 
         # Build relative paths
-        src_file_path_str = files[urllib.parse.unquote(link)]['fullpath']
+        src_file_path_str = files[urllib.parse.unquote(link).split('/')[-1]]['fullpath']
         relative_path = Path(src_file_path_str).relative_to(root_folder_path)
         dst_file_path = md_folder_path.joinpath(relative_path)
 
@@ -277,8 +277,9 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
         isMd = False
         if filename[-3:] == '.md':
             isMd = True
-        if Path(filename).suffix == '':
-            isMd = True
+        else:
+            # Always assume that Obsidian filenames are links
+            # This is the default behavior. Use proper markdown to link to files
             filename += '.md'
 
         md.links.append(filename)
