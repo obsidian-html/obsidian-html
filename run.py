@@ -214,6 +214,10 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
     for l in proper_links:
         # Remove the .md suffix to get the key
         file_name = urllib.parse.unquote(l)
+
+        if file_name[-3:] != '.md':
+            file_name += '.md'
+   
         md.links.append(file_name)
 
         # Change the link in the markdown to link to the relative path
@@ -221,8 +225,7 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
             filepath = files[file_name.split('/')[-1]]['fullpath']
             relative_path_posix = Path(filepath).relative_to(root_folder_path).as_posix()
 
-            if relative_path_posix == rel_entrypoint_path.as_posix():
-                print(f'found entrypoint link {relative_path_posix}')      
+            if relative_path_posix == rel_entrypoint_path.as_posix():      
                 relative_path_posix = 'index.md'
 
             relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
@@ -233,8 +236,8 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
         
     # -- Replace Obsidian links with proper markdown
     # This is any string in between [[ and ]], e.g. [[My Note]]
-    md.links = re.findall("(?<=\[\[).+?(?=\])", md.page)
-    for l in md.links:
+    md_links = re.findall("(?<=\[\[).+?(?=\])", md.page)
+    for l in md_links:
         # A link in Obsidian can have the format 'filename|alias'
         # If a link does not have an alias, the link name will function as the alias.
         parts = l.split('|')
@@ -243,26 +246,39 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
         if len(parts) > 1:
             alias = parts[1]
 
+        # Split #Chapter
+        hashpart = ''
+        parts = filename.split('#')
+        if len(parts) > 1:
+            filename = parts[0]
+            hashpart = parts[1]
+
+        if filename[-3:] != '.md':
+            filename += '.md'
+
+        md.links.append(filename)
+
         # Links can be made in Obsidian without creating the note.
         # When we link to a nonexistant note, link to the not_created.md placeholder instead.
-        if filename+'.md' not in files.keys():
+        if filename not in files.keys():
             relative_path_posix = '/not_created.md'
         else:
             # Obtain the full path of the file in the directory tree
             # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
-            full_path = files[filename+'.md']['fullpath']
+            full_path = files[filename]['fullpath']
             relative_path_posix = Path(full_path).relative_to(root_folder_path).as_posix()
-            if relative_path_posix == rel_entrypoint_path.as_posix():
-                print(f'found entrypoint link {relative_path_posix}')      
+            if relative_path_posix == rel_entrypoint_path.as_posix():   
                 relative_path_posix = 'index.md'
 
             relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
 
-
-              
+        newlink = urllib.parse.quote(relative_path_posix)
+        if hashpart != '':
+            hashpart = hashpart.replace(' ', '-').lower()
+            newlink += f'#{hashpart}'
 
         # Replace Obsidian link with proper markdown link
-        md.page = md.page.replace('[['+l+']]', f"[{alias}]({urllib.parse.quote(relative_path_posix)})")
+        md.page = md.page.replace('[['+l+']]', f"[{alias}]({newlink})")
 
 
     # -- Fix newline issue by adding three spaces before any newline
@@ -297,7 +313,7 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
     # -- Recurse for every link in the current page
     for l in md.links:
         # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
-        link_path = l.split('|')[0].split('/')[-1]+'.md'
+        link_path = l.split('|')[0].split('/')[-1]
         
         # Skip non-existent notes and notes that have been processed already
         if link_path not in files.keys():
@@ -354,7 +370,6 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
             query_part = ''
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
-                print(query_part)
             new_link = f'](/{link.rel_src_path_posix[:-3]}.html{query_part})'
             
             
