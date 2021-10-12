@@ -17,7 +17,7 @@ Only notes that are found by following links recursively starting with the entry
 - [Devfruits.com/Notes](https://devfruits.com)
 
 # Installation
-First install python 3, then:
+First install python 3 (>= 3.9), then:
 
 ``` bash
 python -m pip install --upgrade pip
