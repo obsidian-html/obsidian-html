@@ -212,27 +212,45 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
     # And while we are busy, change the path to point to the full relative path
     proper_links = re.findall("(?<=[^\[]\]\().+?(?=\))", md.page)
     for l in proper_links:
-        # Remove the .md suffix to get the key
+        # Get the filename
         file_name = urllib.parse.unquote(l)
 
-        if file_name[-3:] != '.md':
+        # Determine if file is markdown
+        isMd = False
+        if file_name[-3:] == '.md':
+            isMd = True
+        if Path(file_name).suffix == '':
+            isMd = True
             file_name += '.md'
    
-        md.links.append(file_name)
+        if isMd:
+            # Add to list to recurse to the link later
+            md.links.append(file_name)
 
-        # Change the link in the markdown to link to the relative path
-        if file_name.split('/')[-1] in files.keys():
-            filepath = files[file_name.split('/')[-1]]['fullpath']
-            relative_path_posix = Path(filepath).relative_to(root_folder_path).as_posix()
+        # Don't continue processing for non local files
+        if file_name.split('/')[-1] not in files.keys():
+            continue
 
+        # Determine paths
+        filepath = files[file_name.split('/')[-1]]['fullpath']
+        relative_path_posix = Path(filepath).relative_to(root_folder_path).as_posix()
+        dst_filepath = md_folder_path.joinpath(relative_path_posix)
+
+        if isMd:
             if relative_path_posix == rel_entrypoint_path.as_posix():      
                 relative_path_posix = 'index.md'
 
-            relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
-            new_link = ']('+relative_path_posix+')'
+        # Change the link in the markdown to link to the relative path
+        relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
+        new_link = ']('+relative_path_posix+')'
 
-            safe_link = re.escape(']('+l+')')
-            md.page = re.sub(f"(?<![\[\(])({safe_link})", new_link, md.page)
+        safe_link = re.escape(']('+l+')')
+        md.page = re.sub(f"(?<![\[\(])({safe_link})", new_link, md.page)
+
+        if isMd == False:
+            # Copy file over to new location
+            shutil.copyfile(filepath, dst_filepath)
+
         
     # -- Replace Obsidian links with proper markdown
     # This is any string in between [[ and ]], e.g. [[My Note]]
@@ -253,7 +271,11 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
             filename = parts[0]
             hashpart = parts[1]
 
-        if filename[-3:] != '.md':
+        isMd = False
+        if filename[-3:] == '.md':
+            isMd = True
+        if Path(filename).suffix == '':
+            isMd = True
             filename += '.md'
 
         md.links.append(filename)
@@ -273,6 +295,7 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
             relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
 
         newlink = urllib.parse.quote(relative_path_posix)
+
         if hashpart != '':
             hashpart = hashpart.replace(' ', '-').lower()
             newlink += f'#{hashpart}'
@@ -353,7 +376,13 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         link = MarkdownLink(l, page_path, md_folder_path, url_unquote=True)
 
         # Don't process in the following cases
-        if link.isValid == False or link.isExternal == True or link.suffix != '.md':
+        if link.isValid == False or link.isExternal == True: 
+            continue
+
+        # Copy non md files over wholesale, then we're done for that kind of file
+        if link.suffix != '.md' and link.suffix not in image_suffixes:
+            html_output_folder_path.joinpath(link.rel_src_path).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(link.src_path, html_output_folder_path.joinpath(link.rel_src_path))
             continue        
 
         # Not created clause
@@ -372,8 +401,6 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
                 query_part = link.query_delimiter + link.query 
             new_link = f'](/{link.rel_src_path_posix[:-3]}.html{query_part})'
             
-            
-
         # Update link
         safe_link = re.escape(']('+l+')')
         md.page = re.sub(safe_link, new_link, md.page)
@@ -537,6 +564,7 @@ for path in root_folder_path.rglob('*'):
         raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
     files[path.name] = {'fullpath': str(path), 'processed': False}  
+
 
 # Start conversion with entrypoint.
 # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
