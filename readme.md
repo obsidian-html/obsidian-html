@@ -1,13 +1,20 @@
 # Obsidian-html
 An application to export Obsidian notes to standard markdown and an html based website.
 
-The Obsidian notes will be converted to standard markdown output. Then, optionally, html output is created based on the standard markdown. [Example of the HTML output](https://obsidian-html.github.io/). It is also possible to input existing standard markdown to just use the markdown to html functionality.
+You can see the capabilities of this system in this demo website: [Example of the HTML output](https://obsidian-html.github.io/). 
+
+## Setup
+The Obsidian notes will be converted to standard markdown output. Then, optionally, html output is created based on the standard markdown. 
+It is also possible to input existing standard markdown to just use the markdown to html functionality.
 
 To convert your notes, you need to point to your notes folder, and to one note that will serve as the index.html page.
 Only notes that are found by following links recursively starting with the entrypoint will be converted. If you wish to convert all the notes, please create an issue requesting this feature.
 
 > Note, this code has not been fully tested yet. Work in progress. Issues and/or pull requests are welcomed!
 
+
+## Examples of actual sites using this system
+- [Devfruits.com/Notes](https://devfruits.com)
 
 # Installation
 First install python 3, then:
