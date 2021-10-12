@@ -395,7 +395,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         # Copy non md files over wholesale, then we're done for that kind of file
         if link.suffix != '.md' and link.suffix not in image_suffixes:
             html_output_folder_path.joinpath(link.rel_src_path).parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(link.src_path, html_output_folder_path.joinpath(link.rel_src_path))
+            shutil.copyfile(link.src_path, html_output_folder_path.joinpath(link.rel_src_path))
             continue        
 
         # Not created clause
