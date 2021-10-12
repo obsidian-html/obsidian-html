@@ -511,6 +511,8 @@ if '-h' in sys.argv or len(sys.argv) < 3:
     print('- Convert md to html: \n\tpython run.py <path to md files> <path to md entrypoint> -md\n')
     print('- Add -v for verbose output')
     print('- Add -h to get helptext')
+    print('- Add -nc to skip erasing output folders')
+    print('- Add -md to convert proper markdown to html (entrypoint and root_folder path should point to proper markdown sources)')
     exit()
 
 if '-v' in sys.argv:
