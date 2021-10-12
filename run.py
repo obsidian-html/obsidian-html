@@ -396,7 +396,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         if link.suffix != '.md' and link.suffix not in image_suffixes:
             html_output_folder_path.joinpath(link.rel_src_path).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(link.src_path, html_output_folder_path.joinpath(link.rel_src_path))
-            continue        
+            continue
 
         # Not created clause
         if link.url.split('/')[-1] == 'not_created.md':

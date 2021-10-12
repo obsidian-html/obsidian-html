@@ -85,3 +85,44 @@ Links that point to non-existent notes will be redirected to `output/html/not_cr
 
 # Future developments
 - This code would make a good python-markdown extension, might build that in the future.
+
+
+# Quirks
+## Toggle: relative_path_md
+This toggle controlls whether links to/out of folders are done in a relative or an absolute way. 
+
+Github seems to work best with relative links (I had trouble with / prefixed paths as full paths). 
+Whereas a Gitlab project I've tested this on seemed to exclusively use full-path links.
+
+Let's say we have the following files, all linking to eachother:
+```
+/folder1/page1.md
+/folder1/page2.md
+home.md
+```
+
+With relative_path_md to True, we'll get these links in the md:
+```
+folder1/page1 --> folder1/page2: page2.md
+folder1/page1 --> home: /home.md
+home --> folder1/page1: folder1/page1.md
+```
+
+Or, with how the code works atm (comes down to the same principle):
+
+```
+folder1/page1 --> folder1/page2: ../folder1/page2.md
+folder1/page1 --> home: ../home.md
+home --> folder1/page1: folder1/page1.md
+```
+
+With it on False, we'll get
+```
+folder1/page1 --> folder1/page2: /folder1/page2.md
+folder1/page1 --> home: /home.md
+home --> folder1/page1: /folder1/page1.md
+```
+
+I'd recommend just running the code, and if you are missing files that live in folders, toggle the switch to the other value and try again to see if that fixes it.
+
+The html code just used full paths everywhere because this gives me headache and is more foolproof.
