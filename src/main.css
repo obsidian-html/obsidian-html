@@ -2,12 +2,22 @@
     overflow-anchor: none;
   }
   
-table, th, td {
-    border: 1px solid black;
-    padding: 0.3rem;
-}
 table {
+    width: 100%;
+}
+table, th, td {
+    border-bottom: 1px solid #999;
+    border-right: 1px dotted #6f6f6f;
+    border-left: 1px dotted #6f6f6f;
+    padding: 0.3rem;
+    text-align: left;
     border-collapse: collapse;
+}
+th {
+    text-transform: capitalize;
+    background-color: #f5f7ff;
+    border-right: 1px solid #d8e0e8;
+    border-left: 1px solid #d8e0e8;
 }
 
 body {
@@ -93,10 +103,13 @@ h2 {
 h1 + h2 {
     margin-top: 1rem;
 }
-
 h2 + .codehilite {
     margin-top: 1rem;
 }
+h2 + table {
+    margin-top: 1rem;
+}
+
 
 li {
     margin-bottom: 0.3rem;

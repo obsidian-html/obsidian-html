@@ -24,7 +24,7 @@
 
 <body onload="SetLinks(0);">
 <div id="header" class="header">
-        <a href="/" id="homelink">{title}</a>
+        <a href="{html_url_prefix}/" id="homelink">{title}</a>
 </div>
 <div class="container-wrapper">
         <div class="container">
@@ -79,7 +79,8 @@
         // Change link operation
         function SetLinks(level){
                 size_of_rem = getComputedStyle(document.documentElement).fontSize.split("px")[0]
-                if (window.visualViewport.width > (1.7 * 40 * size_of_rem))
+                console.log('threshold', (1.2 * 40 * size_of_rem));
+                if (window.visualViewport.width > (1.2 * 40 * size_of_rem))
                 {
                         var links = document.getElementsByTagName('a');
                         for (let i=0; i < links.length; i++){

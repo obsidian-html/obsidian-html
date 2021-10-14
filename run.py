@@ -412,7 +412,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
             query_part = ''
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
-            new_link = f'](/{link.rel_src_path_posix[:-3]}.html{query_part})'
+            new_link = f']({html_url_prefix}/{link.rel_src_path_posix[:-3]}.html{query_part})'
             
         # Update link
         safe_link = re.escape(']('+l+')')
@@ -471,7 +471,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
 
     # Wrap body html in valid html structure from template
-    html = html_template.replace('{content}', html_body).replace('{title}', site_name)
+    html = html_template.replace('{content}', html_body).replace('{title}', site_name).replace('{html_url_prefix}', html_url_prefix)
 
     # Save file
     # ---- 
@@ -542,6 +542,7 @@ entrypoint_path = Path(sys.argv[2]).resolve()    # The note that will be used as
 md_folder_path = Path(sys.argv[3]).resolve()
 html_output_folder_path = Path(sys.argv[4]).resolve()
 site_name = sys.argv[5]
+html_url_prefix = sys.argv[6]
 
 # Paths
 md_to_html_entrypoint_path = md_folder_path.joinpath('index.md').resolve()
