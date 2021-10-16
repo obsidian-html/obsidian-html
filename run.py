@@ -173,6 +173,21 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
     # They will be restored at the end
     md.StripCodeSections() 
 
+    # -- Add newline between paragraph and lists
+    buffer = ''
+    prev_is_list_line = False
+    current_is_list_line = False
+    for i, line in enumerate(md.page.split('\n')):
+        if len(line) == 0:
+            current_is_list_line = False
+        elif line[0] == '-':
+            current_is_list_line = True
+        if current_is_list_line and (prev_is_list_line == False):
+            buffer += '\n'
+        buffer += '\n' + line
+        prev_is_list_line = current_is_list_line
+    md.page = buffer
+
     # -- Convert Obsidian type img links to proper md image links
     # Further conversion will be done in the block below
     for link in re.findall("(?<=\!\[\[)(.*?)(?=\])", md.page):
