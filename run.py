@@ -176,11 +176,12 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
     # -- Add newline between paragraph and lists
     buffer = ''
     prev_is_list_line = False
-    current_is_list_line = False
     for i, line in enumerate(md.page.split('\n')):
-        if len(line) == 0:
+        current_is_list_line = False
+        clean_line = line.strip()
+        if len(clean_line) == 0:
             current_is_list_line = False
-        elif line[0] == '-':
+        elif clean_line[0] == '-':
             current_is_list_line = True
         if current_is_list_line and (prev_is_list_line == False):
             buffer += '\n'

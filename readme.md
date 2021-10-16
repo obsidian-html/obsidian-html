@@ -73,6 +73,8 @@ will be converted to `[matched value](matched value)`
 ## Conversion of Obsidian newline behavior
 Three spaces are added behind every newline to simulate Obsidian's "enter = new line" behavior. Note that not all markdown readers comply with this standard, but python-markdown does, so the outputted HTML is as expected.
 
+There is also a newline added between non-list lines and list lines. This to copy Obsidian's allowance to create a list without needing to put a newline in front of it.
+
 ## Basic Templating
 All generated html code will be wrapped by the html code in `src/template.html`. This template points to `src/main.css`. 
 Change this code *in the `/src` folder* to have the changes persist across runs of the code (output will be overwritten).
