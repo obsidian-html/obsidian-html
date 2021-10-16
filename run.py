@@ -542,7 +542,7 @@ entrypoint_path = Path(sys.argv[2]).resolve()    # The note that will be used as
 md_folder_path = Path(sys.argv[3]).resolve()
 html_output_folder_path = Path(sys.argv[4]).resolve()
 site_name = sys.argv[5]
-html_url_prefix = sys.argv[6]
+html_url_prefix = sys.argv[6].replace("'", '')
 
 # Paths
 md_to_html_entrypoint_path = md_folder_path.joinpath('index.md').resolve()

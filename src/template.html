@@ -22,7 +22,7 @@
                 </script>
         </head>
 
-<body onload="SetLinks(0);">
+<body onload="LoadPage();">
 <div id="header" class="header">
         <a href="{html_url_prefix}/" id="homelink">{title}</a>
 </div>
@@ -37,6 +37,11 @@
 <script>
         // Init
         // ----------------------------------------------------------------------------
+        function LoadPage(){
+                console.log('threshold', (1.2 * 40 * getComputedStyle(document.documentElement).fontSize.split("px")[0]));
+                SetLinks(0);
+        }
+
         // Scroll container to #header link
         if (window.location.hash != ''){
                 let el = document.getElementById(window.location.hash.substr(2));
@@ -78,8 +83,7 @@
         
         // Change link operation
         function SetLinks(level){
-                size_of_rem = getComputedStyle(document.documentElement).fontSize.split("px")[0]
-                console.log('threshold', (1.2 * 40 * size_of_rem));
+                size_of_rem = getComputedStyle(document.documentElement).fontSize.split("px")[0];
                 if (window.visualViewport.width > (1.2 * 40 * size_of_rem))
                 {
                         var links = document.getElementsByTagName('a');
@@ -126,7 +130,6 @@
                         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
                         callback(xmlHttp, level, theUrl, callbackpath);
                 }
-                console.log('---', theUrl);
                 xmlHttp.open("GET", theUrl, true); // true for asynchronous 
                 xmlHttp.send(null);
         }
