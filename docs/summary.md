@@ -1,0 +1,13 @@
+
+- MarkdownPage.ConvertObsidianPageToMarkdownPage()
+  - [1] Replace code blocks with placeholders so they aren't altered & [1] Restore codeblocks/-lines
+    - MarkdownPage.ConvertObsidianPageToMarkdownPage() --> MarkdownPage.StripCodeSections() & MarkdownPage.RestoreCodeSections()
+  - [2] Add newline between paragraph and lists
+  - [3] Convert Obsidian type img links to proper md image links
+  - [4] Handle local image links (copy them over to output)
+  - [5] Change file name in proper markdown links to path
+  - [6] Replace Obsidian links with proper markdown
+  - [7] Fix newline issue by adding three spaces before any newline
+  - [8] Insert markdown links for bare http(s) links (those without the `[name](link)` format).
+  - [9] Remove inline tags, like #ThisIsATag
+  - [10] Add code inclusions

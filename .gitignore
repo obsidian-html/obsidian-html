@@ -1,3 +1,4 @@
 output/*
 test.py
 test.txt
+__pychache__/*

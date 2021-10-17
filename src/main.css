@@ -227,7 +227,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .codehilite .hll { background-color: #ffffcc }
 
 .codehilite .c { color: #4b4668; font-style: italic } /* Comment */
-.codehilite .err { border: 1px solid #FF0000 } /* Error */
 .codehilite .k { color: #26adff;  } /* Keyword */
 .codehilite .o { color: #666666 } /* Operator */
 .codehilite .ch { color: #4b4668; line-height: 1.5rem;  } /* Comment.Hashbang */
