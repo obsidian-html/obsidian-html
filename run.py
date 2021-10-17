@@ -154,7 +154,7 @@ class MarkdownLink:
         self.rel_src_path = self.src_path.relative_to(self.root_path)
         self.rel_src_path_posix = self.rel_src_path.as_posix()
 
-def ConvertObsidianPageToMarkdownPage(page_path_str):
+def ConvertObsidianPageToMarkdownPage(page_path_str, include_depth=0):
     page_path = Path(page_path_str).resolve()
 
     if page_path.exists() == False:
@@ -195,9 +195,9 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
         new_link = '![]('+link+')'
 
         # Obsidian page inclusions use the same tag...
-        # These are not implemented yet
+        # Skip if we don't match image suffixes. Inclusions are handled at the end.
         if len(link.split('.')) == 1 or link.split('.')[-1] not in image_suffixes:
-            new_link = f'\n> **obsidian-html error:** Obsidian type page inclusion(({link})) (not implemented yet)\n'
+            new_link = f'<inclusion href="{link}" />'
 
         safe_link = re.escape('![['+link+']]')
         md.page = re.sub(safe_link, new_link, md.page)
@@ -342,8 +342,32 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
         safe_str = re.escape(l)
         md.page = re.sub(safe_str, new_md_str, md.page)
 
+    # -- Add inclusions
+    for l in re.findall(r'^(\<inclusion href="[^"]*" />)', md.page, re.MULTILINE):
+        link = l.replace('<inclusion href="', '').replace('" />', '')
+        print('---', include_depth, l, link)
+        link_lookup = GetObsidianFilePath(link)
+
+        if link_lookup == False:
+            md.page = md.page.replace(l, f"> **obsidian-html error:** Could not find page {link}.")
+            continue
+        
+        md.links.append(link_lookup[1]['fullpath'])
+
+        if include_depth > 3:
+            md.page = md.page.replace(l, f"[{link}]({link_lookup[1]['fullpath']}).")
+            continue
+
+        included_page = ConvertObsidianPageToMarkdownPage(link_lookup[1]['fullpath'], include_depth=include_depth + 1)
+        md.page = md.page.replace(l, included_page.page)
+
     # -- Restore codeblocks/-lines
     md.RestoreCodeSections()
+
+    return md
+
+def recurseObisidianToMarkdown(page_path_str):
+    md = ConvertObsidianPageToMarkdownPage(page_path_str)
 
     # -- Save file
     # Create folder if necessary
@@ -355,14 +379,10 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
 
     # -- Recurse for every link in the current page
     for l in md.links:
-        # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
-        link_path = l.split('|')[0].split('/')[-1]
-        
-        # Skip non-existent notes and notes that have been processed already
-        if link_path not in files.keys():
+        link = GetObsidianFilePath(l)
+        if link == False or link[1]['processed'] == True:
             continue
-        if files[link_path]['processed'] == True:
-            continue
+        link_path = link[0]
 
         # Mark the file as processed so that it will not be processed again at a later stage
         files[link_path]['processed'] = True         
@@ -370,8 +390,21 @@ def ConvertObsidianPageToMarkdownPage(page_path_str):
         # Convert the note that is linked to
         if verbose_printout:
             print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
-        ConvertObsidianPageToMarkdownPage(files[link_path]['fullpath'])
+        recurseObisidianToMarkdown(files[link_path]['fullpath'])
 
+def GetObsidianFilePath(link):
+    # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
+    filename = link.split('|')[0].split('/')[-1].split('#')[-1]
+
+    if filename[-3:] != '.md':
+        filename += '.md'
+        
+    # Skip non-existent notes and notes that have been processed already
+    if filename not in files.keys():
+        return False
+
+    return (filename, files[filename])
+    
 def ConvertMarkdownPageToHtmlPage(page_path_str):
     page_path = Path(page_path_str).resolve()
 
@@ -605,7 +638,7 @@ if toggle_compile_md:
     # Start conversion with entrypoint.
     # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
     print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(entrypoint_path)})')
-    ConvertObsidianPageToMarkdownPage(str(entrypoint_path))
+    recurseObisidianToMarkdown(str(entrypoint_path))
 
 
 # Convert Markdown to Html

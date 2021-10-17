@@ -109,6 +109,9 @@ h2 + .codehilite {
 h2 + table {
     margin-top: 1rem;
 }
+h2 + blockquote {
+    margin-top: 1rem;
+}
 
 
 li {

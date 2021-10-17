@@ -75,6 +75,11 @@ Three spaces are added behind every newline to simulate Obsidian's "enter = new 
 
 There is also a newline added between non-list lines and list lines. This to copy Obsidian's allowance to create a list without needing to put a newline in front of it.
 
+## Obsidian code inclusions
+When using the format `![[Name of note]]`, the contents of the note will be included. In Obsidian, the inclusion is denoted by wrapping a div around the content. This is not possible in the intermediate markdown code, so all inclusions are just pasted in as-is. 
+
+> Note that partial inclusions are not supported. Partial inclusions will lead to the full note being included. This is because otherwise I'll have to parse the whole header structure of the markdown files, and this is out of scope for the moment.
+
 ## Basic Templating
 All generated html code will be wrapped by the html code in `src/template.html`. This template points to `src/main.css`. 
 Change this code *in the `/src` folder* to have the changes persist across runs of the code (output will be overwritten).
