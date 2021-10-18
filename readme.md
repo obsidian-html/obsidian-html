@@ -31,13 +31,11 @@ This application is only tested on Windows, though it should be relatively easy 
 - Find the root folder of your obsidian notes. This is the first folder that contains any markdown files or multiple folders with markdown files.
 - Open powershell and navigate into the cloned folder
 - Run `python run.py -h` for the up to date help text
-- Run `python run.py '<fullpath to notes>' '<fullpath to entry note>' '<rel or fullpath to markdown output folder>' '<rel of fullpath to html output folder>' '<site name>'`
+- Copy `example_config.yml` to `config.yml` and edit the values, see the comments there.
+- Run `python run.py -i config.yml`
 
-Optionally **append**(!) toggles, such as:
+Optionally append command-line toggles, such as:
 - `-v` verbose output in console
-- `-nc` to skip erasing output folders
-- `-md` to convert proper markdown to html (entrypoint and root_folder path should point to proper markdown sources)
-
 
 > **Note**: Only notes that are found by following links recursively starting with the entrypoint will be converted. If you wish to convert all the notes, please create an issue requesting this feature.
 

@@ -1,4 +1,4 @@
 output/*
-test.py
-test.txt
+test*
 __pycache__/*
+local_configs/*

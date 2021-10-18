@@ -4,6 +4,7 @@ import shutil               # used to remove a non-empty directory, copy files
 import re                   # regex string finding/replacing
 from pathlib import Path    # 
 import markdown             # convert markdown to html
+import yaml
 import urllib.parse         # convert link characters like %
 from lib import MarkdownPage, MarkdownLink, DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes
 
@@ -17,13 +18,13 @@ def recurseObisidianToMarkdown(page_path_str):
     if page_path.suffix != '.md':
         return
 
-    md = MarkdownPage(page_path, root_folder_path, files)
-    md.ConvertObsidianPageToMarkdownPage(md_folder_path, entrypoint_path)
+    md = MarkdownPage(page_path, obsidian_folder_path, files)
+    md.ConvertObsidianPageToMarkdownPage(md_folder_path, obsidian_entrypoint_path)
 
     # -- Save file
     # Create folder if necessary
     md.dst_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Write markdown
     with open(md.dst_path, 'w', encoding="utf-8") as f:
         f.write(md.page)
@@ -39,7 +40,7 @@ def recurseObisidianToMarkdown(page_path_str):
         files[link_path]['processed'] = True         
 
         # Convert the note that is linked to
-        if verbose_printout:
+        if conf['toggles']['verbose_printout']:
             print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
         recurseObisidianToMarkdown(files[link_path]['fullpath'])
 
@@ -53,7 +54,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
 
     # Load contents 
     md = MarkdownPage(page_path, md_folder_path, files)
-    md.SetDestinationPath(html_output_folder_path, md_to_html_entrypoint_path)
+    md.SetDestinationPath(html_output_folder_path, md_entrypoint_path)
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
@@ -64,7 +65,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
     proper_links = re.findall("(?<=\]\().+?(?=\))", md.page)
     for l in proper_links:
         # Init link
-        link = MarkdownLink(l, page_path, md_folder_path, url_unquote=True, relative_path_md = relative_path_md)
+        link = MarkdownLink(l, page_path, md_folder_path, url_unquote=True, relative_path_md = conf['toggles']['relative_path_md'])
 
         # Don't process in the following cases
         if link.isValid == False or link.isExternal == True: 
@@ -97,7 +98,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
             query_part = ''
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
-            new_link = f']({html_url_prefix}/{link.rel_src_path_posix[:-3]}.html{query_part})'
+            new_link = f']({conf["html_url_prefix"]}/{link.rel_src_path_posix[:-3]}.html{query_part})'
             
         # Update link
         safe_link = re.escape(']('+l+')')
@@ -113,7 +114,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
         if rel_path.as_posix() not in files.keys():
-            if warn_on_skipped_image:
+            if conf['toggles']['warn_on_skipped_image']:
                 warnings.warn(f"Image {str(full_link_path)} treated as external and not imported in html")            
             continue
 
@@ -156,12 +157,14 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
 
     # [16] Wrap body html in valid html structure from template
-    html = html_template.replace('{content}', html_body).replace('{title}', site_name).replace('{html_url_prefix}', html_url_prefix)
+    html = html_template.replace('{content}', html_body).replace('{title}', conf['site_name']).replace('{html_url_prefix}', conf['html_url_prefix'])
 
     # Save file
     # ---- 
     md.dst_path.parent.mkdir(parents=True, exist_ok=True)   
     html_dst_path_posix = md.dst_path.as_posix()[:-3] + '.html' 
+
+    print(html_dst_path_posix)
 
     # Write html
     with open(html_dst_path_posix, 'w', encoding="utf-8") as f:
@@ -184,7 +187,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         files[link_path]['processed'] = True  
 
         # Convert the note that is linked to
-        if verbose_printout:
+        if conf['toggles']['verbose_printout']:
             print("html: converting ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
         ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'])  
@@ -192,56 +195,55 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
 
 # Config
 # ------------------------------------------
-# Toggles
-toggle_compile_html = True
-toggle_compile_md = True
-verbose_printout = False
-allow_duplicate_filenames_in_root = False
-warn_on_skipped_image = True
-no_clean = False
-relative_path_md = True                        # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
+# Load input yaml
+input_yml_path_str = ''
+for i, v in enumerate(sys.argv):
+  if v == '-i':
+    input_yml_path_str = sys.argv[i+1]
+    break
+
+if input_yml_path_str == '':
+  raise Exception("No yaml input given.\n Use python run.py -i /path/to/config.yml to provide input.")
+  exit(1)
+
+with open(input_yml_path_str, 'rb') as f:
+    conf = yaml.load(f.read(), Loader=yaml.SafeLoader) 
+
+# Overwrite conf
+for i, v in enumerate(sys.argv):
+  if v == '-v':
+    conf['toggles']['verbose_printout'] = True
 
 # Input
 # ------------------------------------------
 if '-h' in sys.argv or len(sys.argv) < 3:
     print('[Obsidian-html]')
-    print('- Convert obsidian to html: \n\tpython run.py <path to obsidian notes> <path to entrypoint>\n')
-    print('- Convert md to html: \n\tpython run.py <path to md files> <path to md entrypoint> -md\n')
+    print('- Add -i </path/to/input.yml> to provide config\n')
     print('- Add -v for verbose output')
     print('- Add -h to get helptext')
-    print('- Add -nc to skip erasing output folders')
-    print('- Add -md to convert proper markdown to html (entrypoint and root_folder path should point to proper markdown sources)')
     exit()
 
-if '-v' in sys.argv:
-    verbose_printout = True
+# Set Paths
+obsidian_folder_path = Path(conf['obsidian_folder_path_str']).resolve()
+md_folder_path = Path(conf['md_folder_path_str']).resolve()
 
-if '-nc' in sys.argv:
-    no_clean = True
+obsidian_entrypoint_path = Path(conf['obsidian_entrypoint_path_str']).resolve()
+md_entrypoint_path = Path(conf['md_entrypoint_path_str']).resolve()
 
-root_folder_path = Path(sys.argv[1]).resolve()   # first folder that contains all markdown files
-entrypoint_path = Path(sys.argv[2]).resolve()    # The note that will be used as the index.html
-md_folder_path = Path(sys.argv[3]).resolve()
-html_output_folder_path = Path(sys.argv[4]).resolve()
-site_name = sys.argv[5]
-html_url_prefix = sys.argv[6].replace("'", '')
+html_output_folder_path = Path(conf['html_output_folder_path_str']).resolve()
 
-# Paths
-md_to_html_entrypoint_path = md_folder_path.joinpath('index.md').resolve()
-rel_entrypoint_path = entrypoint_path.relative_to(root_folder_path)
+# Deduce relative paths
+rel_obsidian_entrypoint_path = obsidian_entrypoint_path.relative_to(obsidian_folder_path)
+rel_md_entrypoint_path = md_entrypoint_path.relative_to(md_folder_path)
 
-if '-md' in sys.argv:
-    toggle_compile_md = False
-    md_folder_path = root_folder_path
-    md_to_html_entrypoint_path = entrypoint_path
-
+print(yaml.dump(conf, allow_unicode=True, default_flow_style=False))
 
 # Preprocess
 # ------------------------------------------
 # Remove previous output
-if no_clean == False:
+if conf['toggles']['no_clean'] == False:
     print('> CLEARING OUTPUT FOLDERS')
-    if toggle_compile_md:
+    if conf['toggles']['compile_md']:
         if md_folder_path.exists():
             shutil.rmtree(md_folder_path)
 
@@ -259,24 +261,24 @@ html_output_folder_path.mkdir(parents=True, exist_ok=True)
 # Load all filenames in the root folder.
 # This data will be used to check which files are local, and to get their full path
 # It's clear that no two files can be allowed to have the same file name.
-if toggle_compile_md:
+if conf['toggles']['compile_md']:
     files = {}
-    for path in root_folder_path.rglob('*'):
-        if path.name in files.keys() and allow_duplicate_filenames_in_root == False:
+    for path in obsidian_folder_path.rglob('*'):
+        if path.name in files.keys() and conf['toggles']['allow_duplicate_filenames_in_root'] == False:
             raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
         files[path.name] = {'fullpath': str(path), 'processed': False}  
 
     # Start conversion with entrypoint.
     # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
-    print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(entrypoint_path)})')
-    recurseObisidianToMarkdown(str(entrypoint_path))
+    print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(obsidian_entrypoint_path)})')
+    recurseObisidianToMarkdown(str(obsidian_entrypoint_path))
 
 
 # Convert Markdown to Html
 # ------------------------------------------
-if toggle_compile_html:
-    print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(md_to_html_entrypoint_path)})')
+if conf['toggles']['compile_html']:
+    print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(md_entrypoint_path)})')
 
     # Get html template code. Every note will become a html page, where the body comes from the note's 
     # markdown, and the wrapper code from this template.
@@ -291,7 +293,7 @@ if toggle_compile_html:
         files[rel_path_posix] = {'fullpath': str(path.resolve()), 'processed': False}  
 
     # Start conversion from the entrypoint
-    ConvertMarkdownPageToHtmlPage(str(md_to_html_entrypoint_path))
+    ConvertMarkdownPageToHtmlPage(str(md_entrypoint_path))
 
     # Add Extra stuff to the output directories
     # ------------------------------------------

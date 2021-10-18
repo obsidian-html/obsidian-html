@@ -20,7 +20,7 @@ class MarkdownPage:
 
     src_path  = None        # Path() object of src file
     rel_src_path  = None    # Path() object relative to given markdown root folder (src_folder_path)
-    src_folder_path = None  # Path() object of given markdown root folder
+    src_folder_path = None  # Path() object of given obsidian root folder
     dst_folder_path = None  # Path() object of given markdown output folder
     dst_path = None         # Path() object of destination file
 
@@ -72,6 +72,8 @@ class MarkdownPage:
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
         # -- Load contents
         self.SetDestinationPath(dst_folder_path, entrypoint_path)
+
+        rel_obsidian_entrypoint_path = entrypoint_path.relative_to(self.src_folder_path)
 
         # -- Get page depth
         page_folder_depth = self.rel_src_path.as_posix().count('/')
@@ -162,8 +164,8 @@ class MarkdownPage:
             relative_path_posix = Path(filepath).relative_to(self.src_folder_path).as_posix()
             dst_filepath = self.dst_folder_path.joinpath(relative_path_posix)
 
-            if isMd:
-                if relative_path_posix == self.rel_dst_path.as_posix():      
+            if isMd: 
+                if relative_path_posix == rel_obsidian_entrypoint_path.as_posix():   
                     relative_path_posix = 'index.md'
 
             # Change the link in the markdown to link to the relative path
@@ -216,7 +218,8 @@ class MarkdownPage:
                 # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
                 full_path = self.file_tree[filename]['fullpath']
                 relative_path_posix = Path(full_path).relative_to(self.src_folder_path).as_posix()
-                if relative_path_posix == self.rel_dst_path.as_posix():   
+                
+                if relative_path_posix == rel_obsidian_entrypoint_path.as_posix():    
                     relative_path_posix = 'index.md'
 
                 relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
