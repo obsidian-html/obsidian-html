@@ -55,7 +55,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
     md = MarkdownPage(page_path, md_folder_path, files)
     md.SetDestinationPath(html_output_folder_path, md_to_html_entrypoint_path)
 
-    # Replace code blocks with placeholders so they aren't altered
+    # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
     md.StripCodeSections()     
 
@@ -76,17 +76,15 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
             isMd = True
         if Path(filename).suffix == '':
             isMd = True
-            #link.url += '.md'
-            #link.ParsePaths()
             filename += '.md'
 
-        # Copy non md files over wholesale, then we're done for that kind of file
+        # [12] Copy non md files over wholesale, then we're done for that kind of file
         if link.suffix != '.md' and link.suffix not in image_suffixes:
             html_output_folder_path.joinpath(link.rel_src_path).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(link.src_path, html_output_folder_path.joinpath(link.rel_src_path))
             continue
 
-        # Not created clause
+        # [13] Link to a custom 404 page when linked to a not-created note
         if link.url.split('/')[-1] == 'not_created.md':
             new_link = '](/not_created.html)'
         else:
@@ -95,7 +93,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
 
             md.links.append(link.rel_src_path_posix)
 
-            # Local link found, update link suffix from .md to .html
+            # [11.1] Rewrite .md links to .html (when the link is to a file in our root folder)
             query_part = ''
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
@@ -105,7 +103,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         safe_link = re.escape(']('+l+')')
         md.page = re.sub(safe_link, new_link, md.page)
 
-    # Handle local image links (copy them over to output)
+    # [4] Handle local image links (copy them over to output)
     # ----
     for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", md.page):
         l = urllib.parse.unquote(link)
@@ -124,17 +122,17 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         dst_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(full_link_path, dst_path)
 
-        # Adjust link in page
+        # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
         new_link = '![]('+urllib.parse.quote(rel_path.as_posix())+')'
         safe_link = re.escape('![](/'+link+')')
         md.page = re.sub(safe_link, new_link, md.page)
    
 
-    # Restore codeblocks/-lines
+    # [1] Restore codeblocks/-lines
     # ----
     md.RestoreCodeSections()
 
-    # Convert markdown to html
+    # [11] Convert markdown to html
     # ----
     extension_configs = {
     'codehilite ': {
@@ -142,7 +140,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
     }}
     html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc'], extension_configs=extension_configs)
 
-    # Tag external links
+    # [14] Tag external links with a class so it can be decorated differently
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
         if l == '':
             continue
@@ -154,10 +152,10 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         safe_str = f"<a href=\"{l}\""
         html_body = html_body.replace(safe_str, new_str)
 
-    # Tag not created links
+    # [15] Tag not created links with a class so it can be decorated differently
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
 
-    # Wrap body html in valid html structure from template
+    # [16] Wrap body html in valid html structure from template
     html = html_template.replace('{content}', html_body).replace('{title}', site_name).replace('{html_url_prefix}', html_url_prefix)
 
     # Save file
@@ -189,7 +187,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str):
         if verbose_printout:
             print("html: converting ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
-        hmm = ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'])  
+        ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'])  
 
 
 # Config
@@ -202,8 +200,6 @@ allow_duplicate_filenames_in_root = False
 warn_on_skipped_image = True
 no_clean = False
 relative_path_md = True                        # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
-
-
 
 # Input
 # ------------------------------------------
@@ -270,7 +266,6 @@ if toggle_compile_md:
             raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
         files[path.name] = {'fullpath': str(path), 'processed': False}  
-
 
     # Start conversion with entrypoint.
     # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!

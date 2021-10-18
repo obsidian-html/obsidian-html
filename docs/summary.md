@@ -11,3 +11,13 @@
   - [8] Insert markdown links for bare http(s) links (those without the `[name](link)` format).
   - [9] Remove inline tags, like #ThisIsATag
   - [10] Add code inclusions
+- ConvertMarkdownPageToHtmlPage()
+  - [4] Handle local image links (copy them over to output) 
+  - [11] Convert markdown to html
+    - [11.1] Rewrite .md links to .html (when the link is to a file in our root folder)
+    - [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
+  - [12] Copy non md files over wholesale, then we're done for that kind of file
+  - [13] Link to a custom 404 page when linked to a not-created note
+  - [14] Tag external links with a class so it can be decorated differently
+  - [15] Tag not created links with a class so it can be decorated differently
+  - [16] Wrap body html in valid html structure from template
