@@ -55,6 +55,12 @@ To view the html as a website, do the following:
 - Run `python -m http.server --dir /path/to/your/html/output/folder`
 - Open [http://localhost:8000](http://localhost:8000)
 
+# Development
+- Git clone this repository
+- Open a terminal and `cd` into the cloned folder
+- Run `python -m obsidianhtml -i /path/to/config.yml` to run obsidianhtml
+
+> If you haven't installed obsidianhtml yet as described in section [Installation](#installation), you might miss packages. To resolve this, just install obsidianhtml, this will make sure all the dependencies are installed.
 
 # Features
 ## Not supported

@@ -169,8 +169,6 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, paths, files, html_template, co
     md.dst_path.parent.mkdir(parents=True, exist_ok=True)   
     html_dst_path_posix = md.dst_path.as_posix()[:-3] + '.html' 
 
-    print(html_dst_path_posix)
-
     # Write html
     with open(html_dst_path_posix, 'w', encoding="utf-8") as f:
         f.write(html)   

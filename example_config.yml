@@ -8,16 +8,16 @@ obsidian_folder_path_str: 'C:\Users\User\Obsidian\Notes'
 obsidian_entrypoint_path_str: 'C:\Users\User\Documents\Obsidian\Notes\My Entrypoint Note.md'
 
 # Input and output path of markdown files
-# This can be an absolute or a relative path (relative to the working directory when calling run.py)
+# This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 md_folder_path_str:  'output/md'
 
 # Markdown entrypoint path
 # This has to be md_folder_path_str + '/index.md' when toggles/compile_md == True
-# This can be an absolute or a relative path (relative to the working directory when calling run.py)
+# This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 md_entrypoint_path_str: 'output/md/index.md'
 
 # Output path of HTML files
-# This can be an absolute or a relative path (relative to the working directory when calling run.py)
+# This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 html_output_folder_path_str: 'output/html'
 
 # Will be inputted into the Html template as page title
@@ -25,7 +25,7 @@ html_output_folder_path_str: 'output/html'
 site_name: 'Obsidian-Html/Notes'
 
 # Use when deploying to https://mydomain.com/html_prefix/ instead of https://mydomain.com/
-# use '/prefix' (prepend slash, no slash at the end)
+# use '/html_prefix' (prepend slash, no slash at the end)
 html_url_prefix: ''
 
 toggles:
@@ -35,7 +35,7 @@ toggles:
   # Opt-in/-out of Md->Html conversion, set to False when only wanting to get proper markdown from Obsidian
   compile_html: True
 
-  # Can be overwritten ad-hoc by using "python run.py -i config.yml -v" (the -v option)
+  # Can be overwritten ad-hoc by using "obsidianhtml -i config.yml -v" (the -v option)
   verbose_printout: False
 
   # This option should be False for Obsidian->Md, but can be True when compile_md == False
