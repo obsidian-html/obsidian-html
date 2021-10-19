@@ -88,8 +88,6 @@ Links that point to non-existent notes will be redirected to `output/html/not_cr
 - Syntax highlighting built-in
 - [Very clean html + minor javascript website output](https://www.devfruits.com)
 
-# Future developments
-- This code would make a good python-markdown extension, might build that in the future.
 
 
 # Quirks
