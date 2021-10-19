@@ -6,7 +6,9 @@ from pathlib import Path    #
 import markdown             # convert markdown to html
 import yaml
 import urllib.parse         # convert link characters like %
-from .lib import MarkdownPage, MarkdownLink, DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes
+from .MarkdownPage import MarkdownPage
+from .MarkdownLink import MarkdownLink
+from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes
 
 # Open source files in the package
 import importlib.resources as pkg_resources
