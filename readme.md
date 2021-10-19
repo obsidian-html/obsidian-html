@@ -3,7 +3,7 @@ An application to export Obsidian notes to standard markdown and an html based w
 
 You can see the capabilities of this system in this demo website: [Example of the HTML output](https://obsidian-html.github.io/). 
 
-## Setup
+## High level
 The Obsidian notes will be converted to standard markdown output. Then, optionally, html output is created based on the standard markdown. 
 It is also possible to input existing standard markdown to just use the markdown to html functionality.
 
@@ -17,31 +17,44 @@ Only notes that are found by following links recursively starting with the entry
 - [Devfruits.com/Notes](https://devfruits.com)
 
 # Installation
-First install python 3 (>= 3.9), then:
+- First install python 3 (>= 3.9)
+- Open your terminal of choice
+- (Optional) Create and enter a virtual environment
 
+Then run:
+  ``` bash
+  pip install git+https://github.com/obsidian-html/obsidian-html
+  ```
+
+To uninstall, run:
 ``` bash
-python -m pip install --upgrade pip
-pip install markdown python-frontmatter pygments
+pip uninstall obsidianhtml
 ```
 
 # Useage
 This application is only tested on Windows, though it should be relatively easy to get working for Linux.
 
-- Git clone this repository
-- Find the root folder of your obsidian notes. This is the first folder that contains any markdown files or multiple folders with markdown files.
-- Open powershell and navigate into the cloned folder
-- Run `python run.py -h` for the up to date help text
-- Copy `example_config.yml` to `config.yml` and edit the values, see the comments there.
-- Run `python run.py -i config.yml`
+- Find the root folder of your obsidian notes. This is the first folder that contains any markdown files or multiple folders with markdown files. Write down its full path.
+- Choose a note that will serve as your index.html, and write down its full path
+- Download the [example_config.yml](example_config.yml) file to your local system, and rename it to `config.yml`.
+- Open config.yml and edit the settings, see the comments there. At the very least, edit the following variables:
+  - `obsidian_folder_path_str`: set to the root folder determined above.
+  - `obsidian_entrypoint_path_str`: set to the note that will server as your index.html.
+  - `md_entrypoint_path_str`: set to some folder where you want to write the markdown files to
+  - `html_output_folder_path_str`: set to some folder where you want to write the html files to 
+- Open your terminal of choice, and enter your virtual environment if you installed obsidianhtml in one
+- Run `obsidianhtml -i /path/to/your/config.yml`
 
 Optionally append command-line toggles, such as:
 - `-v` verbose output in console
 
 > **Note**: Only notes that are found by following links recursively starting with the entrypoint will be converted. If you wish to convert all the notes, please create an issue requesting this feature.
 
-The script then writes converted (standard format) markdown files to `output/md`, and html files to `output/html`.
+To view the html as a website, do the following:
+- Open a terminal
+- Run `python -m http.server --dir /path/to/your/html/output/folder`
+- Open [http://localhost:8000](http://localhost:8000)
 
-To test the html files, run `python -m http.server --directory output/html` then open [http://localhost:8000]()
 
 # Features
 ## Not supported

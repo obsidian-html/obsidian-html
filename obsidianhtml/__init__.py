@@ -208,7 +208,7 @@ def main():
             break
 
     if input_yml_path_str == '':
-        raise Exception("No yaml input given.\n Use python run.py -i /path/to/config.yml to provide input.")
+        raise Exception("No yaml input given.\n Use obsidianhtml -i /path/to/config.yml to provide input.")
         exit(1)
 
     with open(input_yml_path_str, 'rb') as f:
