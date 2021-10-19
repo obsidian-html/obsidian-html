@@ -20,13 +20,5 @@ setup(
             'obsidianhtml=obsidianhtml'
         ]
     },
-    data_files=[(
-        'obsidianhtml/src', [
-            'obsidianhtml/src/external.svg', 
-            'obsidianhtml/src/main.css',
-            'obsidianhtml/src/not_created.html',
-            'obsidianhtml/src/SourceCodePro-Regular.ttf',
-            'obsidianhtml/src/template.html'
-        ]
-    ),]
+    package_data={'obsidianhtml': ['src/*']},
 )
