@@ -113,6 +113,16 @@ h2 + blockquote {
     margin-top: 1rem;
 }
 
+.anchor {
+    visibility: hidden;
+    float: left;
+    padding-right: 4px;
+    margin-left: -20px;
+    line-height: 1;
+}
+.anchor svg {
+    fill: #2f2f2f;
+}
 
 li {
     margin-bottom: 0.3rem;
