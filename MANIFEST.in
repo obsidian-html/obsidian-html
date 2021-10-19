@@ -1,0 +1,2 @@
+include LICENSE readme.md
+recursive-include obsidianhtml/src *
