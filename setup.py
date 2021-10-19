@@ -8,7 +8,7 @@ setup(
     author='dwrolvink',
     author_email='dwrolvink@protonmail.com',
     license_files = ('LICENSE',),
-    packages=['obsidianhtml', 'src'],
+    packages=['obsidianhtml'],
     install_requires=[
       'markdown',
       'python-frontmatter',
