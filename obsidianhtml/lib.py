@@ -23,4 +23,11 @@ def GetObsidianFilePath(link, file_tree):
         return (filename, False)
 
     return (filename, file_tree[filename])
-    
+
+def ConvertTitleToMarkdownId(title):
+    idstr = title.lower()
+    idstr = idstr.replace(' ', '-')
+    while '--' in idstr:
+        idstr = idstr.replace('--', '-')
+    idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -')])
+    return idstr
