@@ -4,7 +4,8 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 import shutil               # used to remove a non-empty directory, copy files
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes
+from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes, ConvertTitleToMarkdownId
+from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
 
 class MarkdownPage:
     page = None             # Pure markdown code read from src file
@@ -251,25 +252,37 @@ class MarkdownPage:
         for l in re.findall(r'^(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')
             link_lookup = GetObsidianFilePath(link, self.file_tree)
+            file_record = link_lookup[1]
+            header = link_lookup[2]
 
             if link_lookup == False:
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Could not find page {link}.")
                 continue
             
-            self.links.append(link_lookup[1]['fullpath'])
+            self.links.append(file_record['fullpath'])
 
             if include_depth > 3:
-                self.page = self.page.replace(l, f"[{link}]({link_lookup[1]['fullpath']}).")
+                self.page = self.page.replace(l, f"[{link}]({file_record['fullpath']}).")
                 continue
 
-            incl_page_path = Path(link_lookup[1]['fullpath']).resolve()
+            incl_page_path = Path(file_record['fullpath']).resolve()
             if incl_page_path.exists() == False or incl_page_path.suffix != '.md':
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Error including file or not a markdown file {link}.")
                 continue
             
+            # Get code
             included_page = MarkdownPage(incl_page_path, self.src_folder_path, self.file_tree)
             included_page.ConvertObsidianPageToMarkdownPage(self.dst_folder_path, entrypoint_path, include_depth=include_depth + 1)
-            self.page = self.page.replace(l, included_page.page)
+
+            # Get subsection of code if header is present
+            if header != '':
+                header_id = ConvertTitleToMarkdownId(header)
+                included_page.StripCodeSections()
+                header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
+                included_page.page = PrintHeaderTree(header_dict[header_id])
+                included_page.RestoreCodeSections()
+            
+            self.page = self.page.replace(l, included_page.page + '\n')
 
         # -- [1] Restore codeblocks/-lines
         self.RestoreCodeSections()

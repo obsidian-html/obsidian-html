@@ -95,7 +95,7 @@ There is also a newline added between non-list lines and list lines. This to cop
 ## Obsidian code inclusions
 When using the format `![[Name of note]]`, the contents of the note will be included. In Obsidian, the inclusion is denoted by wrapping a div around the content. This is not possible in the intermediate markdown code, so all inclusions are just pasted in as-is. 
 
-> Note that partial inclusions are not supported. Partial inclusions will lead to the full note being included. This is because otherwise I'll have to parse the whole header structure of the markdown files, and this is out of scope for the moment.
+This package also supports partial inclusions. You can use this by writing `![[Name of note#Chapter Name]]`. In this case, only that chapter and its contents until the next chapter of the same depth is included. See also [Example Website#partial-code-inclusion](https://obsidian-html.github.io/#!partial-code-inclusion).
 
 ## Basic Templating
 All generated html code will be wrapped by the html code in `src/template.html`. This template points to `src/main.css`. 

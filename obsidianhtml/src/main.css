@@ -96,22 +96,26 @@ h2 {
     border-bottom: 1px dotted #777070;
     font-weight: 600;
     padding-bottom: 0.2rem;
-    margin-bottom: -0.5rem;
     margin-top: 2rem;
 }
-
 h1 + h2 {
     margin-top: 1rem;
 }
-h2 + .codehilite {
-    margin-top: 1rem;
+h2 + p {
+    margin-top: 0rem;
 }
-h2 + table {
-    margin-top: 1rem;
+
+h3 {
+    font-size: 13pt;
+    font-weight: 600;
+    border-bottom: 1px dashed #c0cae6;
+    padding: 2px;
+    color: #000;  
 }
-h2 + blockquote {
-    margin-top: 1rem;
+h3 + p {
+    margin-top: 0rem;
 }
+
 
 .anchor {
     visibility: hidden;

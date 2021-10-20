@@ -1,6 +1,5 @@
 import re
 import yaml
-from string import ascii_letters, digits
 from .lib import ConvertTitleToMarkdownId
 
 # Purpose:
@@ -12,7 +11,7 @@ from .lib import ConvertTitleToMarkdownId
 #   from .lib import ConvertTitleToMarkdownId
 #   header_id = ConvertTitleToMarkdownId("My Header Name")
 #   header_dict, root_element = ConvertMarkdownToHeaderTree(markdown_content_as_string)
-#   print(header_dict[header_id])
+#   print(PrintHeaderTree(header_dict[header_id]))
 
 def _newElement():
     return {'level': 0, 'title': '', 'md-title': '', 'content': [], 'parent': None}
