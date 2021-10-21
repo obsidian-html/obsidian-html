@@ -27,6 +27,10 @@ For developers: [Developer Documentation](docs/developer_docs.md)
 
 Then run:
   ``` bash
+  # For the latest published version
+  pip install obsidianhtml
+
+  # For the latest version in this repository
   pip install git+https://github.com/obsidian-html/obsidian-html
   ```
 

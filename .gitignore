@@ -2,3 +2,6 @@ output/*
 test*
 */__pycache__/*
 local_configs/*
+obsidianhtml.egg-info
+dist/*
+build.ps1
