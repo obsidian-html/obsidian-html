@@ -200,6 +200,29 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, paths, files, html_template, co
 def main():
     # Config
     # ------------------------------------------
+    if '-h' in sys.argv or len(sys.argv) < 3:
+        print('[Obsidian-html]')
+        print('- Add -i </path/to/input.yml> to provide config')
+        print('- Add -v for verbose output')
+        print('- Add -h to get helptext')
+        print('- Add -eht <target/path/file.name> to export the html template.')
+        exit()
+
+    # Functions other than main function
+    export_html_template_target_path = None
+    for i, v in enumerate(sys.argv):
+        if v == '-eht':
+            if len(sys.argv) < (i + 2):
+                raise Exception("No output path given.\n Use obsidianhtml -eht /target/path/to/template.html to provide input.")
+                exit(1)
+            export_html_template_target_path = Path(sys.argv[i+1]).resolve()
+            export_html_template_target_path.parent.mkdir(parents=True, exist_ok=True)
+            html = pkg_resources.read_text(src, 'template.html')
+            with open (export_html_template_target_path, 'w', encoding="utf-8") as t:
+                t.write(html)
+            print(f"Exported html template to {str(export_html_template_target_path)}.")
+            exit(0)
+
     # Load input yaml
     input_yml_path_str = ''
     for i, v in enumerate(sys.argv):
@@ -221,13 +244,6 @@ def main():
 
     # Input
     # ------------------------------------------
-    if '-h' in sys.argv or len(sys.argv) < 3:
-        print('[Obsidian-html]')
-        print('- Add -i </path/to/input.yml> to provide config\n')
-        print('- Add -v for verbose output')
-        print('- Add -h to get helptext')
-        exit()
-
     # Set Paths
     paths = {
         'obsidian_folder': Path(conf['obsidian_folder_path_str']).resolve(),
@@ -241,7 +257,7 @@ def main():
     paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
 
-    print(yaml.dump(conf, allow_unicode=True, default_flow_style=False))
+    #print(yaml.dump(conf, allow_unicode=True, default_flow_style=False))
 
     # Preprocess
     # ------------------------------------------
@@ -287,7 +303,16 @@ def main():
 
         # Get html template code. Every note will become a html page, where the body comes from the note's 
         # markdown, and the wrapper code from this template.
-        html_template = pkg_resources.read_text(src, 'template.html')
+        if  'html_template_path_str' in conf.keys() and conf['html_template_path_str'] != '':
+            print('-------------')
+            with open(Path(conf['html_template_path_str']).resolve()) as f:
+                html_template = f.read()
+        else:
+            html_template = pkg_resources.read_text(src, 'template.html')
+
+        if '{content}' not in html_template:
+            raise Exception('The provided html template does not contain the string `{content}`. This will break its intended use as a template.')
+            exit(1)
 
         # Load all filenames in the markdown folder
         # This data is used to check which links are local

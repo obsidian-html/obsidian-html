@@ -28,6 +28,10 @@ site_name: 'Obsidian-Html/Notes'
 # use '/html_prefix' (prepend slash, no slash at the end)
 html_url_prefix: ''
 
+# Provide the fullpath to a template file to use instead of standard template. 
+# Note that this file must contain at least "{content}" somewhere in the page.
+html_template_path_str: ''
+
 toggles:
   # Opt-in/-out of Obsidian->Md conversion, set to False when using proper markdown as input
   compile_md: True

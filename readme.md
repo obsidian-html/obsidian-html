@@ -67,6 +67,19 @@ To view the html as a website, do the following:
 - Run `python -m http.server --dir /path/to/your/html/output/folder`
 - Open [http://localhost:8000](http://localhost:8000)
 
+## Use a custom html template
+By default, obsidianhtml will use its packaged html template to compile the html output.
+To change this, first export the packaged template to a given path:
+
+``` bash
+obsidianhtml -eht C:\Users\User\Downloads\template.html
+```
+
+Then, open and edit your exported template. Note that the string '{content}' should remain present somewhere in the template.
+Finally, pass the path to your custom template as an input variable. Open your config.yml, and fill in the full path under `html_template_path_str`.
+
+This will make sure future runs of obsidianhtml will use your custom template (provided that you use that specific yaml file as input).
+
 # Features
 ## Not supported
 - Tags (you can use them in Obsidian, but they are ignored in the conversion)

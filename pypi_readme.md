@@ -15,4 +15,6 @@ To convert your notes, you need to point to your notes folder, and to one note t
 Only notes that are found by following links recursively, starting with the entrypoint, will be converted! 
 
 **Changelog**:
+0.0.4: Added the option to use a custom html template, and to export the packaged template.
+0.0.3: Updated readme file to work with pypi.
 0.0.2: Updated readme file to work with pypi.
