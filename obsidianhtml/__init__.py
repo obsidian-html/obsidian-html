@@ -6,18 +6,25 @@ from pathlib import Path    #
 import markdown             # convert markdown to html
 import yaml
 import urllib.parse         # convert link characters like %
+import frontmatter
+
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
 from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes
+from .PicknickBasket import PicknickBasket
 
 # Open source files in the package
 import importlib.resources as pkg_resources
-from . import src  # relative-import the *package* containing the templates
+from . import src 
 
 
 # python run.py 'C:\Users\Installer\OneDrive\Obsidian\Notes' "C:\Users\Installer\OneDrive\Obsidian\Notes\Devfruits Notes.md" "output/md" "output/html" "Devfruits/Notes"
 
-def recurseObisidianToMarkdown(page_path_str, paths, files, conf):
+def recurseObisidianToMarkdown(page_path_str, pb):
+    paths = pb.paths
+    files = pb.files
+    conf = pb.config
+
     # Convert path string to Path and do a double check
     page_path = Path(page_path_str).resolve()
     if page_path.exists() == False:
@@ -27,6 +34,9 @@ def recurseObisidianToMarkdown(page_path_str, paths, files, conf):
 
     md = MarkdownPage(page_path, paths['obsidian_folder'], files)
     md.ConvertObsidianPageToMarkdownPage(paths['md_folder'], paths['obsidian_entrypoint'])
+
+    # Add yaml frontmatter back in
+    md.page = (frontmatter.dumps(frontmatter.Post("", **md.metadata))) + '\n' + md.page
 
     # -- Save file
     # Create folder if necessary
@@ -49,10 +59,14 @@ def recurseObisidianToMarkdown(page_path_str, paths, files, conf):
         # Convert the note that is linked to
         if conf['toggles']['verbose_printout']:
             print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
-        recurseObisidianToMarkdown(files[link_path]['fullpath'], paths, files, conf)
+        recurseObisidianToMarkdown(files[link_path]['fullpath'], pb)
 
-def ConvertMarkdownPageToHtmlPage(page_path_str, paths, files, html_template, conf):
+def ConvertMarkdownPageToHtmlPage(page_path_str, pb):
     page_path = Path(page_path_str).resolve()
+    paths = pb.paths
+    files = pb.files
+    html_template = pb.html_template
+    conf = pb.config
 
     if page_path.exists() == False:
         return
@@ -171,6 +185,8 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, paths, files, html_template, co
     md.dst_path.parent.mkdir(parents=True, exist_ok=True)   
     html_dst_path_posix = md.dst_path.as_posix()[:-3] + '.html' 
 
+    md.AddToTagtree(pb.tagtree, md.dst_path.relative_to(paths['html_output_folder']).as_posix()[:-3] + '.html')
+
     # Write html
     with open(html_dst_path_posix, 'w', encoding="utf-8") as f:
         f.write(html)   
@@ -195,7 +211,38 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, paths, files, html_template, co
         if conf['toggles']['verbose_printout']:
             print("html: converting ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
-        ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], paths, files, html_template, conf)  
+        ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], pb)  
+
+def recurseTagList(tagtree, tagpath, pb):
+    html_url_prefix = pb.config['html_url_prefix']
+    tag_dst_path = pb.paths['html_output_folder'].joinpath(f'{tagpath}index.html').resolve()
+    tag_dst_path_posix = tag_dst_path.as_posix()
+    rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
+
+    # Compile markdown
+    md = ''
+    if len(tagtree['subtags'].keys()) > 0:
+        md += '# Subtags\n'
+        for key in tagtree['subtags'].keys():
+            rel_key_path_as_posix = recurseTagList(tagtree['subtags'][key], tagpath + key + '/', pb)
+            md += f'- [{key}](/{rel_key_path_as_posix})' + '\n'
+
+    if len(tagtree['notes']) > 0:
+        md = '\n# Notes\n'
+        for note in tagtree['notes']:
+            md += f'- [{note.replace(".html", "")}]({html_url_prefix}/{note})\n'
+
+    # Compile html
+    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc'])
+    html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
+    html = pb.html_template.replace('{content}', html_body).replace('{title}', pb.config['site_name']).replace('{html_url_prefix}', pb.config['html_url_prefix'])
+
+    # Write file
+    tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
+    with open(tag_dst_path_posix, 'w', encoding="utf-8") as f:
+        f.write(html) 
+
+    return rel_dst_path_as_posix
 
 def main():
     # Config
@@ -276,6 +323,8 @@ def main():
     paths['md_folder'].mkdir(parents=True, exist_ok=True)
     paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
 
+    # Make "global" object that we can pass so functions
+    pb = PicknickBasket(conf, paths)
 
     # Convert Obsidian to markdown
     # ------------------------------------------
@@ -290,10 +339,12 @@ def main():
 
             files[path.name] = {'fullpath': str(path), 'processed': False}  
 
+        pb.files = files
+
         # Start conversion with entrypoint.
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
         print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(paths["obsidian_entrypoint"])})')
-        recurseObisidianToMarkdown(str(paths['obsidian_entrypoint']), paths, files, conf)
+        recurseObisidianToMarkdown(str(paths['obsidian_entrypoint']), pb)
 
 
     # Convert Markdown to Html
@@ -321,8 +372,14 @@ def main():
             rel_path_posix = path.relative_to(paths['md_folder']).as_posix()
             files[rel_path_posix] = {'fullpath': str(path.resolve()), 'processed': False}  
 
+        pb.files = files
+        pb.html_template = html_template
+
         # Start conversion from the entrypoint
-        ConvertMarkdownPageToHtmlPage(str(paths['md_entrypoint']), paths, files, html_template, conf)
+        ConvertMarkdownPageToHtmlPage(str(paths['md_entrypoint']), pb)
+
+        # Create tag page
+        recurseTagList(pb.tagtree, 'tags/', pb)
 
         # Add Extra stuff to the output directories
         # ------------------------------------------

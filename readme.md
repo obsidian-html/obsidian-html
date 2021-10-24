@@ -82,7 +82,7 @@ This will make sure future runs of obsidianhtml will use your custom template (p
 
 # Features
 ## Not supported
-- Tags (you can use them in Obsidian, but they are ignored in the conversion)
+- Inline tags (you can use them in Obsidian, but they are ignored in the conversion). Frontmatter tags are converted to a tag list, see below.
 - Possibly a lot more
 
 ## Conversion of Obsidian type links
@@ -114,6 +114,10 @@ There is also a newline added between non-list lines and list lines. This to cop
 When using the format `![[Name of note]]`, the contents of the note will be included. In Obsidian, the inclusion is denoted by wrapping a div around the content. This is not possible in the intermediate markdown code, so all inclusions are just pasted in as-is. 
 
 This package also supports partial inclusions. You can use this by writing `![[Name of note#Chapter Name]]`. In this case, only that chapter and its contents until the next chapter of the same depth is included. See also [Example Website#partial-code-inclusion](https://obsidian-html.github.io/#!partial-code-inclusion).
+
+## Frontmatter Tag list
+Inline tags are excluded, but those listed in the yaml frontmatter are compiled into a list.
+When running your website, go to `/tags` to view the tag list. [Example](https://obsidian-html.github.io/tags/).
 
 ## Basic Templating
 All generated html code will be wrapped by the html code in `src/template.html`. This template points to `src/main.css`. 

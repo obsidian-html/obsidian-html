@@ -33,9 +33,8 @@ class MarkdownPage:
         self.codelines = []
         
         # Load contents of entrypoint and strip frontmatter yaml.
-        page = frontmatter.load(str(src_path))
-        self.page = page.content
-        self.yaml = page
+        with open(src_path, encoding="utf-8") as f:
+            self.metadata, self.page = frontmatter.parse(f.read())
 
     def SetDestinationPath(self, dst_folder_path, entrypoint_src_path):
         """Set destination path of the converted file. Both full and relative paths are set."""
@@ -63,6 +62,23 @@ class MarkdownPage:
             self.page = self.page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```\n")
         for i, value in enumerate(self.codelines):
             self.page = self.page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")  
+
+    def AddToTagtree(self, tagtree, url=''):
+        if 'tags' not in self.metadata:
+            return
+
+        if url == '':
+            url = str(self.dst_path)
+
+        for tag in self.metadata['tags']:
+            ctagtree = tagtree
+            for n, subtag in enumerate(tag.split('/')):
+                if subtag not in ctagtree['subtags'].keys():
+                    ctagtree['subtags'][subtag] = {'notes': [], 'subtags': {}}
+                ctagtree = ctagtree['subtags'][subtag]
+
+                if n == (len(tag.split('/')) - 1):
+                    ctagtree['notes'].append(url)
 
     def ConvertObsidianPageToMarkdownPage(self, dst_folder_path, entrypoint_path, include_depth=0):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
