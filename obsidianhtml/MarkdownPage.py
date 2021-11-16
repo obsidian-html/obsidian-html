@@ -20,6 +20,8 @@ class MarkdownPage:
     dst_folder_path = None  # Path() object of given markdown output folder
     dst_path = None         # Path() object of destination file
 
+    isEntryPoint = False
+
     file_tree = None        # Tree of files that are found in the root folder
 
     def __init__(self, src_path, src_folder_path, file_tree):
@@ -41,6 +43,7 @@ class MarkdownPage:
         self.dst_folder_path = dst_folder_path
 
         if entrypoint_src_path == self.src_path:
+            self.isEntryPoint = True
             self.dst_path = dst_folder_path.joinpath('index.md')
         else:
             self.dst_path = dst_folder_path.joinpath(self.rel_src_path.as_posix())
@@ -89,6 +92,8 @@ class MarkdownPage:
 
         # -- Get page depth
         page_folder_depth = self.rel_src_path.as_posix().count('/')
+        if self.isEntryPoint:
+            page_folder_depth = 0
 
         # -- [1] Replace code blocks with placeholders so they aren't altered
         # They will be restored at the end

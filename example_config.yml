@@ -1,23 +1,28 @@
 # The first folder that contains all obsidian files
 # Can be absent when toggles/compile_md == False
+# On linux, use fullpath instead of ~/
 obsidian_folder_path_str: 'C:\Users\User\Obsidian\Notes'   
 
 # The note that will be used as the index.html 
 # should be in obsidian_folder_path_str
 # Can be absent when toggles/compile_md == False
+# On linux, use fullpath instead of ~/
 obsidian_entrypoint_path_str: 'C:\Users\User\Documents\Obsidian\Notes\My Entrypoint Note.md'
 
 # Input and output path of markdown files
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
+# On linux, use fullpath instead of ~/
 md_folder_path_str:  'output/md'
 
 # Markdown entrypoint path
 # This has to be md_folder_path_str + '/index.md' when toggles/compile_md == True
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
+# On linux, use fullpath instead of ~/
 md_entrypoint_path_str: 'output/md/index.md'
 
 # Output path of HTML files
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
+# On linux, use fullpath instead of ~/
 html_output_folder_path_str: 'output/html'
 
 # Will be inputted into the Html template as page title

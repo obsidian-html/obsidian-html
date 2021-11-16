@@ -15,7 +15,20 @@ from .PicknickBasket import PicknickBasket
 
 # Open source files in the package
 import importlib.resources as pkg_resources
+import importlib.util
 from . import src 
+
+def OpenIncludedFile(resource):
+    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
+    path = os.path.join(path, resource)
+    with open(path, 'r', encoding="utf-8") as f:
+        return f.read()
+
+def OpenIncludedFileBinary(resource):
+    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
+    path = os.path.join(path, resource)
+    with open(path, 'rb') as f:
+        return f.read()        
 
 
 # python run.py 'C:\Users\Installer\OneDrive\Obsidian\Notes' "C:\Users\Installer\OneDrive\Obsidian\Notes\Devfruits Notes.md" "output/md" "output/html" "Devfruits/Notes"
@@ -264,7 +277,7 @@ def main():
                 exit(1)
             export_html_template_target_path = Path(sys.argv[i+1]).resolve()
             export_html_template_target_path.parent.mkdir(parents=True, exist_ok=True)
-            html = pkg_resources.read_text(src, 'template.html')
+            html = OpenIncludedFile('template.html')
             with open (export_html_template_target_path, 'w', encoding="utf-8") as t:
                 t.write(html)
             print(f"Exported html template to {str(export_html_template_target_path)}.")
@@ -359,7 +372,7 @@ def main():
             with open(Path(conf['html_template_path_str']).resolve()) as f:
                 html_template = f.read()
         else:
-            html_template = pkg_resources.read_text(src, 'template.html')
+            html_template = OpenIncludedFile('template.html')
 
         if '{content}' not in html_template:
             raise Exception('The provided html template does not contain the string `{content}`. This will break its intended use as a template.')
@@ -385,16 +398,16 @@ def main():
         # ------------------------------------------
         os.makedirs(paths['html_output_folder'].joinpath('static'), exist_ok=True)
 
-        css = pkg_resources.read_text(src, 'main.css')
+        css = OpenIncludedFile('main.css')
         with open (paths['html_output_folder'].joinpath('main.css'), 'w', encoding="utf-8") as t:
             t.write(css)
-        svg = pkg_resources.read_text(src, 'external.svg')
+        svg = OpenIncludedFile('external.svg')
         with open (paths['html_output_folder'].joinpath('external.svg'), 'w', encoding="utf-8") as t:
             t.write(svg)
-        scp = pkg_resources.read_binary(src, 'SourceCodePro-Regular.ttf')
+        scp = OpenIncludedFileBinary('SourceCodePro-Regular.ttf')
         with open (paths['html_output_folder'].joinpath('static/SourceCodePro-Regular.ttf'), 'wb') as t:
             t.write(scp)                    
-        nc = pkg_resources.read_text(src, 'not_created.html')
+        nc = OpenIncludedFile('not_created.html')
         with open (paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as t:
             t.write(html_template.replace('{content}', nc))
 
