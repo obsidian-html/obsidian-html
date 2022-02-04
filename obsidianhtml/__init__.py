@@ -173,7 +173,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb):
     'codehilite ': {
         'linenums': True
     }}
-    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc'], extension_configs=extension_configs)
+    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'], extension_configs=extension_configs)
 
     # [14] Tag external links with a class so it can be decorated differently
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
@@ -246,7 +246,7 @@ def recurseTagList(tagtree, tagpath, pb):
             md += f'- [{note.replace(".html", "")}]({html_url_prefix}/{note})\n'
 
     # Compile html
-    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc'])
+    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'])
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
     html = pb.html_template.replace('{content}', html_body).replace('{title}', pb.config['site_name']).replace('{html_url_prefix}', pb.config['html_url_prefix'])
 
@@ -347,7 +347,12 @@ def main():
     if conf['toggles']['compile_md']:
         files = {}
         for path in paths['obsidian_folder'].rglob('*'):
+            if path.is_dir():
+                continue
+            if path.resolve().is_relative_to(paths['obsidian_folder'].joinpath('.obsidian')):
+                continue
             if path.name in files.keys() and conf['toggles']['allow_duplicate_filenames_in_root'] == False:
+                print(path)
                 raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
             files[path.name] = {'fullpath': str(path), 'processed': False}  
@@ -401,6 +406,12 @@ def main():
         css = OpenIncludedFile('main.css')
         with open (paths['html_output_folder'].joinpath('main.css'), 'w', encoding="utf-8") as t:
             t.write(css)
+        mermaidcss = OpenIncludedFile('mermaid.css')
+        with open (paths['html_output_folder'].joinpath('mermaid.css'), 'w', encoding="utf-8") as t:
+            t.write(mermaidcss)
+        mermaidjs = OpenIncludedFile('mermaid.min.js')
+        with open (paths['html_output_folder'].joinpath('mermaid.min.js'), 'w', encoding="utf-8") as t:
+            t.write(mermaidjs)
         svg = OpenIncludedFile('external.svg')
         with open (paths['html_output_folder'].joinpath('external.svg'), 'w', encoding="utf-8") as t:
             t.write(svg)

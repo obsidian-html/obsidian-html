@@ -1,0 +1,344 @@
+/* Flowchart variables */
+/* Sequence Diagram variables */
+/* Gantt chart variables */
+div.mermaid svg
+{
+    display: block;
+
+    margin-right: auto;
+    margin-left: auto;
+}
+.mermaid .label
+{
+    color: #333;
+}
+div.mermaid .node rect,
+div.mermaid .node circle,
+div.mermaid .node ellipse,
+div.mermaid .node polygon
+{
+    fill: #ececff;
+    stroke: #ccf;
+    stroke-width: 1px;
+}
+div.mermaid .edgePath .path
+{
+    stroke: #333;
+}
+div.mermaid .edgeLabel
+{
+    background-color: #e8e8e8;
+}
+div.mermaid .cluster rect
+{
+    fill: #ffffde !important;
+    rx: 4 !important;
+    stroke: #aa3 !important;
+    stroke-width: 1px !important;
+}
+div.mermaid .cluster text
+{
+    fill: #333;
+}
+div.mermaid .actor
+{
+    stroke: #ccf;
+    fill: #ececff;
+}
+div.mermaid text.actor
+{
+    fill: black;
+    stroke: none;
+}
+div.mermaid .actor-line
+{
+    stroke: grey;
+}
+div.mermaid .messageLine0
+{
+    stroke-width: 1.5;
+    stroke-dasharray: '2 2';
+    marker-end: 'url(#arrowhead)';
+    stroke: #333;
+}
+div.mermaid .messageLine1
+{
+    stroke-width: 1.5;
+    stroke-dasharray: '2 2';
+    stroke: #333;
+}
+#arrowhead
+{
+    fill: #333;
+}
+#crosshead path
+{
+    fill: #333 !important;
+    stroke: #333 !important;
+}
+div.mermaid .messageText
+{
+    fill: #333;
+    stroke: none;
+}
+div.mermaid .labelBox
+{
+    stroke: #ccf;
+    fill: #ececff;
+}
+div.mermaid .labelText
+{
+    fill: black;
+    stroke: none;
+}
+div.mermaid .loopText
+{
+    fill: black;
+    stroke: none;
+}
+div.mermaid .loopLine
+{
+    stroke-width: 2;
+    stroke-dasharray: '2 2';
+    marker-end: 'url(#arrowhead)';
+    stroke: #ccf;
+}
+div.mermaid .note
+{
+    stroke: #aa3;
+    fill: #fff5ad;
+}
+div.mermaid .noteText
+{
+    font-family: 'trebuchet ms', verdana, arial;
+    font-size: 14px;
+
+    fill: black;
+    stroke: none;
+}
+/** Section styling */
+div.mermaid .section
+{
+    opacity: .2;
+
+    stroke: none;
+}
+div.mermaid .section0
+{
+    fill: rgba(102, 102, 255, .49);
+}
+div.mermaid .section2
+{
+    fill: #fff400;
+}
+div.mermaid .section1,
+div.mermaid .section3
+{
+    opacity: .2;
+
+    fill: white;
+}
+div.mermaid .sectionTitle0
+{
+    fill: #333;
+}
+div.mermaid .sectionTitle1
+{
+    fill: #333;
+}
+div.mermaid .sectionTitle2
+{
+    fill: #333;
+}
+div.mermaid .sectionTitle3
+{
+    fill: #333;
+}
+div.mermaid .sectionTitle
+{
+    font-size: 11px;
+
+    text-anchor: start;
+    text-height: 14px;
+}
+/* Grid and axis */
+div.mermaid .grid .tick
+{
+    opacity: .3;
+
+    stroke: lightgrey;
+    shape-rendering: crispEdges;
+}
+div.mermaid .grid path
+{
+    stroke-width: 0;
+}
+/* Today line */
+div.mermaid .today
+{
+    fill: none;
+    stroke: red;
+    stroke-width: 2px;
+}
+/* Task styling */
+/* Default task */
+div.mermaid .task
+{
+    stroke-width: 2;
+}
+div.mermaid .taskText
+{
+    font-size: 11px;
+
+    text-anchor: middle;
+}
+div.mermaid .taskTextOutsideRight
+{
+    font-size: 11px;
+
+    fill: black;
+    text-anchor: start;
+}
+div.mermaid .taskTextOutsideLeft
+{
+    font-size: 11px;
+
+    fill: black;
+    text-anchor: end;
+}
+/* Specific task settings for the sections*/
+div.mermaid .taskText0,
+div.mermaid .taskText1,
+div.mermaid .taskText2,
+div.mermaid .taskText3
+{
+    fill: white;
+}
+div.mermaid .task0,
+div.mermaid .task1,
+div.mermaid .task2,
+div.mermaid .task3
+{
+    fill: #8a90dd;
+    stroke: #534fbc;
+}
+div.mermaid .taskTextOutside0,
+div.mermaid .taskTextOutside2
+{
+    fill: black;
+}
+div.mermaid .taskTextOutside1,
+div.mermaid .taskTextOutside3
+{
+    fill: black;
+}
+/* Active task */
+div.mermaid .active0,
+div.mermaid .active1,
+div.mermaid .active2,
+div.mermaid .active3
+{
+    fill: #bfc7ff;
+    stroke: #534fbc;
+}
+div.mermaid .activeText0,
+div.mermaid .activeText1,
+div.mermaid .activeText2,
+div.mermaid .activeText3
+{
+    fill: black !important;
+}
+/* Completed task */
+div.mermaid .done0,
+div.mermaid .done1,
+div.mermaid .done2,
+div.mermaid .done3
+{
+    stroke: grey;
+    fill: lightgrey;
+    stroke-width: 2;
+}
+div.mermaid .doneText0,
+div.mermaid .doneText1,
+div.mermaid .doneText2,
+div.mermaid .doneText3
+{
+    fill: black !important;
+}
+/* Tasks on the critical line */
+div.mermaid .crit0,
+div.mermaid .crit1,
+div.mermaid .crit2,
+div.mermaid .crit3
+{
+    stroke: #f88;
+    fill: red;
+    stroke-width: 2;
+}
+div.mermaid .activeCrit0,
+div.mermaid .activeCrit1,
+div.mermaid .activeCrit2,
+div.mermaid .activeCrit3
+{
+    stroke: #f88;
+    fill: #bfc7ff;
+    stroke-width: 2;
+}
+div.mermaid .doneCrit0,
+div.mermaid .doneCrit1,
+div.mermaid .doneCrit2,
+div.mermaid .doneCrit3
+{
+    cursor: pointer;
+
+    stroke: #f88;
+    fill: lightgrey;
+    stroke-width: 2;
+    shape-rendering: crispEdges;
+}
+div.mermaid .doneCritText0,
+div.mermaid .doneCritText1,
+div.mermaid .doneCritText2,
+div.mermaid .doneCritText3
+{
+    fill: black !important;
+}
+div.mermaid .activeCritText0,
+div.mermaid .activeCritText1,
+div.mermaid .activeCritText2,
+div.mermaid .activeCritText3
+{
+    fill: black !important;
+}
+div.mermaid .titleText
+{
+    font-size: 18px;
+
+    text-anchor: middle;
+    fill: black;
+}
+/*
+*/
+div.mermaid .node text
+{
+    font-family: 'trebuchet ms', verdana, arial;
+    font-size: 14px;
+}
+div.mermaidTooltip
+{
+    font-family: 'trebuchet ms', verdana, arial;
+    font-size: 12px;
+
+    position: absolute;
+    z-index: 100;
+
+    max-width: 200px;
+    padding: 2px;
+
+    text-align: center;
+    pointer-events: none;
+
+    border: 1px solid #aa3;
+    border-radius: 2px;
+    background: #ffffde;
+}
