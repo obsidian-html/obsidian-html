@@ -7,6 +7,9 @@ An application to export Obsidian notes to standard markdown and an html based w
 
 > You can see the capabilities of this system in this demo website: [Example of the HTML output](https://obsidian-html.github.io/). This site also functions as a nice documentation for all things not mentioned on this page.
 
+## Alternatives
+This solution might not be the best for your usecase. Check out the [alternatives section](#alternatives-1) to compare other solutions to this one.
+
 ## Examples of actual sites using this system
 - [Devfruits.com/Notes](https://devfruits.com)
 
@@ -180,6 +183,19 @@ The html code just used full paths everywhere because this gives me headache and
 This package might not be what you are looking for. I will keep a list here of other options that I find online for publishing Obsidian notes to webpages.
 
 The **extra features** will list features that these solutions have that this package lacks.
+
+## Perlite
+- Source: https://github.com/secure-77/Perlite
+- Example site: https://perlite.secure77.de/
+- Technology: php
+- Extra features:
+  - Search
+  - Fullscreen mode
+- Good things:
+  - Very clean website design
+  - Nice vertical navigation menu
+- Bad things:
+  - I haven't run this solution yet. None that I can find from documentation
 
 ## Gatsby Garden
 - Source: https://github.com/binnyva/gatsby-garden/
