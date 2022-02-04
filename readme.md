@@ -1,7 +1,7 @@
 # Obsidian-html
 An application to export Obsidian notes to standard markdown and an html based website.
 
-You can see the capabilities of this system in this demo website: [Example of the HTML output](https://obsidian-html.github.io/). 
+> You can see the capabilities of this system in this demo website: [Example of the HTML output](https://obsidian-html.github.io/). This site also functions as a nice documentation for all things not mentioned on this page.
 
 ## Examples of actual sites using this system
 - [Devfruits.com/Notes](https://devfruits.com)
