@@ -125,10 +125,11 @@ Change this code *in the `/src` folder* to have the changes persist across runs 
 
 Links that point to non-existent notes will be redirected to `output/html/not_created.html`, the base code for this is located at `/src/not_created.html`.
 
-## Other (expected) features
+## Other features
 - Syntax highlighting built-in
 - [Very clean html + minor javascript website output](https://www.devfruits.com)
-
+- Mermaid diagrams supported using md-mermaid
+- See the [Example Website](https://obsidian-html.github.io/) for the most up to date list of supported features!
 
 
 # Quirks
