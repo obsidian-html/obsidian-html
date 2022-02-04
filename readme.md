@@ -193,3 +193,15 @@ The **extra features** will list features that these solutions have that this pa
 - Bad things:
   - Notes should be in a specific location to work (= copypasting when you have multiple vaults)
  
+## ObsidianToHtmlConverter
+- Source: https://github.com/klalle/ObsidianToHtmlConverter
+- Example site: n/a
+- Technology: python script
+- Extra features:
+  - None
+- Good things:
+  - Very simple
+- Bad things:
+  - Very simple (lacks many features)
+  - Bad looking default html output (personal opinion)
+  - Uses a homebrew solution for converting markdown to html 
