@@ -185,6 +185,7 @@ This package might not be what you are looking for. I will keep a list here of o
 The **extra features** will list features that these solutions have that this package lacks.
 
 ## Perlite
+`have not tried this myself yet`
 - Source: https://github.com/secure-77/Perlite
 - Example site: https://perlite.secure77.de/
 - Technology: php
@@ -197,7 +198,23 @@ The **extra features** will list features that these solutions have that this pa
 - Bad things:
   - I haven't run this solution yet. None that I can find from documentation
 
+## Pubsidian
+`have not tried this myself yet`
+- Source: https://github.com/yoursamlan/pubsidian
+- Example site: https://yoursamlan.github.io/pubsidian/
+- Technology: python
+- Extra features:
+  - Graph view
+  - Toggle light/dark mode
+- Good things:
+  - Responsive website design
+  - Has a [Windows installer](https://github.com/yoursamlan/pubsidian#pubsidian-convert-gui-v10) to help you convert your Obsidian notes to a website
+- Bad things:
+  - I haven't run this solution yet. None that I can find from documentation. Seems to miss tag-related features.
+
+
 ## Gatsby Garden
+`have not tried this myself yet`
 - Source: https://github.com/binnyva/gatsby-garden/
 - Example site: https://notes.binnyva.com/
 - Technology: node, npm
