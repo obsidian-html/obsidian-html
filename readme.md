@@ -40,7 +40,7 @@ pip uninstall obsidianhtml
 ```
 
 # Useage
-This application is only tested on Windows, though it should be relatively easy to get working for Linux.
+> This application is extensively tested on Windows, and currently used by the main developer on Linux.
 
 - Download the [example_config.yml](example_config.yml) file to your local system, and rename it to `config.yml`.
 - Open config.yml and edit the settings, see the comments there. At the very least, edit the following variables:
