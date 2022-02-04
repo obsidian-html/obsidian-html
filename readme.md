@@ -175,3 +175,21 @@ home --> folder1/page1: /folder1/page1.md
 I'd recommend just running the code, and if you are missing files that live in folders, toggle the switch to the other value and try again to see if that fixes it.
 
 The html code just used full paths everywhere because this gives me headache and is more foolproof.
+
+# Alternatives
+This package might not be what you are looking for. I will keep a list here of other options that I find online for publishing Obsidian notes to webpages.
+
+The **extra features** will list features that these solutions have that this package lacks.
+
+## Gatsby Garden
+- Source: https://github.com/binnyva/gatsby-garden/
+- Example site: https://notes.binnyva.com/
+- Technology: node, npm
+- Extra features:
+  - Graph view
+  - Sitemap, RSS Feed
+- Good things:
+  - Very clean website design
+- Bad things:
+  - Notes should be in a specific location to work (= copypasting when you have multiple vaults)
+ 
