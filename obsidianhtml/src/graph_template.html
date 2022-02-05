@@ -1,5 +1,5 @@
-<svg id="A{id}" width="680" height="400"></svg>
-<button class="graph_button" id="B{id}" onclick="run('{id}', '{pinnedNode}');">Show Graph</button>
+<svg class="graph_svg" id="A{id}{level}" width="680" height="400"></svg>
+<button class="graph_button" id="B{id}{level}" level="{level}" onclick="run('{id}'+this.level, '{pinnedNode}');">Show Graph</button>
 <script>
 function run(uid, pinnedNode){
     // Get elements
@@ -19,7 +19,11 @@ function run(uid, pinnedNode){
         _svg.style.display = "block";
 
         cont = _svg.parentElement;
-        window.scrollBy(cont.getBoundingClientRect().right - window.visualViewport.width,0)
+        
+        if (cont.getBoundingClientRect().right > window.visualViewport.width){
+                window.scrollBy(cont.getBoundingClientRect().right - window.visualViewport.width,0)
+        }
+        
     }
 
     // run d3 graph

@@ -215,7 +215,11 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         html_body += "\n" + graph_template.replace('{id}', str(uuid.uuid4()).replace('-','')).replace('{pinnedNode}', node['id']) + "\n"
 
     # [16] Wrap body html in valid html structure from template
-    html = html_template.replace('{content}', html_body).replace('{title}', conf['site_name']).replace('{html_url_prefix}', conf['html_url_prefix']).replace('{dynamic_includes}', pb.dynamic_inclusions)
+    html = html_template\
+        .replace('{title}', conf['site_name'])\
+        .replace('{html_url_prefix}', conf['html_url_prefix'])\
+        .replace('{dynamic_includes}', pb.dynamic_inclusions)\
+        .replace('{content}', html_body)
 
     # Save file
     # ---- 
@@ -269,10 +273,16 @@ def recurseTagList(tagtree, tagpath, pb):
         for note in tagtree['notes']:
             md += f'- [{note.replace(".html", "")}]({html_url_prefix}/{note})\n'
 
+
+
     # Compile html
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'])
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
-    html = pb.html_template.replace('{content}', html_body).replace('{title}', pb.config['site_name']).replace('{html_url_prefix}', pb.config['html_url_prefix'])
+
+    html = pb.html_template.replace('{title}', pb.config['site_name'])\
+        .replace('{html_url_prefix}', pb.config['html_url_prefix'])\
+        .replace('{dynamic_includes}', '<link rel="stylesheet" href="/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />')\
+        .replace('{content}', html_body)
 
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
@@ -478,8 +488,11 @@ def main():
         with open (static_folder.joinpath('SourceCodePro-Regular.ttf'), 'wb') as t:
             t.write(scp)                    
         nc = OpenIncludedFile('not_created.html')
-        with open (static_folder.joinpath('not_created.html'), 'w', encoding="utf-8") as t:
-            t.write(html_template.replace('{content}', nc))
+        with open (paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as t:
+            t.write(html_template.replace('{dynamic_includes}', '').replace('{content}', nc))
+        tcss = OpenIncludedFile('taglist.css')
+        with open (static_folder.joinpath('taglist.css'), 'w', encoding="utf-8") as t:
+            t.write(tcss)        
 
         # dynamic file inclusion
         if conf['toggles']['features']['build_graph']:
