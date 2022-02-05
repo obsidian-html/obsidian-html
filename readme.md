@@ -139,6 +139,12 @@ See the [Example Website](https://obsidian-html.github.io/) for the most up to d
 
 
 # Quirks
+## Be careful with these folder names in your vault
+The following folders will be created in the HTML output, that might overwrite any notes that you have in similarly named folders:
+
+- `tags`
+- `98682199-5ac9-448c-afc8-23ab7359a91b-static` (okay, this one is prefixed with a guid exactly because we want to avoid overwriting your notes in the output.)
+
 ## Toggle: relative_path_md
 This toggle controlls whether links to/out of folders are done in a relative or an absolute way. 
 

@@ -8,10 +8,11 @@ import markdown             # convert markdown to html
 import yaml
 import urllib.parse         # convert link characters like %
 import frontmatter
+import json
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes
+from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, image_suffixes
 from .PicknickBasket import PicknickBasket
 
 # Open source files in the package
@@ -19,25 +20,13 @@ import importlib.resources as pkg_resources
 import importlib.util
 from . import src 
 
-def OpenIncludedFile(resource):
-    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
-    path = os.path.join(path, resource)
-    with open(path, 'r', encoding="utf-8") as f:
-        return f.read()
-
-def OpenIncludedFileBinary(resource):
-    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
-    path = os.path.join(path, resource)
-    with open(path, 'rb') as f:
-        return f.read()        
-
-
-# python run.py 'C:\Users\Installer\OneDrive\Obsidian\Notes' "C:\Users\Installer\OneDrive\Obsidian\Notes\Devfruits Notes.md" "output/md" "output/html" "Devfruits/Notes"
-
 def recurseObisidianToMarkdown(page_path_str, pb):
-    paths = pb.paths
-    files = pb.files
-    conf = pb.config
+    '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
+
+    # Unpack picknick basket so we don't have to type too much.
+    paths = pb.paths        # Paths of interest, such as the output and input folders
+    files = pb.files        # Hashtable of all files found in the obsidian vault
+    config = pb.config
 
     # Convert path string to Path and do a double check
     page_path = Path(page_path_str).resolve()
@@ -46,21 +35,29 @@ def recurseObisidianToMarkdown(page_path_str, pb):
     if page_path.suffix != '.md':
         return
 
+    # Convert note to markdown
+    # ------------------------------------------------------------------
+    # Create an object that handles a lot of the logic of parsing the page paths, content, etc
     md = MarkdownPage(page_path, paths['obsidian_folder'], files)
+
+    # The bulk of the conversion process happens here
     md.ConvertObsidianPageToMarkdownPage(paths['md_folder'], paths['obsidian_entrypoint'])
 
+    # The frontmatter was stripped from the obsidian note prior to conversion
     # Add yaml frontmatter back in
     md.page = (frontmatter.dumps(frontmatter.Post("", **md.metadata))) + '\n' + md.page
 
-    # -- Save file
+    # Save file
+    # ------------------------------------------------------------------
     # Create folder if necessary
     md.dst_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Write markdown
+    # Write markdown to file
     with open(md.dst_path, 'w', encoding="utf-8") as f:
         f.write(md.page)
 
-    # -- Recurse for every link in the current page
+    # Recurse for every link in the current page
+    # ------------------------------------------------------------------
     for l in md.links:
         link = GetObsidianFilePath(l, files)
         if link[1] == False or link[1]['processed'] == True:
@@ -71,66 +68,49 @@ def recurseObisidianToMarkdown(page_path_str, pb):
         files[link_path]['processed'] = True         
 
         # Convert the note that is linked to
-        if conf['toggles']['verbose_printout']:
+        if config['toggles']['verbose_printout']:
             print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
+
         recurseObisidianToMarkdown(files[link_path]['fullpath'], pb)
 
 def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
-    page_path = Path(page_path_str).resolve()
-    paths = pb.paths
-    files = pb.files
-    html_template = pb.html_template
-    conf = pb.config
+    '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
+    
+    # Unpack picknick basket so we don't have to type too much.
+    paths = pb.paths                    # Paths of interest, such as the output and input folders
+    files = pb.files                    # Hashtable of all files found in the obsidian vault
+    html_template = pb.html_template    # Built-in or user-provided html template
+    config = pb.config
 
+    # Convert path string to Path and do a double check
+    page_path = Path(page_path_str).resolve()
     if page_path.exists() == False:
         return
     if page_path.suffix != '.md':
         return
 
-    # Load contents 
+    # Load contents
+    # ------------------------------------------------------------------
+    # Create an object that handles a lot of the logic of parsing the page paths, content, etc
     md = MarkdownPage(page_path, paths['md_folder'], files)
     md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
 
-    # [??] Add self to nodelist
-    node = pb.network_tree.NewNode()
-    
-    node['id'] = str(md.rel_dst_path).split('/')[-1].replace('.md', '')
-    if 'graph_name' in md.metadata.keys():
-        node['id'] = md.metadata['graph_name']
-
-    node['url'] = f'{conf["html_url_prefix"]}/{str(md.rel_dst_path)[:-3]}.html'
-    pb.network_tree.AddNode(node)
-
-    if backlinkNode is not None:
-        link = pb.network_tree.NewLink()
-        link['source'] = backlinkNode['id']
-        link['target'] = node['id']
-        pb.network_tree.AddLink(link)
-    
-    backlinkNode = node
-
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
+    # ------------------------------------------------------------------
     md.StripCodeSections()     
 
-    # Get all markdown links. 
+    # Get all local markdown links. 
+    # ------------------------------------------------------------------
     # This is any string in between '](' and  ')'
     proper_links = re.findall("(?<=\]\().+?(?=\))", md.page)
     for l in proper_links:
         # Init link
-        link = MarkdownLink(l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = conf['toggles']['relative_path_md'])
+        link = MarkdownLink(l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = config['toggles']['relative_path_md'])
 
         # Don't process in the following cases
         if link.isValid == False or link.isExternal == True: 
             continue
-
-        isMd = False
-        filename = link.src_path.name
-        if filename[-3:] == '.md':
-            isMd = True
-        if Path(filename).suffix == '':
-            isMd = True
-            filename += '.md'
 
         # [12] Copy non md files over wholesale, then we're done for that kind of file
         if link.suffix != '.md' and link.suffix not in image_suffixes:
@@ -151,14 +131,14 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
             query_part = ''
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
-            new_link = f']({conf["html_url_prefix"]}/{link.rel_src_path_posix[:-3]}.html{query_part})'
+            new_link = f']({config["html_url_prefix"]}/{link.rel_src_path_posix[:-3]}.html{query_part})'
             
         # Update link
         safe_link = re.escape(']('+l+')')
         md.page = re.sub(safe_link, new_link, md.page)
 
     # [4] Handle local image links (copy them over to output)
-    # ----
+    # ------------------------------------------------------------------
     for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", md.page):
         l = urllib.parse.unquote(link)
         full_link_path = page_path.parent.joinpath(l).resolve()
@@ -167,8 +147,8 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
         if rel_path.as_posix() not in files.keys():
-            if conf['toggles']['warn_on_skipped_image']:
-                warnings.warn(f"Image {str(full_link_path)} treated as external and not imported in html")            
+            if config['toggles']['warn_on_skipped_image']:
+                warnings.warn(f"Image {str(full_link_path)} treated as external and not imported in html")
             continue
 
         # Copy src to dst
@@ -183,18 +163,20 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
    
 
     # [1] Restore codeblocks/-lines
-    # ----
+    # ------------------------------------------------------------------
     md.RestoreCodeSections()
 
     # [11] Convert markdown to html
-    # ----
+    # ------------------------------------------------------------------
     extension_configs = {
     'codehilite ': {
         'linenums': True
     }}
     html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'], extension_configs=extension_configs)
 
-    # [14] Tag external links with a class so it can be decorated differently
+    # HTML Tweaks
+    # ------------------------------------------------------------------
+    # [14] Tag external links with a class so they can be decorated differently
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
         if l == '':
             continue
@@ -206,23 +188,50 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         safe_str = f"<a href=\"{l}\""
         html_body = html_body.replace(safe_str, new_str)
 
-    # [15] Tag not created links with a class so it can be decorated differently
+    # [15] Tag not created links with a class so they can be decorated differently
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
 
-    # [??] Add in graph code
-    if conf['toggles']['features']['build_graph']:
+    # Graph view integrations
+    # ------------------------------------------------------------------
+    # The nodelist will result in graph.json, which may have uses beyond the graph view
+
+    # [17] Add self to nodelist
+    node = pb.network_tree.NewNode()
+    
+    # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
+    node['id'] = str(md.rel_dst_path).split('/')[-1].replace('.md', '')
+    if 'graph_name' in md.metadata.keys():
+        node['id'] = md.metadata['graph_name']
+
+    # Url is used so you can open the note/node by clicking on it
+    node['url'] = f'{config["html_url_prefix"]}/{str(md.rel_dst_path)[:-3]}.html'
+    pb.network_tree.AddNode(node)
+
+    # Backlinks are set so when recursing, the links (edges) can be determined
+    if backlinkNode is not None:
+        link = pb.network_tree.NewLink()
+        link['source'] = backlinkNode['id']
+        link['target'] = node['id']
+        pb.network_tree.AddLink(link)
+    
+    backlinkNode = node
+
+    # [17] Add in graph code to template (via {content})
+    # This shows the "Show Graph" button, and adds the js code to handle showing the graph
+    if config['toggles']['features']['build_graph']:
         graph_template = OpenIncludedFile('graph_template.html')
         html_body += "\n" + graph_template.replace('{id}', str(uuid.uuid4()).replace('-','')).replace('{pinnedNode}', node['id']) + "\n"
 
     # [16] Wrap body html in valid html structure from template
+    # ------------------------------------------------------------------
     html = html_template\
-        .replace('{title}', conf['site_name'])\
-        .replace('{html_url_prefix}', conf['html_url_prefix'])\
+        .replace('{title}', config['site_name'])\
+        .replace('{html_url_prefix}', config['html_url_prefix'])\
         .replace('{dynamic_includes}', pb.dynamic_inclusions)\
         .replace('{content}', html_body)
 
     # Save file
-    # ---- 
+    # ------------------------------------------------------------------
     md.dst_path.parent.mkdir(parents=True, exist_ok=True)   
     html_dst_path_posix = md.dst_path.as_posix()[:-3] + '.html' 
 
@@ -230,14 +239,17 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
 
     # Write html
     with open(html_dst_path_posix, 'w', encoding="utf-8") as f:
-        f.write(html)   
+        f.write(html)
+
+    # > Done with this markdown page!
 
     # Recurse for every link in the current page
+    # ------------------------------------------------------------------
     for l in md.links:
         # these are of type rel_path_posix
         link_path = l
         
-        # Skip non-existent notes and notes that have been processed already
+        # Skip non-existent links, non-markdown links, and links that have been processed already
         if link_path not in files.keys():
             continue
         if files[link_path]['processed'] == True:
@@ -249,35 +261,44 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         files[link_path]['processed'] = True
 
         # Convert the note that is linked to
-        if conf['toggles']['verbose_printout']:
+        if config['toggles']['verbose_printout']:
             print("html: converting ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
         ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], pb, backlinkNode)
 
-def recurseTagList(tagtree, tagpath, pb):
+def recurseTagList(tagtree, tagpath, pb, level):
+    '''This function creates the folder `tags` in the html_output_folder, and a filestructure in that so you can navigate the tags.'''
+
+    # Get relevant paths
+    # ---------------------------------------------------------
     html_url_prefix = pb.config['html_url_prefix']
     tag_dst_path = pb.paths['html_output_folder'].joinpath(f'{tagpath}index.html').resolve()
     tag_dst_path_posix = tag_dst_path.as_posix()
     rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
 
-    # Compile markdown
+    # Compile markdown from tagtree
+    # ---------------------------------------------------------
     md = ''
+    # Handle subtags
     if len(tagtree['subtags'].keys()) > 0:
-        md += '# Subtags\n'
+        if level == 0:
+            md += '# Tags\n'
+        else:
+            md += '# Subtags\n'
+
         for key in tagtree['subtags'].keys():
-            rel_key_path_as_posix = recurseTagList(tagtree['subtags'][key], tagpath + key + '/', pb)
+            # Point of recursion
+            rel_key_path_as_posix = recurseTagList(tagtree['subtags'][key], tagpath + key + '/', pb, level+1)
             md += f'- [{key}](/{rel_key_path_as_posix})' + '\n'
 
+    # Handle notes
     if len(tagtree['notes']) > 0:
-        md = '\n# Notes\n'
+        md += '\n# Notes\n'
         for note in tagtree['notes']:
             md += f'- [{note.replace(".html", "")}]({html_url_prefix}/{note})\n'
 
-
-
     # Compile html
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'])
-    html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
 
     html = pb.html_template.replace('{title}', pb.config['site_name'])\
         .replace('{html_url_prefix}', pb.config['html_url_prefix'])\
@@ -289,11 +310,13 @@ def recurseTagList(tagtree, tagpath, pb):
     with open(tag_dst_path_posix, 'w', encoding="utf-8") as f:
         f.write(html) 
 
+    # Return link of this page, to be used by caller for building its page
     return rel_dst_path_as_posix
 
+
 def main():
-    # Config
-    # ------------------------------------------
+    # Show help text
+    # ---------------------------------------------------------
     if '-h' in sys.argv or len(sys.argv) < 3:
         print('[Obsidian-html]')
         print('- Add -i </path/to/input.yml> to provide config')
@@ -302,7 +325,8 @@ def main():
         print('- Add -eht <target/path/file.name> to export the html template.')
         exit()
 
-    # Functions other than main function
+    # Export packaged html template so users can edit it and then use their custom template
+    # ---------------------------------------------------------
     export_html_template_target_path = None
     for i, v in enumerate(sys.argv):
         if v == '-eht':
@@ -318,6 +342,7 @@ def main():
             exit(0)
 
     # Load input yaml
+    # ---------------------------------------------------------
     input_yml_path_str = ''
     for i, v in enumerate(sys.argv):
         if v == '-i':
@@ -348,9 +373,9 @@ def main():
     if set_build_graph:
         conf['toggles']['features']['build_graph'] = True
 
-    # Input
-    # ------------------------------------------
+
     # Set Paths
+    # ---------------------------------------------------------
     paths = {
         'obsidian_folder': Path(conf['obsidian_folder_path_str']).resolve(),
         'md_folder': Path(conf['md_folder_path_str']).resolve(),
@@ -363,17 +388,18 @@ def main():
     paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
 
+
     # Compile dynamic inclusion list
+    # ---------------------------------------------------------
+    # This is a set of javascript/css files to be loaded into the header based on config choices.
     dynamic_inclusions = ""
     if conf['toggles']['features']['build_graph']:
         dynamic_inclusions += '<link rel="stylesheet" href="/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
-    #print(yaml.dump(conf, allow_unicode=True, default_flow_style=False))
 
-    # Preprocess
-    # ------------------------------------------
     # Remove previous output
+    # ---------------------------------------------------------
     if conf['toggles']['no_clean'] == False:
         print('> CLEARING OUTPUT FOLDERS')
         if conf['toggles']['compile_md']:
@@ -383,21 +409,23 @@ def main():
         if paths['html_output_folder'].exists():
             shutil.rmtree(paths['html_output_folder'])    
 
-    # Recreate tree
+    # Recreate folder tree
+    # ---------------------------------------------------------
     print('> CREATING OUTPUT FOLDERS')
     paths['md_folder'].mkdir(parents=True, exist_ok=True)
     paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
 
     # Make "global" object that we can pass to functions
+    # ---------------------------------------------------------
     pb = PicknickBasket(conf, paths)
 
     # Convert Obsidian to markdown
-    # ------------------------------------------
-    # Load all filenames in the root folder.
-    # This data will be used to check which files are local, and to get their full path
-    # It's clear that no two files can be allowed to have the same file name.
-
+    # ---------------------------------------------------------
     if conf['toggles']['compile_md']:
+
+        # Load all filenames in the root folder.
+        # This data will be used to check which files are local, and to get their full path
+        # It's clear that no two files can be allowed to have the same file name.
         files = {}
         for path in paths['obsidian_folder'].rglob('*'):
             if path.is_dir():
@@ -437,8 +465,9 @@ def main():
     if conf['toggles']['compile_html']:
         print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(paths["md_entrypoint"])})')
 
-        # Get html template code. Every note will become a html page, where the body comes from the note's 
-        # markdown, and the wrapper code from this template.
+        # Get html template code. 
+        # Every note will become a html page, where the body comes from the note's markdown, 
+        # and the wrapper code from this template.
         if  'html_template_path_str' in conf.keys() and conf['html_template_path_str'] != '':
             print('-------------')
             with open(Path(conf['html_template_path_str']).resolve()) as f:
@@ -465,42 +494,9 @@ def main():
         ConvertMarkdownPageToHtmlPage(str(paths['md_entrypoint']), pb)
 
         # Create tag page
-        recurseTagList(pb.tagtree, 'tags/', pb)
+        recurseTagList(pb.tagtree, 'tags/', pb, level=0)
 
         # Add Extra stuff to the output directories
-        # ------------------------------------------
-        static_folder = paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static')
-        os.makedirs(static_folder, exist_ok=True)
-
-        css = OpenIncludedFile('main.css')
-        with open (static_folder.joinpath('main.css'), 'w', encoding="utf-8") as t:
-            t.write(css)
-        mermaidcss = OpenIncludedFile('mermaid.css')
-        with open (static_folder.joinpath('mermaid.css'), 'w', encoding="utf-8") as t:
-            t.write(mermaidcss)
-        mermaidjs = OpenIncludedFile('mermaid.min.js')
-        with open (static_folder.joinpath('mermaid.min.js'), 'w', encoding="utf-8") as t:
-            t.write(mermaidjs)
-        svg = OpenIncludedFile('external.svg')
-        with open (static_folder.joinpath('external.svg'), 'w', encoding="utf-8") as t:
-            t.write(svg)
-        scp = OpenIncludedFileBinary('SourceCodePro-Regular.ttf')
-        with open (static_folder.joinpath('SourceCodePro-Regular.ttf'), 'wb') as t:
-            t.write(scp)                    
-        nc = OpenIncludedFile('not_created.html')
-        with open (paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as t:
-            t.write(html_template.replace('{dynamic_includes}', '').replace('{content}', nc))
-        tcss = OpenIncludedFile('taglist.css')
-        with open (static_folder.joinpath('taglist.css'), 'w', encoding="utf-8") as t:
-            t.write(tcss)        
-
-        # dynamic file inclusion
-        if conf['toggles']['features']['build_graph']:
-            graph_css = OpenIncludedFile('graph.css')
-            with open (static_folder.joinpath('graph.css'), 'w', encoding="utf-8") as t:
-                t.write(graph_css)
-
-            with open (static_folder.joinpath('graph.json'), 'w', encoding="utf-8") as t:
-                t.write(pb.network_tree.OutputJson())                      
+        ExportStaticFiles(pb)
 
     print('> DONE')

@@ -21,3 +21,4 @@
   - [14] Tag external links with a class so it can be decorated differently
   - [15] Tag not created links with a class so it can be decorated differently
   - [16] Wrap body html in valid html structure from template
+  - [17] Show a graph view per note
