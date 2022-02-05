@@ -122,7 +122,7 @@ class MarkdownPage:
 
             # Obsidian page inclusions use the same tag...
             # Skip if we don't match image suffixes. Inclusions are handled at the end.
-            if len(link.split('.')) == 1 or link.split('.')[-1] not in image_suffixes:
+            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0] not in image_suffixes:
                 new_link = f'<inclusion href="{link}" />'
 
             safe_link = re.escape('![['+link+']]')
@@ -130,12 +130,14 @@ class MarkdownPage:
 
         # -- [4] Handle local image links (copy them over to output)
         for link in re.findall("(?<=\!\[\]\()(.*)(?=\))", self.page):
+            clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
+
             # Only handle local image files (images located in the root folder)
-            if urllib.parse.unquote(link).split('/')[-1] not in self.file_tree.keys():
+            if clean_link_name not in self.file_tree.keys():
                 continue
 
             # Build relative paths
-            src_file_path_str = self.file_tree[urllib.parse.unquote(link).split('/')[-1]]['fullpath']
+            src_file_path_str = self.file_tree[clean_link_name]['fullpath']
             relative_path = Path(src_file_path_str).relative_to(self.src_folder_path)
             dst_file_path = self.dst_folder_path.joinpath(relative_path)
 
