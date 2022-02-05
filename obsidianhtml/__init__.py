@@ -386,17 +386,32 @@ def main():
     # Load all filenames in the root folder.
     # This data will be used to check which files are local, and to get their full path
     # It's clear that no two files can be allowed to have the same file name.
+
     if conf['toggles']['compile_md']:
         files = {}
         for path in paths['obsidian_folder'].rglob('*'):
             if path.is_dir():
                 continue
-            if path.resolve().is_relative_to(paths['obsidian_folder'].joinpath('.obsidian')):
-                continue
+
+            # Exclude configured subfolders
+            if 'exclude_subfolders' in conf:
+                _continue = False
+                for folder in conf['exclude_subfolders']:
+                    excl_folder_path = paths['obsidian_folder'].joinpath(folder)
+                    if path.resolve().is_relative_to(excl_folder_path):
+                        if conf['toggles']['verbose_printout']:
+                            print(f'Excluded folder {excl_folder_path}: Excluded file {path.name}.')
+                        _continue = True
+                    continue
+                if _continue:
+                    continue
+
+            # Check if filename is duplicate
             if path.name in files.keys() and conf['toggles']['allow_duplicate_filenames_in_root'] == False:
                 print(path)
                 raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
+            # Add to tree
             files[path.name] = {'fullpath': str(path), 'processed': False}  
 
         pb.files = files

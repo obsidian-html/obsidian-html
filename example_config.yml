@@ -37,6 +37,12 @@ html_url_prefix: ''
 # Note that this file must contain at least "{content}" somewhere in the page.
 html_template_path_str: ''
 
+# Exclude subfolders
+# These are relative to obsidian_folder_path_str
+# To exclude a folder two levels deep, use level1/level2
+exclude_subfolders:
+  - ".obsidian"
+
 toggles:
   # Opt-in/-out of Obsidian->Md conversion, set to False when using proper markdown as input
   compile_md: True
