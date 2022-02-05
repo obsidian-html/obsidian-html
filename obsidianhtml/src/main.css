@@ -33,6 +33,8 @@ body {
     padding: 2rem;
     height: calc(100vh - 5rem);
     overflow: scroll;  
+    overflow-y: scroll;
+    scrollbar-color: #7c7f8c #f0f0f0;
 }
 .container-wrapper {
     max-width: calc(45rem + 3rem);
@@ -49,7 +51,7 @@ body {
     width: 2.0rem;
     height: 1.1rem;
     top: 0px;
-    right: 1rem;
+    right: 0.78rem;
     border-radius: 0 0 0 1rem;
     cursor: pointer;
 }
@@ -168,7 +170,7 @@ a.nonexistent-link:visited {
 }
 
 .external-link::after {
-    background: transparent url(/external.svg) 0 0 no-repeat;
+    background: transparent url(/98682199-5ac9-448c-afc8-23ab7359a91b-static/external.svg) 0 0 no-repeat;
     background-size: auto;
     background-size: 16px;
     content: "";
@@ -203,7 +205,7 @@ span.tag {
 
 @font-face {
     font-family: 'SourceCodePro-Regular';
-    src: url('/static/SourceCodePro-Regular.ttf') format('truetype');
+    src: url('/98682199-5ac9-448c-afc8-23ab7359a91b-static/SourceCodePro-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: monospace;
 }

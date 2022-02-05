@@ -12,9 +12,12 @@
                 <title>{title}</title>
 
                 <!-- Includes -->
-                <link rel="stylesheet" href="/mermaid.css" />
-                <link rel="stylesheet" href="/main.css" />
-                <script src="/mermaid.min.js"></script> 
+                <link rel="stylesheet" href="/98682199-5ac9-448c-afc8-23ab7359a91b-static/mermaid.css" />
+                <link rel="stylesheet" href="/98682199-5ac9-448c-afc8-23ab7359a91b-static/main.css" />
+                <script src="/98682199-5ac9-448c-afc8-23ab7359a91b-static/mermaid.min.js"></script> 
+                {dynamic_includes}
+
+                <!-- Onload tweaks -->
                 <script>
                         // add prefix to hash to avoid scrolling
                         if (window.location.hash != '' && window.location.hash.substr(1)[0] != '!'){
@@ -192,6 +195,7 @@
         
         function httpGetAsync(theUrl, callback, level, callbackpath)
         {
+                console.log("htt", level);
                 var xmlHttp = new XMLHttpRequest();
                 xmlHttp.onreadystatechange = function() { 
                         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)

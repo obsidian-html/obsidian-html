@@ -5,15 +5,13 @@ Only recently I learned that there used to be a similar package under the same n
 # Obsidian-html
 An application to export Obsidian notes to standard markdown and an html based website.
 
-> You can see the capabilities of this system in this demo website: [Example of the HTML output](https://obsidian-html.github.io/). This site also functions as a nice documentation for all things not mentioned on this page.
+You can see the capabilities of this system in this demo website: 
+- [Example of the HTML output](https://obsidian-html.github.io/). 
+
+This site also functions as a nice documentation for all things not mentioned on this page.
 
 ## Alternatives
 This solution might not be the best for your usecase. Check out the [alternatives section](#alternatives-1) to compare other solutions to this one.
-
-## Examples of actual sites using this system
-- [Devfruits.com/Notes](https://devfruits.com)
-
-> **Note**: this code is actively worked on. There is comprehensive testing, but there is no test regiment before pushing. Things may break because of the frequent changes! Let me know if something does not work as expected or advertised.
 
 ## What does it do?
 The Obsidian notes will be converted to standard markdown output. Then, optionally, html output is created based on the standard markdown. 
@@ -134,9 +132,10 @@ Links that point to non-existent notes will be redirected to `output/html/not_cr
 
 ## Other features
 - Syntax highlighting built-in
-- [Very clean html + minor javascript website output](https://www.devfruits.com)
 - Mermaid diagrams supported using md-mermaid
-- See the [Example Website](https://obsidian-html.github.io/) for the most up to date list of supported features!
+- [Graph view](https://obsidian-html.github.io/es%20Graph%20view.html)
+
+See the [Example Website](https://obsidian-html.github.io/) for the most up to date list of supported features!
 
 
 # Quirks

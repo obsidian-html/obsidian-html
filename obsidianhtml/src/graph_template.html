@@ -1,0 +1,167 @@
+<svg id="A{id}" width="680" height="400"></svg>
+<button class="graph_button" id="B{id}" onclick="run('{id}', '{pinnedNode}');">Show Graph</button>
+<script>
+function run(uid, pinnedNode){
+    // Get elements
+    var _button = document.getElementById('B' + uid);
+    var _svg = document.getElementById('A' + uid);
+    
+    // toggle graph on or off
+    var turn_on = true;
+    if (_button.innerHTML == 'Hide Graph'){
+        _button.innerHTML = 'Show Graph';
+        turn_on = false;
+        _svg.style.display = "None";
+        d3.selectAll("#A" + uid + " > *").remove();
+    }
+    else {
+        _button.innerHTML = "Hide Graph";
+        _svg.style.display = "block";
+
+        cont = _svg.parentElement;
+        window.scrollBy(cont.getBoundingClientRect().right - window.visualViewport.width,0)
+    }
+
+    // run d3 graph
+
+    if (turn_on){
+        var svg = d3.select("#A" + uid),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+        var simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(function(d) { return d.id; }))
+            .force("charge", d3.forceManyBody().strength(-200))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+
+        d3.json("/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.json", function(error, graph) {
+                if (error) throw error;
+
+                var link = svg.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(graph.links)
+                .enter().append("line")
+                .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+                var node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("g")
+                .data(graph.nodes)
+                .enter().append("g")            
+
+                var circles = node.append("circle")
+                .attr("r", 5)
+                .attr("fill", function(d) { 
+                        if (d.id == pinnedNode){
+                                return 'red'
+                        }
+                        return color(d.group); 
+                });
+
+                // Create a drag handler and append it to the node object instead
+                var drag_handler = d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended);
+
+                drag_handler(node);
+                
+                var lables = node.append("text")
+                .text(function(d) {
+                        return d.id;
+                })
+                .attr('x', 6)
+                .attr('y', 3)
+                .on("click", function(d) {
+                    let svg_el = document.getElementById('A' + uid);
+                    console.log('A' + uid)
+                    let level = parseInt(svg_el.parentElement.id.split('-')[1]);
+                    console.log(svg_el.parentElement);
+                    console.log(level, level+1);
+                    httpGetAsync(encodeURI(d.url), ReceiveCall, level+1, false); 
+                    return false; 
+                        //window.open(d.url);
+                });
+
+                node.append("title")
+                .text(function(d) { return d.id; });
+
+                simulation
+                .nodes(graph.nodes)
+                .on("tick", ticked);
+
+                simulation.force("link")
+                .links(graph.links);
+
+                function ticked() {
+                        node
+                                .attr("transform", function(d) { 
+                                        if (d.id == pinnedNode){  
+                                                d.fx = (width / 2)
+                                                d.fy = (height / 2)  
+                                        }                          
+                                        return "translate(" + bindx(d.x) + "," + bindy(d.y) + ")";
+                                })
+
+                        // //constrains the nodes to be within a box
+                        // node
+                        //         .attr("cx", function(d) { return let dx = Math.max(d.radius, Math.min(width - d.radius, d.x)); })
+                        //         .attr("cy", function(d) { return d.y = Math.max(d.radius, Math.min(height - d.radius, d.y)); }); 
+                        link
+                                .attr("x1", function(d) { return bindx(d.source.x); })
+                                .attr("y1", function(d) { return bindy(d.source.y); })
+                                .attr("x2", function(d) { return bindx(d.target.x); })
+                                .attr("y2", function(d) { return bindy(d.target.y); });
+                }
+        });
+
+        function bindx(x){
+                if (x > width){
+                        return (width - 10);
+                } 
+                if (x < 0) {
+                        return (10);
+                }     
+                return (x);           
+        }
+        function bindy(y){
+                if (y > height){
+                        return (height - 10);
+                } 
+                if (y < 0) {
+                        return (10);
+                }     
+                return (y);           
+        }        
+
+        function dragstarted(d) {
+                if (d.id == pinnedNode){
+                        return
+                }
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart();         
+        d.fx = d.x;
+        d.fy = d.y;
+        }
+
+        function dragged(d) {
+                if (d.id == pinnedNode){
+                        return
+                }                
+        d.fx = bindx(d3.event.x);
+        d.fy = bindy(d3.event.y);
+        }
+
+        function dragended(d) {
+                if (d.id == pinnedNode){
+                        return
+                }
+        if (!d3.event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+        }
+    }
+}
+</script>

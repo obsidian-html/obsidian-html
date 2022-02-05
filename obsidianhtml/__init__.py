@@ -1,6 +1,7 @@
 import sys                  # commandline arguments
 import os                   #
 import shutil               # used to remove a non-empty directory, copy files
+import uuid
 import re                   # regex string finding/replacing
 from pathlib import Path    # 
 import markdown             # convert markdown to html
@@ -74,7 +75,7 @@ def recurseObisidianToMarkdown(page_path_str, pb):
             print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
         recurseObisidianToMarkdown(files[link_path]['fullpath'], pb)
 
-def ConvertMarkdownPageToHtmlPage(page_path_str, pb):
+def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     page_path = Path(page_path_str).resolve()
     paths = pb.paths
     files = pb.files
@@ -89,6 +90,24 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb):
     # Load contents 
     md = MarkdownPage(page_path, paths['md_folder'], files)
     md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
+
+    # [??] Add self to nodelist
+    node = pb.network_tree.NewNode()
+    
+    node['id'] = str(md.rel_dst_path).split('/')[-1].replace('.md', '')
+    if 'graph_name' in md.metadata.keys():
+        node['id'] = md.metadata['graph_name']
+
+    node['url'] = f'{conf["html_url_prefix"]}/{str(md.rel_dst_path)[:-3]}.html'
+    pb.network_tree.AddNode(node)
+
+    if backlinkNode is not None:
+        link = pb.network_tree.NewLink()
+        link['source'] = backlinkNode['id']
+        link['target'] = node['id']
+        pb.network_tree.AddLink(link)
+    
+    backlinkNode = node
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
@@ -190,8 +209,13 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb):
     # [15] Tag not created links with a class so it can be decorated differently
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
 
+    # [??] Add in graph code
+    if conf['toggles']['features']['build_graph']:
+        graph_template = OpenIncludedFile('graph_template.html')
+        html_body += "\n" + graph_template.replace('{id}', str(uuid.uuid4()).replace('-','')).replace('{pinnedNode}', node['id']) + "\n"
+
     # [16] Wrap body html in valid html structure from template
-    html = html_template.replace('{content}', html_body).replace('{title}', conf['site_name']).replace('{html_url_prefix}', conf['html_url_prefix'])
+    html = html_template.replace('{content}', html_body).replace('{title}', conf['site_name']).replace('{html_url_prefix}', conf['html_url_prefix']).replace('{dynamic_includes}', pb.dynamic_inclusions)
 
     # Save file
     # ---- 
@@ -218,13 +242,13 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb):
             continue        
 
         # Mark the file as processed so that it will not be processed again at a later stage
-        files[link_path]['processed'] = True  
+        files[link_path]['processed'] = True
 
         # Convert the note that is linked to
         if conf['toggles']['verbose_printout']:
             print("html: converting ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
-        ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], pb)  
+        ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], pb, backlinkNode)
 
 def recurseTagList(tagtree, tagpath, pb):
     html_url_prefix = pb.config['html_url_prefix']
@@ -302,6 +326,18 @@ def main():
         if v == '-v':
             conf['toggles']['verbose_printout'] = True
 
+    # Set defaults
+    set_build_graph = False 
+    if 'features' not in conf['toggles']:
+        conf['toggles']['features'] = {}
+        set_build_graph = True
+    else:
+        if 'build_graph' not in conf['toggles']['features']:
+            set_build_graph = True
+
+    if set_build_graph:
+        conf['toggles']['features']['build_graph'] = True
+
     # Input
     # ------------------------------------------
     # Set Paths
@@ -316,6 +352,12 @@ def main():
     # Deduce relative paths
     paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
+
+    # Compile dynamic inclusion list
+    dynamic_inclusions = ""
+    if conf['toggles']['features']['build_graph']:
+        dynamic_inclusions += '<link rel="stylesheet" href="/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
+        dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
     #print(yaml.dump(conf, allow_unicode=True, default_flow_style=False))
 
@@ -336,7 +378,7 @@ def main():
     paths['md_folder'].mkdir(parents=True, exist_ok=True)
     paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
 
-    # Make "global" object that we can pass so functions
+    # Make "global" object that we can pass to functions
     pb = PicknickBasket(conf, paths)
 
     # Convert Obsidian to markdown
@@ -392,6 +434,7 @@ def main():
 
         pb.files = files
         pb.html_template = html_template
+        pb.dynamic_inclusions = dynamic_inclusions
 
         # Start conversion from the entrypoint
         ConvertMarkdownPageToHtmlPage(str(paths['md_entrypoint']), pb)
@@ -401,25 +444,35 @@ def main():
 
         # Add Extra stuff to the output directories
         # ------------------------------------------
-        os.makedirs(paths['html_output_folder'].joinpath('static'), exist_ok=True)
+        static_folder = paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static')
+        os.makedirs(static_folder, exist_ok=True)
 
         css = OpenIncludedFile('main.css')
-        with open (paths['html_output_folder'].joinpath('main.css'), 'w', encoding="utf-8") as t:
+        with open (static_folder.joinpath('main.css'), 'w', encoding="utf-8") as t:
             t.write(css)
         mermaidcss = OpenIncludedFile('mermaid.css')
-        with open (paths['html_output_folder'].joinpath('mermaid.css'), 'w', encoding="utf-8") as t:
+        with open (static_folder.joinpath('mermaid.css'), 'w', encoding="utf-8") as t:
             t.write(mermaidcss)
         mermaidjs = OpenIncludedFile('mermaid.min.js')
-        with open (paths['html_output_folder'].joinpath('mermaid.min.js'), 'w', encoding="utf-8") as t:
+        with open (static_folder.joinpath('mermaid.min.js'), 'w', encoding="utf-8") as t:
             t.write(mermaidjs)
         svg = OpenIncludedFile('external.svg')
-        with open (paths['html_output_folder'].joinpath('external.svg'), 'w', encoding="utf-8") as t:
+        with open (static_folder.joinpath('external.svg'), 'w', encoding="utf-8") as t:
             t.write(svg)
         scp = OpenIncludedFileBinary('SourceCodePro-Regular.ttf')
-        with open (paths['html_output_folder'].joinpath('static/SourceCodePro-Regular.ttf'), 'wb') as t:
+        with open (static_folder.joinpath('SourceCodePro-Regular.ttf'), 'wb') as t:
             t.write(scp)                    
         nc = OpenIncludedFile('not_created.html')
-        with open (paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as t:
+        with open (static_folder.joinpath('not_created.html'), 'w', encoding="utf-8") as t:
             t.write(html_template.replace('{content}', nc))
+
+        # dynamic file inclusion
+        if conf['toggles']['features']['build_graph']:
+            graph_css = OpenIncludedFile('graph.css')
+            with open (static_folder.joinpath('graph.css'), 'w', encoding="utf-8") as t:
+                t.write(graph_css)
+
+            with open (static_folder.joinpath('graph.json'), 'w', encoding="utf-8") as t:
+                t.write(pb.network_tree.OutputJson())                      
 
     print('> DONE')

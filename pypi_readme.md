@@ -16,6 +16,7 @@ Only notes that are found by following links recursively, starting with the entr
 
 **Changelog**:
 
+- 0.0.9: Added graph view
 - 0.0.8: Bugfix: mermaid not loading when dynamically opened in new tab
 - 0.0.7: Added mermaid support   
 - 0.0.6: Bugfix for Linux paths   

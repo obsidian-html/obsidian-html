@@ -59,4 +59,8 @@ toggles:
   no_clean: False
 
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
-  relative_path_md: True                        
+  relative_path_md: True
+  
+  features:
+    # Include code to build the graph view per page (default: True)
+    build_graph: True
