@@ -14,6 +14,8 @@ class DuplicateFileNameInRoot(Exception):
 
 def GetObsidianFilePath(link, file_tree):
     # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
+    # a link can look like this: folder/note#chapter|alias
+    # then filename=note, header=chapter
     parts = link.split('|')[0].split('/')[-1].split('#')
     filename = parts[0]
     header = ''
@@ -25,7 +27,7 @@ def GetObsidianFilePath(link, file_tree):
         
     # Return tuple
     if filename not in file_tree.keys():
-        return (filename, False)
+        return (filename, False, '')
 
     return (filename, file_tree[filename], header)
 
