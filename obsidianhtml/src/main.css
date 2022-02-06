@@ -5,9 +5,6 @@
 table {
     width: 100%;
 }
-img {
-    width: 100%;
-}
 table, th, td {
     border-bottom: 1px solid #999;
     border-right: 1px dotted #6f6f6f;
@@ -38,6 +35,9 @@ body {
     overflow: scroll;  
     overflow-y: scroll;
     scrollbar-color: #7c7f8c #f0f0f0;
+}
+.container img {
+    max-width: 100%;
 }
 .container-wrapper {
     max-width: calc(45rem + 3rem);
