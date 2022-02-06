@@ -5,6 +5,9 @@
 table {
     width: 100%;
 }
+img {
+    width: 100%;
+}
 table, th, td {
     border-bottom: 1px solid #999;
     border-right: 1px dotted #6f6f6f;
