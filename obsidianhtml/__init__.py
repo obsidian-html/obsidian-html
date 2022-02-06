@@ -525,7 +525,7 @@ def main():
             for k in unparsed.keys():
                 i += 1
                 if conf['toggles']['verbose_printout'] == True:
-                    print(f'{i}/{l}')
+                    print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
                 ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb)
 
         # Create tag page
