@@ -70,6 +70,10 @@ def ExportStaticFiles(pb):
 
     for file_name in copy_file_list:
         c = OpenIncludedFile(file_name)
+        
+        if file_name in ('main.css'):
+            c = c.replace('{html_url_prefix}', pb.config['html_url_prefix'])
+
         with open (static_folder.joinpath(file_name), 'w', encoding="utf-8") as f:
             f.write(c)
 
