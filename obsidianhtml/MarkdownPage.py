@@ -4,7 +4,7 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 import shutil               # used to remove a non-empty directory, copy files
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes, ConvertTitleToMarkdownId
+from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes, ConvertTitleToMarkdownId, MalformedTags
 from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
 
 class MarkdownPage:
@@ -72,6 +72,10 @@ class MarkdownPage:
 
         if url == '':
             url = str(self.dst_path)
+
+        for tag in self.metadata['tags']:
+            if (not isinstance(tag, str)):
+                raise MalformedTags(f"Tag {tag} in frontmatter of \"{self.src_path}\" is of type {type(tag)}, but should be a string. (Items under 'tags:' can not include a ':' on its line).")
 
         for tag in self.metadata['tags']:
             ctagtree = tagtree

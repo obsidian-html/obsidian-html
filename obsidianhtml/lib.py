@@ -17,6 +17,8 @@ image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'pdf']
 
 class DuplicateFileNameInRoot(Exception):
     pass
+class MalformedTags(Exception):
+    pass
 
 def GetObsidianFilePath(link, file_tree):
     # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
