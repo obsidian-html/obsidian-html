@@ -369,6 +369,8 @@ def main():
     else:
         if 'build_graph' not in conf['toggles']['features']:
             set_build_graph = True
+    if 'process_all' not in conf['toggles']:
+        conf['toggles']['process_all'] = False
 
     if set_build_graph:
         conf['toggles']['features']['build_graph'] = True
@@ -459,6 +461,22 @@ def main():
         print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(paths["obsidian_entrypoint"])})')
         recurseObisidianToMarkdown(str(paths['obsidian_entrypoint']), pb)
 
+        # Keep going until all other files are processed
+        if conf['toggles']['process_all'] == True:
+            unparsed = {}
+            for k in files.keys():
+                if files[k]["processed"] == False:
+                    unparsed[k] = files[k]
+
+            i = 0
+            l = len(unparsed.keys())
+            for k in unparsed.keys():
+                i += 1
+                if conf['toggles']['verbose_printout'] == True:
+                    print(f'{i}/{l}')
+                recurseObisidianToMarkdown(unparsed[k]['fullpath'], pb)
+
+        
 
     # Convert Markdown to Html
     # ------------------------------------------
@@ -483,6 +501,8 @@ def main():
         # This data is used to check which links are local
         files = {}
         for path in paths['md_folder'].rglob('*'):
+            if path.is_dir():
+                continue
             rel_path_posix = path.relative_to(paths['md_folder']).as_posix()
             files[rel_path_posix] = {'fullpath': str(path.resolve()), 'processed': False}  
 
@@ -493,6 +513,21 @@ def main():
         # Start conversion from the entrypoint
         ConvertMarkdownPageToHtmlPage(str(paths['md_entrypoint']), pb)
 
+        # Keep going until all other files are processed
+        if conf['toggles']['process_all'] == True:
+            unparsed = {}
+            for k in files.keys():
+                if files[k]["processed"] == False:
+                    unparsed[k] = files[k]
+
+            i = 0
+            l = len(unparsed.keys())
+            for k in unparsed.keys():
+                i += 1
+                if conf['toggles']['verbose_printout'] == True:
+                    print(f'{i}/{l}')
+                ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb)
+
         # Create tag page
         recurseTagList(pb.tagtree, 'tags/', pb, level=0)
 
@@ -502,5 +537,7 @@ def main():
         # Write node json to static folder
         with open (pb.paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static').joinpath('graph.json'), 'w', encoding="utf-8") as f:
             f.write(pb.network_tree.OutputJson())
+
+        
 
     print('> DONE')

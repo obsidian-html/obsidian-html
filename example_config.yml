@@ -50,6 +50,10 @@ toggles:
   # Opt-in/-out of Md->Html conversion, set to False when only wanting to get proper markdown from Obsidian
   compile_html: True
 
+  # If this is false only the entrypoint and all its links (recursively) are processed
+  # if true all the notes will be processed
+  process_all: False
+
   # Can be overwritten ad-hoc by using "obsidianhtml -i config.yml -v" (the -v option)
   verbose_printout: False
 
