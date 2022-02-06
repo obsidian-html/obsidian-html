@@ -36,6 +36,9 @@ body {
     overflow-y: scroll;
     scrollbar-color: #7c7f8c #f0f0f0;
 }
+.container img {
+    max-width: 100%;
+}
 .container-wrapper {
     max-width: calc(45rem + 3rem);
     position: relative;  
