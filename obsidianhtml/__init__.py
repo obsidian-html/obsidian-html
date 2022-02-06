@@ -9,6 +9,7 @@ import yaml
 import urllib.parse         # convert link characters like %
 import frontmatter
 import json
+import warnings
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
