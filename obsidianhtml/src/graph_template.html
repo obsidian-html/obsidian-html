@@ -37,20 +37,25 @@ function run(uid, pinnedNode){
 
         var simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(function(d) { return d.id; }))
-            .force("charge", d3.forceManyBody().strength(-100))
+            .force("charge", d3.forceManyBody().strength({graph_coalesce_force}))
             .force("center", d3.forceCenter(width / 2, height / 2))
 
-        d3.json("98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.json", function(error, graph) {
+        d3.json("{html_url_prefix}/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.json", function(error, graph) {
                 if (error) throw error;
 
-                var link = svg.append("g")
+
+                //add encompassing group for the zoom 
+                var g = svg.append("g")
+                .attr("class", "everything");
+
+                var link = g.append("g")
                 .attr("class", "links")
                 .selectAll("line")
                 .data(graph.links)
                 .enter().append("line")
                 .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
-                var node = svg.append("g")
+                var node = g.append("g")
                 .attr("class", "nodes")
                 .selectAll("g")
                 .data(graph.nodes)
@@ -107,7 +112,7 @@ function run(uid, pinnedNode){
                                                 d.fx = (width / 2)
                                                 d.fy = (height / 2)  
                                         }                          
-                                        return "translate(" + bindx(d.x) + "," + bindy(d.y) + ")";
+                                        return "translate(" + d.x + "," + d.y + ")";
                                 })
 
                         // //constrains the nodes to be within a box
@@ -115,56 +120,48 @@ function run(uid, pinnedNode){
                         //         .attr("cx", function(d) { return let dx = Math.max(d.radius, Math.min(width - d.radius, d.x)); })
                         //         .attr("cy", function(d) { return d.y = Math.max(d.radius, Math.min(height - d.radius, d.y)); }); 
                         link
-                                .attr("x1", function(d) { return bindx(d.source.x); })
-                                .attr("y1", function(d) { return bindy(d.source.y); })
-                                .attr("x2", function(d) { return bindx(d.target.x); })
-                                .attr("y2", function(d) { return bindy(d.target.y); });
+                                .attr("x1", function(d) { return d.source.x; })
+                                .attr("y1", function(d) { return d.source.y; })
+                                .attr("x2", function(d) { return d.target.x; })
+                                .attr("y2", function(d) { return d.target.y; });
+                }
+
+        //add zoom capabilities 
+        var zoom_handler = d3.zoom()
+            .on("zoom", zoom_actions);
+
+        zoom_handler(svg); 
+                //Zoom functions 
+                function zoom_actions(){
+                        g.attr("transform", d3.event.transform)
                 }
         });
 
-        function bindx(x){
-                if (x > width){
-                        return (width - 10);
-                } 
-                if (x < 0) {
-                        return (10);
-                }     
-                return (x);           
-        }
-        function bindy(y){
-                if (y > height){
-                        return (height - 10);
-                } 
-                if (y < 0) {
-                        return (10);
-                }     
-                return (y);           
-        }        
 
         function dragstarted(d) {
-                if (d.id == pinnedNode){
-                        return
-                }
-        if (!d3.event.active) simulation.alphaTarget(0.3).restart();         
-        d.fx = d.x;
-        d.fy = d.y;
+                // if (d.id == pinnedNode){
+                //         return
+                // }
+                if (!d3.event.active) simulation.alphaTarget(0.3).restart();         
+                d.fx = d.x;
+                d.fy = d.y;
         }
 
         function dragged(d) {
-                if (d.id == pinnedNode){
-                        return
-                }                
-        d.fx = bindx(d3.event.x);
-        d.fy = bindy(d3.event.y);
+                // if (d.id == pinnedNode){
+                //         return
+                // }                
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
         }
 
         function dragended(d) {
-                if (d.id == pinnedNode){
-                        return
-                }
-        if (!d3.event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
+                // if (d.id == pinnedNode){
+                //         return
+                // }
+                if (!d3.event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
         }
     }
 }

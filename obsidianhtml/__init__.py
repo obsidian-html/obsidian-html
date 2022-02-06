@@ -13,7 +13,10 @@ import warnings
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, image_suffixes
+from .lib import    DuplicateFileNameInRoot, \
+                    GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, \
+                    IsValidLocalMarkdownLink, \
+                    image_suffixes
 from .PicknickBasket import PicknickBasket
 
 # Open source files in the package
@@ -85,9 +88,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
 
     # Convert path string to Path and do a double check
     page_path = Path(page_path_str).resolve()
-    if page_path.exists() == False:
-        return
-    if page_path.suffix != '.md':
+    if not IsValidLocalMarkdownLink(page_path_str):
         return
 
     # Load contents
@@ -95,6 +96,39 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     # Create an object that handles a lot of the logic of parsing the page paths, content, etc
     md = MarkdownPage(page_path, paths['md_folder'], files)
     md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
+
+    # Graph view integrations
+    # ------------------------------------------------------------------
+    # The nodelist will result in graph.json, which may have uses beyond the graph view
+
+    # [17] Add self to nodelist
+    node = pb.network_tree.NewNode()
+    
+    # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
+    node['id'] = str(md.rel_dst_path).split('/')[-1].replace('.md', '')
+    if 'graph_name' in md.metadata.keys():
+        node['id'] = md.metadata['graph_name']
+
+    # Url is used so you can open the note/node by clicking on it
+    node['url'] = f'{config["html_url_prefix"]}/{str(md.rel_dst_path)[:-3]}.html'
+    pb.network_tree.AddNode(node)
+
+    # Backlinks are set so when recursing, the links (edges) can be determined
+    if backlinkNode is not None:
+        link = pb.network_tree.NewLink()
+        link['source'] = backlinkNode['id']
+        link['target'] = node['id']
+        pb.network_tree.AddLink(link)
+    
+    backlinkNode = node
+
+    # Skip further processing if processing has happened already for this file
+    # ------------------------------------------------------------------
+    if files[md.rel_src_path.as_posix()]['processed'] == True:
+        return
+
+    if config['toggles']['verbose_printout']:
+        print("html: converting ", page_path.as_posix(), " (parent ", md.src_path, ")")
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
@@ -195,36 +229,15 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     # [15] Tag not created links with a class so they can be decorated differently
     html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
 
-    # Graph view integrations
-    # ------------------------------------------------------------------
-    # The nodelist will result in graph.json, which may have uses beyond the graph view
-
-    # [17] Add self to nodelist
-    node = pb.network_tree.NewNode()
-    
-    # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-    node['id'] = str(md.rel_dst_path).split('/')[-1].replace('.md', '')
-    if 'graph_name' in md.metadata.keys():
-        node['id'] = md.metadata['graph_name']
-
-    # Url is used so you can open the note/node by clicking on it
-    node['url'] = f'{config["html_url_prefix"]}/{str(md.rel_dst_path)[:-3]}.html'
-    pb.network_tree.AddNode(node)
-
-    # Backlinks are set so when recursing, the links (edges) can be determined
-    if backlinkNode is not None:
-        link = pb.network_tree.NewLink()
-        link['source'] = backlinkNode['id']
-        link['target'] = node['id']
-        pb.network_tree.AddLink(link)
-    
-    backlinkNode = node
-
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
-    if config['toggles']['features']['build_graph']:
+    if config['toggles']['features']['graph']['enabled']:
         graph_template = OpenIncludedFile('graph_template.html')
-        html_body += "\n" + graph_template.replace('{id}', str(uuid.uuid4()).replace('-','')).replace('{pinnedNode}', node['id']) + "\n"
+        graph_template = graph_template.replace('{id}', str(uuid.uuid4()).replace('-',''))\
+                                       .replace('{pinnedNode}', node['id'])\
+                                       .replace('{html_url_prefix}', config['html_url_prefix'])\
+                                       .replace('{graph_coalesce_force}', config['toggles']['features']['graph']['coalesce_force'])
+        html_body += f"\n{graph_template}\n"
 
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
@@ -245,6 +258,9 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     with open(html_dst_path_posix, 'w', encoding="utf-8") as f:
         f.write(html)
 
+    # Set file to processed
+    files[md.rel_src_path.as_posix()]['processed'] = True
+
     # > Done with this markdown page!
 
     # Recurse for every link in the current page
@@ -253,20 +269,16 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         # these are of type rel_path_posix
         link_path = l
         
-        # Skip non-existent links, non-markdown links, and links that have been processed already
+        # Skip non-existent links
         if link_path not in files.keys():
             continue
-        if files[link_path]['processed'] == True:
-            continue
-        if files[link_path]['fullpath'][-3:] != '.md':
-            continue        
 
-        # Mark the file as processed so that it will not be processed again at a later stage
-        files[link_path]['processed'] = True
+        if not IsValidLocalMarkdownLink(files[link_path]['fullpath']):
+            continue
 
         # Convert the note that is linked to
         if config['toggles']['verbose_printout']:
-            print("html: converting ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
+            print("html: initiating conversion for ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
         ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], pb, backlinkNode)
 
@@ -366,18 +378,20 @@ def main():
             conf['toggles']['verbose_printout'] = True
 
     # Set defaults
-    set_build_graph = False 
+    set_graph_defaults = False 
     if 'features' not in conf['toggles']:
         conf['toggles']['features'] = {}
-        set_build_graph = True
+        set_graph_defaults = True
     else:
-        if 'build_graph' not in conf['toggles']['features']:
-            set_build_graph = True
+        if 'graph' not in conf['toggles']['features']:
+            set_graph_defaults = True
     if 'process_all' not in conf['toggles']:
         conf['toggles']['process_all'] = False
 
-    if set_build_graph:
-        conf['toggles']['features']['build_graph'] = True
+    if set_graph_defaults:
+        conf['toggles']['features']['graph'] = {}
+        conf['toggles']['features']['graph']['enabled'] = True
+        conf['toggles']['features']['graph']['coalesce_force'] = "-200"
 
 
     # Set Paths
@@ -399,7 +413,7 @@ def main():
     # ---------------------------------------------------------
     # This is a set of javascript/css files to be loaded into the header based on config choices.
     dynamic_inclusions = ""
-    if conf['toggles']['features']['build_graph']:
+    if conf['toggles']['features']['graph']['enabled']:
         dynamic_inclusions += '<link rel="stylesheet" href="'+conf["html_url_prefix"]+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
