@@ -52,7 +52,7 @@ toggles:
 
   # If this is false only the entrypoint and all its links (recursively) are processed
   # if true all the notes will be processed
-  process_all: False
+  process_all: True
 
   # Can be overwritten ad-hoc by using "obsidianhtml -i config.yml -v" (the -v option)
   verbose_printout: False
