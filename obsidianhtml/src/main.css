@@ -170,7 +170,7 @@ a.nonexistent-link:visited {
 }
 
 .external-link::after {
-    background: transparent url(/98682199-5ac9-448c-afc8-23ab7359a91b-static/external.svg) 0 0 no-repeat;
+    background: transparent url(98682199-5ac9-448c-afc8-23ab7359a91b-static/external.svg) 0 0 no-repeat;
     background-size: auto;
     background-size: 16px;
     content: "";

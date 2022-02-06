@@ -6,3 +6,5 @@ local_output/*
 obsidianhtml.egg-info
 dist/*
 build.ps1
+build/lib/obsidianhtml/src/external.svg
+build/*

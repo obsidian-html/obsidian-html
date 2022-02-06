@@ -289,7 +289,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
         for key in tagtree['subtags'].keys():
             # Point of recursion
             rel_key_path_as_posix = recurseTagList(tagtree['subtags'][key], tagpath + key + '/', pb, level+1)
-            md += f'- [{key}](/{rel_key_path_as_posix})' + '\n'
+            md += f'- [{key}]({html_url_prefix}/{rel_key_path_as_posix})' + '\n'
 
     # Handle notes
     if len(tagtree['notes']) > 0:
@@ -302,7 +302,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     html = pb.html_template.replace('{title}', pb.config['site_name'])\
         .replace('{html_url_prefix}', pb.config['html_url_prefix'])\
-        .replace('{dynamic_includes}', '<link rel="stylesheet" href="/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />')\
+        .replace('{dynamic_includes}', '<link rel="stylesheet" href="'+pb.config['html_url_prefix']+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />')\
         .replace('{content}', html_body)
 
     # Write file
@@ -396,7 +396,7 @@ def main():
     # This is a set of javascript/css files to be loaded into the header based on config choices.
     dynamic_inclusions = ""
     if conf['toggles']['features']['build_graph']:
-        dynamic_inclusions += '<link rel="stylesheet" href="/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
+        dynamic_inclusions += '<link rel="stylesheet" href="'+conf["html_url_prefix"]+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
 
