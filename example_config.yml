@@ -72,5 +72,6 @@ toggles:
   relative_path_md: True
   
   features:
-    # Include code to build the graph view per page (default: True)
-    build_graph: True
+    graph_view:
+      enabled: True           # Include code to build the graph view per page (default: True)
+      coalesce_force: '-200'

@@ -39,6 +39,16 @@ def GetObsidianFilePath(link, file_tree):
 
     return (filename, file_tree[filename], header)
 
+def IsValidLocalMarkdownLink(full_file_path_str):
+    page_path = Path(full_file_path_str).resolve()
+
+    if page_path.exists() == False:
+        return False
+    if page_path.suffix != '.md':
+        return False
+
+    return True
+
 def ConvertTitleToMarkdownId(title):
     idstr = title.lower().strip()
     idstr = idstr.replace(' ', '-')
@@ -65,7 +75,7 @@ def ExportStaticFiles(pb):
 
     # copy files over (standard copy, static_folder)
     copy_file_list = ['main.css', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg']
-    if pb.config['toggles']['features']['build_graph']:
+    if pb.config['toggles']['features']['graph']['enabled']:
         copy_file_list += ['graph.css']
 
     for file_name in copy_file_list:
