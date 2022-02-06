@@ -262,7 +262,8 @@ class MarkdownPage:
 
         # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
         # Cannot start with [, (, nor "
-        for l in re.findall("(?<![\[\(\"])(http.[^\s]*)", self.page):
+        # match 'http://* ' or 'https://* ' (end match by whitespace)
+        for l in re.findall("(?<![\[\(\"])(https*:\/\/.[^\s]*)", self.page):
             new_md_link = f"[{l}]({l})"
             safe_link = re.escape(l)
             self.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, self.page)
