@@ -64,7 +64,7 @@ def ExportStaticFiles(pb):
     # copy files over (standard copy, static_folder)
     copy_file_list = ['main.css', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg']
     if pb.config['toggles']['features']['build_graph']:
-        copy_file_list += ['graph.css', 'graph.json']
+        copy_file_list += ['graph.css']
 
     for file_name in copy_file_list:
         c = OpenIncludedFile(file_name)

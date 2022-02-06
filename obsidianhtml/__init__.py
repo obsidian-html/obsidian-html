@@ -499,4 +499,8 @@ def main():
         # Add Extra stuff to the output directories
         ExportStaticFiles(pb)
 
+        # Write node json to static folder
+        with open (pb.paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static').joinpath('graph.json'), 'w', encoding="utf-8") as f:
+            f.write(pb.network_tree.OutputJson())
+
     print('> DONE')
