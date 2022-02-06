@@ -157,8 +157,8 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         shutil.copyfile(full_link_path, dst_path)
 
         # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = '![]('+urllib.parse.quote(rel_path.as_posix())+')'
-        safe_link = re.escape('![](/'+link+')')
+        new_link = '![]('+urllib.parse.quote(config['html_url_prefix']+'/'+rel_path.as_posix())+')'
+        safe_link = re.escape('![]('+link+')')
         md.page = re.sub(safe_link, new_link, md.page)
    
 
