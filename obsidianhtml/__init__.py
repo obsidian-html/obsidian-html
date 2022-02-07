@@ -571,6 +571,10 @@ def main():
             if len(_files.keys()) == 0:
                 raise Exception(f"No notes found with the given tags.")
 
+            if not config['toggles']['process_all']:
+                # Overwrite the filetree 
+                files = _files
+
             if config['toggles']['verbose_printout']:
                 print(f'Building index.md')
 
@@ -622,7 +626,9 @@ def main():
         recurseObisidianToMarkdown(str(paths['obsidian_entrypoint']), pb)
 
         # Keep going until all other files are processed
-        if config['toggles']['process_all'] == True:
+        if config['toggles']['process_all'] or config['toggles']['features']['create_index_from_tags']['enabled']:
+            # Note: for case create_index_from_tags/enabled = True and process_all = False, 
+            #       the files dict has been overwritten from including all files, to only the files matched on the provided tags 
             unparsed = {}
             for k in files.keys():
                 if files[k]["processed"] == False:
@@ -636,7 +642,6 @@ def main():
                     print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
                 recurseObisidianToMarkdown(unparsed[k]['fullpath'], pb)
 
-        
 
     # Convert Markdown to Html
     # ------------------------------------------
