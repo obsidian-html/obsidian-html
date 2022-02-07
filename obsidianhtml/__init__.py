@@ -97,6 +97,12 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     md = MarkdownPage(page_path, paths['md_folder'], files)
     md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
 
+    # Fix the issue of a note being called 'index.md' in the root folder
+    if md.dst_path == paths['html_output_folder'].joinpath('index.md') and md.src_path != paths['md_entrypoint']:
+        md.dst_path = md.dst_path.parent.joinpath('index__2.md')
+        md.rel_dst_path = md.dst_path.relative_to(md.dst_folder_path)
+    
+
     # Graph view integrations
     # ------------------------------------------------------------------
     # The nodelist will result in graph.json, which may have uses beyond the graph view
@@ -370,38 +376,49 @@ def main():
         exit(1)
 
     with open(input_yml_path_str, 'rb') as f:
-        conf = yaml.load(f.read(), Loader=yaml.SafeLoader) 
+        config = yaml.load(f.read(), Loader=yaml.SafeLoader) 
 
     # Overwrite conf
     for i, v in enumerate(sys.argv):
         if v == '-v':
-            conf['toggles']['verbose_printout'] = True
+            config['toggles']['verbose_printout'] = True
 
     # Set defaults
     set_graph_defaults = False 
-    if 'features' not in conf['toggles']:
-        conf['toggles']['features'] = {}
+    set_create_index_from_tags_defaults = False 
+
+    if 'features' not in config['toggles']:
+        config['toggles']['features'] = {}
         set_graph_defaults = True
+        set_create_index_from_tags_defaults = True
     else:
-        if 'graph' not in conf['toggles']['features']:
+        if 'graph' not in config['toggles']['features']:
             set_graph_defaults = True
-    if 'process_all' not in conf['toggles']:
-        conf['toggles']['process_all'] = False
+        if 'create_index_from_tags' not in config['toggles']['features']:
+            set_create_index_from_tags_defaults = True       
+
+    if 'process_all' not in config['toggles']:
+        config['toggles']['process_all'] = False
 
     if set_graph_defaults:
-        conf['toggles']['features']['graph'] = {}
-        conf['toggles']['features']['graph']['enabled'] = True
-        conf['toggles']['features']['graph']['coalesce_force'] = "-200"
+        config['toggles']['features']['graph'] = {}
+        config['toggles']['features']['graph']['enabled'] = True
+        config['toggles']['features']['graph']['coalesce_force'] = "-200"
 
+    if set_create_index_from_tags_defaults:
+        config['toggles']['features']['create_index_from_tags'] = {}
+        config['toggles']['features']['create_index_from_tags']['enabled'] = False
+        config['toggles']['features']['create_index_from_tags']['tags'] = []
+        config['toggles']['features']['create_index_from_tags']['add_links_in_graph_tree'] = True
 
     # Set Paths
     # ---------------------------------------------------------
     paths = {
-        'obsidian_folder': Path(conf['obsidian_folder_path_str']).resolve(),
-        'md_folder': Path(conf['md_folder_path_str']).resolve(),
-        'obsidian_entrypoint': Path(conf['obsidian_entrypoint_path_str']).resolve(),
-        'md_entrypoint': Path(conf['md_entrypoint_path_str']).resolve(),
-        'html_output_folder': Path(conf['html_output_folder_path_str']).resolve()
+        'obsidian_folder': Path(config['obsidian_folder_path_str']).resolve(),
+        'md_folder': Path(config['md_folder_path_str']).resolve(),
+        'obsidian_entrypoint': Path(config['obsidian_entrypoint_path_str']).resolve(),
+        'md_entrypoint': Path(config['md_entrypoint_path_str']).resolve(),
+        'html_output_folder': Path(config['html_output_folder_path_str']).resolve()
     }
 
     # Deduce relative paths
@@ -413,16 +430,16 @@ def main():
     # ---------------------------------------------------------
     # This is a set of javascript/css files to be loaded into the header based on config choices.
     dynamic_inclusions = ""
-    if conf['toggles']['features']['graph']['enabled']:
-        dynamic_inclusions += '<link rel="stylesheet" href="'+conf["html_url_prefix"]+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
+    if config['toggles']['features']['graph']['enabled']:
+        dynamic_inclusions += '<link rel="stylesheet" href="'+config["html_url_prefix"]+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
 
     # Remove previous output
     # ---------------------------------------------------------
-    if conf['toggles']['no_clean'] == False:
+    if config['toggles']['no_clean'] == False:
         print('> CLEARING OUTPUT FOLDERS')
-        if conf['toggles']['compile_md']:
+        if config['toggles']['compile_md']:
             if paths['md_folder'].exists():
                 shutil.rmtree(paths['md_folder'])
 
@@ -437,11 +454,11 @@ def main():
 
     # Make "global" object that we can pass to functions
     # ---------------------------------------------------------
-    pb = PicknickBasket(conf, paths)
+    pb = PicknickBasket(config, paths)
 
     # Convert Obsidian to markdown
     # ---------------------------------------------------------
-    if conf['toggles']['compile_md']:
+    if config['toggles']['compile_md']:
 
         # Load all filenames in the root folder.
         # This data will be used to check which files are local, and to get their full path
@@ -452,12 +469,12 @@ def main():
                 continue
 
             # Exclude configured subfolders
-            if 'exclude_subfolders' in conf:
+            if 'exclude_subfolders' in config:
                 _continue = False
-                for folder in conf['exclude_subfolders']:
+                for folder in config['exclude_subfolders']:
                     excl_folder_path = paths['obsidian_folder'].joinpath(folder)
                     if path.resolve().is_relative_to(excl_folder_path):
-                        if conf['toggles']['verbose_printout']:
+                        if config['toggles']['verbose_printout']:
                             print(f'Excluded folder {excl_folder_path}: Excluded file {path.name}.')
                         _continue = True
                     continue
@@ -465,7 +482,7 @@ def main():
                     continue
 
             # Check if filename is duplicate
-            if path.name in files.keys() and conf['toggles']['allow_duplicate_filenames_in_root'] == False:
+            if path.name in files.keys() and config['toggles']['allow_duplicate_filenames_in_root'] == False:
                 print(path)
                 raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
@@ -474,13 +491,138 @@ def main():
 
         pb.files = files
 
+        # Create index.md based on given tagname, that will serve as the entrypoint
+        # ---------------------------------------------------------
+        if config['toggles']['features']['create_index_from_tags']['enabled']:
+            if config['toggles']['verbose_printout']:
+                print('> FEATURE: CREATE INDEX FROM TAGS: Enabled')
+
+            # Test input
+            if not isinstance(config['toggles']['features']['create_index_from_tags']['tags'], list):
+                raise Exception("toggles/features/create_index_from_tags/tags should be a list")
+
+            if len(config['toggles']['features']['create_index_from_tags']['tags']) == 0:
+                raise Exception("Feature create_index_from_tags is enabled, but no tags were listed")
+
+            # shorthand 
+            include_tags = config['toggles']['features']['create_index_from_tags']['tags']
+            if config['toggles']['verbose_printout']:
+                print('Looking for tags: ', include_tags)
+
+            # overwrite defaults
+            index_dst_path = paths['md_folder'].joinpath('__tags_index.md').resolve()
+
+            if config['toggles']['verbose_printout']:
+                print('Will write the note index to: ', index_dst_path)
+                print('Will overwrite entrypoints: md_entrypoint_path_str, obsidian_entrypoint, md_entrypoint, rel_md_entrypoint_path')
+
+            config['md_entrypoint_path_str']       = str(index_dst_path)                              # should not be used anymore at this point, but just to be sure
+            paths['obsidian_entrypoint']         = paths['obsidian_folder'].joinpath('dontparse')   # Set to nonexistent file without .md so the entrypoint becomes invalid
+            paths['md_entrypoint']               = index_dst_path
+            paths['rel_md_entrypoint_path']      = paths['md_entrypoint'].relative_to(paths['md_folder'])
+            pb.paths = paths
+
+            # Find notes with given tags
+            _files = {}
+            index_dict = {}
+            for t in include_tags:
+                index_dict[t] = []
+
+            for k in files.keys():
+                # Determine src file path
+                page_path_str = files[k]['fullpath']
+                page_path = Path(page_path_str).resolve()
+
+                # Skip if not valid
+                if not IsValidLocalMarkdownLink(page_path_str):
+                    continue
+
+                # Try to open file
+                with open(page_path, encoding="utf-8") as f:
+                    # Get frontmatter yaml
+                    metadata, page = frontmatter.parse(f.read())
+
+                    # Bug out if frontdata not present
+                    if not isinstance(metadata, dict):
+                        continue
+                    if 'tags' not in metadata.keys():
+                        continue
+
+                    # get graphname of the page, we need this later
+                    graph_name = k[:-3]
+                    if 'graph_name' in metadata.keys():
+                        graph_name = metadata['graph_name']
+
+
+                    # Check for each of the tags if its present                    
+                    for t in include_tags:
+                        if t in metadata['tags']:
+                            if config['toggles']['verbose_printout']:
+                                print(f'Matched note {k} on tag {t}')
+
+                            # copy file to temp filetree for checking later
+                            _files[k] = files[k].copy()
+
+                            # Add entry to our index dict so we can parse this later
+                            md = MarkdownPage(page_path, paths['obsidian_folder'], files)
+                            md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
+                            index_dict[t].append((k, md.rel_dst_path.as_posix(), graph_name))
+
+            if len(_files.keys()) == 0:
+                raise Exception(f"No notes found with the given tags.")
+
+            if config['toggles']['verbose_printout']:
+                print(f'Building index.md')
+
+            index_md_content = '# Notes\n'
+            for t in index_dict.keys():
+                # Add header
+                index_md_content += f'## {t}\n'
+
+                # Add notes as list
+                for n in index_dict[t]:
+                    index_md_content += f'- [{n[0][:-3]}]({config["html_url_prefix"]}/{n[1]})\n'
+                index_md_content += '\n'
+
+            # write content to markdown file
+            with open(index_dst_path, 'w', encoding="utf-8") as f:
+                f.write(index_md_content)
+
+            # [17] Build graph node/links
+            if config['toggles']['features']['create_index_from_tags']['add_links_in_graph_tree']:
+
+                if config['toggles']['verbose_printout']:
+                    print(f'Adding graph links between index.md and the matched notes')
+                
+                node = pb.network_tree.NewNode()
+                node['id'] = 'index'
+                node['url'] = f'{config["html_url_prefix"]}/index.html'
+                pb.network_tree.AddNode(node)
+                bln = node
+                for t in index_dict.keys():
+                    for n in index_dict[t]:
+                        node = pb.network_tree.NewNode()
+                        node['id'] = n[2]
+                        node['url'] = f'{config["html_url_prefix"]}/{n[1][:-3]}.html'
+                        pb.network_tree.AddNode(node)
+
+                        link = pb.network_tree.NewLink()
+                        link['source'] = bln['id']
+                        link['target'] = node['id']
+                        pb.network_tree.AddLink(link)
+
+            if config['toggles']['verbose_printout']:
+                print('< FEATURE: CREATE INDEX FROM TAGS: Done')
+
+
         # Start conversion with entrypoint.
+        # ---------------------------------------------------------
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
         print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(paths["obsidian_entrypoint"])})')
         recurseObisidianToMarkdown(str(paths['obsidian_entrypoint']), pb)
 
         # Keep going until all other files are processed
-        if conf['toggles']['process_all'] == True:
+        if config['toggles']['process_all'] == True:
             unparsed = {}
             for k in files.keys():
                 if files[k]["processed"] == False:
@@ -490,7 +632,7 @@ def main():
             l = len(unparsed.keys())
             for k in unparsed.keys():
                 i += 1
-                if conf['toggles']['verbose_printout'] == True:
+                if config['toggles']['verbose_printout'] == True:
                     print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
                 recurseObisidianToMarkdown(unparsed[k]['fullpath'], pb)
 
@@ -498,15 +640,15 @@ def main():
 
     # Convert Markdown to Html
     # ------------------------------------------
-    if conf['toggles']['compile_html']:
+    if config['toggles']['compile_html']:
         print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(paths["md_entrypoint"])})')
 
         # Get html template code. 
         # Every note will become a html page, where the body comes from the note's markdown, 
         # and the wrapper code from this template.
-        if  'html_template_path_str' in conf.keys() and conf['html_template_path_str'] != '':
+        if  'html_template_path_str' in config.keys() and config['html_template_path_str'] != '':
             print('-------------')
-            with open(Path(conf['html_template_path_str']).resolve()) as f:
+            with open(Path(config['html_template_path_str']).resolve()) as f:
                 html_template = f.read()
         else:
             html_template = OpenIncludedFile('template.html')
@@ -532,7 +674,7 @@ def main():
         ConvertMarkdownPageToHtmlPage(str(paths['md_entrypoint']), pb)
 
         # Keep going until all other files are processed
-        if conf['toggles']['process_all'] == True:
+        if config['toggles']['process_all'] == True:
             unparsed = {}
             for k in files.keys():
                 if files[k]["processed"] == False:
@@ -542,7 +684,7 @@ def main():
             l = len(unparsed.keys())
             for k in unparsed.keys():
                 i += 1
-                if conf['toggles']['verbose_printout'] == True:
+                if config['toggles']['verbose_printout'] == True:
                     print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
                 ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb)
 
