@@ -158,7 +158,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
 
         # [13] Link to a custom 404 page when linked to a not-created note
         if link.url.split('/')[-1] == 'not_created.md':
-            new_link = '](/not_created.html)'
+            new_link = f']({config["html_url_prefix"]}/not_created.html)'
         else:
             if link.rel_src_path_posix not in files.keys():
                 continue
