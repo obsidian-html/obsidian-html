@@ -177,7 +177,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
 
     # [4] Handle local image links (copy them over to output)
     # ------------------------------------------------------------------
-    for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", md.page):
+    for link in re.findall("\!\[.*\]\((.*?)\)", md.page):
         l = urllib.parse.unquote(link)
         full_link_path = page_path.parent.joinpath(l).resolve()
         rel_path = full_link_path.relative_to(paths['md_folder'])
@@ -196,7 +196,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
 
         # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
         new_link = '![]('+urllib.parse.quote(config['html_url_prefix']+'/'+rel_path.as_posix())+')'
-        safe_link = re.escape('![]('+link+')')
+        safe_link = "\!\[.*\]\("+re.escape(link)+"\)"
         md.page = re.sub(safe_link, new_link, md.page)
    
 
