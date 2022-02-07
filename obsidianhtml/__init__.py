@@ -585,7 +585,7 @@ def main():
 
                 # Add notes as list
                 for n in index_dict[t]:
-                    index_md_content += f'- [{n[0][:-3]}]({config["html_url_prefix"]}/{n[1]})\n'
+                    index_md_content += f'- [{n[0][:-3]}]({n[1]})\n'
                 index_md_content += '\n'
 
             # write content to markdown file
