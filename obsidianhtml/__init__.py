@@ -233,7 +233,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if config['toggles']['features']['graph']['enabled']:
         graph_template = OpenIncludedFile('graph_template.html')
-        graph_template = graph_template.replace('{id}', str(uuid.uuid4()).replace('-',''))\
+        graph_template = graph_template.replace('{id}', simpleHash(html_body))\
                                        .replace('{pinnedNode}', node['id'])\
                                        .replace('{html_url_prefix}', config['html_url_prefix'])\
                                        .replace('{graph_coalesce_force}', config['toggles']['features']['graph']['coalesce_force'])
@@ -328,6 +328,12 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     # Return link of this page, to be used by caller for building its page
     return rel_dst_path_as_posix
+
+def simpleHash(text:str):
+    hash=0
+    for ch in text:
+        hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    return str(hash)
 
 
 def main():
