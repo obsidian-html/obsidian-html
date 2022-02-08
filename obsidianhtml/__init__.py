@@ -341,17 +341,19 @@ def simpleHash(text:str):
         hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     return str(hash)
 
+def printHelpAndExit(exitCode:int):
+    print('[Obsidian-html]')
+    print('- Add -i </path/to/input.yml> to provide config')
+    print('- Add -v for verbose output')
+    print('- Add -h to get helptext')
+    print('- Add -eht <target/path/file.name> to export the html template.')
+    exit(exitCode)
 
 def main():
     # Show help text
     # ---------------------------------------------------------
-    if '-h' in sys.argv or len(sys.argv) < 3:
-        print('[Obsidian-html]')
-        print('- Add -i </path/to/input.yml> to provide config')
-        print('- Add -v for verbose output')
-        print('- Add -h to get helptext')
-        print('- Add -eht <target/path/file.name> to export the html template.')
-        exit()
+    if '-h' in sys.argv:
+        printHelpAndExit(0)
 
     # Export packaged html template so users can edit it and then use their custom template
     # ---------------------------------------------------------
@@ -359,8 +361,8 @@ def main():
     for i, v in enumerate(sys.argv):
         if v == '-eht':
             if len(sys.argv) < (i + 2):
-                raise Exception("No output path given.\n Use obsidianhtml -eht /target/path/to/template.html to provide input.")
-                exit(1)
+                print(f'No output path given.\n  Use `obsidianhtml -eht /target/path/to/template.html` to provide input.')
+                printHelpAndExit(1)
             export_html_template_target_path = Path(sys.argv[i+1]).resolve()
             export_html_template_target_path.parent.mkdir(parents=True, exist_ok=True)
             html = OpenIncludedFile('template.html')
@@ -371,18 +373,18 @@ def main():
 
     # Load input yaml
     # ---------------------------------------------------------
-    input_yml_path_str = ''
+    input_yml_path_str = 'config.yml'
     for i, v in enumerate(sys.argv):
         if v == '-i':
             input_yml_path_str = sys.argv[i+1]
             break
 
-    if input_yml_path_str == '':
-        raise Exception("No yaml input given.\n Use obsidianhtml -i /path/to/config.yml to provide input.")
-        exit(1)
-
-    with open(input_yml_path_str, 'rb') as f:
-        config = yaml.load(f.read(), Loader=yaml.SafeLoader) 
+    try:
+        with open(input_yml_path_str, 'rb') as f:
+            config = yaml.load(f.read(), Loader=yaml.SafeLoader)
+    except FileNotFoundError:
+        print(f'Could not locate the config file {input_yml_path_str}.\n  Please try passing the exact location of it with the `obsidianhtml -i /your/path/to/{input_yml_path_str}` parameter.')
+        printHelpAndExit(1)
 
     # Overwrite conf
     for i, v in enumerate(sys.argv):
