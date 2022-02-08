@@ -97,4 +97,4 @@ def ExportStaticFiles(pb):
     # Custom copy
     c = OpenIncludedFile('not_created.html')
     with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
-        f.write(pb.html_template.replace('{dynamic_includes}', '').replace('{content}', c))
+        f.write(pb.html_template.replace('{dynamic_includes}', '').replace('{content}', c).replace('{html_url_prefix}', pb.config['html_url_prefix']))
