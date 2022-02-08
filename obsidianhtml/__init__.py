@@ -584,7 +584,7 @@ def main():
             if config['toggles']['verbose_printout']:
                 print(f'Building index.md')
 
-            index_md_content = '# Notes\n'
+            index_md_content = f'# {config["site_name"]}\n'
             for t in index_dict.keys():
                 # Add header
                 index_md_content += f'## {t}\n'
