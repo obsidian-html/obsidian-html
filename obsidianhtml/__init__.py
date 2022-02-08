@@ -15,7 +15,7 @@ from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
 from .lib import    DuplicateFileNameInRoot, \
                     GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, \
-                    IsValidLocalMarkdownLink, \
+                    IsValidLocalMarkdownLink, PopulateTemplate, \
                     image_suffixes
 from .PicknickBasket import PicknickBasket
 
@@ -233,7 +233,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         html_body = html_body.replace(safe_str, new_str)
 
     # [15] Tag not created links with a class so they can be decorated differently
-    html_body = html_body.replace('<a href="/not_created.html">', '<a href="/not_created.html" class="nonexistent-link">')
+    html_body = html_body.replace(f'<a href="{config["html_url_prefix"]}/not_created.html">', f'<a href="{config["html_url_prefix"]}/not_created.html" class="nonexistent-link">')
 
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
@@ -247,11 +247,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
 
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
-    html = html_template\
-        .replace('{title}', config['site_name'])\
-        .replace('{html_url_prefix}', config['html_url_prefix'])\
-        .replace('{dynamic_includes}', pb.dynamic_inclusions)\
-        .replace('{content}', html_body)
+    html = PopulateTemplate(pb, html_template, content=html_body)
 
     # Save file
     # ------------------------------------------------------------------
@@ -322,10 +318,8 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Compile html
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'])
 
-    html = pb.html_template.replace('{title}', pb.config['site_name'])\
-        .replace('{html_url_prefix}', pb.config['html_url_prefix'])\
-        .replace('{dynamic_includes}', '<link rel="stylesheet" href="'+pb.config['html_url_prefix']+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />')\
-        .replace('{content}', html_body)
+    di = '<link rel="stylesheet" href="'+pb.config['html_url_prefix']+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />'
+    html = PopulateTemplate(pb, pb.html_template, content=html_body, dynamic_includes=di)
 
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   

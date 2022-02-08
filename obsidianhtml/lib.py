@@ -97,4 +97,18 @@ def ExportStaticFiles(pb):
     # Custom copy
     c = OpenIncludedFile('not_created.html')
     with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
-        f.write(pb.html_template.replace('{dynamic_includes}', '').replace('{content}', c).replace('{html_url_prefix}', pb.config['html_url_prefix']))
+        f.write(PopulateTemplate(pb, pb.html_template, content=c, dynamic_includes=''))
+
+def PopulateTemplate(pb, template, content, title='', dynamic_includes=None):
+    # Defaults
+    if title == '':
+        title = pb.config['site_name']
+    if dynamic_includes is None:
+        dynamic_includes = pb.dynamic_inclusions
+
+    return template\
+        .replace('{title}', title)\
+        .replace('{dynamic_includes}', pb.dynamic_inclusions)\
+        .replace('{content}', content)\
+        .replace('{html_url_prefix}', pb.config['html_url_prefix'])
+    
