@@ -1,7 +1,8 @@
 > This page is under construction
 
-# Unit testing
+# Regression testing
 ## Installation
 ``` bash
 pip install beautifulsoup4
+python ci/tests/basic_regression_test.py
 ```

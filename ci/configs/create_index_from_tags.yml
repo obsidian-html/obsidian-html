@@ -1,0 +1,87 @@
+# The first folder that contains all obsidian files
+# Can be absent when toggles/compile_md == False
+# On linux, use fullpath instead of ~/
+obsidian_folder_path_str: 'ci/test_vault/'
+
+# The note that will be used as the index.html 
+# should be in obsidian_folder_path_str
+# Can be absent when toggles/compile_md == False
+# On linux, use fullpath instead of ~/
+obsidian_entrypoint_path_str: 'ci/test_vault/entrypoint.md'
+
+# Input and output path of markdown files
+# This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
+# On linux, use fullpath instead of ~/
+md_folder_path_str:  'tmp/md'
+
+# Markdown entrypoint path
+# This has to be md_folder_path_str + '/index.md' when toggles/compile_md == True
+# This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
+# On linux, use fullpath instead of ~/
+md_entrypoint_path_str: 'tmp/md/index.md'
+
+# Output path of HTML files
+# This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
+# On linux, use fullpath instead of ~/
+html_output_folder_path_str: 'tmp/html'
+
+# Will be inputted into the Html template as page title
+# Not used anywhere else atm.
+site_name: 'Obsidian-Html/Notes'
+
+# Use when deploying to https://mydomain.com/html_prefix/ instead of https://mydomain.com/
+# use '/html_prefix' (prepend slash, no slash at the end)
+html_url_prefix: ''
+
+# Provide the fullpath to a template file to use instead of standard template. 
+# Note that this file must contain at least "{content}" somewhere in the page.
+html_template_path_str: ''
+
+# Exclude subfolders
+# These are relative to obsidian_folder_path_str
+# To exclude a folder two levels deep, use level1/level2
+exclude_subfolders:
+  - ".obsidian"
+
+toggles:
+  # Opt-in/-out of Obsidian->Md conversion, set to False when using proper markdown as input
+  compile_md: True
+
+  # Opt-in/-out of Md->Html conversion, set to False when only wanting to get proper markdown from Obsidian
+  compile_html: True
+
+  # If this is false only the entrypoint and all its links (recursively) are processed
+  # if true all the notes will be processed
+  process_all: False
+
+  # Can be overwritten ad-hoc by using "obsidianhtml -i config.yml -v" (the -v option)
+  verbose_printout: False
+
+  # This option should be False for Obsidian->Md, but can be True when compile_md == False
+  # Setting it to True will cause an error when two files with the same file name are found anywhere in the input folder
+  allow_duplicate_filenames_in_root: False
+
+  # Sometimes linked images that should be local (based on the path) cannot be found.
+  # Toggle this to False to disable warnings if that happens.
+  warn_on_skipped_image: True
+
+  # This will skip emptying output folders, if you want to implement this yourself
+  no_clean: False
+
+  # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
+  relative_path_md: True
+  
+  features:
+    graph_view:
+      enabled: True           # Include code to build the graph view per page (default: True)
+      coalesce_force: '-200'
+
+    # Create an index.md with links to notes that have one of the given tags.
+    # This index.md will serve as the entrypoint.
+    # !! Enabling this feature will overwrite obsidian_entrypoint_path_str and md_entrypoint_path_str
+    create_index_from_tags:
+      enabled: True
+      tags:
+        - type/index1
+        - type/index2
+      add_links_in_graph_tree: True # The index.md will be created, and thus will be without links, this setting will create links to the notes that are matched.
