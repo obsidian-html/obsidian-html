@@ -97,7 +97,9 @@ def ExportStaticFiles(pb):
     # Custom copy
     c = OpenIncludedFile('not_created.html')
     with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
-        f.write(PopulateTemplate(pb, pb.html_template, content=c, dynamic_includes=''))
+        html = PopulateTemplate(pb, pb.html_template, content=c, dynamic_includes='')
+        html = html.replace('{html_url_prefix}', pb.config['html_url_prefix'])
+        f.write(html)
 
 def PopulateTemplate(pb, template, content, title='', dynamic_includes=None):
     # Defaults
@@ -109,6 +111,10 @@ def PopulateTemplate(pb, template, content, title='', dynamic_includes=None):
     return template\
         .replace('{title}', title)\
         .replace('{dynamic_includes}', pb.dynamic_inclusions)\
-        .replace('{content}', content)\
-        .replace('{html_url_prefix}', pb.config['html_url_prefix'])
+        .replace('{html_url_prefix}', pb.config['html_url_prefix'])\
+        .replace('{content}', content)
+
+        # Adding value replacement in content should be done in ConvertMarkdownPageToHtmlPage, 
+        # Between the md.StripCodeSections() and md.RestoreCodeSections() statements, otherwise codeblocks can be altered.
+        
     

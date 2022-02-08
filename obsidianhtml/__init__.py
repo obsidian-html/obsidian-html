@@ -204,7 +204,6 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         new_link = '![]('+urllib.parse.quote(config['html_url_prefix']+'/'+rel_path.as_posix())+')'
         safe_link = "\!\[.*\]\("+re.escape(link)+"\)"
         md.page = re.sub(safe_link, new_link, md.page)
-   
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
