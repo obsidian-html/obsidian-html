@@ -101,6 +101,10 @@ def ExportStaticFiles(pb):
         html = html.replace('{html_url_prefix}', pb.config['html_url_prefix'])
         f.write(html)
 
+    c = OpenIncludedFileBinary('favicon.ico')
+    with open (pb.paths['html_output_folder'].joinpath('favicon.ico'), 'wb') as f:
+        f.write(c)
+
 def PopulateTemplate(pb, template, content, title='', dynamic_includes=None):
     # Defaults
     if title == '':
