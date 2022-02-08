@@ -4,7 +4,6 @@ output/*
 local_configs/*
 local_output/*
 obsidianhtml.egg-info
-dist/*
 build.ps1
 build/*
 
