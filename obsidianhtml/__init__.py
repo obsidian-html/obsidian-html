@@ -10,10 +10,11 @@ import urllib.parse         # convert link characters like %
 import frontmatter
 import json
 import warnings
+import time
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
-from .lib import    DuplicateFileNameInRoot, \
+from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, \
                     IsValidLocalMarkdownLink, PopulateTemplate, \
                     image_suffixes
@@ -426,6 +427,7 @@ def main():
         config['toggles']['features']['backlinks'] = {}
         config['toggles']['features']['backlinks']['enabled'] = True
 
+
     # Set Paths
     # ---------------------------------------------------------
     paths = {
@@ -441,6 +443,22 @@ def main():
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
 
 
+    # Copy vault to tempdir, so any bugs will not affect the user's vault
+    # ---------------------------------------------------------
+    if 'copy_vault_to_tempdir' not in config or config['copy_vault_to_tempdir']:
+        # Copy over vault to tempdir
+        tmpdir = CreateTemporaryCopy(source_folder_path=paths['obsidian_folder'])
+
+        # update paths
+        paths['obsidian_folder'] = Path(tmpdir.name).resolve()
+        paths['obsidian_entrypoint'] = paths['obsidian_folder'].joinpath(paths['rel_obsidian_entrypoint'])
+
+
+    # Make "global" object that we can pass to functions
+    # ---------------------------------------------------------
+    pb = PicknickBasket(config, paths)
+
+
     # Compile dynamic inclusion list
     # ---------------------------------------------------------
     # This is a set of javascript/css files to be loaded into the header based on config choices.
@@ -452,7 +470,7 @@ def main():
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
 
-    # Remove previous output
+    # Remove potential previous output
     # ---------------------------------------------------------
     if config['toggles']['no_clean'] == False:
         print('> CLEARING OUTPUT FOLDERS')
@@ -463,15 +481,12 @@ def main():
         if paths['html_output_folder'].exists():
             shutil.rmtree(paths['html_output_folder'])    
 
-    # Recreate folder tree
+    # Create folder tree
     # ---------------------------------------------------------
     print('> CREATING OUTPUT FOLDERS')
     paths['md_folder'].mkdir(parents=True, exist_ok=True)
     paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
 
-    # Make "global" object that we can pass to functions
-    # ---------------------------------------------------------
-    pb = PicknickBasket(config, paths)
 
     # Convert Obsidian to markdown
     # ---------------------------------------------------------

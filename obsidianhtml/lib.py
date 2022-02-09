@@ -6,6 +6,9 @@ import urllib.parse         # convert link characters like %
 import warnings
 import shutil               # used to remove a non-empty directory, copy files
 from string import ascii_letters, digits
+import tempfile             # used to create temporary files/folders
+from distutils.dir_util import copy_tree
+import time
 
 # Open source files in the package
 import importlib.resources as pkg_resources
@@ -121,4 +124,14 @@ def PopulateTemplate(pb, template, content, title='', dynamic_includes=None):
         # Adding value replacement in content should be done in ConvertMarkdownPageToHtmlPage, 
         # Between the md.StripCodeSections() and md.RestoreCodeSections() statements, otherwise codeblocks can be altered.
         
+def CreateTemporaryCopy(source_folder_path):
+    # Create temp dir
+    tmpdir = tempfile.TemporaryDirectory()
+    
+    # Copy vault to temp dir
+    print(f"> COPYING VAULT {source_folder_path} TO {tmpdir.name}", end=' ')
+    copy_tree(source_folder_path, tmpdir.name)
+    print("< DONE")
+
+    return tmpdir
     
