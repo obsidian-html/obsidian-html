@@ -227,7 +227,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
             # Internal link, skip
             continue
 
-        new_str = f"<a href=\"{l}\" class=\"external-link\""
+        new_str = f"<a href=\"{l}\" target=\"_blank\" class=\"external-link\""
         safe_str = f"<a href=\"{l}\""
         html_body = html_body.replace(safe_str, new_str)
 
