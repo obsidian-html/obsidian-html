@@ -17,14 +17,15 @@
   
 .graph_svg {
     border:1px solid black;
-    margin-bottom: 20px;
+    margin-bottom: 0rem;
     display: none;
+    margin-top: 1rem;
 }
 
 .graph_button {
     width: 100%;
 border: none;
 color: #464b64;
-margin-top: 2rem;
+margin-top: 1rem;
 margin-bottom: 2rem;
 }

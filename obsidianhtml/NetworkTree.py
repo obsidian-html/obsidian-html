@@ -7,6 +7,7 @@ class NetworkTree:
     def __init__(self, conf):
         self.conf = conf
         self.tree = {'nodes': [], 'links': []}
+        self.node_lookup = {}
 
     def NewNode(self):
         return {'id': '', 'group': 1, 'url': ''}
@@ -43,6 +44,10 @@ class NetworkTree:
         self.tree['links'].append(link_obj) 
         if self.conf['toggles']['verbose_printout']:
             print("Link added")
+
+    def compile_node_lookup(self):
+        for n in self.tree['nodes']:
+            self.node_lookup[n['id']] = n
     
     def OutputJson(self):
         return json.dumps(self.tree)

@@ -234,6 +234,10 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     # [15] Tag not created links with a class so they can be decorated differently
     html_body = html_body.replace(f'<a href="{config["html_url_prefix"]}/not_created.html">', f'<a href="{config["html_url_prefix"]}/not_created.html" class="nonexistent-link">')
 
+    # [18] add backlinks to page 
+    if config['toggles']['features']['backlinks']['enabled']:
+        html_body += '{_obsidian_html_backlinks_pattern_:'+node['id']+'}'    
+
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if config['toggles']['features']['graph']['enabled']:
@@ -385,32 +389,40 @@ def main():
             config['toggles']['verbose_printout'] = True
 
     # Set defaults
+    set_features_defaults = False
+
     set_graph_defaults = False 
     set_create_index_from_tags_defaults = False 
+    set_backlinks_defaults = False
 
     if 'features' not in config['toggles']:
         config['toggles']['features'] = {}
-        set_graph_defaults = True
-        set_create_index_from_tags_defaults = True
+        set_features_defaults = True
     else:
         if 'graph' not in config['toggles']['features']:
             set_graph_defaults = True
         if 'create_index_from_tags' not in config['toggles']['features']:
-            set_create_index_from_tags_defaults = True       
+            set_create_index_from_tags_defaults = True
+        if 'backlinks' not in config['toggles']['features']:
+            set_backlinks_defaults = True
 
     if 'process_all' not in config['toggles']:
         config['toggles']['process_all'] = False
 
-    if set_graph_defaults:
+    if set_graph_defaults or set_features_defaults:
         config['toggles']['features']['graph'] = {}
         config['toggles']['features']['graph']['enabled'] = True
         config['toggles']['features']['graph']['coalesce_force'] = "-200"
 
-    if set_create_index_from_tags_defaults:
+    if set_create_index_from_tags_defaults or set_features_defaults:
         config['toggles']['features']['create_index_from_tags'] = {}
         config['toggles']['features']['create_index_from_tags']['enabled'] = False
         config['toggles']['features']['create_index_from_tags']['tags'] = []
         config['toggles']['features']['create_index_from_tags']['add_links_in_graph_tree'] = True
+
+    if set_backlinks_defaults or set_features_defaults:
+        config['toggles']['features']['backlinks'] = {}
+        config['toggles']['features']['backlinks']['enabled'] = True
 
     # Set Paths
     # ---------------------------------------------------------
@@ -556,7 +568,6 @@ def main():
                     if 'graph_name' in metadata.keys():
                         graph_name = metadata['graph_name']
 
-
                     # Check for each of the tags if its present                    
                     for t in include_tags:
                         if t in metadata['tags']:
@@ -696,6 +707,45 @@ def main():
                     print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
                 ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb)
 
+        # [18] Add in backlinks (test)
+        # ------------------------------------------
+        if config['toggles']['features']['backlinks']['enabled']:
+            # Make lookup so that we can easily find the url of a node
+            pb.network_tree.compile_node_lookup()
+
+            # for each file in output
+            for path in paths['html_output_folder'].rglob('*'):
+                if path.is_dir():
+                    continue
+
+                # not all files are utf-8 readable, just ignore those
+                try:
+                    with open(path, 'r', encoding="utf-8") as f:
+                        html = f.read()
+                except:
+                    continue
+                
+                # Get node_id
+                m = re.search(r'(?<=\{_obsidian_html_backlinks_pattern_:)(.*?)(?=\})', html)
+                if m is None:
+                    continue
+                node_id = m.group(0)
+
+                # Compile backlinks list
+                snippet = '<h2>Backlinks</h2>'
+                snippet += '\n<ul>\n'
+                for l in pb.network_tree.tree['links']:
+                    if l['target'] == node_id:
+                        url = pb.network_tree.node_lookup[l["source"]]['url']
+                        snippet += f'\t<li><a href="{url}">{l["source"]}</a></li>\n'
+                snippet += '</ul>'
+
+                # replace placeholder with list
+                html = re.sub('\{_obsidian_html_backlinks_pattern_:'+node_id+'}', snippet, html)
+
+                with open(path, 'w', encoding="utf-8") as f:
+                    f.write(html)
+
         # Create tag page
         recurseTagList(pb.tagtree, 'tags/', pb, level=0)
 
@@ -705,7 +755,5 @@ def main():
         # Write node json to static folder
         with open (pb.paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static').joinpath('graph.json'), 'w', encoding="utf-8") as f:
             f.write(pb.network_tree.OutputJson())
-
-        
 
     print('> DONE')
