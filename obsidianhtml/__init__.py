@@ -756,7 +756,7 @@ def main():
                 snippet += '</ul>'
 
                 # replace placeholder with list
-                html = re.sub('\{_obsidian_html_backlinks_pattern_:'+node_id+'}', snippet, html)
+                html = re.sub('\{_obsidian_html_backlinks_pattern_:'+re.escape(node_id)+'}', snippet, html)
 
                 with open(path, 'w', encoding="utf-8") as f:
                     f.write(html)

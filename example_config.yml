@@ -38,8 +38,8 @@ html_url_prefix: ''
 html_template_path_str: ''
 
 # Provide an array of custom inclusions (css, javascript, etc) that you would like to be included in the resultant html
-html_custom_inclusions:
-  # - '<link rel="stylesheet" href="/assets/custom.css" />'
+#html_custom_inclusions:
+#  - '<link rel="stylesheet" href="/assets/custom.css" />'
 
 # Exclude subfolders
 # These are relative to obsidian_folder_path_str
@@ -82,8 +82,13 @@ toggles:
   
   # Below are toggles for optional features and their related settings.
   features:
+    # Show backlinks at the bottom of each note
+    backlinks:
+      enabled: True
+    
+    # Include code to build the graph view per page 
     graph:
-      enabled: True           # Include code to build the graph view per page (default: True)
+      enabled: True                 # (default: True)
       coalesce_force: '-200'
 
     # Create an index.md with links to notes that have one of the given tags.
