@@ -37,6 +37,10 @@ html_url_prefix: ''
 # Note that this file must contain at least "{content}" somewhere in the page.
 html_template_path_str: ''
 
+# Provide an array of custom inclusions (css, javascript, etc) that you would like to be included in the resultant html
+html_custom_inclusions:
+  # - '<link rel="stylesheet" href="/assets/custom.css" />'
+
 # Exclude subfolders
 # These are relative to obsidian_folder_path_str
 # To exclude a folder two levels deep, use level1/level2

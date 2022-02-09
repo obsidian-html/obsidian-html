@@ -431,6 +431,8 @@ def main():
     # ---------------------------------------------------------
     # This is a set of javascript/css files to be loaded into the header based on config choices.
     dynamic_inclusions = ""
+    if 'html_custom_inclusions' in config:
+        dynamic_inclusions += '\n'.join(config['html_custom_inclusions']) +'\n'
     if config['toggles']['features']['graph']['enabled']:
         dynamic_inclusions += '<link rel="stylesheet" href="'+config["html_url_prefix"]+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
