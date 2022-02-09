@@ -154,6 +154,21 @@ class TestDefaultMode(ModeTemplate):
         next_url = self.obsidian_type_links_should_work(next_url)
         self.markdown_type_links_should_work(next_url)
 
+class TestHtmlPrefixMode(ModeTemplate):
+    """Use default settings and run all tests"""
+    testcase_name = "HtmlPrefix"
+    testcase_config_file_name = 'html_prefix.yml'
+
+    def test_A__test_self(self):
+        "Tests working of the test structure"
+        self.self_check()
+
+    def test_B__index_and_links(self):
+        "Tests placement of files and working of links"
+        next_url = self.index_html_should_exist(path=f'{self.testcase_config["html_url_prefix"][1:]}/index.html')
+        next_url = self.obsidian_type_links_should_work(next_url)
+        self.markdown_type_links_should_work(next_url)
+
 class TestMisc(ModeTemplate):
     """Use default settings and run all tests"""
     testcase_name = "Default"
@@ -162,7 +177,7 @@ class TestMisc(ModeTemplate):
     def test_special_characters_should_be_preserved(self):
         self.scribe('special characters should be preserved')
         soup = html_get('Special Characters.html')
-        self.assertEqual(len(soup.text), 20915)
+        self.assertEqual(len(soup.text), 20926)
 
 
 if __name__ == '__main__':
@@ -193,7 +208,7 @@ if __name__ == '__main__':
         stack.callback(partial(print, 'DEFERRED: closed webserver'))
 
         time.sleep(0.1)
-        print("WEBSERVER: started on http://localhost:8888")
+        print(f"WEBSERVER: started on http://localhost:8888 in {paths['html_output_folder']}")
 
         # Run tests
         # ----------------------------
