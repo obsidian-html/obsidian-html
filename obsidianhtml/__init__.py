@@ -749,11 +749,18 @@ def main():
                 # Compile backlinks list
                 snippet = '<h2>Backlinks</h2>'
                 snippet += '\n<ul>\n'
+                i = 0
                 for l in pb.network_tree.tree['links']:
                     if l['target'] == node_id:
                         url = pb.network_tree.node_lookup[l["source"]]['url']
                         snippet += f'\t<li><a href="{url}">{l["source"]}</a></li>\n'
+                        i += 1
                 snippet += '</ul>'
+
+                # remove everything if no backlinks are present
+                # (otherwise we have a header with no content below it)
+                if i == 0:
+                    snippet = ''
 
                 # replace placeholder with list
                 html = re.sub('\{_obsidian_html_backlinks_pattern_:'+re.escape(node_id)+'}', snippet, html)
