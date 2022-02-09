@@ -22,3 +22,4 @@
   - [15] Tag not created links with a class so it can be decorated differently
   - [16] Wrap body html in valid html structure from template
   - [17] Show a graph view per note
+  - [18] Display backlinks to note
