@@ -47,6 +47,11 @@ html_custom_inclusions:
 exclude_subfolders:
   - ".obsidian"
 
+# Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data. 
+# Should be fine to turn off if copying the vault takes too long / disk space is too limited.
+# The tempdir is automatically removed on exit of the program.
+copy_vault_to_tempdir: True
+
 toggles:
   # Opt-in/-out of Obsidian->Md conversion, set to False when using proper markdown as input
   compile_md: True
@@ -75,6 +80,7 @@ toggles:
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
   relative_path_md: True
   
+  # Below are toggles for optional features and their related settings.
   features:
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)
