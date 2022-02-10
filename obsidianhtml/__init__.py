@@ -3,7 +3,7 @@ import sys                  # commandline arguments
 import os                   #
 import shutil               # used to remove a non-empty directory, copy files
 import uuid
-import re                   # regex string finding/replacing
+import regex as re          # regex string finding/replacing
 from pathlib import Path    # 
 import markdown             # convert markdown to html
 import yaml
@@ -375,7 +375,7 @@ def loadConfig():
     try:
         with open(input_yml_path_str, 'rb') as f:
             newConfig = yaml.safe_load(f.read())
-            theConfig.update({k: v for k, v in newConfig.items() if v})
+            theConfig.update({k: v for k, v in newConfig.items()})
     except FileNotFoundError:
         print(f'Could not locate the config file {input_yml_path_str}.\n  Please try passing the exact location of it with the `obsidianhtml -i /your/path/to/{input_yml_path_str}` parameter.')
         printHelpAndExit(1)
