@@ -264,6 +264,25 @@ class TestMisc(ModeTemplate):
         soup = html_get('Special Characters.html')
         self.assertIn(len(soup.text), {20925, 20926}, msg="difference in length means that characters have been lost")
 
+class TestCustomHtmlTemplate(ModeTemplate):
+    """Use custom html template"""
+    testcase_name = "CustomHtmlTemplate"
+    testcase_config_file_name = 'custom_html_template.yml'
+
+    def test_if_custom_template_is_used(self):
+        self.scribe('custom html template should be used')
+        
+        # get index.html
+        soup = html_get('index.html')
+        
+        # find div with certain ID from custom template, and doublecheck the contents to be sure.
+        div_id = 'test'
+        div = soup.body.find('div', attrs={'id':div_id})
+        self.assertIsNotNone(div, msg="Div from custom template with id={div_id} was not found.")
+
+        content = "See if this div is included"
+        self.assertEqual(div.text, content, msg=f"innerhtml of custom div was expected to be \n\t'{content}'\n but was \n\t'{div.text}'")
+
 
 if __name__ == '__main__':
     # Args
