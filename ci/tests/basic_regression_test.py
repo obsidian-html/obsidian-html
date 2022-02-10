@@ -106,7 +106,7 @@ class ModeTemplate(unittest.TestCase):
     def self_check(self):
         self.scribe('(self check) config dict should have been fetched')
         config = self.testcase_config
-        self.assertIn('site_name', config.keys())
+        self.assertIn('obsidian_folder_path_str', config.keys())
     
     # Standard tests
     # -------------------------------
