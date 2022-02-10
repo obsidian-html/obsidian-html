@@ -386,7 +386,7 @@ def main():
             break
 
     # Set config
-    input_yml_path_str = False
+    input_yml_path_str = 'config.yml'
     for i, v in enumerate(sys.argv):
         if v == '-i':
             if len(sys.argv) < (i + 2):
@@ -520,7 +520,6 @@ def main():
                 print('Will write the note index to: ', index_dst_path)
                 print('Will overwrite entrypoints: md_entrypoint_path_str, obsidian_entrypoint, md_entrypoint, rel_md_entrypoint_path')
 
-            theConfig['md_entrypoint_path_str']  = str(index_dst_path)                              # should not be used anymore at this point, but just to be sure
             paths['obsidian_entrypoint']         = paths['obsidian_folder'].joinpath('dontparse')   # Set to nonexistent file without .md so the entrypoint becomes invalid
             paths['md_entrypoint']               = index_dst_path
             paths['rel_md_entrypoint_path']      = paths['md_entrypoint'].relative_to(paths['md_folder'])
