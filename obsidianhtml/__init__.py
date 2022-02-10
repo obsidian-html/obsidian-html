@@ -18,7 +18,7 @@ from .MarkdownLink import MarkdownLink
 from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, \
                     IsValidLocalMarkdownLink, PopulateTemplate, \
-                    image_suffixes
+                    image_suffixes, printHelpAndExit
 from .PicknickBasket import PicknickBasket
 
 # Open source files in the package
@@ -26,7 +26,6 @@ import importlib.resources as pkg_resources
 import importlib.util
 from . import src
 
-theConfig = {}
 
 def recurseObisidianToMarkdown(page_path_str, pb):
     '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
@@ -75,7 +74,7 @@ def recurseObisidianToMarkdown(page_path_str, pb):
         files[link_path]['processed'] = True         
 
         # Convert the note that is linked to
-        if getConf('toggles','verbose_printout'):
+        if pb.gc('toggles','verbose_printout'):
             print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
 
         recurseObisidianToMarkdown(files[link_path]['fullpath'], pb)
@@ -117,7 +116,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         node['id'] = md.metadata['graph_name']
 
     # Url is used so you can open the note/node by clicking on it
-    node['url'] = f'{getConf("html_url_prefix")}/{str(md.rel_dst_path)[:-3]}.html'
+    node['url'] = f'{pb.gc("html_url_prefix")}/{str(md.rel_dst_path)[:-3]}.html'
     pb.network_tree.AddNode(node)
 
     # Backlinks are set so when recursing, the links (edges) can be determined
@@ -134,7 +133,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     if files[md.rel_src_path.as_posix()]['processed'] == True:
         return
 
-    if getConf('toggles','verbose_printout'):
+    if pb.gc('toggles','verbose_printout'):
         print("html: converting ", page_path.as_posix(), " (parent ", md.src_path, ")")
 
     # [1] Replace code blocks with placeholders so they aren't altered
@@ -148,7 +147,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
     proper_links = re.findall("(?<=\]\().+?(?=\))", md.page)
     for l in proper_links:
         # Init link
-        link = MarkdownLink(l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = getConf('toggles','relative_path_md'))
+        link = MarkdownLink(l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = pb.gc('toggles','relative_path_md'))
 
         # Don't process in the following cases
         if link.isValid == False or link.isExternal == True: 
@@ -165,7 +164,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
 
         # [13] Link to a custom 404 page when linked to a not-created note
         if link.url.split('/')[-1] == 'not_created.md':
-            new_link = f']({getConf("html_url_prefix")}/not_created.html)'
+            new_link = f']({pb.gc("html_url_prefix")}/not_created.html)'
         else:
             if link.rel_src_path_posix not in files.keys():
                 continue
@@ -176,7 +175,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
             query_part = ''
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
-            new_link = f']({getConf("html_url_prefix")}/{link.rel_src_path_posix[:-3]}.html{query_part})'
+            new_link = f']({pb.gc("html_url_prefix")}/{link.rel_src_path_posix[:-3]}.html{query_part})'
             
         # Update link
         safe_link = re.escape(']('+l+')')
@@ -192,7 +191,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
         if rel_path.as_posix() not in files.keys():
-            if getConf('toggles','warn_on_skipped_image'):
+            if pb.gc('toggles','warn_on_skipped_image'):
                 warnings.warn(f"Image {str(full_link_path)} treated as external and not imported in html")
             continue
 
@@ -202,7 +201,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         shutil.copyfile(full_link_path, dst_path)
 
         # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = '![]('+urllib.parse.quote(getConf('html_url_prefix')+'/'+rel_path.as_posix())+')'
+        new_link = '![]('+urllib.parse.quote(pb.gc('html_url_prefix')+'/'+rel_path.as_posix())+')'
         safe_link = "\!\[.*\]\("+re.escape(link)+"\)"
         md.page = re.sub(safe_link, new_link, md.page)
 
@@ -228,32 +227,32 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
             # Internal link, skip
             continue
         external_blank_html = ''
-        if getConf('toggles','external_blank'):
+        if pb.gc('toggles','external_blank'):
             external_blank_html = 'target=\"_blank\" '
         new_str = f"<a href=\"{l}\" {external_blank_html}class=\"external-link\""
         safe_str = f"<a href=\"{l}\""
         html_body = html_body.replace(safe_str, new_str)
 
     # [15] Tag not created links with a class so they can be decorated differently
-    html_body = html_body.replace(f'<a href="{getConf("html_url_prefix")}/not_created.html">', f'<a href="{getConf("html_url_prefix")}/not_created.html" class="nonexistent-link">')
+    html_body = html_body.replace(f'<a href="{pb.gc("html_url_prefix")}/not_created.html">', f'<a href="{pb.gc("html_url_prefix")}/not_created.html" class="nonexistent-link">')
 
     # [18] add backlinks to page 
-    if getConf('toggles','features','backlinks','enabled'):
+    if pb.gc('toggles','features','backlinks','enabled'):
         html_body += '{_obsidian_html_backlinks_pattern_:'+node['id']+'}'    
 
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
-    if getConf('toggles','features','graph','enabled'):
+    if pb.gc('toggles','features','graph','enabled'):
         graph_template = OpenIncludedFile('graph_template.html')
         graph_template = graph_template.replace('{id}', simpleHash(html_body))\
                                        .replace('{pinnedNode}', node['id'])\
-                                       .replace('{html_url_prefix}', getConf('html_url_prefix'))\
-                                       .replace('{graph_coalesce_force}', getConf('toggles','features','graph','coalesce_force'))
+                                       .replace('{html_url_prefix}', pb.gc('html_url_prefix'))\
+                                       .replace('{graph_coalesce_force}', pb.gc('toggles','features','graph','coalesce_force'))
         html_body += f"\n{graph_template}\n"
 
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
-    html = PopulateTemplate(getConf('site_name'), getConf('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body)
+    html = PopulateTemplate(pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body)
 
     # Save file
     # ------------------------------------------------------------------
@@ -285,7 +284,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
             continue
 
         # Convert the note that is linked to
-        if getConf('toggles','verbose_printout'):
+        if pb.gc('toggles','verbose_printout'):
             print("html: initiating conversion for ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
 
         ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], pb, backlinkNode)
@@ -295,7 +294,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     # Get relevant paths
     # ---------------------------------------------------------
-    html_url_prefix = getConf('html_url_prefix')
+    html_url_prefix = pb.gc('html_url_prefix')
     tag_dst_path = pb.paths['html_output_folder'].joinpath(f'{tagpath}index.html').resolve()
     tag_dst_path_posix = tag_dst_path.as_posix()
     rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
@@ -324,8 +323,8 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Compile html
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'])
 
-    di = '<link rel="stylesheet" href="'+getConf('html_url_prefix')+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />'
-    html = PopulateTemplate(getConf('site_name'), getConf('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di)
+    di = '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />'
+    html = PopulateTemplate(pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di)
 
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
@@ -341,55 +340,17 @@ def simpleHash(text:str):
         hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     return str(hash)
 
-def printHelpAndExit(exitCode:int):
-    print('[Obsidian-html]')
-    print('- Add -i </path/to/input.yml> to provide config')
-    print('- Add -v for verbose output')
-    print('- Add -h to get helptext')
-    print('- Add -eht <target/path/file.name> to export the html template.')
-    exit(exitCode)
 
-def getConf(*keys:str):
-    value = theConfig
-    try:
-        for key in keys:
-            value = value[key]
-    except KeyError:
-        raise KeyError(f'The key, {keys}, is not found in your configuration file.  Please ensure that you have added it, and then try again')
-    return value
-
-def loadConfig():
-    # Load default yaml first
-    # ---------------------------------------------------------
-    global theConfig
-    theConfig = yaml.safe_load(OpenIncludedFile('defaults_config.yml'))
-
-    # Load input yaml
-    # ---------------------------------------------------------
-    input_yml_path_str = 'config.yml'
-    for i, v in enumerate(sys.argv):
-        if v == '-i':
-            input_yml_path_str = sys.argv[i+1]
-            break
-
-    try:
-        with open(input_yml_path_str, 'rb') as f:
-            newConfig = yaml.safe_load(f.read())
-            theConfig.update({k: v for k, v in newConfig.items()})
-    except FileNotFoundError:
-        print(f'Could not locate the config file {input_yml_path_str}.\n  Please try passing the exact location of it with the `obsidianhtml -i /your/path/to/{input_yml_path_str}` parameter.')
-        printHelpAndExit(1)
-
-    # Overwrite conf for verbose from command line
-    for i, v in enumerate(sys.argv):
-        if v == '-v':
-            theConfig['toggles']['verbose_printout'] = True
 
 def main():
     # Show help text
     # ---------------------------------------------------------
     if '-h' in sys.argv:
         printHelpAndExit(0)
+
+    # Make "global" object that we can pass to functions
+    # ---------------------------------------------------------
+    pb = PicknickBasket()
 
     # Export packaged html template so users can edit it and then use their custom template
     # ---------------------------------------------------------
@@ -407,17 +368,44 @@ def main():
             print(f"Exported html template to {str(export_html_template_target_path)}.")
             exit(0)
 
-    loadConfig()
+
+    # Export packaged default config so users can see what is default behavior
+    # ---------------------------------------------------------
+    for i, v in enumerate(sys.argv):
+        if v == '-gc':
+            default_config = OpenIncludedFile('defaults_config.yml')
+            print(default_config)
+            exit(0)
+
+    # Other commandline arguments
+    # ---------------------------------------------------------
+    # Set verbosity (overwrite config)
+    for i, v in enumerate(sys.argv):
+        if v == '-v':
+            pb.verbose = True
+            break
+
+    # Set config
+    input_yml_path_str = False
+    for i, v in enumerate(sys.argv):
+        if v == '-i':
+            if len(sys.argv) < (i + 2):
+                print(f'No config path given.\n  Use `obsidianhtml -i /target/path/to/config.yml` to provide input.')
+                printHelpAndExit(1)            
+            input_yml_path_str = sys.argv[i+1]
+            break
+
+    pb.loadConfig(input_yml_path_str)
 
 
     # Set Paths
     # ---------------------------------------------------------
     paths = {
-        'obsidian_folder': Path(getConf('obsidian_folder_path_str')).resolve(),
-        'md_folder': Path(getConf('md_folder_path_str')).resolve(),
-        'obsidian_entrypoint': Path(getConf('obsidian_entrypoint_path_str')).resolve(),
-        'md_entrypoint': Path(getConf('md_entrypoint_path_str')).resolve(),
-        'html_output_folder': Path(getConf('html_output_folder_path_str')).resolve()
+        'obsidian_folder': Path(pb.gc('obsidian_folder_path_str')).resolve(),
+        'md_folder': Path(pb.gc('md_folder_path_str')).resolve(),
+        'obsidian_entrypoint': Path(pb.gc('obsidian_entrypoint_path_str')).resolve(),
+        'md_entrypoint': Path(pb.gc('md_entrypoint_path_str')).resolve(),
+        'html_output_folder': Path(pb.gc('html_output_folder_path_str')).resolve()
     }
 
     # Deduce relative paths
@@ -427,7 +415,7 @@ def main():
 
     # Copy vault to tempdir, so any bugs will not affect the user's vault
     # ---------------------------------------------------------
-    if getConf('copy_vault_to_tempdir'):
+    if pb.gc('copy_vault_to_tempdir'):
         # Copy over vault to tempdir
         tmpdir = CreateTemporaryCopy(source_folder_path=paths['obsidian_folder'])
 
@@ -435,24 +423,28 @@ def main():
         paths['obsidian_folder'] = Path(tmpdir.name).resolve()
         paths['obsidian_entrypoint'] = paths['obsidian_folder'].joinpath(paths['rel_obsidian_entrypoint'])
 
+    # Add paths to pb
+    # ---------------------------------------------------------
+    pb.paths = paths
+
     # Compile dynamic inclusion list
     # ---------------------------------------------------------
     # This is a set of javascript/css files to be loaded into the header based on config choices.
     dynamic_inclusions = ""
     try:
-        dynamic_inclusions += '\n'.join(getConf('html_custom_inclusions')) +'\n'
+        dynamic_inclusions += '\n'.join(pb.gc('html_custom_inclusions')) +'\n'
     except:
         None
-    if getConf('toggles','features','graph','enabled'):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+getConf('html_url_prefix')+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
+    if pb.gc('toggles','features','graph','enabled'):
+        dynamic_inclusions += '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
 
     # Remove potential previous output
     # ---------------------------------------------------------
-    if getConf('toggles','no_clean') == False:
+    if pb.gc('toggles','no_clean') == False:
         print('> CLEARING OUTPUT FOLDERS')
-        if getConf('toggles','compile_md'):
+        if pb.gc('toggles','compile_md'):
             if paths['md_folder'].exists():
                 shutil.rmtree(paths['md_folder'])
 
@@ -465,13 +457,10 @@ def main():
     paths['md_folder'].mkdir(parents=True, exist_ok=True)
     paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
 
-    # Make "global" object that we can pass to functions
-    # ---------------------------------------------------------
-    pb = PicknickBasket(getConf('toggles','verbose_printout'), paths)
 
     # Convert Obsidian to markdown
     # ---------------------------------------------------------
-    if getConf('toggles','compile_md'):
+    if pb.gc('toggles','compile_md'):
 
         # Load all filenames in the root folder.
         # This data will be used to check which files are local, and to get their full path
@@ -484,10 +473,10 @@ def main():
             # Exclude configured subfolders
             try:
                 _continue = False
-                for folder in getConf('exclude_subfolders'):
+                for folder in pb.gc('exclude_subfolders'):
                     excl_folder_path = paths['obsidian_folder'].joinpath(folder)
                     if path.resolve().is_relative_to(excl_folder_path):
-                        if getConf('toggles','verbose_printout'):
+                        if pb.gc('toggles','verbose_printout'):
                             print(f'Excluded folder {excl_folder_path}: Excluded file {path.name}.')
                         _continue = True
                     continue
@@ -497,7 +486,7 @@ def main():
                 None
 
             # Check if filename is duplicate
-            if path.name in files.keys() and getConf('toggles','allow_duplicate_filenames_in_root') == False:
+            if path.name in files.keys() and pb.gc('toggles','allow_duplicate_filenames_in_root') == False:
                 print(path)
                 raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
@@ -508,26 +497,26 @@ def main():
 
         # Create index.md based on given tagname, that will serve as the entrypoint
         # ---------------------------------------------------------
-        if getConf('toggles','features','create_index_from_tags','enabled'):
-            if getConf('toggles','verbose_printout'):
+        if pb.gc('toggles','features','create_index_from_tags','enabled'):
+            if pb.gc('toggles','verbose_printout'):
                 print('> FEATURE: CREATE INDEX FROM TAGS: Enabled')
 
             # Test input
-            if not isinstance(getConf('toggles','features','create_index_from_tags','tags'), list):
+            if not isinstance(pb.gc('toggles','features','create_index_from_tags','tags'), list):
                 raise Exception("toggles/features/create_index_from_tags/tags should be a list")
 
-            if len(getConf('toggles','features','create_index_from_tags','tags')) == 0:
+            if len(pb.gc('toggles','features','create_index_from_tags','tags')) == 0:
                 raise Exception("Feature create_index_from_tags is enabled, but no tags were listed")
 
             # shorthand 
-            include_tags = getConf('toggles','features','create_index_from_tags','tags')
-            if getConf('toggles','verbose_printout'):
+            include_tags = pb.gc('toggles','features','create_index_from_tags','tags')
+            if pb.gc('toggles','verbose_printout'):
                 print('Looking for tags: ', include_tags)
 
             # overwrite defaults
             index_dst_path = paths['md_folder'].joinpath('__tags_index.md').resolve()
 
-            if getConf('toggles','verbose_printout'):
+            if pb.gc('toggles','verbose_printout'):
                 print('Will write the note index to: ', index_dst_path)
                 print('Will overwrite entrypoints: md_entrypoint_path_str, obsidian_entrypoint, md_entrypoint, rel_md_entrypoint_path')
 
@@ -571,7 +560,7 @@ def main():
                     # Check for each of the tags if its present                    
                     for t in include_tags:
                         if t in metadata['tags']:
-                            if getConf('toggles','verbose_printout'):
+                            if pb.gc('toggles','verbose_printout'):
                                 print(f'Matched note {k} on tag {t}')
 
                             # copy file to temp filetree for checking later
@@ -585,14 +574,14 @@ def main():
             if len(_files.keys()) == 0:
                 raise Exception(f"No notes found with the given tags.")
 
-            if not getConf('toggles','process_all'):
+            if not pb.gc('toggles','process_all'):
                 # Overwrite the filetree 
                 files = _files
 
-            if getConf('toggles','verbose_printout'):
+            if pb.gc('toggles','verbose_printout'):
                 print(f'Building index.md')
 
-            index_md_content = f'# {getConf("site_name")}\n'
+            index_md_content = f'# {pb.gc("site_name")}\n'
             for t in index_dict.keys():
                 # Add header
                 index_md_content += f'## {t}\n'
@@ -607,21 +596,21 @@ def main():
                 f.write(index_md_content)
 
             # [17] Build graph node/links
-            if getConf('toggles','features','create_index_from_tags','add_links_in_graph_tree'):
+            if pb.gc('toggles','features','create_index_from_tags','add_links_in_graph_tree'):
 
-                if getConf('toggles','verbose_printout'):
+                if pb.gc('toggles','verbose_printout'):
                     print(f'Adding graph links between index.md and the matched notes')
                 
                 node = pb.network_tree.NewNode()
                 node['id'] = 'index'
-                node['url'] = f'{getConf("html_url_prefix")}/index.html'
+                node['url'] = f'{pb.gc("html_url_prefix")}/index.html'
                 pb.network_tree.AddNode(node)
                 bln = node
                 for t in index_dict.keys():
                     for n in index_dict[t]:
                         node = pb.network_tree.NewNode()
                         node['id'] = n[2]
-                        node['url'] = f'{getConf("html_url_prefix")}/{n[1][:-3]}.html'
+                        node['url'] = f'{pb.gc("html_url_prefix")}/{n[1][:-3]}.html'
                         pb.network_tree.AddNode(node)
 
                         link = pb.network_tree.NewLink()
@@ -629,7 +618,7 @@ def main():
                         link['target'] = node['id']
                         pb.network_tree.AddLink(link)
 
-            if getConf('toggles','verbose_printout'):
+            if pb.gc('toggles','verbose_printout'):
                 print('< FEATURE: CREATE INDEX FROM TAGS: Done')
 
 
@@ -640,7 +629,7 @@ def main():
         recurseObisidianToMarkdown(str(paths['obsidian_entrypoint']), pb)
 
         # Keep going until all other files are processed
-        if getConf('toggles','process_all') or getConf('toggles','features','create_index_from_tags','enabled'):
+        if pb.gc('toggles','process_all') or pb.gc('toggles','features','create_index_from_tags','enabled'):
             # Note: for case create_index_from_tags/enabled = True and process_all = False, 
             #       the files dict has been overwritten from including all files, to only the files matched on the provided tags 
             unparsed = {}
@@ -652,21 +641,21 @@ def main():
             l = len(unparsed.keys())
             for k in unparsed.keys():
                 i += 1
-                if getConf('toggles','verbose_printout') == True:
+                if pb.gc('toggles','verbose_printout') == True:
                     print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
                 recurseObisidianToMarkdown(unparsed[k]['fullpath'], pb)
 
 
     # Convert Markdown to Html
     # ------------------------------------------
-    if getConf('toggles','compile_html'):
+    if pb.gc('toggles','compile_html'):
         print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(paths["md_entrypoint"])})')
 
         # Get html template code. 
         # Every note will become a html page, where the body comes from the note's markdown, 
         # and the wrapper code from this template.
         try:
-            with open(Path(getConf('html_template_path_str')).resolve()) as f:
+            with open(Path(pb.gc('html_template_path_str')).resolve()) as f:
                 html_template = f.read()
         except:
             html_template = OpenIncludedFile('template.html')
@@ -692,7 +681,7 @@ def main():
         ConvertMarkdownPageToHtmlPage(str(paths['md_entrypoint']), pb)
 
         # Keep going until all other files are processed
-        if getConf('toggles','process_all') == True:
+        if pb.gc('toggles','process_all') == True:
             unparsed = {}
             for k in files.keys():
                 if files[k]["processed"] == False:
@@ -702,13 +691,13 @@ def main():
             l = len(unparsed.keys())
             for k in unparsed.keys():
                 i += 1
-                if getConf('toggles','verbose_printout') == True:
+                if pb.gc('toggles','verbose_printout') == True:
                     print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
                 ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb)
 
         # [18] Add in backlinks (test)
         # ------------------------------------------
-        if getConf('toggles','features','backlinks','enabled'):
+        if pb.gc('toggles','features','backlinks','enabled'):
             # Make lookup so that we can easily find the url of a node
             pb.network_tree.compile_node_lookup()
 
@@ -756,7 +745,7 @@ def main():
         recurseTagList(pb.tagtree, 'tags/', pb, level=0)
 
         # Add Extra stuff to the output directories
-        ExportStaticFiles(pb, getConf('toggles','features','graph','enabled'), getConf('html_url_prefix'), getConf('site_name'))
+        ExportStaticFiles(pb, pb.gc('toggles','features','graph','enabled'), pb.gc('html_url_prefix'), pb.gc('site_name'))
 
         # Write node json to static folder
         with open (pb.paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static').joinpath('graph.json'), 'w', encoding="utf-8") as f:
