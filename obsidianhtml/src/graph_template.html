@@ -1,5 +1,7 @@
-<svg class="graph_svg" id="A{id}{level}" width="680" height="400"></svg>
-<button class="graph_button" id="B{id}{level}" level="{level}" onclick="run('{id}'+this.level, '{pinnedNode}');">Show Graph</button>
+<div class="graph">
+    <svg class="graph_svg" id="A{id}{level}" width="680" height="400"></svg>
+    <button class="graph_button" id="B{id}{level}" level="{level}" onclick="run('{id}'+this.level, '{pinnedNode}');">Show Graph</button>
+</div>
 <script>
 function run(uid, pinnedNode){
     // Get elements

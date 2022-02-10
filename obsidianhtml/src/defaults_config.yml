@@ -1,14 +1,3 @@
-# The first folder that contains all obsidian files
-# Can be absent when toggles/compile_md == False
-# On linux, use fullpath instead of ~/
-obsidian_folder_path_str: 'C:\Users\User\Obsidian\Notes'   
-
-# The note that will be used as the index.html 
-# should be in obsidian_folder_path_str
-# Can be absent when toggles/compile_md == False
-# On linux, use fullpath instead of ~/
-obsidian_entrypoint_path_str: 'C:\Users\User\Documents\Obsidian\Notes\My Entrypoint Note.md'
-
 # Input and output path of markdown files
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 # On linux, use fullpath instead of ~/
@@ -29,23 +18,13 @@ html_output_folder_path_str: 'output/html'
 # Not used anywhere else atm.
 site_name: 'Obsidian-Html/Notes'
 
-# Use when deploying to https://mydomain.com/html_prefix/ instead of https://mydomain.com/
-# use '/html_prefix' (prepend slash, no slash at the end)
-html_url_prefix: ''
-
-# Provide the fullpath to a template file to use instead of standard template. 
-# Note that this file must contain at least "{content}" somewhere in the page.
-html_template_path_str: ''
-
-# Provide an array of custom inclusions (css, javascript, etc) that you would like to be included in the resultant html
-#html_custom_inclusions:
-#  - '<link rel="stylesheet" href="/assets/custom.css" />'
-
 # Exclude subfolders
 # These are relative to obsidian_folder_path_str
 # To exclude a folder two levels deep, use level1/level2
 exclude_subfolders:
   - ".obsidian"
+  - ".trash"
+  - ".DS_Store"
 
 # Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data. 
 # Should be fine to turn off if copying the vault takes too long / disk space is too limited.
@@ -79,19 +58,10 @@ toggles:
 
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
   relative_path_md: True
-
-  # Whether external http anchor links should have a target of "_blank"
-  external_blank: False
   
-  # Below are toggles for optional features and their related settings.
   features:
-    # Show backlinks at the bottom of each note
-    backlinks:
-      enabled: True
-    
-    # Include code to build the graph view per page 
     graph:
-      enabled: True                 # (default: True)
+      enabled: True           # Include code to build the graph view per page (default: True)
       coalesce_force: '-200'
 
     # Create an index.md with links to notes that have one of the given tags.
@@ -101,3 +71,5 @@ toggles:
       enabled: False
       tags: []
       add_links_in_graph_tree: True # The index.md will be created, and thus will be without links, this setting will create links to the notes that are matched.
+    backlinks:
+      enabled: True

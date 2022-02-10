@@ -1,29 +1,29 @@
 # The first folder that contains all obsidian files
 # Can be absent when toggles/compile_md == False
 # On linux, use fullpath instead of ~/
-obsidian_folder_path_str: 'C:\Users\User\Obsidian\Notes'   
+obsidian_folder_path_str: 'ci/test_vault/'
 
 # The note that will be used as the index.html 
 # should be in obsidian_folder_path_str
 # Can be absent when toggles/compile_md == False
 # On linux, use fullpath instead of ~/
-obsidian_entrypoint_path_str: 'C:\Users\User\Documents\Obsidian\Notes\My Entrypoint Note.md'
+obsidian_entrypoint_path_str: 'ci/test_vault/entrypoint.md'
 
 # Input and output path of markdown files
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 # On linux, use fullpath instead of ~/
-md_folder_path_str:  'output/md'
+md_folder_path_str:  'tmp/md'
 
 # Markdown entrypoint path
 # This has to be md_folder_path_str + '/index.md' when toggles/compile_md == True
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 # On linux, use fullpath instead of ~/
-md_entrypoint_path_str: 'output/md/index.md'
+md_entrypoint_path_str: 'tmp/md/index.md'
 
 # Output path of HTML files
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 # On linux, use fullpath instead of ~/
-html_output_folder_path_str: 'output/html'
+html_output_folder_path_str: 'tmp/html/a/'
 
 # Will be inputted into the Html template as page title
 # Not used anywhere else atm.
@@ -31,7 +31,7 @@ site_name: 'Obsidian-Html/Notes'
 
 # Use when deploying to https://mydomain.com/html_prefix/ instead of https://mydomain.com/
 # use '/html_prefix' (prepend slash, no slash at the end)
-html_url_prefix: ''
+html_url_prefix: '/a'
 
 # Provide the fullpath to a template file to use instead of standard template. 
 # Note that this file must contain at least "{content}" somewhere in the page.
@@ -47,7 +47,7 @@ html_template_path_str: ''
 exclude_subfolders:
   - ".obsidian"
 
-# Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data. 
+  # Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data. 
 # Should be fine to turn off if copying the vault takes too long / disk space is too limited.
 # The tempdir is automatically removed on exit of the program.
 copy_vault_to_tempdir: True
@@ -79,19 +79,14 @@ toggles:
 
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
   relative_path_md: True
-
-  # Whether external http anchor links should have a target of "_blank"
-  external_blank: False
   
-  # Below are toggles for optional features and their related settings.
   features:
     # Show backlinks at the bottom of each note
     backlinks:
       enabled: True
-    
-    # Include code to build the graph view per page 
+
     graph:
-      enabled: True                 # (default: True)
+      enabled: True           # Include code to build the graph view per page (default: True)
       coalesce_force: '-200'
 
     # Create an index.md with links to notes that have one of the given tags.
