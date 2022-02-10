@@ -614,12 +614,8 @@ def main():
                 # Add header
                 index_md_content += f'## {t}\n'
 
-                # [??] sort note list on creation time
-                notes = sorted(index_dict[t], key=lambda file: file[3].lstat().st_ctime)
-
                 # Add notes as list
-                for n in notes:
-                    print(n[3].lstat().st_ctime)
+                for n in index_dict[t]:
                     index_md_content += f'- [{n[0][:-3]}]({n[1]})\n'
                 index_md_content += '\n'
 
