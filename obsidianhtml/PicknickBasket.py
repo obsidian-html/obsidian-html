@@ -1,15 +1,16 @@
+from math import fabs
 from .NetworkTree import NetworkTree
 
 class PicknickBasket:
-    files = None           
+    verbose = None
+    files = None
     tagtree = None
-    config = None
     paths = None
     html_template = None
     dynamic_inclusions = None
 
-    def __init__(self, config, paths):
-        self.config = config
+    def __init__(self, verbose, paths):
+        self.verbose = verbose
         self.tagtree = {'notes': [], 'subtags': {}}
         self.paths = paths
-        self.network_tree = NetworkTree(config)
+        self.network_tree = NetworkTree(self.verbose)

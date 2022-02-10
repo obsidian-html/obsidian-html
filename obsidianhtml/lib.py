@@ -72,20 +72,20 @@ def OpenIncludedFileBinary(resource):
     with open(path, 'rb') as f:
         return f.read()    
 
-def ExportStaticFiles(pb):
+def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
     static_folder = pb.paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static')
     os.makedirs(static_folder, exist_ok=True)
 
     # copy files over (standard copy, static_folder)
     copy_file_list = ['main.css', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg']
-    if pb.config['toggles']['features']['graph']['enabled']:
+    if graph_enabled:
         copy_file_list += ['graph.css']
 
     for file_name in copy_file_list:
         c = OpenIncludedFile(file_name)
         
         if file_name in ('main.css'):
-            c = c.replace('{html_url_prefix}', pb.config['html_url_prefix'])
+            c = c.replace('{html_url_prefix}', html_url_prefix)
 
         with open (static_folder.joinpath(file_name), 'w', encoding="utf-8") as f:
             f.write(c)
@@ -100,25 +100,25 @@ def ExportStaticFiles(pb):
     # Custom copy
     c = OpenIncludedFile('not_created.html')
     with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
-        html = PopulateTemplate(pb, pb.html_template, content=c, dynamic_includes='')
-        html = html.replace('{html_url_prefix}', pb.config['html_url_prefix'])
+        html = PopulateTemplate(site_name, html_url_prefix, pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
+        html = html.replace('{html_url_prefix}', html_url_prefix)
         f.write(html)
 
     c = OpenIncludedFileBinary('favicon.ico')
     with open (pb.paths['html_output_folder'].joinpath('favicon.ico'), 'wb') as f:
         f.write(c)
 
-def PopulateTemplate(pb, template, content, title='', dynamic_includes=None):
+def PopulateTemplate(site_name, html_url_prefix, dynamic_inclusions, template, content, title='', dynamic_includes=None):
     # Defaults
     if title == '':
-        title = pb.config['site_name']
-    if dynamic_includes is None:
-        dynamic_includes = pb.dynamic_inclusions
+        title = site_name
+    if dynamic_includes is not None:
+        dynamic_inclusions += dynamic_includes
 
     return template\
         .replace('{title}', title)\
-        .replace('{dynamic_includes}', pb.dynamic_inclusions)\
-        .replace('{html_url_prefix}', pb.config['html_url_prefix'])\
+        .replace('{dynamic_includes}', dynamic_inclusions)\
+        .replace('{html_url_prefix}', html_url_prefix)\
         .replace('{content}', content)
 
         # Adding value replacement in content should be done in ConvertMarkdownPageToHtmlPage, 
