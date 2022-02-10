@@ -177,7 +177,7 @@ class TestMisc(ModeTemplate):
     def test_special_characters_should_be_preserved(self):
         self.scribe('special characters should be preserved')
         soup = html_get('Special Characters.html')
-        self.assertEqual(len(soup.text), 20926)
+        self.assertEqual(len(soup.text), 20925)
 
 
 if __name__ == '__main__':
