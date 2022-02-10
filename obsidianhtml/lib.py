@@ -29,6 +29,7 @@ def printHelpAndExit(exitCode:int):
     print('- Add -v for verbose output')
     print('- Add -h to get helptext')
     print('- Add -eht <target/path/file.name> to export the html template.')
+    print('- Add -gc to output all configurable keys and their default values.')
     exit(exitCode)
 
 def GetObsidianFilePath(link, file_tree):
