@@ -130,7 +130,7 @@ def CreateTemporaryCopy(source_folder_path):
     
     # Copy vault to temp dir
     print(f"> COPYING VAULT {source_folder_path} TO {tmpdir.name}", end=' ')
-    copy_tree(source_folder_path, tmpdir.name)
+    copy_tree(source_folder_path, tmpdir.name, preserve_times=1)
     print("< DONE")
 
     return tmpdir
