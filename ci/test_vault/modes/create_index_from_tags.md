@@ -9,3 +9,4 @@ tags:
 Test whether the link shows up in index.html when create_index_from_tags/enabled = True, and whether that link will lead to this page.
 
 ## Next test
+Test if the next note can be found via Obsidian type link: [[create_index_from_tags2]]
