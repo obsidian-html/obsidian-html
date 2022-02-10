@@ -227,8 +227,10 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         if l[0] == '/':
             # Internal link, skip
             continue
-
-        new_str = f"<a href=\"{l}\" target=\"_blank\" class=\"external-link\""
+        external_blank_html = ''
+        if config['toggles']['external_blank']:
+            external_blank_html = 'target=\"_blank\" '
+        new_str = f"<a href=\"{l}\" {external_blank_html}class=\"external-link\""
         safe_str = f"<a href=\"{l}\""
         html_body = html_body.replace(safe_str, new_str)
 

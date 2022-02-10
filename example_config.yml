@@ -79,6 +79,9 @@ toggles:
 
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
   relative_path_md: True
+
+  # Whether external http anchor links should have a target of "_blank"
+  external_blank: False
   
   # Below are toggles for optional features and their related settings.
   features:
