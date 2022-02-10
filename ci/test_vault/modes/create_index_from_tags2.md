@@ -9,4 +9,5 @@ tags:
 Test whether the link shows up in index.html when create_index_from_tags/enabled = True, and whether that link will lead to this page.
 
 ## Next test
-Test whether [[create_index_from_tags3]] is included, when process_all is false.
+Test markdown type link: [create_index_from_tags3](/modes/create_index_from_tags3.md)
+
