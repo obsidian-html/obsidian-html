@@ -23,6 +23,14 @@ class DuplicateFileNameInRoot(Exception):
 class MalformedTags(Exception):
     pass
 
+def printHelpAndExit(exitCode:int):
+    print('[Obsidian-html]')
+    print('- Add -i </path/to/input.yml> to provide config')
+    print('- Add -v for verbose output')
+    print('- Add -h to get helptext')
+    print('- Add -eht <target/path/file.name> to export the html template.')
+    exit(exitCode)
+
 def GetObsidianFilePath(link, file_tree):
     # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
     # a link can look like this: folder/note#chapter|alias

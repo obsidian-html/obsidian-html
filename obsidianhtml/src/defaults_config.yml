@@ -1,3 +1,17 @@
+##########################################################################
+#                               PATHS                                    #
+##########################################################################
+# The first folder that contains all obsidian files
+# Can be absent when toggles/compile_md == False
+# On linux, use fullpath instead of ~/
+obsidian_folder_path_str: '<REQUIRED_INPUT>'
+
+# The note that will be used as the index.html 
+# should be in obsidian_folder_path_str
+# Can be absent when toggles/compile_md == False
+# On linux, use fullpath instead of ~/
+obsidian_entrypoint_path_str: '<REQUIRED_INPUT>'
+
 # Input and output path of markdown files
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 # On linux, use fullpath instead of ~/
@@ -14,10 +28,9 @@ md_entrypoint_path_str: 'output/md/index.md'
 # On linux, use fullpath instead of ~/
 html_output_folder_path_str: 'output/html'
 
-# Will be inputted into the Html template as page title
-# Not used anywhere else atm.
-site_name: 'Obsidian-Html/Notes'
-
+##########################################################################
+#                              OPERATIONS                                #
+##########################################################################
 # Exclude subfolders
 # These are relative to obsidian_folder_path_str
 # To exclude a folder two levels deep, use level1/level2
@@ -31,6 +44,27 @@ exclude_subfolders:
 # The tempdir is automatically removed on exit of the program.
 copy_vault_to_tempdir: True
 
+
+##########################################################################
+#                             HTML OUTPUT                                #
+##########################################################################
+
+# Will be inputted into the Html template as page title
+# Not used anywhere else atm.
+site_name: 'Obsidian-Html/Notes'
+
+# Use when deploying to https://mydomain.com/html_prefix/ instead of https://mydomain.com/
+# use '/html_prefix' (prepend slash, no slash at the end)
+html_url_prefix: ''
+
+# Provide the fullpath to a template file to use instead of standard template. 
+# Note that this file must contain at least "{content}" somewhere in the page.
+html_template_path_str: ''
+
+
+##########################################################################
+#                    OPTIONAL BEHAVIOR / FEATURES                        #
+##########################################################################
 toggles:
   # Opt-in/-out of Obsidian->Md conversion, set to False when using proper markdown as input
   compile_md: True
@@ -58,8 +92,12 @@ toggles:
 
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
   relative_path_md: True
+
+  # Whether external http anchor links should have a target of "_blank"
+  external_blank: False  
   
   features:
+    # Include code to build the graph view per page 
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)
       coalesce_force: '-200'
@@ -71,5 +109,7 @@ toggles:
       enabled: False
       tags: []
       add_links_in_graph_tree: True # The index.md will be created, and thus will be without links, this setting will create links to the notes that are matched.
+
+    # Show backlinks at the bottom of each note
     backlinks:
       enabled: True
