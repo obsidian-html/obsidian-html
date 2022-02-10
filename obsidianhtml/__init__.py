@@ -519,7 +519,7 @@ def main():
                 raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
             # Add to tree
-            files[path.name] = {'fullpath': str(path), 'processed': False}  
+            files[path.name] = {'fullpath': str(path), 'processed': False, 'pathobj': path}  
 
         pb.files = files
 
@@ -597,7 +597,7 @@ def main():
                             # Add entry to our index dict so we can parse this later
                             md = MarkdownPage(page_path, paths['obsidian_folder'], files)
                             md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
-                            index_dict[t].append((k, md.rel_dst_path.as_posix(), graph_name))
+                            index_dict[t].append((k, md.rel_dst_path.as_posix(), graph_name, page_path))
 
             if len(_files.keys()) == 0:
                 raise Exception(f"No notes found with the given tags.")
