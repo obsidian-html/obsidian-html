@@ -1,12 +1,23 @@
 # Developer documentation
-## Architecture
-[Architecture & Code standards](architecture.md)
-
 ## Install custom code
-- Git clone this repository
-- Open a terminal and `cd` into the cloned folder
-- Run `python -m obsidianhtml -i /path/to/config.yml` to run obsidianhtml
+These steps describe how to install the requirements and use obsidianhtml from the code, instead of installing it as a package. This way you can quickly test changes.
 
-This setup allows the code to be edited and quickly run again with the updated code.
+``` bash
+# Get the code
+# Note that the master branch is work in progress! Code might be broken. 
+# Move into a release branch if you want fully tested code instead.
+git clone git@github.com:obsidian-html/obsidian-html.git
 
-> If you haven't installed obsidianhtml yet as described in section [Installation](../README.md#installation), you might miss packages. To resolve this, just install obsidianhtml, this will make sure all the dependencies are installed.
+# Move into folder
+cd obsidian-html
+
+# Install all the dependencies of the package, but not the package itself.
+# You only need to do this once.
+pip install .
+
+# Run ObsidianHtml from code (so not via the package)
+python -m obsidianhtml -i /path/to/config.yml
+```
+
+# Architecture
+[Architecture & Code standards](architecture.md)
