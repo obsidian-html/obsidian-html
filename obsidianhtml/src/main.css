@@ -213,6 +213,10 @@ span.tag {
     font-style: monospace;
 }
 
+.graph_svg {
+    width: 100%;
+    height: 400px;
+}
 
 .codehilite { 
     background: #050b15; 
