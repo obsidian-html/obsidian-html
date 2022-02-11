@@ -1,9 +1,9 @@
-name: test
+name: RegressionTest
 
 on:
   push:
     branches:
-    - master
+    - 'releases/**'
     tags-ignore:
     - '*'
 
