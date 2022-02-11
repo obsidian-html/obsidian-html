@@ -1,7 +1,8 @@
 ---
+sort: 0
 tags:
 - type/index2
-- date/2022-02-10
+- date/2022-02-01
 ---
 
 # create_index_from_tags4

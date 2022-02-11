@@ -110,8 +110,14 @@ toggles:
     # !! Enabling this feature will overwrite obsidian_entrypoint_path_str and md_entrypoint_path_str
     create_index_from_tags:
       enabled: False
+      add_links_in_graph_tree: True
       tags: []
-      add_links_in_graph_tree: True # The index.md will be created, and thus will be without links, this setting will create links to the notes that are matched.
+      sort:
+        method: 'none'          # <key_value, none>
+        key_path: ''            # empty for top level, use ':' to go down multiple levels
+        value_prefix: ''        # in case of multiple values under key_path, match on this prefix, and then remove prefix
+        reverse: false          # false/true reverses output
+        none_on_bottom: true    # will put notes at the bottom that do not have the sort key, otherwise at the top
 
     # Show backlinks at the bottom of each note
     backlinks:
