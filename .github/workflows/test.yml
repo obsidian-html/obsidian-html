@@ -1,14 +1,14 @@
-name: test
+name: TestSuite
 
 on:
-  push:
+  pull_request:
     branches:
-    - master
+    - 'releases/**'
     tags-ignore:
     - '*'
 
 jobs:
-  test:
+  regression_test:
     runs-on: ubuntu-latest
     steps:
       -
