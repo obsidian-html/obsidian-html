@@ -316,21 +316,17 @@ class TestMisc(ModeTemplate):
     """Use process_all & copy_vault_to_tempdir: False"""
     testcase_name = "MiscTests"
     testcase_custom_config_values = [
-        ('toggles/process_all', True)
+        ('toggles/process_all', True),
+        ('toggles/features/backlinks/enabled', False),
+        ('html_template_path_str', 'ci/configs/custom_html_template.html'),
+        ('copy_vault_to_tempdir', False),
     ]
 
     def test_special_characters_should_be_preserved(self):
         self.scribe('special characters should be preserved')
-        soup = html_get('Special Characters.html')
-        self.assertIn(len(soup.text), {20925, 20926}, msg="difference in length means that characters have been lost")
 
-class TestCustomHtmlTemplate(ModeTemplate):
-    """Use custom html template"""
-    testcase_name = "CustomHtmlTemplate"
-    testcase_config_file_name = 'custom_html_template.yml'
-    testcase_custom_config_values = [
-        ('html_template_path_str', 'ci/configs/custom_html_template.html'),
-    ]
+        soup = html_get('Special Characters.html')
+        self.assertIn(len(soup.text), (7274,), msg="difference in length means that characters have been lost")
 
     def test_if_custom_template_is_used(self):
         self.scribe('custom html template should be used')
