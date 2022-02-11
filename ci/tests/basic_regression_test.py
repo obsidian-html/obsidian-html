@@ -326,7 +326,7 @@ class TestMisc(ModeTemplate):
         self.scribe('special characters should be preserved')
 
         soup = html_get('Special Characters.html')
-        self.assertIn(len(soup.text), (17274,), msg="difference in length means that characters have been lost")
+        self.assertIn(len(soup.text), (7274,), msg="difference in length means that characters have been lost")
 
     def test_if_custom_template_is_used(self):
         self.scribe('custom html template should be used')
