@@ -1,8 +1,10 @@
-> **Important note**:    
-Only recently I learned that there used to be a similar package under the same name. That one seems to have been renamed to Oboe. The original was located at https://github.com/kmaasrud/obsidian-html and later https://github.com/kmaasrud/oboe which you find referenced in a lot of places. I would link to it but I can't find an authoritative source, only forks. Anyways: **This is not that package**. 
+# Obsidian-html [![TestSuite](https://github.com/obsidian-html/obsidian-html/actions/workflows/test.yml/badge.svg)](https://github.com/obsidian-html/obsidian-html/actions/workflows/test.yml)
 
+**Important note**:
+Only recently I learned that there used to be a similar package under the same name. That one seems to have been renamed to Oboe. The original was located at https://github.com/kmaasrud/obsidian-html and later https://github.com/kmaasrud/oboe which you find referenced in a lot of places. I would link to it but I can't find an authoritative source, only forks. Anyways: **This is not that package**.
 
-# Obsidian-html
+## Description
+
 An application to export Obsidian notes to standard markdown and an html based website.
 
 You can see the capabilities of this system in this demo website: 
