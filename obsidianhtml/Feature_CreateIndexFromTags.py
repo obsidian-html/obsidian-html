@@ -3,6 +3,7 @@ from .MarkdownPage import MarkdownPage
 
 import frontmatter
 from pathlib import Path 
+import platform
 
 def CreateIndexFromTags(pb):
     # get settings
@@ -76,7 +77,7 @@ def CreateIndexFromTags(pb):
 
             # determine sorting value
             sort_value   = None
-            if method != 'none':
+            if method not in ('none', 'creation_time', 'modified_time'):
                 if method == 'key_value':
                     # key can be multiple levels deep, like this: level1:level2
                     # get the value of the key
@@ -106,6 +107,13 @@ def CreateIndexFromTags(pb):
                 else:
                     raise Exception(f'Sort method {method} not implemented. Check spelling.')
             
+            # Get sort_value from files dict
+            if method in ('creation_time', 'modified_time'):
+                # created time is not really accessible under Linux, we might add a case for OSX
+                if method == 'creation_time' and platform.system() != 'Windows':
+                    raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
+                sort_value = files[k][method]
+
             if pb.gc('toggles','verbose_printout'):
                 print(f'Sort value of note {k} is {sort_value}')
 

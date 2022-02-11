@@ -12,6 +12,8 @@ import frontmatter
 import json
 import warnings
 import time
+import datetime
+import platform
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
@@ -421,8 +423,11 @@ def main():
         tmpdir = CreateTemporaryCopy(source_folder_path=paths['obsidian_folder'])
 
         # update paths
+        paths['original_obsidian_folder'] = paths['obsidian_folder']        # use only for lookups!
         paths['obsidian_folder'] = Path(tmpdir.name).resolve()
         paths['obsidian_entrypoint'] = paths['obsidian_folder'].joinpath(paths['rel_obsidian_entrypoint'])
+    else:
+        paths['original_obsidian_folder'] = paths['obsidian_folder']        # use only for lookups!
 
     # Add paths to pb
     # ---------------------------------------------------------
@@ -491,8 +496,20 @@ def main():
                 print(path)
                 raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
+            # Fetch creation_time/modified_time from orginal location
+            rel_path = path.relative_to(paths['obsidian_folder'])
+            original_path = paths['original_obsidian_folder'].joinpath(rel_path)
+
+            creation_time = None
+            modified_time = None
+            if platform.system() == 'Windows':
+                creation_time = datetime.datetime.fromtimestamp(os.path.getctime(original_path)).isoformat()
+                modified_time = datetime.datetime.fromtimestamp(os.path.getmtime(original_path)).isoformat()
+            else:
+                modified_time = datetime.datetime.fromtimestamp(os.path.getmtime(original_path)).isoformat()
+
             # Add to tree
-            files[path.name] = {'fullpath': str(path), 'processed': False, 'pathobj': path}  
+            files[path.name] = {'fullpath': str(path), 'processed': False, 'pathobj': path, 'creation_time': creation_time, 'modified_time': modified_time}  
 
         pb.files = files
 
