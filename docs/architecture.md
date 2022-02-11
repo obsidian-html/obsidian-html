@@ -1,3 +1,5 @@
+> This page is outdated!
+
 # Architecture
 ## High level
 The conversion from Obsidian Notes to an HTML site goes in three steps:
