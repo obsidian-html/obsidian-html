@@ -1,0 +1,36 @@
+name: test
+
+on:
+  push:
+    branches:
+    - master
+    tags-ignore:
+    - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: karmanet/obsidianhtml
+          flavor: |
+            latest=true
+
+      - name: Build test target Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          # target: test
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
