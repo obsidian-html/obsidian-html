@@ -144,3 +144,43 @@ def CreateTemporaryCopy(source_folder_path):
 
     return tmpdir
     
+
+def MergeDictRecurse(base_dict, update_dict, path=''):
+    helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
+
+    for k, v in update_dict.items():
+        key_path = '/'.join(x for x in (path, k) if x !='')
+
+        # every configured key should be known in base config, otherwise this might suggest a typo/other error
+        if k not in base_dict.keys():
+            raise Exception(f'\n\tThe configured key "{key_path}" is unknown. Check for typos/indentation. {helptext}')
+
+        # don't overwrite a dict in the base config with a string, or something else
+        # in general, we don't expect types to change
+        if type(base_dict[k]) != type(v):
+            raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
+
+        # dict match -> recurse
+        if isinstance(base_dict[k], dict) and isinstance(v, dict):
+            base_dict[k] = MergeDictRecurse(base_dict[k], update_dict[k], path=key_path)
+            continue
+        
+        # other cases -> copy over
+        if isinstance(update_dict[k], list):
+            base_dict[k] = v.copy()
+        else:
+            base_dict[k] = v
+
+    return base_dict.copy()
+
+def CheckConfigRecurse(config, path='', match_str='<REQUIRED_INPUT>'):
+    helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
+
+    for k, v in config.items():
+        key_path = '/'.join(x for x in (path, k) if x !='')
+        
+        if isinstance(v, dict):
+            CheckConfigRecurse(config[k], path=key_path)
+
+        if v == match_str:
+            raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')
