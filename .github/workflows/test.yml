@@ -1,7 +1,7 @@
 name: RegressionTest
 
 on:
-  push:
+  pull_request:
     branches:
     - 'releases/**'
     tags-ignore:
