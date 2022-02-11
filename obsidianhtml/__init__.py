@@ -20,6 +20,7 @@ from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     IsValidLocalMarkdownLink, PopulateTemplate, \
                     image_suffixes, printHelpAndExit
 from .PicknickBasket import PicknickBasket
+from .Feature_CreateIndexFromTags import CreateIndexFromTags
 
 # Open source files in the package
 import importlib.resources as pkg_resources
@@ -495,130 +496,10 @@ def main():
 
         pb.files = files
 
-        # Create index.md based on given tagname, that will serve as the entrypoint
+        # Create index.md based on given tagnames, that will serve as the entrypoint
         # ---------------------------------------------------------
         if pb.gc('toggles','features','create_index_from_tags','enabled'):
-            if pb.gc('toggles','verbose_printout'):
-                print('> FEATURE: CREATE INDEX FROM TAGS: Enabled')
-
-            # Test input
-            if not isinstance(pb.gc('toggles','features','create_index_from_tags','tags'), list):
-                raise Exception("toggles/features/create_index_from_tags/tags should be a list")
-
-            if len(pb.gc('toggles','features','create_index_from_tags','tags')) == 0:
-                raise Exception("Feature create_index_from_tags is enabled, but no tags were listed")
-
-            # shorthand 
-            include_tags = pb.gc('toggles','features','create_index_from_tags','tags')
-            if pb.gc('toggles','verbose_printout'):
-                print('Looking for tags: ', include_tags)
-
-            # overwrite defaults
-            index_dst_path = paths['md_folder'].joinpath('__tags_index.md').resolve()
-
-            if pb.gc('toggles','verbose_printout'):
-                print('Will write the note index to: ', index_dst_path)
-                print('Will overwrite entrypoints: md_entrypoint_path_str, obsidian_entrypoint, md_entrypoint, rel_md_entrypoint_path')
-
-            paths['obsidian_entrypoint']         = paths['obsidian_folder'].joinpath('dontparse')   # Set to nonexistent file without .md so the entrypoint becomes invalid
-            paths['md_entrypoint']               = index_dst_path
-            paths['rel_md_entrypoint_path']      = paths['md_entrypoint'].relative_to(paths['md_folder'])
-            pb.paths = paths
-
-            # Find notes with given tags
-            _files = {}
-            index_dict = {}
-            for t in include_tags:
-                index_dict[t] = []
-
-            for k in files.keys():
-                # Determine src file path
-                page_path_str = files[k]['fullpath']
-                page_path = Path(page_path_str).resolve()
-
-                # Skip if not valid
-                if not IsValidLocalMarkdownLink(page_path_str):
-                    continue
-
-                # Try to open file
-                with open(page_path, encoding="utf-8") as f:
-                    # Get frontmatter yaml
-                    metadata, page = frontmatter.parse(f.read())
-
-                    # Bug out if frontdata not present
-                    if not isinstance(metadata, dict):
-                        continue
-                    if 'tags' not in metadata.keys():
-                        continue
-
-                    # get graphname of the page, we need this later
-                    graph_name = k[:-3]
-                    if 'graph_name' in metadata.keys():
-                        graph_name = metadata['graph_name']
-
-                    # Check for each of the tags if its present                    
-                    for t in include_tags:
-                        if t in metadata['tags']:
-                            if pb.gc('toggles','verbose_printout'):
-                                print(f'Matched note {k} on tag {t}')
-
-                            # copy file to temp filetree for checking later
-                            _files[k] = files[k].copy()
-
-                            # Add entry to our index dict so we can parse this later
-                            md = MarkdownPage(page_path, paths['obsidian_folder'], files)
-                            md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
-                            index_dict[t].append((k, md.rel_dst_path.as_posix(), graph_name, page_path))
-
-            if len(_files.keys()) == 0:
-                raise Exception(f"No notes found with the given tags.")
-
-            if not pb.gc('toggles','process_all'):
-                # Overwrite the filetree 
-                files = _files
-
-            if pb.gc('toggles','verbose_printout'):
-                print(f'Building index.md')
-
-            index_md_content = f'# {pb.gc("site_name")}\n'
-            for t in index_dict.keys():
-                # Add header
-                index_md_content += f'## {t}\n'
-
-                # Add notes as list
-                for n in index_dict[t]:
-                    index_md_content += f'- [{n[0][:-3]}]({n[1]})\n'
-                index_md_content += '\n'
-
-            # write content to markdown file
-            with open(index_dst_path, 'w', encoding="utf-8") as f:
-                f.write(index_md_content)
-
-            # [17] Build graph node/links
-            if pb.gc('toggles','features','create_index_from_tags','add_links_in_graph_tree'):
-
-                if pb.gc('toggles','verbose_printout'):
-                    print(f'Adding graph links between index.md and the matched notes')
-                
-                node = pb.network_tree.NewNode()
-                node['id'] = 'index'
-                node['url'] = f'{pb.gc("html_url_prefix")}/index.html'
-                pb.network_tree.AddNode(node)
-                bln = node
-                for t in index_dict.keys():
-                    for n in index_dict[t]:
-                        node = pb.network_tree.NewNode()
-                        node['id'] = n[2]
-                        node['url'] = f'{pb.gc("html_url_prefix")}/{n[1][:-3]}.html'
-                        pb.network_tree.AddNode(node)
-
-                        link = pb.network_tree.NewLink()
-                        link['source'] = bln['id']
-                        link['target'] = node['id']
-                        pb.network_tree.AddLink(link)
-
-            if pb.gc('toggles','verbose_printout'):
-                print('< FEATURE: CREATE INDEX FROM TAGS: Done')
+            pb = CreateIndexFromTags(pb)
 
 
         # Start conversion with entrypoint.

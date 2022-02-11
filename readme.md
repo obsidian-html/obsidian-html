@@ -54,7 +54,7 @@ pip uninstall obsidianhtml
 ```
 
 # Useage
-- Download the [defaults_config.yml](example_config.yml) file to your local system.
+- Download the [defaults_config.yml](obsidianhtml/src/example_config.yml) file to your local system.
   - Alternatively run (on Linux/OSX)
     ``` bash
     obsidianhtml -gc > config.yml
@@ -178,7 +178,7 @@ The html code just used full paths everywhere because this gives me headache and
 # Alternatives
 This package might not be what you are looking for. I will keep a list here of other options that I find online for publishing Obsidian notes to webpages.
 
-The **extra features** will list features that these solutions have that this package lacks.
+The **extra features** will list features that these solutions have that are not found in many other solutions.
 
 ## Perlite
 `have not tried this myself yet`
