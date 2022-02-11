@@ -113,7 +113,7 @@ toggles:
       add_links_in_graph_tree: True
       tags: []
       sort:
-        method: 'none'          # <key_value, none>
+        method: 'none'          # <key_value, creation_time, modified_time, none>    ! created_time not available on Linux!
         key_path: ''            # empty for top level, use ':' to go down multiple levels
         value_prefix: ''        # in case of multiple values under key_path, match on this prefix, and then remove prefix
         reverse: false          # false/true reverses output

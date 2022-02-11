@@ -10,5 +10,5 @@ tags:
 This page is in a different folder from the others. (Subfolder -> root folder)
 
 ## Next test
-Test if a note that does not match the tags is included when process_all:True or False.
+Test if a note that does not match the tags is included when process_all:True or False. Test
 [[create_index_from_tags5]]
