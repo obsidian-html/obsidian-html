@@ -141,11 +141,6 @@ def CreateIndexFromTags(pb):
     if len(_files.keys()) == 0:
         raise Exception(f"No notes found with the given tags.")
 
-    if not pb.gc('toggles','process_all'):
-        # Overwrite the filetree 
-        files = _files
-        pb.files = files
-
     if pb.gc('toggles','verbose_printout'):
         print(f'Building index.md')
 
