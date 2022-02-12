@@ -200,6 +200,7 @@ class MarkdownPage:
 
             if isMd == False:
                 # Copy file over to new location
+                dst_filepath.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(filepath, dst_filepath)
 
             

@@ -83,6 +83,17 @@
         }        
         OpenPath(1);
 
+        // Keybindings
+        // ----------------------------------------------------------------------------
+        document.addEventListener('keypress', logKey);
+
+        function logKey(e) {
+                // Move to the beginning if 1 or enter is pressed
+                if (e.key == '1'){
+                        window.scrollTo(0,0);
+                }
+        }
+
 
         // FUNCTIONS 
         // ----------------------------------------------------------------------------
