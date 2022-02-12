@@ -30,7 +30,7 @@ import importlib.util
 from . import src
 
 
-def recurseObisidianToMarkdown(page_path_str, pb):
+def recurseObisidianToMarkdown(page_path_str, pb, log_level=1):
     '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
 
     # Unpack picknick basket so we don't have to type too much.
@@ -70,6 +70,11 @@ def recurseObisidianToMarkdown(page_path_str, pb):
     for l in md.links:
         link = GetObsidianFilePath(l, files)
         if link[1] == False or link[1]['processed'] == True:
+            if pb.gc('toggles','verbose_printout'):
+                if link[1] == False:
+                    print('\t'*log_level, f"Skipping converting {l}, link not internal or not valid.")
+                else:
+                    print('\t'*log_level, f"Skipping converting {l}, already processed.")
             continue
         link_path = link[0]
 
@@ -78,11 +83,11 @@ def recurseObisidianToMarkdown(page_path_str, pb):
 
         # Convert the note that is linked to
         if pb.gc('toggles','verbose_printout'):
-            print(f"converting {files[link_path]['fullpath']} (parent {page_path})")
+            print('\t'*log_level, f"found link {files[link_path]['fullpath']} (through parent {page_path})")
 
-        recurseObisidianToMarkdown(files[link_path]['fullpath'], pb)
+        recurseObisidianToMarkdown(files[link_path]['fullpath'], pb, log_level=log_level)
 
-def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
+def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_level=1):
     '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
     
     # Unpack picknick basket so we don't have to type too much.
@@ -137,7 +142,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
         return
 
     if pb.gc('toggles','verbose_printout'):
-        print("html: converting ", page_path.as_posix(), " (parent ", md.src_path, ")")
+        print('\t'*log_level, f"html: converting {page_path.as_posix()} (parent {md.src_path})")
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
@@ -162,7 +167,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
             try:
                 shutil.copyfile(link.src_path, paths['html_output_folder'].joinpath(link.rel_src_path))
             except FileNotFoundError:
-                print('File ' + str(link.src_path) + ' not located, so not copied.')
+                print('\t'*(log_level+1), 'File ' + str(link.src_path) + ' not located, so not copied.')
             continue
 
         # [13] Link to a custom 404 page when linked to a not-created note
@@ -288,9 +293,9 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None):
 
         # Convert the note that is linked to
         if pb.gc('toggles','verbose_printout'):
-            print("html: initiating conversion for ", files[link_path]['fullpath'], " (parent ", md.src_path, ")")
+            print('\t'*(log_level+1), f"html: initiating conversion for {files[link_path]['fullpath']} (parent {md.src_path})")
 
-        ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], pb, backlinkNode)
+        ConvertMarkdownPageToHtmlPage(files[link_path]['fullpath'], pb, backlinkNode, log_level=log_level)
 
 def recurseTagList(tagtree, tagpath, pb, level):
     '''This function creates the folder `tags` in the html_output_folder, and a filestructure in that so you can navigate the tags.'''
@@ -420,7 +425,7 @@ def main():
     # ---------------------------------------------------------
     if pb.gc('copy_vault_to_tempdir'):
         # Copy over vault to tempdir
-        tmpdir = CreateTemporaryCopy(source_folder_path=paths['obsidian_folder'])
+        tmpdir = CreateTemporaryCopy(source_folder_path=paths['obsidian_folder'], pb=pb)
 
         # update paths
         paths['original_obsidian_folder'] = paths['obsidian_folder']        # use only for lookups!
@@ -471,6 +476,8 @@ def main():
         # Load all filenames in the root folder.
         # This data will be used to check which files are local, and to get their full path
         # It's clear that no two files can be allowed to have the same file name.
+        if pb.gc('toggles','verbose_printout'):
+            print('> CREATING FILE TREE')
         files = {}
         for path in paths['obsidian_folder'].rglob('*'):
             if path.is_dir():
@@ -483,7 +490,7 @@ def main():
                     excl_folder_path = paths['obsidian_folder'].joinpath(folder)
                     if path.resolve().is_relative_to(excl_folder_path):
                         if pb.gc('toggles','verbose_printout'):
-                            print(f'Excluded folder {excl_folder_path}: Excluded file {path.name}.')
+                            print(f'\tExcluded folder {excl_folder_path}: Excluded file {path.name}.')
                         _continue = True
                     continue
                 if _continue:
@@ -513,6 +520,9 @@ def main():
 
         pb.files = files
 
+        if pb.gc('toggles','verbose_printout'):
+            print('< CREATING FILE TREE: Done')
+
         # Create index.md based on given tagnames, that will serve as the entrypoint
         # ---------------------------------------------------------
         if pb.gc('toggles','features','create_index_from_tags','enabled'):
@@ -526,9 +536,8 @@ def main():
         recurseObisidianToMarkdown(str(paths['obsidian_entrypoint']), pb)
 
         # Keep going until all other files are processed
-        if pb.gc('toggles','process_all') or pb.gc('toggles','features','create_index_from_tags','enabled'):
-            # Note: for case create_index_from_tags/enabled = True and process_all = False, 
-            #       the files dict has been overwritten from including all files, to only the files matched on the provided tags 
+        if pb.gc('toggles','process_all'):
+            print('\t> FEATURE: PROCESS ALL')
             unparsed = {}
             for k in files.keys():
                 if files[k]["processed"] == False:
@@ -539,8 +548,9 @@ def main():
             for k in unparsed.keys():
                 i += 1
                 if pb.gc('toggles','verbose_printout') == True:
-                    print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
-                recurseObisidianToMarkdown(unparsed[k]['fullpath'], pb)
+                    print(f'\t\t{i}/{l} - ' + unparsed[k]['fullpath'])
+                recurseObisidianToMarkdown(unparsed[k]['fullpath'], pb, log_level=2)
+            print('\t< FEATURE: PROCESS ALL: Done')
 
 
     # Convert Markdown to Html
@@ -579,6 +589,7 @@ def main():
 
         # Keep going until all other files are processed
         if pb.gc('toggles','process_all') == True:
+            print('\t> FEATURE: PROCESS ALL')
             unparsed = {}
             for k in files.keys():
                 if files[k]["processed"] == False:
@@ -589,8 +600,9 @@ def main():
             for k in unparsed.keys():
                 i += 1
                 if pb.gc('toggles','verbose_printout') == True:
-                    print(f'{i}/{l} - ' + unparsed[k]['fullpath'])
-                ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb)
+                    print(f'\t\t{i}/{l} - ' + unparsed[k]['fullpath'])
+                ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb, log_level=2)
+            print('\t< FEATURE: PROCESS ALL: Done')
 
         # [18] Add in backlinks (test)
         # ------------------------------------------
@@ -648,4 +660,4 @@ def main():
         with open (pb.paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static').joinpath('graph.json'), 'w', encoding="utf-8") as f:
             f.write(pb.network_tree.OutputJson())
 
-    print('> DONE')
+    print('< COMPILING HTML FROM MARKDOWN CODE: Done')
