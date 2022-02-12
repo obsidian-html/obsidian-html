@@ -119,12 +119,12 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     node = pb.network_tree.NewNode()
     
     # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-    node['id'] = str(md.rel_dst_path).split('/')[-1].replace('.md', '')
+    node['id'] = md.rel_dst_path.as_posix().split('/')[-1].replace('.md', '')
     if 'graph_name' in md.metadata.keys():
         node['id'] = md.metadata['graph_name']
 
     # Url is used so you can open the note/node by clicking on it
-    node['url'] = f'{pb.gc("html_url_prefix")}/{str(md.rel_dst_path)[:-3]}.html'
+    node['url'] = f'{pb.gc("html_url_prefix")}/{md.rel_dst_path.as_posix()[:-3]}.html'
     pb.network_tree.AddNode(node)
 
     # Backlinks are set so when recursing, the links (edges) can be determined
@@ -193,6 +193,8 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     # ------------------------------------------------------------------
     for link in re.findall("\!\[.*\]\((.*?)\)", md.page):
         l = urllib.parse.unquote(link)
+        if '://' in l:
+            continue
         full_link_path = page_path.parent.joinpath(l).resolve()
         rel_path = full_link_path.relative_to(paths['md_folder'])
 
@@ -604,7 +606,7 @@ def main():
                 ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb, log_level=2)
             print('\t< FEATURE: PROCESS ALL: Done')
 
-        # [18] Add in backlinks (test)
+        # [18] Add in backlinks
         # ------------------------------------------
         if pb.gc('toggles','features','backlinks','enabled'):
             # Make lookup so that we can easily find the url of a node
