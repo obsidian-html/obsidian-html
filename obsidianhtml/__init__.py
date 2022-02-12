@@ -152,7 +152,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     # Get all local markdown links. 
     # ------------------------------------------------------------------
     # This is any string in between '](' and  ')'
-    proper_links = re.findall("(?<=\]\().+?(?=\))", md.page)
+    proper_links = re.findall(r'(?<=\]\().+?(?=\))', md.page)
     for l in proper_links:
         # Init link
         link = MarkdownLink(l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = pb.gc('toggles','relative_path_md'))
@@ -191,7 +191,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
 
     # [4] Handle local image links (copy them over to output)
     # ------------------------------------------------------------------
-    for link in re.findall("\!\[.*\]\((.*?)\)", md.page):
+    for link in re.findall(r'\!\[.*\]\((.*?)\)', md.page):
         l = urllib.parse.unquote(link)
         if '://' in l:
             continue
@@ -212,7 +212,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
 
         # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
         new_link = '![]('+urllib.parse.quote(pb.gc('html_url_prefix')+'/'+rel_path.as_posix())+')'
-        safe_link = "\!\[.*\]\("+re.escape(link)+"\)"
+        safe_link = r"\!\[.*\]\("+re.escape(link)+r"\)"
         md.page = re.sub(safe_link, new_link, md.page)
 
     # [1] Restore codeblocks/-lines
