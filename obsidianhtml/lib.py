@@ -133,14 +133,18 @@ def PopulateTemplate(site_name, html_url_prefix, dynamic_inclusions, template, c
         # Adding value replacement in content should be done in ConvertMarkdownPageToHtmlPage, 
         # Between the md.StripCodeSections() and md.RestoreCodeSections() statements, otherwise codeblocks can be altered.
         
-def CreateTemporaryCopy(source_folder_path):
+def CreateTemporaryCopy(source_folder_path, pb):
     # Create temp dir
     tmpdir = tempfile.TemporaryDirectory()
+
+    print(f"> COPYING VAULT {source_folder_path} TO {tmpdir.name}")
+
+    if pb.gc('toggles','verbose_printout'):
+        print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
     
     # Copy vault to temp dir
-    print(f"> COPYING VAULT {source_folder_path} TO {tmpdir.name}", end=' ')
     copy_tree(source_folder_path, tmpdir.name, preserve_times=1)
-    print("< DONE")
+    print("< COPYING VAULT: Done")
 
     return tmpdir
     

@@ -3,6 +3,8 @@ from .MarkdownPage import MarkdownPage
 
 import frontmatter
 from pathlib import Path 
+import platform
+import datetime
 
 def CreateIndexFromTags(pb):
     # get settings
@@ -26,21 +28,28 @@ def CreateIndexFromTags(pb):
     if len(settings['tags']) == 0:
         raise Exception("Feature create_index_from_tags is enabled, but no tags were listed")
 
+    # We'll need to write a file to the obsidian folder
+    # This is not good if we don't target the temp folder (copy_vault_to_tempdir = True)
+    # Because we don't want to mess around in people's vaults.
+    # So disable this feature if that setting is turned off
+    if pb.gc('copy_vault_to_tempdir') == False:
+        raise Exception("The feature 'CREATE INDEX FROM TAGS' needs to write an index file to the obsidian path. We don't want to write in your vault, so in order to use this feature set 'copy_vault_to_tempdir: True' in your config.")
+
     # shorthand 
     include_tags = settings['tags']
     if pb.gc('toggles','verbose_printout'):
-        print('Looking for tags: ', include_tags)
+        print('\tLooking for tags: ', include_tags)
+
 
     # overwrite defaults
-    index_dst_path = paths['md_folder'].joinpath('__tags_index.md').resolve()
+    index_dst_path = paths['obsidian_folder'].joinpath('__tags_index.md').resolve()
 
     if pb.gc('toggles','verbose_printout'):
-        print('Will write the note index to: ', index_dst_path)
-        print('Will overwrite entrypoints: md_entrypoint_path_str, obsidian_entrypoint, md_entrypoint, rel_md_entrypoint_path')
+        print('\tWill write the note index to: ', index_dst_path)
+        print('\tWill overwrite entrypoints: obsidian_entrypoint, rel_obsidian_entrypoint')
 
-    paths['obsidian_entrypoint']         = paths['obsidian_folder'].joinpath('dontparse')   # Set to nonexistent file without .md so the entrypoint becomes invalid
-    paths['md_entrypoint']               = index_dst_path
-    paths['rel_md_entrypoint_path']      = paths['md_entrypoint'].relative_to(paths['md_folder'])
+    paths['obsidian_entrypoint']         = index_dst_path
+    paths['rel_obsidian_entrypoint']     = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     pb.paths = paths
 
     # Find notes with given tags
@@ -69,6 +78,18 @@ def CreateIndexFromTags(pb):
             if 'tags' not in metadata.keys():
                 continue
 
+            # Check for each of the tags if its present
+            # Skip if none matched
+            matched = False
+            for t in include_tags:
+                if t in metadata['tags']:
+                    if pb.gc('toggles','verbose_printout'):
+                        print(f'\t\tMatched note {k} on tag {t}')
+                    matched = True
+            
+            if matched == False:
+                continue
+
             # get graphname of the page, we need this later
             graph_name = k[:-3]
             if 'graph_name' in metadata.keys():
@@ -76,7 +97,7 @@ def CreateIndexFromTags(pb):
 
             # determine sorting value
             sort_value   = None
-            if method != 'none':
+            if method not in ('none', 'creation_time', 'modified_time'):
                 if method == 'key_value':
                     # key can be multiple levels deep, like this: level1:level2
                     # get the value of the key
@@ -106,15 +127,19 @@ def CreateIndexFromTags(pb):
                 else:
                     raise Exception(f'Sort method {method} not implemented. Check spelling.')
             
-            if pb.gc('toggles','verbose_printout'):
-                print(f'Sort value of note {k} is {sort_value}')
+            # Get sort_value from files dict
+            if method in ('creation_time', 'modified_time'):
+                # created time is not really accessible under Linux, we might add a case for OSX
+                if method == 'creation_time' and platform.system() != 'Windows':
+                    raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
+                sort_value = files[k][method]
 
-            # Check for each of the tags if its present
+            if pb.gc('toggles','verbose_printout'):
+                print(f'\t\t\tSort value of note {k} is {sort_value}')
+
+            # Add an entry into index_dict for each tag matched on this page
             for t in include_tags:
                 if t in metadata['tags']:
-                    if pb.gc('toggles','verbose_printout'):
-                        print(f'Matched note {k} on tag {t}')
-
                     # copy file to temp filetree for checking later
                     _files[k] = files[k].copy()
 
@@ -133,13 +158,8 @@ def CreateIndexFromTags(pb):
     if len(_files.keys()) == 0:
         raise Exception(f"No notes found with the given tags.")
 
-    if not pb.gc('toggles','process_all'):
-        # Overwrite the filetree 
-        files = _files
-        pb.files = files
-
     if pb.gc('toggles','verbose_printout'):
-        print(f'Building index.md')
+        print(f'\tBuilding index.md')
 
     index_md_content = f'# {pb.gc("site_name")}\n'
     for t in index_dict.keys():
@@ -187,11 +207,15 @@ def CreateIndexFromTags(pb):
     with open(index_dst_path, 'w', encoding="utf-8") as f:
         f.write(index_md_content)
 
+    # add file to file tree
+    now = datetime.datetime.now().isoformat()
+    pb.files['__tags_index.md'] = {'fullpath': str(index_dst_path), 'processed': False, 'pathobj': index_dst_path, 'creation_time': now, 'modified_time': now}
+
     # [17] Build graph node/links
     if pb.gc('toggles','features','create_index_from_tags','add_links_in_graph_tree'):
 
         if pb.gc('toggles','verbose_printout'):
-            print(f'Adding graph links between index.md and the matched notes')
+            print(f'\tAdding graph links between index.md and the matched notes')
         
         node = pb.network_tree.NewNode()
         node['id'] = 'index'

@@ -6,4 +6,4 @@ local_output/*
 obsidianhtml.egg-info
 build.ps1
 build/*
-
+tmp/*
