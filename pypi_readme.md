@@ -1,21 +1,18 @@
-An application to export Obsidian notes to standard markdown and an html based website.
+**An application to export Obsidian notes to standard markdown and an html based website.**
 
 See the github repository for the code, to raise issues, and further information: https://github.com/obsidian-html/obsidian-html
 
-You can see the capabilities of this system in this demo website: https://obsidian-html.github.io/. 
+You can see the capabilities of this system on the documentation website: https://obsidian-html.github.io/, which is created from an Obsidian vault using only this package.
 
-**Note**: this code is actively worked on. There is comprehensive testing, but there is no test regiment before pushing. Things may break because of the frequent changes! Let me know if something does not work as expected or advertised.
 
 **What it does**:
 The Obsidian notes will be converted to standard markdown output. Then, optionally, html output is created based on the standard markdown. 
 It is also possible to input existing standard markdown to just use the markdown to html functionality.
 
-To convert your notes, you need to point to your notes folder, and to one note that will serve as the index.html page.
-
-Only notes that are found by following links recursively, starting with the entrypoint, will be converted! 
+See the docs for more information on configuring the behavior of ObsidianHtml.
 
 **Changelog**:
-
+- 0.0.10: Update readme (not possible without publishing a new version...)
 - 0.0.9: Added: graph view, backlinks, index from tags, image scaling, temporary vault copy. Made configurable: folder exclusion, external link behavior,  css/js inclusions   
 - 0.0.8: Bugfix: mermaid not loading when dynamically opened in new tab   
 - 0.0.7: Added mermaid support   
