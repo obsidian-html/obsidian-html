@@ -2,10 +2,6 @@ name: TestSuite
 
 on:
   pull_request:
-    branches:
-    - 'releases/**'
-    tags-ignore:
-    - '*'
 
 jobs:
   regression_test:
