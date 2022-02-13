@@ -130,7 +130,7 @@ def CreateIndexFromTags(pb):
             # Get sort_value from files dict
             if method in ('creation_time', 'modified_time'):
                 # created time is not really accessible under Linux, we might add a case for OSX
-                if method == 'creation_time' and platform.system() != 'Windows':
+                if method == 'creation_time' and platform.system() != 'Windows' and platform.system() != 'Darwin':
                     raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
                 sort_value = files[k][method]
 

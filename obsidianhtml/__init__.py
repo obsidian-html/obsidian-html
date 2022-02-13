@@ -511,7 +511,7 @@ def main():
 
             creation_time = None
             modified_time = None
-            if platform.system() == 'Windows':
+            if platform.system() == 'Windows' or platform.system() == 'Darwin':
                 creation_time = datetime.datetime.fromtimestamp(os.path.getctime(original_path)).isoformat()
                 modified_time = datetime.datetime.fromtimestamp(os.path.getmtime(original_path)).isoformat()
             else:
