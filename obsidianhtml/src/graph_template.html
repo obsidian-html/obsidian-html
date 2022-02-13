@@ -90,13 +90,9 @@ function run(uid, pinnedNode){
                 .attr('y', 3)
                 .on("click", function(d) {
                     let svg_el = document.getElementById('A' + uid);
-                    console.log('A' + uid)
-                    let level = parseInt(svg_el.parentElement.id.split('-')[1]);
-                    console.log(svg_el.parentElement);
-                    console.log(level, level+1);
+                    let level = parseInt(svg_el.parentElement.parentElement.level);
                     httpGetAsync(encodeURI(d.url), ReceiveCall, level+1, false); 
-                    return false; 
-                        //window.open(d.url);
+                    return false;
                 });
 
                 node.append("title")
