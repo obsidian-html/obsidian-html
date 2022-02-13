@@ -118,19 +118,26 @@ def CreateIndexFromTags(pb):
                             if len(items) == 1:
                                 sort_value = items[0]
                                 # done
-                        if isinstance(value, str):
+                        elif isinstance(value, str):
                             sort_value = value.replace(value_prefix, '', 1)
-                        if isinstance(value, bool):
+                        elif isinstance(value, bool):
                             sort_value = str(int(value))
-                        if isinstance(value, int) or isinstance(value, float):
-                            sort_value = str(value)
+                        elif isinstance(value, datetime.datetime):
+                            sort_value = value.isoformat()
+                        # elif isinstance(value, int) or isinstance(value, float):
+                        #     sort_value = str(value)
+                        else:
+                            try:
+                                sort_value = str(value)
+                            except:
+                                None
                 else:
                     raise Exception(f'Sort method {method} not implemented. Check spelling.')
             
             # Get sort_value from files dict
             if method in ('creation_time', 'modified_time'):
                 # created time is not really accessible under Linux, we might add a case for OSX
-                if method == 'creation_time' and platform.system() != 'Windows':
+                if method == 'creation_time' and platform.system() != 'Windows' and platform.system() != 'Darwin':
                     raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
                 sort_value = files[k][method]
 

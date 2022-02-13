@@ -119,12 +119,12 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     node = pb.network_tree.NewNode()
     
     # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-    node['id'] = str(md.rel_dst_path).split('/')[-1].replace('.md', '')
+    node['id'] = md.rel_dst_path.as_posix().split('/')[-1].replace('.md', '')
     if 'graph_name' in md.metadata.keys():
         node['id'] = md.metadata['graph_name']
 
     # Url is used so you can open the note/node by clicking on it
-    node['url'] = f'{pb.gc("html_url_prefix")}/{str(md.rel_dst_path)[:-3]}.html'
+    node['url'] = f'{pb.gc("html_url_prefix")}/{md.rel_dst_path.as_posix()[:-3]}.html'
     pb.network_tree.AddNode(node)
 
     # Backlinks are set so when recursing, the links (edges) can be determined
@@ -152,7 +152,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     # Get all local markdown links. 
     # ------------------------------------------------------------------
     # This is any string in between '](' and  ')'
-    proper_links = re.findall("(?<=\]\().+?(?=\))", md.page)
+    proper_links = re.findall(r'(?<=\]\().+?(?=\))', md.page)
     for l in proper_links:
         # Init link
         link = MarkdownLink(l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = pb.gc('toggles','relative_path_md'))
@@ -191,8 +191,10 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
 
     # [4] Handle local image links (copy them over to output)
     # ------------------------------------------------------------------
-    for link in re.findall("\!\[.*\]\((.*?)\)", md.page):
+    for link in re.findall(r'\!\[.*\]\((.*?)\)', md.page):
         l = urllib.parse.unquote(link)
+        if '://' in l:
+            continue
         full_link_path = page_path.parent.joinpath(l).resolve()
         rel_path = full_link_path.relative_to(paths['md_folder'])
 
@@ -210,7 +212,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
 
         # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
         new_link = '![]('+urllib.parse.quote(pb.gc('html_url_prefix')+'/'+rel_path.as_posix())+')'
-        safe_link = "\!\[.*\]\("+re.escape(link)+"\)"
+        safe_link = r"\!\[.*\]\("+re.escape(link)+r"\)"
         md.page = re.sub(safe_link, new_link, md.page)
 
     # [1] Restore codeblocks/-lines
@@ -509,7 +511,7 @@ def main():
 
             creation_time = None
             modified_time = None
-            if platform.system() == 'Windows':
+            if platform.system() == 'Windows' or platform.system() == 'Darwin':
                 creation_time = datetime.datetime.fromtimestamp(os.path.getctime(original_path)).isoformat()
                 modified_time = datetime.datetime.fromtimestamp(os.path.getmtime(original_path)).isoformat()
             else:
@@ -604,7 +606,7 @@ def main():
                 ConvertMarkdownPageToHtmlPage(unparsed[k]['fullpath'], pb, log_level=2)
             print('\t< FEATURE: PROCESS ALL: Done')
 
-        # [18] Add in backlinks (test)
+        # [18] Add in backlinks
         # ------------------------------------------
         if pb.gc('toggles','features','backlinks','enabled'):
             # Make lookup so that we can easily find the url of a node
