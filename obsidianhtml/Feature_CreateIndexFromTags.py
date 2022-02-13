@@ -127,7 +127,6 @@ def CreateIndexFromTags(pb):
                         # elif isinstance(value, int) or isinstance(value, float):
                         #     sort_value = str(value)
                         else:
-                            print(type(value))
                             try:
                                 sort_value = str(value)
                             except:
