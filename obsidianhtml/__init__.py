@@ -229,17 +229,28 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
 
     # HTML Tweaks
     # ------------------------------------------------------------------
-    # [14] Tag external links with a class so they can be decorated differently
+    # [14] Tag external/anchor links with a class so they can be decorated differently
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
         if l == '':
             continue
         if l[0] == '/':
             # Internal link, skip
             continue
-        external_blank_html = ''
-        if pb.gc('toggles','external_blank'):
-            external_blank_html = 'target=\"_blank\" '
-        new_str = f"<a href=\"{l}\" {external_blank_html}class=\"external-link\""
+
+        # anchor links
+        if l[0] == '#':
+            new_str = f"<a href=\"{l}\" class=\"anchor-link\""
+        
+        # external links
+        else:
+            # add in target="_blank" (or not)
+            external_blank_html = ''
+            if pb.gc('toggles','external_blank'):
+                external_blank_html = 'target=\"_blank\" '
+
+            new_str = f"<a href=\"{l}\" {external_blank_html}class=\"external-link\""
+        
+        # convert link
         safe_str = f"<a href=\"{l}\""
         html_body = html_body.replace(safe_str, new_str)
 
