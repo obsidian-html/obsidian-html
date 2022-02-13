@@ -118,14 +118,20 @@ def CreateIndexFromTags(pb):
                             if len(items) == 1:
                                 sort_value = items[0]
                                 # done
-                        if isinstance(value, str):
+                        elif isinstance(value, str):
                             sort_value = value.replace(value_prefix, '', 1)
-                        if isinstance(value, bool):
+                        elif isinstance(value, bool):
                             sort_value = str(int(value))
-                        if isinstance(value, int) or isinstance(value, float):
-                            sort_value = str(value)
-                        if isinstance(value, datetime.datetime):
+                        elif isinstance(value, datetime.datetime):
                             sort_value = value.isoformat()
+                        # elif isinstance(value, int) or isinstance(value, float):
+                        #     sort_value = str(value)
+                        else:
+                            print(type(value))
+                            try:
+                                sort_value = str(value)
+                            except:
+                                None
                 else:
                     raise Exception(f'Sort method {method} not implemented. Check spelling.')
             
