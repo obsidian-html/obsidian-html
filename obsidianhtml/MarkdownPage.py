@@ -51,7 +51,7 @@ class MarkdownPage:
 
     def StripCodeSections(self):
         """(Temporarily) Remove codeblocks/-lines so that they are not altered in all the conversions. Placeholders are inserted."""
-        self.codeblocks = re.findall("^```([\s\S]*?)```$", self.page, re.MULTILINE)
+        self.codeblocks = re.findall("^```([\s\S]*?)```[\s]*?$", self.page, re.MULTILINE)
         for i, match in enumerate(self.codeblocks):
             self.page = self.page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
             
@@ -223,6 +223,11 @@ class MarkdownPage:
                 filename = parts[0]
                 hashpart = parts[1]
 
+            # Case: hashpart exists, filename is empty --> anchor link
+            is_anchor = False
+            if hashpart != '' and filename == '':
+                is_anchor = True
+
             isMd = False
             if filename[-3:] == '.md':
                 isMd = True
@@ -231,28 +236,33 @@ class MarkdownPage:
                 # This is the default behavior. Use proper markdown to link to files
                 filename += '.md'
 
-            self.links.append(filename)
+            if is_anchor == False:
+                self.links.append(filename)
 
-            # Links can be made in Obsidian without creating the note.
-            # When we link to a nonexistant note, link to the not_created.md placeholder instead.
-            if filename not in self.file_tree.keys():
-                relative_path_posix = '/not_created.md'
-            else:
-                # Obtain the full path of the file in the directory tree
-                # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
-                full_path = self.file_tree[filename]['fullpath']
-                relative_path_posix = Path(full_path).relative_to(self.src_folder_path).as_posix()
-                
-                if relative_path_posix == rel_obsidian_entrypoint_path.as_posix():    
-                    relative_path_posix = 'index.md'
+                # Links can be made in Obsidian without creating the note.
+                # When we link to a nonexistant note, link to the not_created.md placeholder instead.
+                if filename not in self.file_tree.keys():
+                    relative_path_posix = '/not_created.md'
+                else:
+                    # Obtain the full path of the file in the directory tree
+                    # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
+                    full_path = self.file_tree[filename]['fullpath']
+                    relative_path_posix = Path(full_path).relative_to(self.src_folder_path).as_posix()
+                    
+                    if relative_path_posix == rel_obsidian_entrypoint_path.as_posix():    
+                        relative_path_posix = 'index.md'
 
-                relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
+                    relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
 
-            newlink = urllib.parse.quote(relative_path_posix)
+                newlink = urllib.parse.quote(relative_path_posix)
 
-            if hashpart != '':
-                hashpart = hashpart.replace(' ', '-').lower()
-                newlink += f'#{hashpart}'
+                if hashpart != '':
+                    hashpart = hashpart.replace(' ', '-').lower()
+                    newlink += f'#{hashpart}'
+
+            elif is_anchor:
+                newlink = '#' + ConvertTitleToMarkdownId(hashpart)
+                alias = hashpart
 
             # Replace Obsidian link with proper markdown link
             self.page = self.page.replace('[['+l+']]', f"[{alias}]({newlink})")

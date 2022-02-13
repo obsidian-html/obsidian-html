@@ -66,7 +66,7 @@ def ConvertTitleToMarkdownId(title):
     idstr = idstr.replace(' ', '-')
     while '--' in idstr:
         idstr = idstr.replace('--', '-')
-    idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -')])
+    idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -_')])
     return idstr
 
 def OpenIncludedFile(resource):

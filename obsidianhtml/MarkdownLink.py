@@ -12,6 +12,7 @@ class MarkdownLink:
     
     isValid = True
     isExternal = False
+    isAnchor = False
     inRoot = False
     suffix = ''
 
@@ -82,10 +83,13 @@ class MarkdownLink:
         if ':\\' in self.url:
             self.isExternal = True
 
-    def ParseType(self):                        
-        self.suffix = Path(self.url).suffix
+    def ParseType(self):
+        if self.url.startswith('#'):
+            self.isAnchor = True
+            return
 
         # Convert path/file to path/file.md
+        self.suffix = Path(self.url).suffix
         if self.suffix == '':
             self.url += '.md'
             self.suffix = '.md'
