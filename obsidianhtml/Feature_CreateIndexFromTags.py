@@ -124,6 +124,8 @@ def CreateIndexFromTags(pb):
                             sort_value = str(int(value))
                         if isinstance(value, int) or isinstance(value, float):
                             sort_value = str(value)
+                        if isinstance(value, datetime.datetime):
+                            sort_value = value.isoformat()
                 else:
                     raise Exception(f'Sort method {method} not implemented. Check spelling.')
             
