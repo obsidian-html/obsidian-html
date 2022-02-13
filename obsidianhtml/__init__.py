@@ -225,7 +225,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     'codehilite ': {
         'linenums': True
     }}
-    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'], extension_configs=extension_configs)
+    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'], extension_configs=extension_configs)
 
     # HTML Tweaks
     # ------------------------------------------------------------------
@@ -331,7 +331,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
             md += f'- [{note.replace(".html", "")}]({html_url_prefix}/{note})\n'
 
     # Compile html
-    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'md_mermaid'])
+    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'])
 
     di = '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />'
     html = PopulateTemplate(pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di)
