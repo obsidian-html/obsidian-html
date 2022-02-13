@@ -12,7 +12,7 @@ It is also possible to input existing standard markdown to just use the markdown
 See the docs for more information on configuring the behavior of ObsidianHtml.
 
 **Changelog**:
-- 0.0.10: Update readme (not possible without publishing a new version...)
+- 0.0.10: Update readme (not possible without publishing a new version...)   
 - 0.0.9: Added: graph view, backlinks, index from tags, image scaling, temporary vault copy. Made configurable: folder exclusion, external link behavior,  css/js inclusions   
 - 0.0.8: Bugfix: mermaid not loading when dynamically opened in new tab   
 - 0.0.7: Added mermaid support   
