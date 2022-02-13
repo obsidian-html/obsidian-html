@@ -9,6 +9,7 @@ import time
 # web stuff
 from bs4 import BeautifulSoup
 import requests
+import html
 
 # Defer tools
 from contextlib import ExitStack
@@ -55,17 +56,37 @@ def cleanup_temp_dir():
         shutil.rmtree(paths['temp_dir'])
         print ('CLEANING TEMP DIR: done')
 
-def html_get(path, output_dict=False):
+def requests_get(path):
     if path[0] == '/':
         path = path[1:]
     url = f"http://localhost:8888/{path}"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, features="html5lib")
+    return (requests.get(url), url)
+
+def html_get(path, output_dict=False, convert=False):
+    response, url = requests_get(path)
+
+    if convert == False:
+        soup = BeautifulSoup(response.text, features="html5lib")
+    else:
+        soup = BeautifulSoup(response.text, 'html.parser', features="html5lib")
 
     if output_dict:
         return {'soup': soup, 'url': url}
     else:
         return soup
+
+def html_get2(path, output_dict=False):
+    if path[0] == '/':
+        path = path[1:]
+    url = f"http://localhost:8888/{path}"
+    response = requests.get(url)
+
+    soup = BeautifulSoup(response.text)
+
+    if output_dict:
+        return {'soup': soup, 'url': url}
+    else:
+        return soup        
 
 def get_default_config():
     paths = get_paths()
@@ -325,8 +346,12 @@ class TestMisc(ModeTemplate):
     def test_special_characters_should_be_preserved(self):
         self.scribe('special characters should be preserved')
 
-        soup = html_get('Special Characters.html')
-        self.assertIn(len(soup.text), (7274,), msg="difference in length means that characters have been lost")
+        response, url = requests_get('Special%20Characters.html')
+        r = response.content.decode('utf-8')
+
+        special_chars = 'wSBуghpзючKсшamь#ы7хTгLяfnмvеkrлоztFû9ёiъкищнтэ1́цRвйVO%бжs⟨фдп'
+        for c in special_chars:
+            self.assertIn(c, r, msg=f"character '{c}' expected but not found in 'Special Characters.html'.")
 
     def test_if_custom_template_is_used(self):
         self.scribe('custom html template should be used')
