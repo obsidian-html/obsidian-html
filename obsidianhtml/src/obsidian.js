@@ -310,6 +310,8 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
                 if (el) {
                         el.parentElement.scrollTop = el.offsetTop - rem(1);
                 }
+        } else {
+                levelcont.scrollTop = 0;
         }
 
         // Set url property
