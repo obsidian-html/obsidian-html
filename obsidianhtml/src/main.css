@@ -194,7 +194,7 @@ a.nonexistent-link:visited {
 }
 
 .external-link::after {
-    background: transparent url({html_url_prefix}/98682199-5ac9-448c-afc8-23ab7359a91b-static/external.svg) 0 0 no-repeat;
+    background: transparent url({html_url_prefix}/obs.html/static/external.svg) 0 0 no-repeat;
     background-size: auto;
     background-size: 16px;
     content: "";
@@ -229,7 +229,7 @@ span.tag {
 
 @font-face {
     font-family: 'SourceCodePro-Regular';
-    src: url('{html_url_prefix}/98682199-5ac9-448c-afc8-23ab7359a91b-static/SourceCodePro-Regular.ttf') format('truetype');
+    src: url('{html_url_prefix}/obs.html/static/SourceCodePro-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: monospace;
 }

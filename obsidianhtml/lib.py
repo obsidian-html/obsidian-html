@@ -82,8 +82,14 @@ def OpenIncludedFileBinary(resource):
         return f.read()    
 
 def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
-    static_folder = pb.paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static')
+    obsfolder = pb.paths['html_output_folder'].joinpath('obs.html')
+    os.makedirs(obsfolder, exist_ok=True)
+    static_folder = obsfolder.joinpath('static')
     os.makedirs(static_folder, exist_ok=True)
+    data_folder = obsfolder.joinpath('data')
+    os.makedirs(data_folder, exist_ok=True)
+    rss_folder = obsfolder.joinpath('rss')
+    os.makedirs(rss_folder, exist_ok=True)
 
     # copy files over (standard copy, static_folder)
     copy_file_list = ['main.css', 'obsidian.js', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg']

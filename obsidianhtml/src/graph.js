@@ -40,7 +40,7 @@ function run(uid, pinnedNode){
             .force("charge", d3.forceManyBody().strength({graph_coalesce_force}))
             .force("center", d3.forceCenter(width / 2, height / 2))
 
-        d3.json("{html_url_prefix}/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.json", function(error, graph) {
+        d3.json("{html_url_prefix}/obs.html/data/graph.json", function(error, graph) {
                 if (error) throw error;
 
 
