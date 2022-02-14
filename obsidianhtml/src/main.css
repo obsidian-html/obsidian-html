@@ -35,9 +35,11 @@ body {
     overflow: scroll;  
     overflow-y: scroll;
     scrollbar-color: #7c7f8c #f0f0f0;
+    scroll-margin-top: 2rem;
 }
 .container img {
     max-width: 100%;
+    padding: 0.2rem;
 }
 .container-wrapper {
     max-width: calc(45rem + 3rem);
@@ -66,7 +68,10 @@ body {
     .container:after {
         content: "\a\a\a\a\a";
         white-space: pre;
-    }    
+    }
+    .container-clickback {
+        display: none;
+    }
 }
 
 
@@ -77,6 +82,11 @@ body {
     border-bottom: 3px solid #f0f0f0;
     position:fixed;
     top:0px;
+    z-index:999;
+    background-color: white;
+}
+h1, h2, h3, h4, h5 {
+    scroll-margin-top: 4rem;
 }
 h1 {
     font-size: 28px;
@@ -225,8 +235,7 @@ span.tag {
     color: #d7d7d7; 
     font-weight: 400; 
     margin-top: 0.5rem;
-    margin-bottom: 1rem;
-    margin-right: -2rem; 
+    margin-bottom: 1rem; 
     overflow-x: scroll;   }
 
 code {font-family: 'SourceCodePro-Regular'; font-size: 10pt; font-weight: 500; background-color: aliceblue;

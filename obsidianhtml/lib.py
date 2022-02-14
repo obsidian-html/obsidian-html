@@ -86,7 +86,7 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
     os.makedirs(static_folder, exist_ok=True)
 
     # copy files over (standard copy, static_folder)
-    copy_file_list = ['main.css', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg']
+    copy_file_list = ['main.css', 'obsidian.js', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg']
     if graph_enabled:
         copy_file_list += ['graph.css']
 
@@ -116,6 +116,13 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
     c = OpenIncludedFileBinary('favicon.ico')
     with open (pb.paths['html_output_folder'].joinpath('favicon.ico'), 'wb') as f:
         f.write(c)
+
+    if pb.gc('toggles','features','graph','enabled'):
+        graph_js= OpenIncludedFile('graph.js')
+        graph_js = graph_js.replace('{html_url_prefix}', pb.gc('html_url_prefix'))\
+                           .replace('{graph_coalesce_force}', pb.gc('toggles','features','graph','coalesce_force'))
+        with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:
+            f.write(graph_js)
 
 def PopulateTemplate(site_name, html_url_prefix, dynamic_inclusions, template, content, title='', dynamic_includes=None):
     # Defaults
