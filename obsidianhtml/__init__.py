@@ -316,9 +316,13 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Get relevant paths
     # ---------------------------------------------------------
     html_url_prefix = pb.gc('html_url_prefix')
-    tag_dst_path = pb.paths['html_output_folder'].joinpath(f'{tagpath}index.html').resolve()
+    tags_folder = pb.paths['html_output_folder'].joinpath('obs.html/tags/')
+    tag_dst_path = tags_folder.joinpath(f'{tagpath}index.html').resolve()
     tag_dst_path_posix = tag_dst_path.as_posix()
     rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
+
+    # Make root dir
+    tags_folder.mkdir(parents=True, exist_ok=True)
 
     # Compile markdown from tagtree
     # ---------------------------------------------------------
@@ -344,7 +348,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Compile html
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'])
 
-    di = '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/taglist.css" />'
+    di = '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/obs.html/static/taglist.css" />'
     html = PopulateTemplate(pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di)
 
     # Write file
@@ -460,7 +464,7 @@ def main():
     except:
         None
     if pb.gc('toggles','features','graph','enabled'):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/98682199-5ac9-448c-afc8-23ab7359a91b-static/graph.css" />' + "\n"
+        dynamic_inclusions += '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/obs.html/static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
 
@@ -664,13 +668,13 @@ def main():
                     f.write(html)
 
         # Create tag page
-        recurseTagList(pb.tagtree, 'tags/', pb, level=0)
+        recurseTagList(pb.tagtree, '', pb, level=0)
 
         # Add Extra stuff to the output directories
         ExportStaticFiles(pb, pb.gc('toggles','features','graph','enabled'), pb.gc('html_url_prefix'), pb.gc('site_name'))
 
         # Write node json to static folder
-        with open (pb.paths['html_output_folder'].joinpath('98682199-5ac9-448c-afc8-23ab7359a91b-static').joinpath('graph.json'), 'w', encoding="utf-8") as f:
+        with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
             f.write(pb.network_tree.OutputJson())
 
     print('< COMPILING HTML FROM MARKDOWN CODE: Done')
