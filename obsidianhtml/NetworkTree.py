@@ -10,7 +10,7 @@ class NetworkTree:
         self.node_lookup = {}
 
     def NewNode(self):
-        return {'id': '', 'group': 1, 'url': ''}
+        return {'id': '', 'group': 1, 'url': '', 'metadata': {}}
 
     def NewLink(self):
         return {'source': '', 'target': '', 'value': 1}        

@@ -115,7 +115,7 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
     # Custom copy
     c = OpenIncludedFile('not_created.html')
     with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
-        html = PopulateTemplate(site_name, html_url_prefix, pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
+        html = PopulateTemplate('none', site_name, html_url_prefix, pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
         html = html.replace('{html_url_prefix}', html_url_prefix)
         f.write(html)
 
@@ -130,7 +130,7 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
         with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:
             f.write(graph_js)
 
-def PopulateTemplate(site_name, html_url_prefix, dynamic_inclusions, template, content, title='', dynamic_includes=None):
+def PopulateTemplate(node_id, site_name, html_url_prefix, dynamic_inclusions, template, content, title='', dynamic_includes=None):
     # Defaults
     if title == '':
         title = site_name
@@ -138,6 +138,7 @@ def PopulateTemplate(site_name, html_url_prefix, dynamic_inclusions, template, c
         dynamic_inclusions += dynamic_includes
 
     return template\
+        .replace('{node_id}', node_id)\
         .replace('{title}', title)\
         .replace('{dynamic_includes}', dynamic_inclusions)\
         .replace('{html_url_prefix}', html_url_prefix)\
