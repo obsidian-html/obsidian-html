@@ -92,7 +92,7 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
     os.makedirs(rss_folder, exist_ok=True)
 
     # copy files over (standard copy, static_folder)
-    copy_file_list = ['main.css', 'obsidian.js', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg']
+    copy_file_list = ['main.css', 'obsidian.js', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg', 'rss.svg']
     if graph_enabled:
         copy_file_list += ['graph.css']
 
