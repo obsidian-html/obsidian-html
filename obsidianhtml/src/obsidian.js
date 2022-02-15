@@ -69,6 +69,15 @@ function CenterNote(level) {
         window.scrollTo(window.visualViewport.pageLeft - (margin_left - note_left), 0)
 }
 
+function SetNoteRight(level) {
+        let cont = document.getElementById('level-' + level);
+        let w = parseInt(getComputedStyle(cont.parentElement).maxWidth.replace('px',''));
+
+        let nl_target = window.visualViewport.width - w - rem(4);
+        let nl = cont.getBoundingClientRect().left
+        window.scrollTo(window.visualViewport.pageLeft + (nl - nl_target), 0)
+}
+
 function ScrollNotes(direction) {
         // find note that is currently in the middle
         page_center = window.visualViewport.width / 2
@@ -302,8 +311,9 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
 
         // Scroll into view
         levelcont = document.getElementById('level-' + level);
-        levelcont.scrollIntoView(true);
-        window.scrollTo(window.visualViewport.pageLeft, 0);
+        //levelcont.scrollIntoView(true);
+        //window.scrollTo(window.visualViewport.pageLeft + rem(4), 0);
+        SetNoteRight(level);
 
         // Scroll container to #header link
         theUrl = decodeURI(theUrl);
@@ -353,15 +363,12 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
 }
 
 function CloseUpperContainers(level) {
-        console.log(level)
         // Close all containers that are higher in level than the level
         // of the container in which a link was clicked
         let cns = document.getElementsByClassName("container-wrapper");
         for (let i = 0; i < cns.length; i++) {
                 if (cns[i].id) {
-                        console.log('test remove', cns[i]);
                         if (cns[i].id.split('-')[1] > level) {
-                                console.log('remove', cns[i].id);
                                 cns[i].remove();
                                 CloseUpperContainers(level);
                                 return;
