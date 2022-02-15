@@ -1,0 +1,8 @@
+        <item>
+            <title>{title}</title>
+            <link>{link}</link>
+            <description>{description}</description>
+            <pubDate>{publish_date}</pubDate>
+            <guid>{guid}</guid>
+            {enclosure}
+        </item>

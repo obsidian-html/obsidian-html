@@ -1,0 +1,15 @@
+<rss version="2.0">
+    <channel>
+        <title>{title}</title>
+        <link>{website_link}</link>
+        <description>{description}</description>
+        <language>{language_code}en-us</language>
+        <pubDate>{publish_date}</pubDate>
+        <lastBuildDate>{last_build_date}</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>ObsidianHtml</generator>
+        <managingEditor>{managing_editor}</managingEditor>
+        <webMaster>{web_master}</webMaster>
+{items}
+    </channel>
+</rss>
