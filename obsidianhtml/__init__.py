@@ -509,7 +509,7 @@ def main():
                         if pb.gc('toggles','verbose_printout'):
                             print(f'\tExcluded folder {excl_folder_path}: Excluded file {path.name}.')
                         _continue = True
-                    continue
+                    break
                 if _continue:
                     continue
             except:

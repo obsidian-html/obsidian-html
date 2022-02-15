@@ -50,7 +50,7 @@ class PicknickBasket:
 
     # previously getConf()
     def gc(self, *keys:str):
-        value = self.config.copy()
+        value = self.config
         for key in keys:
             value = value[key]
         return value
