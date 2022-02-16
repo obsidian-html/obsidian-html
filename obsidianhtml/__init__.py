@@ -20,7 +20,7 @@ from .MarkdownLink import MarkdownLink
 from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, \
                     IsValidLocalMarkdownLink, PopulateTemplate, \
-                    image_suffixes, printHelpAndExit
+                    printHelpAndExit
 from .PicknickBasket import PicknickBasket
 from .Feature_CreateIndexFromTags import CreateIndexFromTags
 
@@ -50,7 +50,7 @@ def recurseObisidianToMarkdown(page_path_str, pb, log_level=1):
     md = MarkdownPage(page_path, paths['obsidian_folder'], files)
 
     # The bulk of the conversion process happens here
-    md.ConvertObsidianPageToMarkdownPage(paths['md_folder'], paths['obsidian_entrypoint'])
+    md.ConvertObsidianPageToMarkdownPage(pb, paths['md_folder'], paths['obsidian_entrypoint'])
 
     # The frontmatter was stripped from the obsidian note prior to conversion
     # Add yaml frontmatter back in
@@ -165,7 +165,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
             continue
 
         # [12] Copy non md files over wholesale, then we're done for that kind of file
-        if link.suffix != '.md' and link.suffix not in image_suffixes:
+        if link.suffix != '.md' and link.suffix not in pb.gc('included_file_suffixes'):
             paths['html_output_folder'].joinpath(link.rel_src_path).parent.mkdir(parents=True, exist_ok=True)
             try:
                 shutil.copyfile(link.src_path, paths['html_output_folder'].joinpath(link.rel_src_path))

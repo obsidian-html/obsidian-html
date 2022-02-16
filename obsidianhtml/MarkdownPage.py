@@ -4,7 +4,7 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 import shutil               # used to remove a non-empty directory, copy files
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, image_suffixes, ConvertTitleToMarkdownId, MalformedTags
+from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, ConvertTitleToMarkdownId, MalformedTags
 from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
 
 class MarkdownPage:
@@ -87,7 +87,7 @@ class MarkdownPage:
                 if n == (len(tag.split('/')) - 1):
                     ctagtree['notes'].append(url)
 
-    def ConvertObsidianPageToMarkdownPage(self, dst_folder_path, entrypoint_path, include_depth=0):
+    def ConvertObsidianPageToMarkdownPage(self, pb, dst_folder_path, entrypoint_path, include_depth=0):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
         # -- Load contents
         self.SetDestinationPath(dst_folder_path, entrypoint_path)
@@ -126,7 +126,7 @@ class MarkdownPage:
 
             # Obsidian page inclusions use the same tag...
             # Skip if we don't match image suffixes. Inclusions are handled at the end.
-            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0] not in image_suffixes:
+            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0] not in pb.gc('included_file_suffixes'):
                 new_link = f'<inclusion href="{link}" />'
 
             safe_link = re.escape('![['+link+']]')
@@ -311,7 +311,7 @@ class MarkdownPage:
             
             # Get code
             included_page = MarkdownPage(incl_page_path, self.src_folder_path, self.file_tree)
-            included_page.ConvertObsidianPageToMarkdownPage(self.dst_folder_path, entrypoint_path, include_depth=include_depth + 1)
+            included_page.ConvertObsidianPageToMarkdownPage(pb, self.dst_folder_path, entrypoint_path, include_depth=include_depth + 1)
 
             # Get subsection of code if header is present
             if header != '':

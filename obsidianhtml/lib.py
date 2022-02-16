@@ -15,9 +15,6 @@ import importlib.resources as pkg_resources
 import importlib.util
 from . import src 
  
-# Lookup tables
-image_suffixes = ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'pdf']
-
 class DuplicateFileNameInRoot(Exception):
     pass
 class MalformedTags(Exception):
