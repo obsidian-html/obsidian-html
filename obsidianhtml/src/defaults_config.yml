@@ -44,6 +44,10 @@ exclude_subfolders:
 # The tempdir is automatically removed on exit of the program.
 copy_vault_to_tempdir: True
 
+# ObsidianHtml needs to be able to discern between included notes and included files, because included files 
+# need to be treated differently. This is a configurable setting because we might've missed certain suffixes
+# of files that are includable.
+included_file_suffixes: ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'pdf']
 
 ##########################################################################
 #                             HTML OUTPUT                                #
