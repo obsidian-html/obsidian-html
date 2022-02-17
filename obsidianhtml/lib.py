@@ -96,6 +96,7 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
         ['html/mermaid.min.js', 'mermaid.min.js'],
         ['html/taglist.css', 'taglist.css'],
         ['html/external.svg', 'external.svg'],
+        ['html/hashtag.svg', 'hashtag.svg'],
         ['rss/rss.svg', 'rss.svg']
     ]
     if graph_enabled:
@@ -120,7 +121,7 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
     # Custom copy
     c = OpenIncludedFile('html/not_created.html')
     with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
-        html = PopulateTemplate('none', site_name, html_url_prefix, pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
+        html = PopulateTemplate(pb, 'none', site_name, html_url_prefix, pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
         html = html.replace('{html_url_prefix}', html_url_prefix)
         f.write(html)
 
@@ -135,20 +136,29 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
         with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:
             f.write(graph_js)
 
-def PopulateTemplate(node_id, site_name, html_url_prefix, dynamic_inclusions, template, content, title='', dynamic_includes=None):
+def PopulateTemplate(pb, node_id, site_name, html_url_prefix, dynamic_inclusions, template, content, title='', dynamic_includes=None):
     # Defaults
     if title == '':
         title = site_name
     if dynamic_includes is not None:
         dynamic_inclusions += dynamic_includes
 
-    return template\
+    # Include toggled components
+    if pb.gc('toggles','features','rss','enabled') and pb.gc('toggles','features','rss','styling','show_icon'):
+        code = OpenIncludedFile('rss/button_template.html')
+        template = template.replace('{rss_button}', code)
+    else:
+        template = template.replace('{rss_button}', '')
+
+    # Replace placeholders
+    template = template\
         .replace('{node_id}', node_id)\
         .replace('{title}', title)\
         .replace('{dynamic_includes}', dynamic_inclusions)\
         .replace('{html_url_prefix}', html_url_prefix)\
         .replace('{content}', content)
 
+    return template
         # Adding value replacement in content should be done in ConvertMarkdownPageToHtmlPage, 
         # Between the md.StripCodeSections() and md.RestoreCodeSections() statements, otherwise codeblocks can be altered.
         
