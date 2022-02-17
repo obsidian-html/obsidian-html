@@ -23,6 +23,7 @@ from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     printHelpAndExit
 from .PicknickBasket import PicknickBasket
 from .Feature_CreateIndexFromTags import CreateIndexFromTags
+from .RssFeed import RssFeed
 
 # Open source files in the package
 import importlib.resources as pkg_resources
@@ -267,7 +268,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if pb.gc('toggles','features','graph','enabled'):
-        graph_template = OpenIncludedFile('graph_template.html')
+        graph_template = OpenIncludedFile('graph/graph_template.html')
         graph_template = graph_template.replace('{id}', simpleHash(html_body))\
                                        .replace('{pinnedNode}', node['id'])\
                                        .replace('{html_url_prefix}', pb.gc('html_url_prefix'))\
@@ -390,7 +391,7 @@ def main():
                 printHelpAndExit(1)
             export_html_template_target_path = Path(sys.argv[i+1]).resolve()
             export_html_template_target_path.parent.mkdir(parents=True, exist_ok=True)
-            html = OpenIncludedFile('template.html')
+            html = OpenIncludedFile('html/template.html')
             with open (export_html_template_target_path, 'w', encoding="utf-8") as t:
                 t.write(html)
             print(f"Exported html template to {str(export_html_template_target_path)}.")
@@ -585,7 +586,7 @@ def main():
             with open(Path(pb.gc('html_template_path_str')).resolve()) as f:
                 html_template = f.read()
         except:
-            html_template = OpenIncludedFile('template.html')
+            html_template = OpenIncludedFile('html/template.html')
 
         if '{content}' not in html_template:
             raise Exception('The provided html template does not contain the string `{content}`. This will break its intended use as a template.')
@@ -681,3 +682,9 @@ def main():
             f.write(pb.network_tree.OutputJson())
 
     print('< COMPILING HTML FROM MARKDOWN CODE: Done')
+
+    if pb.gc('toggles','features','rss','enabled'):
+        print('> COMPILING RSS FEED')
+        feed = RssFeed(pb)
+        feed.Compile()
+        print('< COMPILING RSS FEED: Done')
