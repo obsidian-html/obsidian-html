@@ -89,39 +89,47 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
     os.makedirs(rss_folder, exist_ok=True)
 
     # copy files over (standard copy, static_folder)
-    copy_file_list = ['main.css', 'obsidian.js', 'mermaid.css', 'mermaid.min.js', 'taglist.css', 'external.svg', 'rss.svg']
+    copy_file_list = [
+        ['html/main.css','main.css'], 
+        ['html/obsidian.js', 'obsidian.js'],
+        ['html/mermaid.css', 'mermaid.css'],
+        ['html/mermaid.min.js', 'mermaid.min.js'],
+        ['html/taglist.css', 'taglist.css'],
+        ['html/external.svg', 'external.svg'],
+        ['rss/rss.svg', 'rss.svg']
+    ]
     if graph_enabled:
-        copy_file_list += ['graph.css']
+        copy_file_list.append(['graph/graph.css', 'graph.css'])
 
     for file_name in copy_file_list:
-        c = OpenIncludedFile(file_name)
+        c = OpenIncludedFile(file_name[0])
         
-        if file_name in ('main.css'):
+        if file_name[1] in ('main.css'):
             c = c.replace('{html_url_prefix}', html_url_prefix)
 
-        with open (static_folder.joinpath(file_name), 'w', encoding="utf-8") as f:
+        with open (static_folder.joinpath(file_name[1]), 'w', encoding="utf-8") as f:
             f.write(c)
 
     # copy files over (byte copy, static_folder)
-    copy_file_list_byte = ['SourceCodePro-Regular.ttf']
+    copy_file_list_byte = [['html/SourceCodePro-Regular.ttf', 'SourceCodePro-Regular.ttf']]
     for file_name in copy_file_list_byte:
-        c = OpenIncludedFileBinary(file_name)
-        with open (static_folder.joinpath(file_name), 'wb') as f:
+        c = OpenIncludedFileBinary(file_name[0])
+        with open (static_folder.joinpath(file_name[1]), 'wb') as f:
             f.write(c)
 
     # Custom copy
-    c = OpenIncludedFile('not_created.html')
+    c = OpenIncludedFile('html/not_created.html')
     with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
         html = PopulateTemplate('none', site_name, html_url_prefix, pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
         html = html.replace('{html_url_prefix}', html_url_prefix)
         f.write(html)
 
-    c = OpenIncludedFileBinary('favicon.ico')
+    c = OpenIncludedFileBinary('html/favicon.ico')
     with open (pb.paths['html_output_folder'].joinpath('favicon.ico'), 'wb') as f:
         f.write(c)
 
     if pb.gc('toggles','features','graph','enabled'):
-        graph_js= OpenIncludedFile('graph.js')
+        graph_js= OpenIncludedFile('graph/graph.js')
         graph_js = graph_js.replace('{html_url_prefix}', pb.gc('html_url_prefix'))\
                            .replace('{graph_coalesce_force}', pb.gc('toggles','features','graph','coalesce_force'))
         with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:

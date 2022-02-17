@@ -126,3 +126,30 @@ toggles:
     # Show backlinks at the bottom of each note
     backlinks:
       enabled: True
+
+    rss:
+      enabled: False
+      host_root: 'https://localhost:8000/'
+      styling: 
+        show_icon: True
+      channel: 
+        title: 'Notes'
+        website_link: '<https://your website.com>'
+        description: '<your description>'
+        language_code: 'en-us'
+        managing_editor: 'n/a'
+        web_master: 'n/a'
+      items:
+        selector: 
+          match_key: [['tags','type/news']]
+          include_subfolders: []
+          exclude_folders: ['.git', 'obs.html']
+          exclude_files: ['not_created.html', 'index.html']
+        description:
+          selector: ['first-paragraphs', 2]
+        title: 
+          selector: [['html_element','h1'], ['path','file_plus_first_folder'], ['yaml','title']]
+        publish_date: 
+          selector: ['tags','date/']
+          iso_formatted: True
+          format_string: ''

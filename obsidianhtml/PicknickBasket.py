@@ -51,8 +51,13 @@ class PicknickBasket:
     # previously getConf()
     def gc(self, *keys:str):
         value = self.config
+        path = []
         for key in keys:
-            value = value[key]
+            path.append(key)
+            try:
+                value = value[key]
+            except KeyError:
+                raise Exception(f"INTERNAL ERROR: Config setting '{'/'.join(path)}' not found in config.")
         return value
 
 
