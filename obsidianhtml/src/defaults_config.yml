@@ -161,4 +161,4 @@ toggles:
             - ['yaml','rss:publish_date']
             - ['yaml_strip','tags',['date/']]
           iso_formatted: True
-          format_string: ''
+          format_string: '' #'%Y-%m-%d'
