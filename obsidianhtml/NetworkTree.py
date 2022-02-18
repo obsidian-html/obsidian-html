@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 class NetworkTree:
     verbose = None
@@ -50,7 +51,23 @@ class NetworkTree:
             self.node_lookup[n['id']] = n
     
     def OutputJson(self):
-        return json.dumps(self.tree)
+        tree = StringifyDateRecurse(self.tree.copy())
+        return json.dumps(tree)
 
 
-        
+def StringifyDateRecurse(tree):
+
+    if isinstance(tree, dict):
+        for key, value in tree.items():
+            if isinstance(value, date):
+                tree[key] = value.isoformat()
+            elif isinstance(value, list) or isinstance(value, dict):
+                tree[key] = StringifyDateRecurse(value)
+    if isinstance(tree, list):
+        for key, value in enumerate(tree):
+            if isinstance(value, date):
+                tree[key] = value.isoformat()
+            elif isinstance(value, list) or isinstance(value, dict):
+                tree[key] = StringifyDateRecurse(value)
+
+    return tree
