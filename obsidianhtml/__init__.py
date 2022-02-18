@@ -277,7 +277,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
 
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
-    html = PopulateTemplate(node['id'], pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body)
+    html = PopulateTemplate(pb, node['id'], pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body)
 
     # Save file
     # ------------------------------------------------------------------
@@ -353,7 +353,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'])
 
     di = '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/obs.html/static/taglist.css" />'
-    html = PopulateTemplate('none', pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di)
+    html = PopulateTemplate(pb, 'none', pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di)
 
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   

@@ -141,15 +141,24 @@ toggles:
         web_master: 'n/a'
       items:
         selector: 
-          match_key: [['tags','type/news']]
+          match_keys: []
+          exclude_keys: []
           include_subfolders: []
-          exclude_folders: ['.git', 'obs.html']
+          exclude_subfolders: ['.git','obs.html']
           exclude_files: ['not_created.html', 'index.html']
         description:
-          selector: ['first-paragraphs', 2]
+          selectors:
+            - ['yaml','rss:description']
+            - ['first-paragraphs', 2, '<br/><br/>']
+            - ['first-header', 1]
         title: 
-          selector: [['html_element','h1'], ['path','file_plus_first_folder'], ['yaml','title']]
+          selectors: 
+            - ['yaml','rss:title']
+            - ['first-header', 1]
+            - ['path', ['parent',1], '/ ', ['stem']]
         publish_date: 
-          selector: ['tags','date/']
+          selectors: 
+            - ['yaml','rss:publish_date']
+            - ['yaml_strip','tags',['date/']]
           iso_formatted: True
           format_string: ''
