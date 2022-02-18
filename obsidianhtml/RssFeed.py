@@ -213,7 +213,14 @@ class RssFeed():
             if pb.gc('toggles','features','rss','items','publish_date','iso_formatted'):
                 publish_date = datetime.fromisoformat(publish_date)
             else:
-                raise Exception("Don't know how to parse date string")
+                fs = pb.gc('toggles','features','rss','items','publish_date','format_string')
+                if fs:
+                    try:
+                        publish_date = datetime.strptime(publish_date, fs)
+                    except ValueError:
+                        raise Exception(f"Don't know how to parse date string. Found date '{publish_date}' does not match format_string '{fs}'.")
+                else:
+                    raise Exception("Don't know how to parse date string. Iso_formatted is false and format_string is empty.")
 
             publish_date_str = ConvertDateToRssFormat(publish_date)
 
