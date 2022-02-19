@@ -24,3 +24,41 @@ md_entrypoint_path_str: 'tmp/md/index.md'
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
 # On linux, use fullpath instead of ~/
 html_output_folder_path_str: 'tmp/html'
+
+toggles:
+  features:
+    rss:
+      enabled: False
+      host_root: 'https://localhost:8888'
+      styling: 
+        show_icon: True
+      channel: 
+        title: '<test_title>'
+        website_link: '<test_website_link>'
+        description: '<test_website_description>'
+        language_code: 'en-us'
+        managing_editor: '<test_managing_editor>'
+        web_master: '<test_web_master>'
+      items:
+        selector: 
+          match_keys: ['yaml','tags', ['']]
+          exclude_keys: ['yaml','tags', ['type/moc']]
+          include_subfolders: ['rss']
+          exclude_subfolders: ['.git', 'md', 'index_from_tags', 'obs.html','__src']
+          exclude_files: ['not_created.html', 'index.html']
+        description:
+          selectors:
+            - ['yaml','rss:description']
+            - ['first-paragraphs', 2, '<br/><br/>']
+            - ['first-header', 1]
+        title: 
+          selectors: 
+            - ['yaml','rss:title']
+            - ['first-header', 1]
+            - ['path', ['parent',1], '/ ', ['stem']]
+        publish_date: 
+          selectors: 
+            - ['yaml','rss:publish_date']
+            - ['yaml_strip','tags',['date/']]
+          iso_formatted: True
+          format_string: '' #'%Y-%m-%d'

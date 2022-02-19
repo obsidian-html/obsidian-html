@@ -9,6 +9,7 @@ import platform
 from bs4 import BeautifulSoup
 from html import escape
 import json
+from time import sleep
 
 def ConvertDateToRssFormat(datetime_object):
     return datetime_object.strftime("%a, %d %b %Y %H:%M:%S ") + time.tzname[0]
@@ -160,7 +161,11 @@ class RssFeed():
                 soup = BeautifulSoup(f.read(), 'html5lib')
 
             # get metadata
-            node_id = soup.find('meta',attrs={'name':'node_id'})['content']
+            print(path)
+            node_el = soup.find('meta',attrs={'name':'node_id'})
+            if node_el is None:
+                raise Exception('RSS Feed: Meta tag with node_id was not found. If you are using a custom template, make sure that <meta name="node_id" content="{node_id}"> is present in the html header to use this feature.')
+            node_id = node_el['content']
             metadata = None
             if node_id != 'none':
                 metadata = self.node_lut[node_id]['metadata']

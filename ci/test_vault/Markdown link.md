@@ -9,4 +9,4 @@ tags:
 The test was whether this page could be opened by following the link from `Note link.md`.
 
 ## Next test
-tbd
+[[rss_index]]
