@@ -151,6 +151,28 @@ def customize_default_config(items, write_to_tmp_config=True):
     return output
 
 
+def GetRssSoup(file_path):
+    full_path = Path('tmp/html/').joinpath(file_path).resolve()
+    print(full_path)
+    with open(full_path, 'r', encoding="utf-8") as f:
+        rss = f.read()
+    soup = BeautifulSoup(rss, 'lxml')
+
+    articles = soup.findAll('item')
+    articles_dicts = [{'title':a.find('title').text,'link':a.link.next_sibling.replace('\n','').replace('\t',''),'description':a.find('description').text,'pubdate':a.find('pubdate').text} for a in articles]
+    urls = [d['link'] for d in articles_dicts if 'link' in d]
+    titles = [d['title'] for d in articles_dicts if 'title' in d]
+    descriptions = [d['description'] for d in articles_dicts if 'description' in d]
+    pub_dates = [d['pubdate'] for d in articles_dicts if 'pubdate' in d]
+
+    return {
+        'articles': articles_dicts,
+        'urls': urls,
+        'titles': titles,
+        'descriptions': descriptions,
+        'pub_dates': pub_dates
+    }
+
 # Template
 # -------------------------------
 class ModeTemplate(unittest.TestCase):
@@ -248,7 +270,9 @@ class ModeTemplate(unittest.TestCase):
 class TestDefaultMode(ModeTemplate):
     """Use default settings and run all tests"""
     testcase_name = "Default"
-    testcase_custom_config_values = []
+    testcase_custom_config_values = [
+        ('toggles/features/rss/enabled', True)
+    ]  
 
     def test_A__test_self(self):
         "Tests working of the test structure"
@@ -259,6 +283,24 @@ class TestDefaultMode(ModeTemplate):
         next_url = self.index_html_should_exist(path='index.html')
         next_url = self.obsidian_type_links_should_work(next_url)
         self.markdown_type_links_should_work(next_url)
+
+    def test_C_rss(self):
+        rss = GetRssSoup('obs.html/rss/feed.xml')
+        
+        # test setting title, description, pubdate with frontmatter yaml
+        item1 = [x for x in rss['articles'] if x['link'].strip() == "https://localhost:8888/rss/rss_index.html"][0]
+        self.assertEqual(item1['title'], 'test_value_title')
+        self.assertEqual(item1['description'], 'test_value_description')
+        self.assertTrue(item1['pubdate'].startswith('Wed, 10 Dec 1980 00:00:00'))
+
+        # test h1 fallback
+        item2 = [x for x in rss['articles'] if x['link'].strip() == "https://localhost:8888/rss/rss_h1.html"][0]
+        self.assertEqual(item2['title'], 'rss_h1_test')
+
+        # test folder exclusion
+        self.assertTrue(len([x for x in rss['articles'] if x['link'].strip() == "https://localhost:8888/rss_exclude1.html"]) == 0)
+
+
 
 class TestHtmlPrefixMode(ModeTemplate):
     """Configure a HTML prefix"""
