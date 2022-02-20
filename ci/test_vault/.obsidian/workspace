@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "excluded/rss_exclude.md",
+            "file": "Images.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "excluded/rss_exclude.md",
+                "file": "Images.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -84,11 +84,11 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "active": "688650e0e2ca6e50",
   "lastOpenFiles": [
+    "Images.md",
     "excluded/rss_exclude.md",
     "rss/rss_h1.md",
     "rss/rss_index.md",
@@ -97,7 +97,6 @@
     "entrypoint.md",
     "Special Characters.md",
     "Special Characters (In Title).md",
-    "modes/create_index_from_tags.md",
-    "templates/template.md"
+    "modes/create_index_from_tags.md"
   ]
 }

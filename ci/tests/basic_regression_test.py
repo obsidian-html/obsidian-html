@@ -75,19 +75,6 @@ def html_get(path, output_dict=False, convert=False):
     else:
         return soup
 
-def html_get2(path, output_dict=False):
-    if path[0] == '/':
-        path = path[1:]
-    url = f"http://localhost:8888/{path}"
-    response = requests.get(url)
-
-    soup = BeautifulSoup(response.text)
-
-    if output_dict:
-        return {'soup': soup, 'url': url}
-    else:
-        return soup        
-
 def get_default_config():
     paths = get_paths()
 
@@ -285,6 +272,8 @@ class TestDefaultMode(ModeTemplate):
         self.markdown_type_links_should_work(next_url)
 
     def test_C_rss(self):
+        self.scribe('rss should exist and the values should be filled in correctly.')
+
         rss = GetRssSoup('obs.html/rss/feed.xml')
         
         # test setting title, description, pubdate with frontmatter yaml
@@ -300,7 +289,20 @@ class TestDefaultMode(ModeTemplate):
         # test folder exclusion
         self.assertTrue(len([x for x in rss['articles'] if x['link'].strip() == "https://localhost:8888/rss_exclude1.html"]) == 0)
 
+    def test_D_images(self):
+        self.scribe('image link should point to correct location and the image should be downloadable.')
 
+        img_rel_url = '/images/obsidian-html-logo.png'
+        img_note_rel_url = '/Images.html'
+
+        # Get image link
+        soup = html_get(img_note_rel_url)
+        img = soup.body.find('div', attrs={'class':'container'}).find('img')
+        self.assertEqual(img['src'], img_rel_url)
+
+        # Get image
+        r = requests.get(f'http://localhost:8888{img_rel_url}')
+        self.assertEqual(len(r.content), 10134)
 
 class TestHtmlPrefixMode(ModeTemplate):
     """Configure a HTML prefix"""
@@ -319,6 +321,21 @@ class TestHtmlPrefixMode(ModeTemplate):
         next_url = self.index_html_should_exist(path=f'{self.testcase_config["html_url_prefix"][1:]}/index.html')
         next_url = self.obsidian_type_links_should_work(next_url)
         #self.markdown_type_links_should_work(next_url)
+
+    def test_C_images(self):
+        self.scribe('image link should point to correct location and the image should be downloadable.')
+
+        img_rel_url = '/a/images/obsidian-html-logo.png'
+        img_note_rel_url = '/a/Images.html'
+
+        # Get image link
+        soup = html_get(img_note_rel_url)
+        img = soup.body.find('div', attrs={'class':'container'}).find('img')
+        self.assertEqual(img['src'], img_rel_url)
+
+        # Get image
+        r = requests.get(f'http://localhost:8888{img_rel_url}')
+        self.assertEqual(len(r.content), 10134)
 
 class TestCreateIndexFromTagsMode(ModeTemplate):
     """Compile index from a list of tags"""

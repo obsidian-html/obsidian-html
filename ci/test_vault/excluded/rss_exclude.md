@@ -9,3 +9,4 @@ tags:
 Test whether this note is excluded because it isn't in folder `rss/`.
 
 ## Next test
+[[Images]]
