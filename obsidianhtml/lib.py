@@ -114,7 +114,10 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
             f.write(c)
 
     # copy files over (byte copy, static_folder)
-    copy_file_list_byte = [['html/SourceCodePro-Regular.ttf', 'SourceCodePro-Regular.ttf']]
+    copy_file_list_byte = [
+        ['html/SourceCodePro-Regular.ttf', 'SourceCodePro-Regular.ttf'],
+        ['html/Roboto-Regular.ttf', 'Roboto-Regular.ttf']
+    ]
     for file_name in copy_file_list_byte:
         c = OpenIncludedFileBinary(file_name[0])
         with open (static_folder.joinpath(file_name[1]), 'wb') as f:

@@ -1,5 +1,6 @@
 * {
     overflow-anchor: none;
+    text-rendering: optimizeLegibility;
   }
   
 table {
@@ -83,6 +84,20 @@ body {
     .container-clickback {
         display: none;
     }
+}
+
+@font-face {
+    font-family: 'SourceCodePro-Regular';
+    src: url('{html_url_prefix}/obs.html/static/SourceCodePro-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: monospace;
+}
+
+@font-face {
+    font-family: 'Roboto-Regular';
+    src: url('{html_url_prefix}/obs.html/static/Roboto-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 
 
@@ -227,13 +242,6 @@ span.tag {
 }
 
 
-@font-face {
-    font-family: 'SourceCodePro-Regular';
-    src: url('{html_url_prefix}/obs.html/static/SourceCodePro-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: monospace;
-}
-
 .graph_svg {
     width: 100%;
     height: 400px;
@@ -251,6 +259,7 @@ span.tag {
     display: block;
     cursor: pointer;
     margin-bottom: 0.2rem;
+    font-family: 'Roboto-Regular';
 }
 .dir-list {
     margin-top: 0.2rem;
