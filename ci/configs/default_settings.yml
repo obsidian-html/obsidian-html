@@ -62,3 +62,6 @@ toggles:
             - ['yaml_strip','tags',['date/']]
           iso_formatted: True
           format_string: '' #'%Y-%m-%d'
+    
+    create_index_from_dir_structure:
+      enabled: True
