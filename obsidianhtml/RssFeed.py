@@ -161,7 +161,6 @@ class RssFeed():
                 soup = BeautifulSoup(f.read(), 'html5lib')
 
             # get metadata
-            print(path)
             node_el = soup.find('meta',attrs={'name':'node_id'})
             if node_el is None:
                 raise Exception('RSS Feed: Meta tag with node_id was not found. If you are using a custom template, make sure that <meta name="node_id" content="{node_id}"> is present in the html header to use this feature.')

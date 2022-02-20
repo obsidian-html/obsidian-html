@@ -38,6 +38,7 @@ exclude_subfolders:
   - ".obsidian"
   - ".trash"
   - ".DS_Store"
+  - ".git"
 
 # Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data. 
 # Should be fine to turn off if copying the vault takes too long / disk space is too limited.
@@ -162,3 +163,15 @@ toggles:
             - ['yaml_strip','tags',['date/']]
           iso_formatted: True
           format_string: '' #'%Y-%m-%d'
+
+    create_index_from_dir_structure:
+      enabled: False
+      rel_output_path: 'obs.html/dir_index.html'
+      exclude_subfolders:
+        - ".git"
+        - "__src"
+        - "md"
+        - "obs.html"
+      exclude_files:
+        - "favicon.ico"
+        - "not_created.html"

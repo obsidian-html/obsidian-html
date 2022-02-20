@@ -22,7 +22,9 @@ from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     IsValidLocalMarkdownLink, PopulateTemplate, \
                     printHelpAndExit
 from .PicknickBasket import PicknickBasket
-from .Feature_CreateIndexFromTags import CreateIndexFromTags
+
+from .CreateIndexFromTags import CreateIndexFromTags
+from .CreateIndexFromDirStructure import CreateIndexFromDirStructure
 from .RssFeed import RssFeed
 
 # Open source files in the package
@@ -370,7 +372,6 @@ def simpleHash(text:str):
     return str(hash)
 
 
-
 def main():
     # Show help text
     # ---------------------------------------------------------
@@ -513,7 +514,7 @@ def main():
                         if pb.gc('toggles','verbose_printout'):
                             print(f'\tExcluded folder {excl_folder_path}: Excluded file {path.name}.')
                         _continue = True
-                    break
+                        break
                 if _continue:
                     continue
             except:
@@ -688,3 +689,13 @@ def main():
         feed = RssFeed(pb)
         feed.Compile()
         print('< COMPILING RSS FEED: Done')
+
+    if pb.gc('toggles','features','create_index_from_dir_structure','enabled'):
+        rel_output_path = pb.gc('toggles','features','create_index_from_dir_structure','rel_output_path')
+        op = paths['html_output_folder'].joinpath(rel_output_path)
+
+        print(f'> COMPILING INDEX FROM DIR STRUCTURE ({op})')
+        treeobj = CreateIndexFromDirStructure(pb, pb.paths['html_output_folder'])
+        treeobj.BuildIndex()
+        treeobj.WriteIndex()
+        print('< COMPILING INDEX FROM DIR STRUCTURE: Done')
