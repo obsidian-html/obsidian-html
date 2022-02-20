@@ -31,13 +31,14 @@
 <div id="header" class="header">
         <a href="{html_url_prefix}/" id="homelink" title="Clear screen and go to homepage">{title}</a>
 
-        <div style="width:4rem; height:1.6rem; position:fixed; left:calc(100vw - 4rem);top: 0.9rem; ">
+        <div style="width:6rem; height:1.6rem; position:fixed; left:calc(100vw - 6rem);top: 0.9rem; ">
 {rss_button}
                 <div style="width:1.6rem; height:1.6rem; float:right; margin-right:0.2rem">
                         <a href="{html_url_prefix}/obs.html/tags/" title="Open tag view">
                                 <img src = "{html_url_prefix}/obs.html/static/hashtag.svg" alt="RSS Feed link"/>
                         </a>
                 </div>
+{dirtree_button}
         </div>
 
 </div>
@@ -49,21 +50,6 @@
 </div>
 
 
-
 <script src="{html_url_prefix}/obs.html/static/obsidian.js" type="text/javascript"></script>
-<script>
-        function toggle_dir(dir_button_id){
-                console.log(dir_button_id);
-                id = dir_button_id.split('-')[1]
-                cont = document.getElementById('folder-container-'+id)
-
-                if (cont.style.display == "block") {
-                        cont.style.display = "none";
-                }
-                else {
-                        cont.style.display = "block";
-                }
-        }
-</script>
 </body>
 </html>

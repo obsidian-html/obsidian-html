@@ -468,9 +468,13 @@ def main():
         dynamic_inclusions += '\n'.join(pb.gc('html_custom_inclusions')) +'\n'
     except:
         None
+
     if pb.gc('toggles','features','graph','enabled'):
         dynamic_inclusions += '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/obs.html/static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
+
+    if pb.gc('toggles','features','create_index_from_dir_structure','enabled'):
+        dynamic_inclusions += '<script src="'+pb.gc('html_url_prefix')+'/obs.html/static/dirtree.js" /></script>' + "\n"
 
 
     # Remove potential previous output
@@ -700,4 +704,4 @@ def main():
         treeobj.WriteIndex()
         print('< COMPILING INDEX FROM DIR STRUCTURE: Done')
 
-        
+
