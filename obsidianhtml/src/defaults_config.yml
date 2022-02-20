@@ -167,6 +167,8 @@ toggles:
     create_index_from_dir_structure:
       enabled: False
       rel_output_path: 'obs.html/dir_index.html'
+      styling: 
+        show_icon: True
       exclude_subfolders:
         - ".git"
         - "__src"

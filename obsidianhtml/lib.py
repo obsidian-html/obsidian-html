@@ -97,7 +97,9 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
         ['html/taglist.css', 'taglist.css'],
         ['html/external.svg', 'external.svg'],
         ['html/hashtag.svg', 'hashtag.svg'],
-        ['rss/rss.svg', 'rss.svg']
+        ['rss/rss.svg', 'rss.svg'],
+        ['index_from_dir_structure/dirtree.js', 'dirtree.js'],
+        ['index_from_dir_structure/dirtree.svg', 'dirtree.svg'],
     ]
     if graph_enabled:
         copy_file_list.append(['graph/graph.css', 'graph.css'])
@@ -149,6 +151,19 @@ def PopulateTemplate(pb, node_id, site_name, html_url_prefix, dynamic_inclusions
         template = template.replace('{rss_button}', code)
     else:
         template = template.replace('{rss_button}', '')
+
+    if pb.gc('toggles','features','create_index_from_dir_structure','enabled') and pb.gc('toggles','features','create_index_from_dir_structure','styling','show_icon'):
+        # output path
+        output_path = pb.gc('html_url_prefix') + '/' + pb.gc('toggles','features','create_index_from_dir_structure','rel_output_path')
+
+        # compile template
+        code = OpenIncludedFile('index_from_dir_structure/button_template.html')
+        code = code.replace('{dirtree_index_path}', output_path)
+
+        # add to main template
+        template = template.replace('{dirtree_button}', code)
+    else:
+        template = template.replace('{dirtree_button}', '')
 
     # Replace placeholders
     template = template\
