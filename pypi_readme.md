@@ -6,12 +6,16 @@ You can see the capabilities of this system on the documentation website: https:
 
 
 **What it does**:
+
 The Obsidian notes will be converted to standard markdown output. Then, optionally, html output is created based on the standard markdown. 
 It is also possible to input existing standard markdown to just use the markdown to html functionality.
 
 See the docs for more information on configuring the behavior of ObsidianHtml.
 
+
 **Changelog**:
+
+- 1.0.0: Added RSS feed & directory tree page & bugfixes. For more information see: https://github.com/obsidian-html/obsidian-html/issues/137   
 - 0.0.10: Update readme (not possible without publishing a new version...)   
 - 0.0.9: Added: graph view, backlinks, index from tags, image scaling, temporary vault copy. Made configurable: folder exclusion, external link behavior,  css/js inclusions   
 - 0.0.8: Bugfix: mermaid not loading when dynamically opened in new tab   
