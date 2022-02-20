@@ -138,7 +138,7 @@ function SetLinks(level) {
                         if (l.id == 'homelink') {
                                 continue;
                         }
-                        if (l.id == 'rss_link') {
+                        if (l.classList.contains('system-link')) {
                                 continue;
                         }
                         if (l.classList.contains('external-link')) {

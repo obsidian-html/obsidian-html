@@ -12,3 +12,4 @@ Test whether this image links to the correct location, and it can be downloaded.
 
 
 ## Next test
+[[dirtree_note]]

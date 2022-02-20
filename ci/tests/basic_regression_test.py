@@ -140,7 +140,6 @@ def customize_default_config(items, write_to_tmp_config=True):
 
 def GetRssSoup(file_path):
     full_path = Path('tmp/html/').joinpath(file_path).resolve()
-    print(full_path)
     with open(full_path, 'r', encoding="utf-8") as f:
         rss = f.read()
     soup = BeautifulSoup(rss, 'lxml')
@@ -303,6 +302,29 @@ class TestDefaultMode(ModeTemplate):
         # Get image
         r = requests.get(f'http://localhost:8888{img_rel_url}')
         self.assertEqual(len(r.content), 10134)
+
+    def test_E_dirtree(self):
+        self.scribe("dirtree page should be present")
+        soup = html_get('obs.html/dir_index.html')
+        self.assertPageFound(soup)
+
+        self.scribe("dirtree icon should be present on the page")
+        self.assertIsNotNone(soup.find('a', attrs={'id':'dirtree_link'}))
+
+        self.scribe("folder button should be present")
+        button = soup.find('button', text='dirtree')
+        self.assertIsNotNone(button)
+
+        self.scribe("folder container should be present")
+        bid = button['id']
+        div_id = f"folder-container-{bid.split('-')[1]}"
+        div = soup.find('div', attrs={'id':div_id})
+        self.assertIsNotNone(div)
+
+        self.scribe("Correct note should be under correct div")
+        self.assertEqual(div.find('li').find('a')['href'], '/dirtree/dirtree_note.html')
+        
+
 
 class TestHtmlPrefixMode(ModeTemplate):
     """Configure a HTML prefix"""
