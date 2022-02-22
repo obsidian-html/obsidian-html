@@ -1,6 +1,6 @@
 from pathlib import Path
 import yaml
-from .lib import PopulateTemplate
+from .lib import PopulateTemplate, OpenIncludedFile
 
 class CreateIndexFromDirStructure():
     def __init__(self, pb, path):
@@ -110,6 +110,10 @@ class CreateIndexFromDirStructure():
         
         self.uid = 0
         html = _recurse(self.tree, -1)
+
+        if self.pb.gc('toggles','features','graph','enabled'):
+            html += f'\n<script src="{self.html_url_prefix}/obs.html/static/graph.js" type="text/javascript"></script>\n'
+
         self.html = html
 
     def WriteIndex(self):
