@@ -15,6 +15,7 @@ See the docs for more information on configuring the behavior of ObsidianHtml.
 
 **Changelog**:
 
+- 1.0.1: Bugfix: https://obsidian-html.github.io/Changelog/v1.0.1.html   
 - 1.0.0: Added RSS feed & directory tree page & bugfixes. For more information see: https://github.com/obsidian-html/obsidian-html/issues/137   
 - 0.0.10: Update readme (not possible without publishing a new version...)   
 - 0.0.9: Added: graph view, backlinks, index from tags, image scaling, temporary vault copy. Made configurable: folder exclusion, external link behavior,  css/js inclusions   
