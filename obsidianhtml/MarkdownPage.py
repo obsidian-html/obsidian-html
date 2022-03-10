@@ -229,9 +229,7 @@ class MarkdownPage:
                 is_anchor = True
 
             isMd = False
-            if filename[-3:] == '.md':
-                isMd = True
-            else:
+            if filename[-3:] != '.md':
                 # Always assume that Obsidian filenames are links
                 # This is the default behavior. Use proper markdown to link to files
                 filename += '.md'
@@ -248,11 +246,12 @@ class MarkdownPage:
                     # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
                     full_path = self.file_tree[filename]['fullpath']
                     relative_path_posix = Path(full_path).relative_to(self.src_folder_path).as_posix()
-                    
+
                     if relative_path_posix == rel_obsidian_entrypoint_path.as_posix():    
                         relative_path_posix = 'index.md'
 
-                    relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
+                    if pb.gc('toggles','relative_path_md'):
+                        relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
 
                 newlink = urllib.parse.quote(relative_path_posix)
 
@@ -290,15 +289,13 @@ class MarkdownPage:
         # -- [10] Add code inclusions
         for l in re.findall(r'^(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')
-            link_lookup = GetObsidianFilePath(link, self.file_tree)
-            file_record = link_lookup[1]
-            header = link_lookup[2]
+            file_name, file_record, header = GetObsidianFilePath(link, self.file_tree)
 
-            if link_lookup == False:
+            if file_record == False:
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Could not find page {link}.")
                 continue
             
-            self.links.append(file_record['fullpath'])
+            self.links.append(file_name)
 
             if include_depth > 3:
                 self.page = self.page.replace(l, f"[{link}]({file_record['fullpath']}).")
