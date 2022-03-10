@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "modes/create_index_from_tags3.md",
+            "file": "note_inclusion/level1/level2/noteC.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "modes/create_index_from_tags3.md",
+                "file": "note_inclusion/level1/level2/noteC.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -88,15 +88,15 @@
   },
   "active": "688650e0e2ca6e50",
   "lastOpenFiles": [
-    "modes/create_index_from_tags3.md",
-    "modes/create_index_from_tags2.md",
-    "entrypoint.md",
-    "Included via noteincl.md",
-    "blabla.html.md",
+    "note_inclusion/level1/level2/noteC.md",
+    "note_inclusion/noteA.md",
     "dirtree/dirtree_note.md",
-    "Images.md",
-    "excluded/rss_exclude.md",
+    "note_inclusion/level1/noteB.md",
+    "images/obsidian-html-logo.png",
+    "rss/rss_index.md",
     "rss/rss_h1.md",
-    "rss/rss_index.md"
+    "excluded/rss_exclude.md",
+    "Mermaid.md",
+    "Special Characters (In Title).md"
   ]
 }
