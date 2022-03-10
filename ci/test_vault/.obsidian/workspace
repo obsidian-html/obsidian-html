@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "entrypoint.md",
+            "file": "modes/create_index_from_tags3.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "entrypoint.md",
+                "file": "modes/create_index_from_tags3.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -88,6 +88,8 @@
   },
   "active": "688650e0e2ca6e50",
   "lastOpenFiles": [
+    "modes/create_index_from_tags3.md",
+    "modes/create_index_from_tags2.md",
     "entrypoint.md",
     "Included via noteincl.md",
     "blabla.html.md",
@@ -95,8 +97,6 @@
     "Images.md",
     "excluded/rss_exclude.md",
     "rss/rss_h1.md",
-    "rss/rss_index.md",
-    "Markdown link.md",
-    "Note link.md"
+    "rss/rss_index.md"
   ]
 }
