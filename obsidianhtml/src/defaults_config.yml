@@ -99,7 +99,7 @@ toggles:
   no_clean: False
 
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
-  relative_path_md: True
+  relative_path_md: False
 
   # Whether external http anchor links should have a target of "_blank"
   external_blank: False  
