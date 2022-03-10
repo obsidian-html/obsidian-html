@@ -1,5 +1,6 @@
 from .lib import IsValidLocalMarkdownLink
 from .MarkdownPage import MarkdownPage
+import urllib.parse         # convert link characters like %
 
 import frontmatter
 from pathlib import Path 
@@ -202,7 +203,7 @@ def CreateIndexFromTags(pb):
 
         # Add to index content
         for n in notes:
-            index_md_content += f'- [{n["file_key"][:-3]}]({n["md_rel_path_str"]})\n'
+            index_md_content += f'- [[{n["file_key"][:-3]}]]\n'
         index_md_content += '\n'
 
     # write content to markdown file
