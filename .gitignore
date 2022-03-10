@@ -1,9 +1,11 @@
 output/*
 /test*
-*/__pycache__/*
+**/__pycache__/**
 local_configs/*
 local_output/*
 obsidianhtml.egg-info
 build.ps1
 build/*
 tmp/*
+**/.ipynb_checkpoints/**
+**/geckodriver.log

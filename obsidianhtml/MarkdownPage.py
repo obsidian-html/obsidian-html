@@ -192,7 +192,9 @@ class MarkdownPage:
                     relative_path_posix = 'index.md'
 
             # Change the link in the markdown to link to the relative path
-            relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
+            if pb.gc('toggles','relative_path_md'):
+                relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
+                
             new_link = ']('+relative_path_posix+')'
 
             safe_link = re.escape(']('+l+')')
