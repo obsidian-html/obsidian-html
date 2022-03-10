@@ -9,3 +9,4 @@ tags:
 Test if this note is included in the dirtree index.
 
 ## Next test
+[[noteA]]

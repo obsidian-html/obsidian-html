@@ -87,7 +87,7 @@ class MarkdownPage:
                 if n == (len(tag.split('/')) - 1):
                     ctagtree['notes'].append(url)
 
-    def ConvertObsidianPageToMarkdownPage(self, pb, dst_folder_path, entrypoint_path, include_depth=0):
+    def ConvertObsidianPageToMarkdownPage(self, pb, dst_folder_path, entrypoint_path, include_depth=0, includer_page_depth=None):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
         # -- Load contents
         self.SetDestinationPath(dst_folder_path, entrypoint_path)
@@ -95,9 +95,12 @@ class MarkdownPage:
         rel_obsidian_entrypoint_path = entrypoint_path.relative_to(self.src_folder_path)
 
         # -- Get page depth
-        page_folder_depth = self.rel_src_path.as_posix().count('/')
         if self.isEntryPoint:
-            page_folder_depth = 0
+            page_folder_depth = 0        
+        elif includer_page_depth is not None:
+            page_folder_depth = includer_page_depth
+        else:
+            page_folder_depth = self.rel_src_path.as_posix().count('/')
 
         # -- [1] Replace code blocks with placeholders so they aren't altered
         # They will be restored at the end
@@ -310,7 +313,7 @@ class MarkdownPage:
             
             # Get code
             included_page = MarkdownPage(incl_page_path, self.src_folder_path, self.file_tree)
-            included_page.ConvertObsidianPageToMarkdownPage(pb, self.dst_folder_path, entrypoint_path, include_depth=include_depth + 1)
+            included_page.ConvertObsidianPageToMarkdownPage(pb, self.dst_folder_path, entrypoint_path, include_depth=include_depth + 1, includer_page_depth=page_folder_depth)
 
             # Get subsection of code if header is present
             if header != '':
@@ -325,4 +328,4 @@ class MarkdownPage:
         # -- [1] Restore codeblocks/-lines
         self.RestoreCodeSections()
 
-        return self              
+        return self

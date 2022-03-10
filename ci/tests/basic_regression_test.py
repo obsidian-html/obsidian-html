@@ -211,6 +211,29 @@ class TestDefaultMode(ModeTemplate):
 
         self.scribe("Correct note should be under correct div")
         self.assertEqual(div.find('li').find('a')['href'], '/dirtree/dirtree_note.html')
+
+    def test_F_note_inclusion_rel_link_depth(self):
+        self.scribe("links in included notes should reflect caller's page depth")
+        soup = html_get('note_inclusion/noteA.html')
+        self.assertPageFound(soup)
+
+        self.assertIsNotNone(soup.find('a', attrs={'id':'dirtree_link'}))
+        
+        img_url = "/images/obsidian-html-logo.png"
+        imgs = soup.body.find('div', attrs={'class':'container'}).find_all('img')
+        img_urls = [x['src'] for x in imgs]
+        print(img_urls)
+        self.assertEqual(img_url, img_urls[0], msg="image url should be correct")
+        self.assertEqual(len(img_urls), 2, msg="only two images should have been found")
+        self.assertEqual(img_urls[1], img_urls[0], msg="both images should have the same url")
+        
+        note_url = "/note_inclusion/level1/level2/noteC.html"
+        notes = soup.body.find('div', attrs={'class':'container'}).find_all('a', attrs={'class': None})
+        note_urls = [x['href'] for x in notes]
+        print(note_urls)
+        self.assertEqual(note_url, note_urls[0], msg="note url should be correct")
+        self.assertEqual(len(note_urls), 2, msg="only two notelinks should have been found")
+        self.assertEqual(note_urls[1], note_urls[0], msg="both note links should have the same url")
         
 
 
