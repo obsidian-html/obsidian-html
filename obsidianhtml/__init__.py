@@ -661,7 +661,7 @@ def main():
                 for l in pb.network_tree.tree['links']:
                     if l['target'] == node_id:
                         url = pb.network_tree.node_lookup[l["source"]]['url']
-                        snippet += f'\t<li><a href="{url}">{l["source"]}</a></li>\n'
+                        snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
                         i += 1
                 snippet += '</ul>'
 

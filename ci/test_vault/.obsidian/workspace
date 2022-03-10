@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "dirtree/dirtree_note.md",
+            "file": "entrypoint.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "dirtree/dirtree_note.md",
+                "file": "entrypoint.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -88,15 +88,15 @@
   },
   "active": "688650e0e2ca6e50",
   "lastOpenFiles": [
+    "entrypoint.md",
+    "Included via noteincl.md",
+    "blabla.html.md",
     "dirtree/dirtree_note.md",
     "Images.md",
     "excluded/rss_exclude.md",
     "rss/rss_h1.md",
     "rss/rss_index.md",
     "Markdown link.md",
-    "Note link.md",
-    "entrypoint.md",
-    "Special Characters.md",
-    "Special Characters (In Title).md"
+    "Note link.md"
   ]
 }
