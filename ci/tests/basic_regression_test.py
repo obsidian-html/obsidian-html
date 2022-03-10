@@ -288,8 +288,6 @@ class TestCreateIndexFromTagsMode(ModeTemplate):
 
         # Test Obsidian type links
         link_url = self.links_should_work(path=link_url, link_text='create_index_from_tags2', link_type_tested="Obsidian")
-
-        time.sleep(100)
         
         # Test markdown type links
         link_url = self.links_should_work(path=link_url, link_text='create_index_from_tags3', link_type_tested="Markdown")
