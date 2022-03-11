@@ -10,3 +10,7 @@ tags:
 ![[obsidian-html-logo.png]]
 
 ![[reaction_Objection_birb.mp4]]
+
+![[geese.wav]]
+
+![[jazzy.mp3]]

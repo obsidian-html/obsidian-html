@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "note_inclusion/noteA.md",
+            "file": "note_inclusion/level1/noteB.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "note_inclusion/noteA.md",
+                "file": "note_inclusion/level1/noteB.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -88,8 +88,8 @@
   },
   "active": "688650e0e2ca6e50",
   "lastOpenFiles": [
-    "note_inclusion/noteA.md",
     "note_inclusion/level1/noteB.md",
+    "note_inclusion/noteA.md",
     "video/mp4_inclusion.md",
     "note_inclusion/level1/level2/noteC.md",
     "excluded/rss_exclude.md",
