@@ -152,6 +152,9 @@ class MarkdownPage:
             prev_is_list_line = current_is_list_line
         self.page = buffer
 
+        # -- [?] Remove whitespace in front of header hashtags
+        self.page = re.sub('(^\ [\ ]*)(?=#)', '', self.page, flags=re.MULTILINE)
+
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
         
