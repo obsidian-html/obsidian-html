@@ -43,7 +43,13 @@ body {
     padding: 0.2rem;
 }
 .container video {
-    margin: auto;  max-width: calc(100vw - 20px); max-height: calc(100vh - 20px);
+    margin: auto;  
+    max-width: 100%;
+}
+.container audio {
+    margin: auto;  
+    border-radius: 1.5rem;
+    background-color: black;
 }
 .container-wrapper {
     max-width: calc(45rem + 3rem);

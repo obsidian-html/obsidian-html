@@ -20,6 +20,12 @@ Both notes also include a small picture, the same reasoning follows for that.
 
 ![[obsidian-html-logo.png]]
 
+![[reaction_Objection_birb.mp4]]
+
+![[geese.wav]]
+
+![[jazzy.mp3]]
+
 ----
 
 ![[noteB]]

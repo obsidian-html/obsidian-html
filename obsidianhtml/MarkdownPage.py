@@ -97,10 +97,25 @@ class MarkdownPage:
             'wmv': 'video/x-ms-wmv',
             'avi': 'video/x-msvideo'
         }
-        mime_type = mime_type_lut[suffix]
+        try:
+            mime_type = mime_type_lut[suffix]
+        except:
+            mime_type = ''
         video_template = OpenIncludedFile('html/video_template.html')
         return video_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
 
+    def GetAudioHTML(self, file_name, relative_path_corrected, suffix):
+        mime_type_lut = {
+            'mp3': 'audio/mpeg',
+            'm4a': 'audio/mp4',
+            'wav': 'audio/x-wav'
+        }
+        try:
+            mime_type = mime_type_lut[suffix]
+        except:
+            mime_type = ''
+        audio_template = OpenIncludedFile('html/audio_template.html')
+        return audio_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
 
     def ConvertObsidianPageToMarkdownPage(self, pb, dst_folder_path, entrypoint_path, include_depth=0, includer_page_depth=None):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
@@ -151,7 +166,7 @@ class MarkdownPage:
             safe_link = re.escape('![['+link+']]')
             self.page = re.sub(safe_link, new_link, self.page)
 
-        # -- [4] Handle local image/video links (copy them over to output)
+        # -- [4] Handle local image/video/audio links (copy them over to output)
         for link in re.findall("(?<=\!\[\]\()(.*)(?=\))", self.page):
             clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
 
@@ -177,9 +192,11 @@ class MarkdownPage:
             relative_path = ('../' * page_folder_depth) + relative_path
             new_link = '![]('+urllib.parse.quote(relative_path)+')'
 
-            # Handle video usecase
+            # Handle video/audio usecase
             if suffix in pb.gc('video_format_suffixes'):
                 new_link = self.GetVideoHTML(file_name, relative_path, suffix)
+            if suffix in pb.gc('audio_format_suffixes'):
+                new_link = self.GetAudioHTML(file_name, relative_path, suffix)
             
             safe_link = re.escape('![]('+link+')')
             self.page = re.sub(safe_link, new_link, self.page)
