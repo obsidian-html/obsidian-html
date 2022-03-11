@@ -48,6 +48,8 @@ body {
 }
 .container audio {
     margin: auto;  
+    border-radius: 1.5rem;
+    background-color: black;
 }
 .container-wrapper {
     max-width: calc(45rem + 3rem);
