@@ -48,8 +48,9 @@ copy_vault_to_tempdir: True
 # ObsidianHtml needs to be able to discern between included notes and included files, because included files 
 # need to be treated differently. This is a configurable setting because we might've missed certain suffixes
 # of files that are includable.
-included_file_suffixes: ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'pdf', 'mp4']
+included_file_suffixes: ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'pdf', 'mp4', 'wav', 'mp3']
 video_format_suffixes: ['mp4']
+audio_format_suffixes: ['wav', 'mp3']
 
 ##########################################################################
 #                             HTML OUTPUT                                #

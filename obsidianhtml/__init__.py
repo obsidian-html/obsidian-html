@@ -221,7 +221,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
         safe_link = r"\!\[.*\]\("+re.escape(link)+r"\)"
         md.page = re.sub(safe_link, new_link, md.page)
 
-    # [?] Handle local video links (copy them over to output)
+    # [?] Handle local source tag-links (copy them over to output)
     # ------------------------------------------------------------------
     for link in re.findall(r'(?<=<source src=")([^"]*)', md.page):
         l = urllib.parse.unquote(link)
@@ -247,6 +247,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
         safe_link = r'<source src="'+re.escape(link)+r'"'
         print(new_link, safe_link)
         md.page = re.sub(safe_link, new_link, md.page)
+
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
