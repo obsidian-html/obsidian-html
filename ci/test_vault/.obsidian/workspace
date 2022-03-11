@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "video/mp4_inclusion.md",
+            "file": "note_inclusion/noteA.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "video/mp4_inclusion.md",
+                "file": "note_inclusion/noteA.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -88,12 +88,12 @@
   },
   "active": "688650e0e2ca6e50",
   "lastOpenFiles": [
+    "note_inclusion/noteA.md",
+    "note_inclusion/level1/noteB.md",
     "video/mp4_inclusion.md",
     "note_inclusion/level1/level2/noteC.md",
     "excluded/rss_exclude.md",
-    "note_inclusion/noteA.md",
     "dirtree/dirtree_note.md",
-    "note_inclusion/level1/noteB.md",
     "images/obsidian-html-logo.png",
     "rss/rss_index.md",
     "rss/rss_h1.md",

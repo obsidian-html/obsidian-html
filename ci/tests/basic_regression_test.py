@@ -222,7 +222,6 @@ class TestDefaultMode(ModeTemplate):
         img_url = "/images/obsidian-html-logo.png"
         imgs = soup.body.find('div', attrs={'class':'container'}).find_all('img')
         img_urls = [x['src'] for x in imgs]
-        print(img_urls)
         self.assertEqual(img_url, img_urls[0], msg="image url should be correct")
         self.assertEqual(len(img_urls), 2, msg="only two images should have been found")
         self.assertEqual(img_urls[1], img_urls[0], msg="both images should have the same url")
@@ -230,10 +229,16 @@ class TestDefaultMode(ModeTemplate):
         note_url = "/note_inclusion/level1/level2/noteC.html"
         notes = soup.body.find('div', attrs={'class':'container'}).find_all('a', attrs={'class': None})
         note_urls = [x['href'] for x in notes]
-        print(note_urls)
         self.assertEqual(note_url, note_urls[0], msg="note url should be correct")
         self.assertEqual(len(note_urls), 2, msg="only two notelinks should have been found")
         self.assertEqual(note_urls[1], note_urls[0], msg="both note links should have the same url")
+
+        video_url = "/video/mp4/reaction_Objection_birb.mp4"
+        videos = soup.body.find('div', attrs={'class':'container'}).find_all('video')
+        video_urls = [x.find('source')['src'] for x in videos]
+        self.assertEqual(video_url, video_urls[0], msg="video url should be correct")
+        self.assertEqual(len(video_urls), 2, msg="only two videolinks should have been found")
+        self.assertEqual(video_urls[1], video_urls[0], msg="both video links should have the same url")
         
 
 
