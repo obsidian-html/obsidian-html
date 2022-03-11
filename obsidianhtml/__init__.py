@@ -245,7 +245,6 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
         new_link = '<source src="'+urllib.parse.quote(pb.gc('html_url_prefix')+'/'+rel_path.as_posix())+'"'
         safe_link = r'<source src="'+re.escape(link)+r'"'
-        print(new_link, safe_link)
         md.page = re.sub(safe_link, new_link, md.page)
 
 
