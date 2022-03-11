@@ -4,7 +4,7 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 import shutil               # used to remove a non-empty directory, copy files
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, ConvertTitleToMarkdownId, MalformedTags
+from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, ConvertTitleToMarkdownId, MalformedTags, OpenIncludedFile
 from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
 
 class MarkdownPage:
@@ -87,6 +87,21 @@ class MarkdownPage:
                 if n == (len(tag.split('/')) - 1):
                     ctagtree['notes'].append(url)
 
+    def GetVideoHTML(self, file_name, relative_path_corrected, suffix):
+        mime_type_lut = {
+            'mp4': 'video/mp4',
+            'webm': 'video/webm',
+            'flv': 'video/x-flv',
+            '3gp': 'video/3gpp',
+            'mov': 'video/quicktime',
+            'wmv': 'video/x-ms-wmv',
+            'avi': 'video/x-msvideo'
+        }
+        mime_type = mime_type_lut[suffix]
+        video_template = OpenIncludedFile('html/video_template.html')
+        return video_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
+
+
     def ConvertObsidianPageToMarkdownPage(self, pb, dst_folder_path, entrypoint_path, include_depth=0, includer_page_depth=None):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
         # -- Load contents
@@ -124,6 +139,7 @@ class MarkdownPage:
 
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
+        
         for link in re.findall("(?<=\!\[\[)(.*?)(?=\])", self.page):
             new_link = '![]('+link+')'
 
@@ -135,7 +151,7 @@ class MarkdownPage:
             safe_link = re.escape('![['+link+']]')
             self.page = re.sub(safe_link, new_link, self.page)
 
-        # -- [4] Handle local image links (copy them over to output)
+        # -- [4] Handle local image/video links (copy them over to output)
         for link in re.findall("(?<=\!\[\]\()(.*)(?=\))", self.page):
             clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
 
@@ -146,6 +162,7 @@ class MarkdownPage:
             # Build relative paths
             src_file_path_str = self.file_tree[clean_link_name]['fullpath']
             relative_path = Path(src_file_path_str).relative_to(self.src_folder_path)
+            suffix = relative_path.suffix[1:]
             dst_file_path = self.dst_folder_path.joinpath(relative_path)
 
             # Create folders if necessary
@@ -159,6 +176,11 @@ class MarkdownPage:
             relative_path = relative_path.as_posix()
             relative_path = ('../' * page_folder_depth) + relative_path
             new_link = '![]('+urllib.parse.quote(relative_path)+')'
+
+            # Handle video usecase
+            if suffix in pb.gc('video_format_suffixes'):
+                new_link = self.GetVideoHTML(file_name, relative_path, suffix)
+            
             safe_link = re.escape('![]('+link+')')
             self.page = re.sub(safe_link, new_link, self.page)
 

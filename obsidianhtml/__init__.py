@@ -221,6 +221,33 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
         safe_link = r"\!\[.*\]\("+re.escape(link)+r"\)"
         md.page = re.sub(safe_link, new_link, md.page)
 
+    # [?] Handle local video links (copy them over to output)
+    # ------------------------------------------------------------------
+    for link in re.findall(r'(?<=<source src=")([^"]*)', md.page):
+        l = urllib.parse.unquote(link)
+        if '://' in l:
+            continue
+        full_link_path = page_path.parent.joinpath(l).resolve()
+        rel_path = full_link_path.relative_to(paths['md_folder'])
+
+        # Only handle local video files (images located in the root folder)
+        # Doublecheck, who knows what some weird '../../folder/..' does...
+        if rel_path.as_posix() not in files.keys():
+            if pb.gc('toggles','warn_on_skipped_image'):
+                warnings.warn(f"Video {str(full_link_path)} treated as external and not imported in html")
+            continue
+
+        # Copy src to dst
+        dst_path = paths['html_output_folder'].joinpath(rel_path)
+        dst_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(full_link_path, dst_path)
+
+        # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
+        new_link = '<source src="'+urllib.parse.quote(pb.gc('html_url_prefix')+'/'+rel_path.as_posix())+'"'
+        safe_link = r'<source src="'+re.escape(link)+r'"'
+        print(new_link, safe_link)
+        md.page = re.sub(safe_link, new_link, md.page)
+
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
     md.RestoreCodeSections()
