@@ -99,7 +99,16 @@ class CreateIndexFromDirStructure():
 
             for f in tree['files']:
                 rel_path = Path(f['path']).resolve().relative_to(self.root).as_posix()
-                html += '\t'*tab_level + f'<li><a href="{self.html_url_prefix}/{rel_path}">{f["name"]}</a></li>\n'
+                
+                # get link adjustment code
+                class_list = ''
+                external_blank_html = ''
+                if Path(rel_path).suffix != '.html':
+                    class_list = 'class="external-link"'
+                    if self.pb.gc('toggles','external_blank'):
+                        external_blank_html = 'target=\"_blank\" '
+                
+                html += '\t'*tab_level + f'<li><a href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{f["name"]}</a></li>\n'
             
             tab_level -= 1
             html += '\t'*tab_level + '</ul>\n'
