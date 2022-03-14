@@ -108,6 +108,8 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
         c = OpenIncludedFile(file_name[0])
         
         if file_name[1] in ('main.css'):
+            if pb.gc('toggles','relative_path_html'):
+                html_url_prefix = '../..'
             c = c.replace('{html_url_prefix}', html_url_prefix)
 
         with open (static_folder.joinpath(file_name[1]), 'w', encoding="utf-8") as f:
@@ -148,6 +150,13 @@ def PopulateTemplate(pb, node_id, site_name, html_url_prefix, dynamic_inclusions
     if dynamic_includes is not None:
         dynamic_inclusions += dynamic_includes
 
+    if pb.gc('toggles','features','graph','enabled'):
+        dynamic_inclusions += '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/obs.html/static/graph.css" />' + "\n"
+        dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
+
+    if pb.gc('toggles','features','create_index_from_dir_structure','enabled'):
+        dynamic_inclusions += '<script src="'+pb.gc('html_url_prefix')+'/obs.html/static/dirtree.js" /></script>' + "\n"
+
     # Include toggled components
     if pb.gc('toggles','features','rss','enabled') and pb.gc('toggles','features','rss','styling','show_icon'):
         code = OpenIncludedFile('rss/button_template.html')
@@ -157,7 +166,7 @@ def PopulateTemplate(pb, node_id, site_name, html_url_prefix, dynamic_inclusions
 
     if pb.gc('toggles','features','create_index_from_dir_structure','enabled') and pb.gc('toggles','features','create_index_from_dir_structure','styling','show_icon'):
         # output path
-        output_path = pb.gc('html_url_prefix') + '/' + pb.gc('toggles','features','create_index_from_dir_structure','rel_output_path')
+        output_path = html_url_prefix + '/' + pb.gc('toggles','features','create_index_from_dir_structure','rel_output_path')
 
         # compile template
         code = OpenIncludedFile('index_from_dir_structure/button_template.html')
@@ -168,12 +177,19 @@ def PopulateTemplate(pb, node_id, site_name, html_url_prefix, dynamic_inclusions
     else:
         template = template.replace('{dirtree_button}', '')
 
+    footer_js_inclusions = ''
+    if not pb.gc('toggles','relative_path_html'):
+        footer_js_inclusions = f'<script src="{html_url_prefix}/obs.html/static/obsidian.js" type="text/javascript"></script>'
+
+
     # Replace placeholders
     template = template\
         .replace('{node_id}', node_id)\
         .replace('{title}', title)\
         .replace('{dynamic_includes}', dynamic_inclusions)\
+        .replace('{footer_js_inclusions}', footer_js_inclusions)\
         .replace('{html_url_prefix}', html_url_prefix)\
+        .replace('{relative_html_path}', str(int(pb.gc('toggles','relative_path_html'))))\
         .replace('{content}', content)
 
     return template

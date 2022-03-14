@@ -19,6 +19,9 @@ class CreateIndexFromDirStructure():
         self.html_url_prefix = pb.gc("html_url_prefix")
         self.html = ''
 
+        if pb.gc('toggles','relative_path_html'):
+            self.html_url_prefix = '..'
+
     def get_tree(self, path, files=None, folders=None):
         if files is None:
             files = []
