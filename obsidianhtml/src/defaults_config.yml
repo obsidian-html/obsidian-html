@@ -103,6 +103,12 @@ toggles:
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
   relative_path_md: True
 
+  # Whether the html paths will be relative. 
+  # Note: This is only useful if you want to open the html locally on your machine without using a webserver
+  #  and is generally not advised. This will also disable all features that need a webserver to function
+  #  such as the graph view.
+  relative_path_html: False
+
   # Whether external http anchor links should have a target of "_blank"
   external_blank: False  
   

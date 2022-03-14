@@ -113,6 +113,21 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
         md.dst_path = md.dst_path.parent.joinpath('index__2.md')
         md.rel_dst_path = md.dst_path.relative_to(md.dst_folder_path)
     
+    # Features/Toggles influencing other settings
+    # ------------------------------------------------------------------
+    
+    if pb.gc('toggles','relative_path_html'):
+        # Set html_url_prefix
+        page_depth = md.rel_dst_path.as_posix().count('/')
+        if page_depth == 0:
+            pb.config['html_url_prefix'] = '.'
+        else:
+            pb.config['html_url_prefix'] = ('../'*page_depth)[:-1]
+        
+        # Disable graph view
+        if pb.gc('toggles','features','graph','enabled'):
+            print('\t'*log_level, f"WARNING: disabling graph view - not supported with setting relative_path_html:True")
+            pb.config['toggles']['features']['graph']['enabled'] = False
 
     # Graph view integrations
     # ------------------------------------------------------------------
@@ -266,7 +281,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
         if l == '':
             continue
-        if l[0] == '/':
+        if l[0] in ('/','.'):
             # Internal link, skip
             continue
 
@@ -495,13 +510,6 @@ def main():
         dynamic_inclusions += '\n'.join(pb.gc('html_custom_inclusions')) +'\n'
     except:
         None
-
-    if pb.gc('toggles','features','graph','enabled'):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/obs.html/static/graph.css" />' + "\n"
-        dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
-
-    if pb.gc('toggles','features','create_index_from_dir_structure','enabled'):
-        dynamic_inclusions += '<script src="'+pb.gc('html_url_prefix')+'/obs.html/static/dirtree.js" /></script>' + "\n"
 
 
     # Remove potential previous output
