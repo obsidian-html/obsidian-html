@@ -2,19 +2,22 @@
 // ----------------------------------------------------------------------------
 // Globals
 var path_to_open = [];
+var no_tab_mode = {no_tabs};
+var tab_mode = ! no_tab_mode;
 
 function LoadPage() {
         console.log('threshold', (1.2 * 40 * getComputedStyle(document.documentElement).fontSize.split("px")[0]));
-        SetLinks(0);
+        if (tab_mode){
+                SetLinks(0);
+        }
 
         // Scroll container to #header link
-        if (window.location.hash != '') {
+        if (tab_mode && window.location.hash != '') {
                 let el = document.getElementById(window.location.hash.substr(2));
                 if (el) {
                         el.parentElement.scrollTop = el.offsetTop - rem(1);
                 }
         }
-
 
         // Init starting container
         FirstContainer = document.getElementsByClassName('container')[0];
@@ -24,14 +27,16 @@ function LoadPage() {
 
         // Open the path on loading the page
         // This is everything after ?path=
-        var href = window.location.href;
-        if (href.includes('?path=')) {
-                path_to_open = href.split('?path=')[1].split('/');
-                for (let i = 0; i < path_to_open.length; i++) {
-                        path_to_open[i] = decodeURIComponent(path_to_open[i]);
+        if (tab_mode){
+                var href = window.location.href;
+                if (href.includes('?path=')) {
+                        path_to_open = href.split('?path=')[1].split('/');
+                        for (let i = 0; i < path_to_open.length; i++) {
+                                path_to_open[i] = decodeURIComponent(path_to_open[i]);
+                        }
                 }
+                OpenPath(1);
         }
-        OpenPath(1);
 }
 
 // Keybindings
@@ -170,16 +175,18 @@ function SetContainer(container) {
         // This function is called on every (newly created) container. 
         // One container holds one tab
 
-        // Create clickback element
-        cb = document.createElement('div');
-        cb.className = 'container-clickback';
-        cb.id = 'cb' + container.id;
-        container.parentElement.appendChild(cb);
+        if (tab_mode){
+                // Create clickback element
+                cb = document.createElement('div');
+                cb.className = 'container-clickback';
+                cb.id = 'cb' + container.id;
+                container.parentElement.appendChild(cb);
 
-        cb.onclick = function () {
-                cont = document.getElementById(this.id.slice(2))
-                window.scrollTo(Math.max(window.visualViewport.pageLeft - (70 - cont.getBoundingClientRect().left), 0), 0)
-        };
+                cb.onclick = function () {
+                        cont = document.getElementById(this.id.slice(2))
+                        window.scrollTo(Math.max(window.visualViewport.pageLeft - (70 - cont.getBoundingClientRect().left), 0), 0)
+                };
+        }
 
         // Set url
         // This will be set already if this is not the first tab

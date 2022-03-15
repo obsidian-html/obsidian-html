@@ -84,12 +84,22 @@ function run(uid, pinnedNode){
                 })
                 .attr('x', 6)
                 .attr('y', 3)
-                .on("click", function(d) {
-                    let svg_el = document.getElementById('A' + uid);
-                    let level = parseInt(svg_el.parentElement.parentElement.level);
-                    httpGetAsync(encodeURI(d.url), ReceiveCall, level+1, false); 
-                    return false;
-                });
+
+                if (! {no_tabs})
+                {
+                        lables.on("click", function(d) {
+                                let svg_el = document.getElementById('A' + uid);
+                                let level = parseInt(svg_el.parentElement.parentElement.level);
+                                httpGetAsync(encodeURI(d.url), ReceiveCall, level+1, false); 
+                                return false;
+                        });
+                }
+                else {
+                        lables.on("click", function(d) {
+                                window.location.href = d.url;
+                                return false;
+                        });
+                }
 
                 node.append("title")
                 .text(function(d) { return d.id; });
