@@ -136,7 +136,7 @@ class CreateIndexFromDirStructure():
 
         # write html to output
         pb = self.pb
-        html = PopulateTemplate(pb, 'none', pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=self.html)
+        html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=['single_tab_page-left-aligned'])
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html)
 

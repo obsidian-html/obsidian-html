@@ -78,7 +78,7 @@ def OpenIncludedFileBinary(resource):
     with open(path, 'rb') as f:
         return f.read()    
 
-def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
+def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
     obsfolder = pb.paths['html_output_folder'].joinpath('obs.html')
     os.makedirs(obsfolder, exist_ok=True)
     static_folder = obsfolder.joinpath('static')
@@ -128,7 +128,7 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
     # Custom copy
     c = OpenIncludedFile('html/not_created.html')
     with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
-        html = PopulateTemplate(pb, 'none', site_name, html_url_prefix, pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
+        html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
         html = html.replace('{html_url_prefix}', html_url_prefix)
         f.write(html)
 
@@ -143,19 +143,25 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix, site_name):
         with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:
             f.write(graph_js)
 
-def PopulateTemplate(pb, node_id, site_name, html_url_prefix, dynamic_inclusions, template, content, title='', dynamic_includes=None):
+def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, title='', dynamic_includes=None, container_wrapper_class_list=None):
+    # Cache
+    html_url_prefix = pb.gc("html_url_prefix")
+
     # Defaults
     if title == '':
-        title = site_name
+        title = pb.gc('site_name')
     if dynamic_includes is not None:
         dynamic_inclusions += dynamic_includes
 
     if pb.gc('toggles','features','graph','enabled'):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/obs.html/static/graph.css" />' + "\n"
+        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
     if pb.gc('toggles','features','create_index_from_dir_structure','enabled'):
-        dynamic_inclusions += '<script src="'+pb.gc('html_url_prefix')+'/obs.html/static/dirtree.js" /></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"
+
+    if container_wrapper_class_list is None:
+        container_wrapper_class_list = []
 
     # Include toggled components
     if pb.gc('toggles','features','rss','enabled') and pb.gc('toggles','features','rss','styling','show_icon'):
@@ -178,9 +184,10 @@ def PopulateTemplate(pb, node_id, site_name, html_url_prefix, dynamic_inclusions
         template = template.replace('{dirtree_button}', '')
 
     footer_js_inclusions = ''
-    if not pb.gc('toggles','relative_path_html'):
+    if pb.gc('toggles','no_tabs') == False:
         footer_js_inclusions = f'<script src="{html_url_prefix}/obs.html/static/obsidian.js" type="text/javascript"></script>'
-
+    else:
+        container_wrapper_class_list.append('single_tab_page')
 
     # Replace placeholders
     template = template\
@@ -189,7 +196,8 @@ def PopulateTemplate(pb, node_id, site_name, html_url_prefix, dynamic_inclusions
         .replace('{dynamic_includes}', dynamic_inclusions)\
         .replace('{footer_js_inclusions}', footer_js_inclusions)\
         .replace('{html_url_prefix}', html_url_prefix)\
-        .replace('{relative_html_path}', str(int(pb.gc('toggles','relative_path_html'))))\
+        .replace('{container_wrapper_class_list}', ' '.join(container_wrapper_class_list))\
+        .replace('{relative_html_path}', str(int(pb.gc('toggles','no_tabs'))))\
         .replace('{content}', content)
 
     return template

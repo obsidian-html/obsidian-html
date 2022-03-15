@@ -21,7 +21,7 @@
                 <!-- Onload tweaks -->
                 <script>
                         // add prefix to hash to avoid scrolling
-                        if ({relative_html_path} == 0){
+                        if ({no_tabs} == 0){
                                 if (window.location.hash != '' && window.location.hash.substr(1)[0] != '!'){
                                         window.location.hash = '!' + window.location.hash.substr(1);
                                 }
@@ -36,7 +36,7 @@
         <div style="width:6rem; height:1.6rem; position:fixed; left:calc(100vw - 6rem);top: 0.9rem; ">
 {rss_button}
                 <div style="width:1.6rem; height:1.6rem; float:right; margin-right:0.2rem">
-                        <a href="{html_url_prefix}/obs.html/tags/" title="Open tag view">
+                        <a href="{html_url_prefix}/obs.html/tags/index.html" title="Open tag view">
                                 <img src = "{html_url_prefix}/obs.html/static/hashtag.svg" alt="RSS Feed link"/>
                         </a>
                 </div>
@@ -44,7 +44,7 @@
         </div>
 
 </div>
-<div class="container-wrapper">
+<div class="container-wrapper {container_wrapper_class_list}">
         <div class="container">
         {content}
         <!-- end content -->

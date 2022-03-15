@@ -45,6 +45,7 @@ class MarkdownPage:
         if entrypoint_src_path == self.src_path:
             self.isEntryPoint = True
             self.dst_path = dst_folder_path.joinpath('index.md')
+
         else:
             self.dst_path = dst_folder_path.joinpath(self.rel_src_path.as_posix())
         self.rel_dst_path = self.dst_path.relative_to(dst_folder_path)

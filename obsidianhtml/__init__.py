@@ -111,11 +111,10 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
     # Fix the issue of a note being called 'index.md' in the root folder
     if md.dst_path == paths['html_output_folder'].joinpath('index.md') and md.src_path != paths['md_entrypoint']:
         md.dst_path = md.dst_path.parent.joinpath('index__2.md')
-        md.rel_dst_path = md.dst_path.relative_to(md.dst_folder_path)
+    md.rel_dst_path = md.dst_path.relative_to(md.dst_folder_path)
     
     # Features/Toggles influencing other settings
     # ------------------------------------------------------------------
-    
     if pb.gc('toggles','relative_path_html'):
         # Set html_url_prefix
         page_depth = md.rel_dst_path.as_posix().count('/')
@@ -123,11 +122,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
             pb.config['html_url_prefix'] = '.'
         else:
             pb.config['html_url_prefix'] = ('../'*page_depth)[:-1]
-        
-        # Disable graph view
-        if pb.gc('toggles','features','graph','enabled'):
-            print('\t'*log_level, f"WARNING: disabling graph view - not supported with setting relative_path_html:True")
-            pb.config['toggles']['features']['graph']['enabled'] = False
+
 
     # Graph view integrations
     # ------------------------------------------------------------------
@@ -321,7 +316,7 @@ def ConvertMarkdownPageToHtmlPage(page_path_str, pb, backlinkNode=None, log_leve
 
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
-    html = PopulateTemplate(pb, node['id'], pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body)
+    html = PopulateTemplate(pb, node['id'], pb.dynamic_inclusions, pb.html_template, content=html_body)
 
     # Save file
     # ------------------------------------------------------------------
@@ -364,6 +359,8 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Get relevant paths
     # ---------------------------------------------------------
     html_url_prefix = pb.gc('html_url_prefix')
+    if pb.gc('toggles','relative_path_html'):
+        html_url_prefix = pb.sc(path=['html_url_prefix'], value=('../'*(level+2))[:-1])
     tags_folder = pb.paths['html_output_folder'].joinpath('obs.html/tags/')
     tag_dst_path = tags_folder.joinpath(f'{tagpath}index.html').resolve()
     tag_dst_path_posix = tag_dst_path.as_posix()
@@ -396,8 +393,9 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Compile html
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'])
 
-    di = '<link rel="stylesheet" href="'+pb.gc('html_url_prefix')+'/obs.html/static/taglist.css" />'
-    html = PopulateTemplate(pb, 'none', pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di)
+    di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
+    pb.sc(path=['html_url_prefix'], value=html_url_prefix)
+    html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di, container_wrapper_class_list=['single_tab_page-left-aligned'])
 
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
@@ -484,6 +482,20 @@ def main():
     paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
 
+
+    # Features/Toggles influencing other settings
+    # ------------------------------------------------------------------
+    
+    if pb.gc('toggles','relative_path_html'):
+        # Disable graph view
+        if pb.gc('toggles','features','graph','enabled'):
+            print(f"WARNING: disabling graph view - not supported with setting relative_path_html:True")
+            pb.config['toggles']['features']['graph']['enabled'] = False
+
+        # Enable no tab
+        if pb.gc('toggles','no_tabs') == False:
+            print(f"WARNING: enabling setting no_tabs - tabbing not supported with relative_path_html:True")
+            pb.config['toggles']['no_tabs'] = True            
 
     # Copy vault to tempdir, so any bugs will not affect the user's vault
     # ---------------------------------------------------------
@@ -682,6 +694,8 @@ def main():
                         html = f.read()
                 except:
                     continue
+
+                page_depth = path.relative_to(paths['html_output_folder']).as_posix().count('/')
                 
                 # Get node_id
                 m = re.search(r'(?<=\{_obsidian_html_backlinks_pattern_:)(.*?)(?=\})', html)
@@ -696,6 +710,11 @@ def main():
                 for l in pb.network_tree.tree['links']:
                     if l['target'] == node_id:
                         url = pb.network_tree.node_lookup[l["source"]]['url']
+                        print(url)
+                        # hack hack
+                        if pb.gc('toggles','relative_path_html'):
+                            if url == './index.html':
+                                url = ('../'*page_depth)+'index.html'
                         snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
                         i += 1
                 snippet += '</ul>'
@@ -715,7 +734,7 @@ def main():
         recurseTagList(pb.tagtree, '', pb, level=0)
 
         # Add Extra stuff to the output directories
-        ExportStaticFiles(pb, pb.gc('toggles','features','graph','enabled'), pb.gc('html_url_prefix'), pb.gc('site_name'))
+        ExportStaticFiles(pb, pb.gc('toggles','features','graph','enabled'), pb.gc('html_url_prefix'))
 
         # Write node json to static folder
         with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:

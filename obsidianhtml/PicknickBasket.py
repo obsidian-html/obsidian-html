@@ -60,6 +60,20 @@ class PicknickBasket:
                 raise Exception(f"INTERNAL ERROR: Config setting '{'/'.join(path)}' not found in config.")
         return value
 
+    # Set config
+    def sc(self, path, value):
+        ptr = self.config
+        ptr_path = []
+        for key in path[:-1]:
+            ptr_path.append(key)
+            try:
+                ptr = ptr[key]
+            except KeyError:
+                raise Exception(f"INTERNAL ERROR: Config setting '{'/'.join(path)}' not found in config.")
+        ptr[path[-1]] = value  
+        return self.gc(*path)
+        
+
 
 
 
