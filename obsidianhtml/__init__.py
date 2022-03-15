@@ -573,7 +573,6 @@ def main():
 
             # Check if filename is duplicate
             if path.name in files.keys() and pb.gc('toggles','allow_duplicate_filenames_in_root') == False:
-                print(path)
                 raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {files[path.name]['fullpath']}.")
 
             # Fetch creation_time/modified_time from orginal location
@@ -710,7 +709,6 @@ def main():
                 for l in pb.network_tree.tree['links']:
                     if l['target'] == node_id:
                         url = pb.network_tree.node_lookup[l["source"]]['url']
-                        print(url)
                         # hack hack
                         if pb.gc('toggles','relative_path_html'):
                             if url == './index.html':

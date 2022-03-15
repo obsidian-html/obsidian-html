@@ -107,10 +107,10 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
     for file_name in copy_file_list:
         c = OpenIncludedFile(file_name[0])
         
-        if file_name[1] in ('main.css'):
+        if file_name[1] in ('main.css', 'obsidian.js'):
             if pb.gc('toggles','relative_path_html'):
                 html_url_prefix = '../..'
-            c = c.replace('{html_url_prefix}', html_url_prefix)
+            c = c.replace('{html_url_prefix}', html_url_prefix).replace('{no_tabs}',str(int(pb.gc('toggles','no_tabs')))) 
 
         with open (static_folder.joinpath(file_name[1]), 'w', encoding="utf-8") as f:
             f.write(c)
@@ -139,7 +139,8 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
     if pb.gc('toggles','features','graph','enabled'):
         graph_js= OpenIncludedFile('graph/graph.js')
         graph_js = graph_js.replace('{html_url_prefix}', pb.gc('html_url_prefix'))\
-                           .replace('{graph_coalesce_force}', pb.gc('toggles','features','graph','coalesce_force'))
+                           .replace('{graph_coalesce_force}', pb.gc('toggles','features','graph','coalesce_force'))\
+                           .replace('{no_tabs}',str(int(pb.gc('toggles','no_tabs')))) 
         with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:
             f.write(graph_js)
 
@@ -162,6 +163,10 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, title='
 
     if container_wrapper_class_list is None:
         container_wrapper_class_list = []
+    if pb.gc('toggles','no_tabs'):
+        container_wrapper_class_list.append('single_tab_page')        
+
+    footer_js_inclusions = f'<script src="{html_url_prefix}/obs.html/static/obsidian.js" type="text/javascript"></script>'
 
     # Include toggled components
     if pb.gc('toggles','features','rss','enabled') and pb.gc('toggles','features','rss','styling','show_icon'):
@@ -183,11 +188,6 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, title='
     else:
         template = template.replace('{dirtree_button}', '')
 
-    footer_js_inclusions = ''
-    if pb.gc('toggles','no_tabs') == False:
-        footer_js_inclusions = f'<script src="{html_url_prefix}/obs.html/static/obsidian.js" type="text/javascript"></script>'
-    else:
-        container_wrapper_class_list.append('single_tab_page')
 
     # Replace placeholders
     template = template\
@@ -197,7 +197,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, title='
         .replace('{footer_js_inclusions}', footer_js_inclusions)\
         .replace('{html_url_prefix}', html_url_prefix)\
         .replace('{container_wrapper_class_list}', ' '.join(container_wrapper_class_list))\
-        .replace('{relative_html_path}', str(int(pb.gc('toggles','no_tabs'))))\
+        .replace('{no_tabs}', str(int(pb.gc('toggles','no_tabs'))))\
         .replace('{content}', content)
 
     return template
