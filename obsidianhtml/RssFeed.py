@@ -37,6 +37,9 @@ class RssFeed():
     description_selectors = None
     title_selectors = None
 
+    iso_formatted = None
+    verbose = None
+
     def __init__(self, pb):
         # Constants
         self.pb = pb
@@ -46,8 +49,11 @@ class RssFeed():
         self.html_folder = pb.paths['html_output_folder']
         self.feed_path = pb.paths['html_output_folder'].joinpath('obs.html/rss/feed.xml')
 
+        self.iso_formatted = pb.gc('toggles/features/rss/items/publish_date/iso_formatted')
+        self.verbose = pb.gc('toggles/verbose_printout')
+
         # get host and make sure it ends with '/'
-        host = pb.gc('toggles','features','rss','host_root')
+        host = pb.gc('toggles/features/rss/host_root')
         if host[-1] != '/':
             host += '/'
         self.host = host
@@ -65,7 +71,7 @@ class RssFeed():
 
         # define excluded folders
         excluded_folders = []
-        for ef in pb.gc('toggles','features','rss','items','selector','exclude_subfolders'):
+        for ef in pb.gc('toggles/features/rss/items/selector/exclude_subfolders'):
             if ef[-1] != '/':
                 ef += '/'
             excluded_folders.append(self.html_folder.joinpath(ef).resolve())
@@ -73,19 +79,19 @@ class RssFeed():
 
         # define excluded files
         excluded_files = []
-        for ef in pb.gc('toggles','features','rss','items','selector','exclude_files'):
+        for ef in pb.gc('toggles/features/rss/items/selector/exclude_files'):
             excluded_files.append(self.html_folder.joinpath(ef).resolve())
         self.excluded_files = excluded_files
 
         # define include_subfolders
-        self.include_subfolders = pb.gc('toggles','features','rss','items','selector','include_subfolders')
+        self.include_subfolders = pb.gc('toggles/features/rss/items/selector/include_subfolders')
 
         # define item selectors
-        self.item_match_keys_selector = pb.gc('toggles','features','rss','items','selector','match_keys')
-        self.item_exclude_keys_selector = pb.gc('toggles','features','rss','items','selector','exclude_keys')
-        self.description_selectors = pb.gc('toggles','features','rss','items','description','selectors')
-        self.title_selectors = pb.gc('toggles','features','rss','items','title','selectors')
-        self.publish_date_selectors = pb.gc('toggles','features','rss','items','publish_date','selectors')
+        self.item_match_keys_selector = pb.gc('toggles/features/rss/items/selector/match_keys')
+        self.item_exclude_keys_selector = pb.gc('toggles/features/rss/items/selector/exclude_keys')
+        self.description_selectors = pb.gc('toggles/features/rss/items/description/selectors')
+        self.title_selectors = pb.gc('toggles/features/rss/items/title/selectors')
+        self.publish_date_selectors = pb.gc('toggles/features/rss/items/publish_date/selectors')
 
     def Compile(self):
         # Setup
@@ -111,12 +117,12 @@ class RssFeed():
         # Fill in channel template
         # ----------------------------------------------------------------------
         lut = {
-            'title': pb.gc('toggles','features','rss','channel','title'),
-            'website_link': pb.gc('toggles','features','rss','channel','website_link'),
-            'description': pb.gc('toggles','features','rss','channel','description'),
-            'language_code': pb.gc('toggles','features','rss','channel','language_code'),
-            'managing_editor': pb.gc('toggles','features','rss','channel','managing_editor'),
-            'web_master': pb.gc('toggles','features','rss','channel','web_master'),
+            'title': pb.gc('toggles/features/rss/channel/title'),
+            'website_link': pb.gc('toggles/features/rss/channel/website_link'),
+            'description': pb.gc('toggles/features/rss/channel/description'),
+            'language_code': pb.gc('toggles/features/rss/channel/language_code'),
+            'managing_editor': pb.gc('toggles/features/rss/channel/managing_editor'),
+            'web_master': pb.gc('toggles/features/rss/channel/web_master'),
             'publish_date': self.now_rss_format,
             'last_build_date': ConvertDateToRssFormat(most_recent_publish_date),
             'items': items
@@ -128,6 +134,7 @@ class RssFeed():
         # Write to output
         with open(self.feed_path, 'w', encoding='utf-8') as f:
             f.write(rss_channel)
+
 
 
     def get_items(self, entry_folder, most_recent_publish_date):
@@ -214,10 +221,10 @@ class RssFeed():
             if not publish_date:
                 print(f"RSS Feed: warning: no publish_date found for note {path}")
 
-            if pb.gc('toggles','features','rss','items','publish_date','iso_formatted'):
+            if self.iso_formatted:
                 publish_date = datetime.fromisoformat(publish_date)
             else:
-                fs = pb.gc('toggles','features','rss','items','publish_date','format_string')
+                fs = pb.gc('toggles/features/rss/items/publish_date/format_string')
                 if fs:
                     try:
                         publish_date = datetime.strptime(publish_date, fs)
@@ -247,7 +254,7 @@ class RssFeed():
                 rss_item = rss_item.replace('{'+key+'}', escape(value))
             items += rss_item + '\n'
 
-            if pb.gc('toggles','verbose_printout'):
+            if self.verbose:
                 print(f"\tAdded item: '{publish_date_str}', '{title}', '{link}'")
 
         return [items, most_recent_publish_date]

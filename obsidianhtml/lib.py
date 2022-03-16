@@ -9,6 +9,7 @@ from string import ascii_letters, digits
 import tempfile             # used to create temporary files/folders
 from distutils.dir_util import copy_tree
 import time
+from functools import cache
 
 # Open source files in the package
 import importlib.resources as pkg_resources
@@ -66,20 +67,23 @@ def ConvertTitleToMarkdownId(title):
     idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -_')])
     return idstr
 
+@cache
 def OpenIncludedFile(resource):
     path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
     path = os.path.join(path, resource)
     with open(path, 'r', encoding="utf-8") as f:
         return f.read()
 
+@cache
 def OpenIncludedFileBinary(resource):
     path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
     path = os.path.join(path, resource)
     with open(path, 'rb') as f:
         return f.read()    
 
-def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
-    obsfolder = pb.paths['html_output_folder'].joinpath('obs.html')
+@cache
+def CreateStaticFilesFolders(html_output_folder):
+    obsfolder = html_output_folder.joinpath('obs.html')
     os.makedirs(obsfolder, exist_ok=True)
     static_folder = obsfolder.joinpath('static')
     os.makedirs(static_folder, exist_ok=True)
@@ -88,9 +92,14 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
     rss_folder = obsfolder.joinpath('rss')
     os.makedirs(rss_folder, exist_ok=True)
 
+    return (obsfolder, static_folder, data_folder, rss_folder)
+
+def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
+    (obsfolder, static_folder, data_folder, rss_folder) = CreateStaticFilesFolders(pb.paths['html_output_folder'])
+
     # copy files over (standard copy, static_folder)
     copy_file_list = [
-        ['html/main.css','main.css'], 
+        ['html/main.css', 'main.css'], 
         ['html/obsidian.js', 'obsidian.js'],
         ['html/mermaid.css', 'mermaid.css'],
         ['html/mermaid.min.js', 'mermaid.min.js'],
@@ -108,9 +117,9 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
         c = OpenIncludedFile(file_name[0])
         
         if file_name[1] in ('main.css', 'obsidian.js'):
-            if pb.gc('toggles','relative_path_html'):
+            if pb.gc('toggles/relative_path_html', cached=True):
                 html_url_prefix = '../..'
-            c = c.replace('{html_url_prefix}', html_url_prefix).replace('{no_tabs}',str(int(pb.gc('toggles','no_tabs')))) 
+            c = c.replace('{html_url_prefix}', html_url_prefix).replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
 
         with open (static_folder.joinpath(file_name[1]), 'w', encoding="utf-8") as f:
             f.write(c)
@@ -136,11 +145,11 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
     with open (pb.paths['html_output_folder'].joinpath('favicon.ico'), 'wb') as f:
         f.write(c)
 
-    if pb.gc('toggles','features','graph','enabled'):
+    if pb.gc('toggles/features/graph/enabled', cached=True):
         graph_js= OpenIncludedFile('graph/graph.js')
         graph_js = graph_js.replace('{html_url_prefix}', pb.gc('html_url_prefix'))\
-                           .replace('{graph_coalesce_force}', pb.gc('toggles','features','graph','coalesce_force'))\
-                           .replace('{no_tabs}',str(int(pb.gc('toggles','no_tabs')))) 
+                           .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
+                           .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
         with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:
             f.write(graph_js)
 
@@ -150,34 +159,34 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, title='
 
     # Defaults
     if title == '':
-        title = pb.gc('site_name')
+        title = pb.gc('site_name', cached=True)
     if dynamic_includes is not None:
         dynamic_inclusions += dynamic_includes
 
-    if pb.gc('toggles','features','graph','enabled'):
+    if pb.config.feature_is_enabled('graph', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
         dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
-    if pb.gc('toggles','features','create_index_from_dir_structure','enabled'):
+    if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"
 
     if container_wrapper_class_list is None:
         container_wrapper_class_list = []
-    if pb.gc('toggles','no_tabs'):
+    if pb.gc('toggles/no_tabs', cached=True):
         container_wrapper_class_list.append('single_tab_page')        
 
     footer_js_inclusions = f'<script src="{html_url_prefix}/obs.html/static/obsidian.js" type="text/javascript"></script>'
 
     # Include toggled components
-    if pb.gc('toggles','features','rss','enabled') and pb.gc('toggles','features','rss','styling','show_icon'):
+    if pb.config.GetCachedConfig('rss_show_icon'):
         code = OpenIncludedFile('rss/button_template.html')
         template = template.replace('{rss_button}', code)
     else:
         template = template.replace('{rss_button}', '')
 
-    if pb.gc('toggles','features','create_index_from_dir_structure','enabled') and pb.gc('toggles','features','create_index_from_dir_structure','styling','show_icon'):
+    if pb.config.GetCachedConfig('dirtree_show_icon'):
         # output path
-        output_path = html_url_prefix + '/' + pb.gc('toggles','features','create_index_from_dir_structure','rel_output_path')
+        output_path = html_url_prefix + '/' + pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path', cached=True)
 
         # compile template
         code = OpenIncludedFile('index_from_dir_structure/button_template.html')
@@ -197,7 +206,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, title='
         .replace('{footer_js_inclusions}', footer_js_inclusions)\
         .replace('{html_url_prefix}', html_url_prefix)\
         .replace('{container_wrapper_class_list}', ' '.join(container_wrapper_class_list))\
-        .replace('{no_tabs}', str(int(pb.gc('toggles','no_tabs'))))\
+        .replace('{no_tabs}', str(int(pb.gc('toggles/no_tabs', cached=True))))\
         .replace('{content}', content)
 
     return template
@@ -210,7 +219,7 @@ def CreateTemporaryCopy(source_folder_path, pb):
 
     print(f"> COPYING VAULT {source_folder_path} TO {tmpdir.name}")
 
-    if pb.gc('toggles','verbose_printout'):
+    if pb.gc('toggles/verbose_printout'):
         print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
     
     # Copy vault to temp dir
@@ -218,44 +227,3 @@ def CreateTemporaryCopy(source_folder_path, pb):
     print("< COPYING VAULT: Done")
 
     return tmpdir
-    
-
-def MergeDictRecurse(base_dict, update_dict, path=''):
-    helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
-
-    for k, v in update_dict.items():
-        key_path = '/'.join(x for x in (path, k) if x !='')
-
-        # every configured key should be known in base config, otherwise this might suggest a typo/other error
-        if k not in base_dict.keys():
-            raise Exception(f'\n\tThe configured key "{key_path}" is unknown. Check for typos/indentation. {helptext}')
-
-        # don't overwrite a dict in the base config with a string, or something else
-        # in general, we don't expect types to change
-        if type(base_dict[k]) != type(v):
-            raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
-
-        # dict match -> recurse
-        if isinstance(base_dict[k], dict) and isinstance(v, dict):
-            base_dict[k] = MergeDictRecurse(base_dict[k], update_dict[k], path=key_path)
-            continue
-        
-        # other cases -> copy over
-        if isinstance(update_dict[k], list):
-            base_dict[k] = v.copy()
-        else:
-            base_dict[k] = v
-
-    return base_dict.copy()
-
-def CheckConfigRecurse(config, path='', match_str='<REQUIRED_INPUT>'):
-    helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
-
-    for k, v in config.items():
-        key_path = '/'.join(x for x in (path, k) if x !='')
-        
-        if isinstance(v, dict):
-            CheckConfigRecurse(config[k], path=key_path)
-
-        if v == match_str:
-            raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')

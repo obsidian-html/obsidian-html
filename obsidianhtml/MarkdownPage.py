@@ -164,7 +164,7 @@ class MarkdownPage:
 
             # Obsidian page inclusions use the same tag...
             # Skip if we don't match image suffixes. Inclusions are handled at the end.
-            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0] not in pb.gc('included_file_suffixes'):
+            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0] not in pb.gc('included_file_suffixes', cached=True):
                 new_link = f'<inclusion href="{link}" />'
 
             safe_link = re.escape('![['+link+']]')
@@ -197,9 +197,9 @@ class MarkdownPage:
             new_link = '![]('+urllib.parse.quote(relative_path)+')'
 
             # Handle video/audio usecase
-            if suffix in pb.gc('video_format_suffixes'):
+            if suffix in pb.gc('video_format_suffixes', cached=True):
                 new_link = self.GetVideoHTML(file_name, relative_path, suffix)
-            if suffix in pb.gc('audio_format_suffixes'):
+            if suffix in pb.gc('audio_format_suffixes', cached=True):
                 new_link = self.GetAudioHTML(file_name, relative_path, suffix)
             
             safe_link = re.escape('![]('+link+')')
@@ -238,7 +238,7 @@ class MarkdownPage:
                     relative_path_posix = 'index.md'
 
             # Change the link in the markdown to link to the relative path
-            if pb.gc('toggles','relative_path_md'):
+            if pb.gc('toggles/relative_path_md', cached=True):
                 relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
                 
             new_link = ']('+relative_path_posix+')'
@@ -298,7 +298,7 @@ class MarkdownPage:
                     if relative_path_posix == rel_obsidian_entrypoint_path.as_posix():    
                         relative_path_posix = 'index.md'
 
-                    if pb.gc('toggles','relative_path_md'):
+                    if pb.gc('toggles/relative_path_md', cached=True):
                         relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
 
                 newlink = urllib.parse.quote(relative_path_posix)
