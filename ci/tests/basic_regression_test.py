@@ -337,7 +337,7 @@ class TestMisc(ModeTemplate):
         ('toggles/process_all', True),
         ('toggles/features/backlinks/enabled', False),
         ('html_template_path_str', 'ci/configs/custom_html_template.html'),
-        ('copy_vault_to_tempdir', False),
+        ('copy_vault_to_tempdir', True),
     ]
 
     def test_special_characters_should_be_preserved(self):
@@ -355,11 +355,11 @@ class TestMisc(ModeTemplate):
         
         # get index.html
         soup = html_get('index.html')
-        
+
         # find div with certain ID from custom template, and doublecheck the contents to be sure.
         div_id = 'test'
         div = soup.body.find('div', attrs={'id':div_id})
-        self.assertIsNotNone(div, msg="Div from custom template with id={div_id} was not found.")
+        self.assertIsNotNone(div, msg=f"Div from custom template with id={div_id} was not found.")
 
         content = "See if this div is included"
         self.assertEqual(div.text, content, msg=f"innerhtml of custom div was expected to be \n\t'{content}'\n but was \n\t'{div.text}'")

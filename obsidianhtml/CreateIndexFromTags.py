@@ -1,11 +1,11 @@
-from .lib import IsValidLocalMarkdownLink
-from .MarkdownPage import MarkdownPage
 import urllib.parse         # convert link characters like %
 
 import frontmatter
 from pathlib import Path 
 import platform
 import datetime
+
+from .PathFinder import OH_File
 
 def CreateIndexFromTags(pb):
     # get settings
@@ -60,12 +60,14 @@ def CreateIndexFromTags(pb):
         index_dict[t] = []
 
     for k in files.keys():
-        # Determine src file path
-        page_path_str = files[k]['fullpath']
-        page_path = Path(page_path_str).resolve()
+        fo = files[k]
 
+        # Determine src file path
+        page_path = fo.fullpath('note')
+        page_path_str = page_path.as_posix()
+        
         # Skip if not valid
-        if not IsValidLocalMarkdownLink(page_path_str):
+        if not fo.is_valid_note('note'):
             continue
 
         # Try to open file
@@ -135,7 +137,7 @@ def CreateIndexFromTags(pb):
                 # created time is not really accessible under Linux, we might add a case for OSX
                 if method == 'creation_time' and platform.system() != 'Windows' and platform.system() != 'Darwin':
                     raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
-                sort_value = files[k][method]
+                sort_value = fo.metadata[method]
 
             if pb.gc('toggles/verbose_printout', cached=True):
                 print(f'\t\t\tSort value of note {k} is {sort_value}')
@@ -144,15 +146,13 @@ def CreateIndexFromTags(pb):
             for t in include_tags:
                 if t in metadata['tags']:
                     # copy file to temp filetree for checking later
-                    _files[k] = files[k].copy()
+                    _files[k] = files[k]
 
                     # Add entry to our index dict so we can parse this later
-                    md = MarkdownPage(page_path, paths['obsidian_folder'], files)
-                    md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
                     index_dict[t].append(
                         {
                             'file_key': k, 
-                            'md_rel_path_str': md.rel_dst_path.as_posix(),
+                            'md_rel_path_str': fo.path['markdown']['file_relative_path'].as_posix(),
                             'graph_name': graph_name,
                             'sort_value': sort_value
                         }
@@ -212,7 +212,14 @@ def CreateIndexFromTags(pb):
 
     # add file to file tree
     now = datetime.datetime.now().isoformat()
-    pb.files['__tags_index.md'] = {'fullpath': str(index_dst_path), 'processed': False, 'pathobj': index_dst_path, 'creation_time': now, 'modified_time': now}
+
+    fo_index_dst_path = OH_File(pb)
+    fo_index_dst_path.init_note_path(
+        index_dst_path,
+        compile_metadata = True
+    )
+    fo_index_dst_path.init_markdown_path()
+    pb.files['__tags_index.md'] = fo_index_dst_path
 
     # [17] Build graph node/links
     if pb.gc('toggles/features/create_index_from_tags/add_links_in_graph_tree', cached=True):

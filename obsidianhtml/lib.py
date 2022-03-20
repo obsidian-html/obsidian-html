@@ -30,6 +30,38 @@ def printHelpAndExit(exitCode:int):
     print('- Add -gc to output all configurable keys and their default values.')
     exit(exitCode)
 
+
+def WriteFileLog(files, log_file_name, include_processed=False):
+    if include_processed:
+        s = "| key | processed note? | processed md? | note | markdown | html | html link relative | html link absolute |\n|:---|:---|:---|:---|:---|:---|:---|:---|\n"
+    else:
+        s = "| key | note | markdown | html | html link relative | html link absolute |\n|:---|:---|:---|:---|:---|:---|\n"
+
+    for k in files.keys():
+        fo = files[k]
+        n = ''
+        m = ''
+        h = ''
+        if 'note' in fo.path.keys():
+            n = fo.path['note']['file_absolute_path']
+        if 'markdown' in fo.path.keys():
+            m = fo.path['markdown']['file_absolute_path']
+        if 'html' in fo.path.keys():
+            # temp
+            fo.compile_html_link()
+            h = fo.path['html']['file_absolute_path']
+        if 'html' in fo.link.keys():
+            hla = fo.link['html']['absolute']
+            hlr = fo.link['html']['relative']
+
+        if include_processed:
+            s += f"| {k} | {fo.processed_ntm} | {fo.processed_mth} | {n} | {m} | {h} | {hlr} | {hla} |\n"
+        else:
+            s += f"| {k} | {n} | {m} | {h} | {hlr} | {hla} |\n"
+
+    with open(log_file_name, 'w', encoding='utf-8') as f:
+        f.write(s)
+
 def GetObsidianFilePath(link, file_tree):
     # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
     # a link can look like this: folder/note#chapter|alias
@@ -48,16 +80,6 @@ def GetObsidianFilePath(link, file_tree):
         return (filename, False, '')
 
     return (filename, file_tree[filename], header)
-
-def IsValidLocalMarkdownLink(full_file_path_str):
-    page_path = Path(full_file_path_str).resolve()
-
-    if page_path.exists() == False:
-        return False
-    if page_path.suffix != '.md':
-        return False
-
-    return True
 
 def ConvertTitleToMarkdownId(title):
     idstr = title.lower().strip()

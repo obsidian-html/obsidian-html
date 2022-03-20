@@ -28,6 +28,10 @@ md_entrypoint_path_str: 'output/md/index.md'
 # Use full path or relative path, but don't use ~/
 html_output_folder_path_str: 'output/html'
 
+# If extended logging is enabled under toggles/extended_logging
+# Extra information is written to this folder
+log_output_folder_path_str: 'output/log'
+
 ##########################################################################
 #                              OPERATIONS                                #
 ##########################################################################
@@ -88,6 +92,9 @@ toggles:
 
   # Can be overwritten ad-hoc by using "obsidianhtml -i config.yml -v" (the -v option)
   verbose_printout: False
+
+  # Write extra information to log_output_folder_path_str
+  extended_logging: False
 
   # This option should be False for Obsidian->Md, but can be True when compile_md == False
   # Setting it to True will cause an error when two files with the same file name are found anywhere in the input folder
