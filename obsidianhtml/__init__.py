@@ -43,8 +43,6 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
     paths = pb.paths        # Paths of interest, such as the output and input folders
     files = pb.files        # Hashtable of all files found in the obsidian vault
 
-    page_path = fo.path['note']['file_absolute_path']
-
     # Don't parse if not parsable
     if not fo.metadata['is_parsable_note']:
         return
@@ -91,7 +89,7 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
 
         # Convert the note that is linked to
         if pb.gc('toggles/verbose_printout', cached=True):
-            print('\t'*log_level, f"found link {lo.path['note']['file_absolute_path']} (through parent {page_path})")
+            print('\t'*log_level, f"found link {lo.path['note']['file_absolute_path']} (through parent {fo.path['note']['file_absolute_path']})")
 
         recurseObisidianToMarkdown(lo, pb, log_level=log_level)
 
@@ -135,7 +133,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         node['id'] = md.metadata['graph_name']
 
     # Url is used so you can open the note/node by clicking on it
-    node['url'] = fo.path['html']['file_relative_path'].as_posix()
+    node['url'] = rel_dst_path.as_posix()
     pb.network_tree.AddNode(node)
 
     # Backlinks are set so when recursing, the links (edges) can be determined
@@ -220,7 +218,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         lo.copy_file('mth')
 
         # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = '![]('+urllib.parse.quote(lo.get_link('html'))+')'
+        new_link = '![]('+urllib.parse.quote(lo.get_link('html', origin=fo))+')'
         safe_link = r"\!\[.*\]\("+re.escape(link)+r"\)"
         md.page = re.sub(safe_link, new_link, md.page)
 
@@ -245,7 +243,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         lo.copy_file('mth')
 
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = '<source src="'+urllib.parse.quote(lo.get_link('html'))+'"'
+        new_link = '<source src="'+urllib.parse.quote(lo.get_link('html', origin=fo))+'"'
         safe_link = r'<source src="'+re.escape(link)+r'"'
         md.page = re.sub(safe_link, new_link, md.page)
 
@@ -573,8 +571,11 @@ def main():
         # Compile paths
         if pb.gc('toggles/compile_md', cached=True):
             fo.init_note_path(path)
+            fo.compile_metadata(fo.path['note']['file_absolute_path'], cached=True)
         if pb.gc('toggles/compile_html', cached=True):
             fo.init_markdown_path()
+            fo.compile_metadata(fo.path['markdown']['file_absolute_path'], cached=True)
+        
 
         # Add to tree
         pb.files[path.name] = fo
@@ -647,12 +648,12 @@ def main():
         if pb.gc('toggles/process_all') == True:
             print('\t> FEATURE: PROCESS ALL')
             unparsed = [x for x in pb.files.values() if x.processed_mth == False]
-            i = 0
-            l = len(unparsed)
+            i = 0; l = len(unparsed)
             for fo in unparsed:
                 i += 1
                 if pb.gc('toggles/verbose_printout', cached=True) == True:
                     print(f'\t\t{i}/{l} - ' + fo.path['markdown']['file_absolute_path'])
+
                 ConvertMarkdownPageToHtmlPage(fo, pb, log_level=2)
             print('\t< FEATURE: PROCESS ALL: Done')
 
@@ -666,21 +667,21 @@ def main():
             # Make lookup so that we can easily find the url of a node
             pb.network_tree.compile_node_lookup()
 
-            # for each file in output
-            for path in paths['html_output_folder'].rglob('*'):
-                if path.is_dir():
+            for fo in pb.files.values():
+                if not fo.metadata['is_note']:
                     continue
 
-                # not all files are utf-8 readable, just ignore those
+                # get paths / html prefix
+                dst_abs_path = fo.path['html']['file_absolute_path']
+                dst_rel_path_str = fo.path['html']['file_relative_path'].as_posix()
+                html_url_prefix = get_html_url_prefix(pb, rel_path_str=dst_rel_path_str)
+
+                # get html content
                 try:
-                    with open(path, 'r', encoding="utf-8") as f:
+                    with open(dst_abs_path, 'r', encoding="utf-8") as f:
                         html = f.read()
                 except:
                     continue
-
-                dst_rel_path_str = path.relative_to(paths['html_output_folder']).as_posix()
-                page_depth = dst_rel_path_str.count('/')
-                html_url_prefix = get_html_url_prefix(pb, dst_rel_path_str)
                 
                 # Get node_id
                 m = re.search(r'(?<=\{_obsidian_html_backlinks_pattern_:)(.*?)(?=\})', html)
@@ -689,36 +690,26 @@ def main():
                 node_id = m.group(0)
 
                 # Compile backlinks list
-                snippet = '<h2>Backlinks</h2>'
-                snippet += '\n<ul>\n'
-                i = 0
-                for l in pb.network_tree.tree['links']:
-                    if l['target'] == node_id:
-                        url = pb.network_tree.node_lookup[l["source"]]['url']
-                        # hack hack
-                        if pb.gc('toggles/relative_path_html', cached=True):
-                            if url == './index.html':
-                                url = ('../'*page_depth)+'index.html'
-                        snippet += f'\t<li><a class="backlink" href="{html_url_prefix}/{url}">{l["source"]}</a></li>\n'
-                        i += 1
-                snippet += '</ul>'
+                backlinks = [x for x in pb.network_tree.tree['links'] if x['target'] == node_id]
+                snippet = ''
+                if len(backlinks) > 0:
+                    snippet = "<h2>Backlinks</h2>\n<ul>\n"
+                    for l in backlinks:
+                        if l['target'] == node_id:
+                            url = pb.network_tree.node_lookup[l['source']]['url']
+                            snippet += f'\t<li><a class="backlink" href="{html_url_prefix}/{url}">{l["source"]}</a></li>\n'
+                    snippet += '</ul>'
 
-                # remove everything if no backlinks are present
-                # (otherwise we have a header with no content below it)
-                if i == 0:
-                    snippet = ''
-
-                # replace placeholder with list
+                # replace placeholder with list & write output
                 html = re.sub('\{_obsidian_html_backlinks_pattern_:'+re.escape(node_id)+'}', snippet, html)
-
-                with open(path, 'w', encoding="utf-8") as f:
+                with open(dst_abs_path, 'w', encoding="utf-8") as f:
                     f.write(html)
 
         # Create tag page
         recurseTagList(pb.tagtree, '', pb, level=0)
 
         # Add Extra stuff to the output directories
-        ExportStaticFiles(pb, pb.gc('toggles/features/graph/enabled'), pb.gc('html_url_prefix'))
+        ExportStaticFiles(pb)
 
         # Write node json to static folder
         with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:

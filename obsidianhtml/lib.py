@@ -15,6 +15,8 @@ from functools import cache
 import importlib.resources as pkg_resources
 import importlib.util
 from . import src 
+
+from .PathFinder import get_html_url_prefix
  
 class DuplicateFileNameInRoot(Exception):
     pass
@@ -29,7 +31,6 @@ def printHelpAndExit(exitCode:int):
     print('- Add -eht <target/path/file.name> to export the html template.')
     print('- Add -gc to output all configurable keys and their default values.')
     exit(exitCode)
-
 
 def WriteFileLog(files, log_file_name, include_processed=False):
     if include_processed:
@@ -48,7 +49,7 @@ def WriteFileLog(files, log_file_name, include_processed=False):
             m = fo.path['markdown']['file_absolute_path']
         if 'html' in fo.path.keys():
             # temp
-            fo.compile_html_link()
+            fo.get_link('html')
             h = fo.path['html']['file_absolute_path']
         if 'html' in fo.link.keys():
             hla = fo.link['html']['absolute']
@@ -116,10 +117,10 @@ def CreateStaticFilesFolders(html_output_folder):
 
     return (obsfolder, static_folder, data_folder, rss_folder)
 
-def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
+def ExportStaticFiles(pb):
     (obsfolder, static_folder, data_folder, rss_folder) = CreateStaticFilesFolders(pb.paths['html_output_folder'])
 
-    # copy files over (standard copy, static_folder)
+    # define files to be copied over (standard copy, static_folder)
     copy_file_list = [
         ['html/main.css', 'main.css'], 
         ['html/obsidian.js', 'obsidian.js'],
@@ -132,21 +133,27 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
         ['index_from_dir_structure/dirtree.js', 'dirtree.js'],
         ['index_from_dir_structure/dirtree.svg', 'dirtree.svg'],
     ]
-    if graph_enabled:
+    if pb.gc('toggles/features/graph/enabled', cached=True):
         copy_file_list.append(['graph/graph.css', 'graph.css'])
 
+    # copy static files over to the static folder
     for file_name in copy_file_list:
+        # Get file from package
         c = OpenIncludedFile(file_name[0])
+
+        # Define dest path and html_url_prefix
+        dst_path = static_folder.joinpath(file_name[1])
+        html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
         
+        # Templating
         if file_name[1] in ('main.css', 'obsidian.js'):
-            if pb.gc('toggles/relative_path_html', cached=True):
-                html_url_prefix = '../..'
             c = c.replace('{html_url_prefix}', html_url_prefix).replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
 
-        with open (static_folder.joinpath(file_name[1]), 'w', encoding="utf-8") as f:
+        # Write to dest
+        with open (dst_path, 'w', encoding="utf-8") as f:
             f.write(c)
 
-    # copy files over (byte copy, static_folder)
+    # copy binary files to dst (byte copy, static_folder)
     copy_file_list_byte = [
         ['html/SourceCodePro-Regular.ttf', 'SourceCodePro-Regular.ttf'],
         ['html/Roboto-Regular.ttf', 'Roboto-Regular.ttf']
@@ -158,7 +165,10 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
 
     # Custom copy
     c = OpenIncludedFile('html/not_created.html')
-    with open (pb.paths['html_output_folder'].joinpath('not_created.html'), 'w', encoding="utf-8") as f:
+    dst_path = pb.paths['html_output_folder'].joinpath('not_created.html')
+    html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
+
+    with open (dst_path, 'w', encoding="utf-8") as f:
         html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
         html = html.replace('{html_url_prefix}', html_url_prefix)
         f.write(html)
@@ -168,11 +178,14 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
         f.write(c)
 
     if pb.gc('toggles/features/graph/enabled', cached=True):
+        dst_path = static_folder.joinpath('graph.js')
+        html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
+
         graph_js= OpenIncludedFile('graph/graph.js')
-        graph_js = graph_js.replace('{html_url_prefix}', pb.gc('html_url_prefix'))\
+        graph_js = graph_js.replace('{html_url_prefix}', html_url_prefix)\
                            .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
                            .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
-        with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:
+        with open (dst_path, 'w', encoding="utf-8") as f:
             f.write(graph_js)
 
 def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_url_prefix=None, title='', dynamic_includes=None, container_wrapper_class_list=None):
@@ -219,7 +232,6 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         template = template.replace('{dirtree_button}', code)
     else:
         template = template.replace('{dirtree_button}', '')
-
 
     # Replace placeholders
     template = template\

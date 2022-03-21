@@ -115,7 +115,9 @@ class OH_File:
 
         self.metadata['depth'] = self._get_depth(self.path['html']['file_relative_path'])
 
-    def compile_metadata(self, path):
+    def compile_metadata(self, path, cached=False):
+        if cached and 'is_note' in self.metadata:
+            return
         self.set_times(path)
         self.set_file_types(path)
 
@@ -158,7 +160,7 @@ class OH_File:
         elif self.oh_file_type == 'md_to_html':
             self.compile_html_link(origin)
 
-    def get_link(self, link_type, origin:'OH_File'=None):
+    def get_link(self, link_type, origin:'OH_File'=None, origin_rel_dst_path_str=None):
         # print(inspect.stack()[1][3])
         # print('target', self.path['note']['file_relative_path'], self.metadata['depth'])
         # if origin is not None:
@@ -166,22 +168,29 @@ class OH_File:
         # else:
         #     print('origin', 'none')
 
+        # Get origin_rel_dst_path_str
+        if origin_rel_dst_path_str is None:
+            if origin is not None:
+                origin_rel_dst_path_str = origin.path[link_type]['file_relative_path'].as_posix()
+            else:
+                origin_rel_dst_path_str = self.path[link_type]['file_relative_path'].as_posix()
+
         # recompile links if not compiled yet
         if link_type == 'markdown':
-            self.compile_markdown_link(origin)
+            self.compile_markdown_link(origin_rel_dst_path_str)
 
             if self.pb.gc('toggles/relative_path_md', cached=True):
                 return self.link[link_type]['relative']
 
         elif link_type == 'html':
-            self.compile_html_link(origin)
+            self.compile_html_link(origin_rel_dst_path_str)
 
             if self.pb.gc('toggles/relative_path_html', cached=True):
                 return self.link[link_type]['relative']
 
         return self.link[link_type]['absolute']
 
-    def compile_markdown_link(self, origin:'OH_File'=None):
+    def compile_markdown_link(self, origin_rel_dst_path_str):
         self.link['markdown'] = {}
 
         # Absolute
@@ -189,29 +198,19 @@ class OH_File:
         self.link['markdown']['absolute'] = '/'+web_abs_path
 
         # Relative
-        if origin is None:
-            prefix = get_rel_html_url_prefix(self.path['markdown']['file_relative_path'].as_posix())
-        else:
-            prefix = get_rel_html_url_prefix(origin.path['markdown']['file_relative_path'].as_posix())
-
+        prefix = get_rel_html_url_prefix(origin_rel_dst_path_str)
         self.link['markdown']['relative'] = prefix+'/'+web_abs_path
 
-    def compile_html_link(self, origin:'OH_File'=None):
+    def compile_html_link(self, origin_rel_dst_path_str):
         self.link['html'] = {}
 
         # Absolute
         html_url_prefix = self.pb.gc('html_url_prefix')
         abs_link = self.path['html']['file_relative_path'].as_posix()
-        if abs_link[0] != '/':
-            abs_link = html_url_prefix+'/'+abs_link
-        self.link['html']['absolute'] = abs_link
+        self.link['html']['absolute'] = html_url_prefix+'/'+abs_link
 
         # Relative
-        if origin is None:
-            prefix = get_rel_html_url_prefix(self.path['html']['file_relative_path'].as_posix())
-        else:
-            prefix = get_rel_html_url_prefix(origin.path['html']['file_relative_path'].as_posix())
-
+        prefix = get_rel_html_url_prefix(origin_rel_dst_path_str)
         self.link['html']['relative'] = prefix+'/'+self.path['html']['file_relative_path'].as_posix()
 
     def copy_file(self, mode):
@@ -233,7 +232,14 @@ def get_rel_html_url_prefix(rel_path):
         prefix = '.'
     return prefix
 
-def get_html_url_prefix(pb, rel_path_str):
+def get_html_url_prefix(pb, rel_path_str=None, abs_path_str=None):
+    # check input and convert rel_path_str from abs_path_str if necessary
+    if rel_path_str is None:
+        if abs_path_str is None:
+            raise Exception("pass in either rel_path_str or abs_path_str")
+        rel_path_str = Path(abs_path_str).relative_to(pb.paths['html_output_folder']).as_posix()
+
+    # return html_prefix
     if pb.gc('toggles/relative_path_html', cached=True):
         html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_path_str))
     else:

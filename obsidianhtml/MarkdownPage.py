@@ -219,7 +219,6 @@ class MarkdownPage:
 
             # Get file info
             lo = self.file_tree[file_name.split('/')[-1]]
-            lo.compile_markdown_link(origin=origin)
             file_link = lo.get_link('markdown', origin=origin)
 
             # Update link
