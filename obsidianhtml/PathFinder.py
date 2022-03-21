@@ -40,7 +40,6 @@ class OH_File:
 
         return True
 
-
     def init_note_path(self, source_file_absolute_path, source_folder_path=None, target_folder_path=None, compile_metadata=True):
         self.oh_file_type = 'obs_to_md'
 
@@ -76,7 +75,6 @@ class OH_File:
         # is_note, creation_time, modified_time, is_video, is_audio, is_includable
         if compile_metadata:
             self.compile_metadata(source_file_absolute_path)
-
 
     def init_markdown_path(self, source_file_absolute_path=None, source_folder_path=None, target_folder_path=None):
         self.oh_file_type = 'md_to_html'
@@ -117,7 +115,6 @@ class OH_File:
 
         self.metadata['depth'] = self._get_depth(self.path['html']['file_relative_path'])
 
-
     def compile_metadata(self, path):
         self.set_times(path)
         self.set_file_types(path)
@@ -143,7 +140,6 @@ class OH_File:
         if path.exists() and self.metadata['is_note']:
             self.metadata['is_parsable_note'] = True
 
-
     def set_times(self, path):
         if platform.system() == 'Windows' or platform.system() == 'Darwin':
             self.metadata['creation_time'] = datetime.datetime.fromtimestamp(os.path.getctime(path)).isoformat()
@@ -151,7 +147,8 @@ class OH_File:
         else:
             self.metadata['modified_time'] = datetime.datetime.fromtimestamp(os.path.getmtime(path)).isoformat()
 
-
+    def get_depth(self, mode):
+        return self._get_depth(self.path[mode]['file_relative_path'])
     def _get_depth(self, rel_path):
         return rel_path.as_posix().count('/')
 
@@ -175,7 +172,7 @@ class OH_File:
 
             if self.pb.gc('toggles/relative_path_md', cached=True):
                 return self.link[link_type]['relative']
-                
+
         elif link_type == 'html':
             self.compile_html_link(origin)
 

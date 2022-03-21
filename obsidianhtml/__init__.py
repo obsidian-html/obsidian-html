@@ -109,7 +109,11 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     page_path = fo.path['markdown']['file_absolute_path']
     rel_dst_path = fo.path['html']['file_relative_path']
 
-    html_url_prefix = pb.gc('html_url_prefix', cached=True)
+    html_url_prefix = pb.gc('html_url_prefix')
+    if pb.gc('toggles/relative_path_html', cached=True):
+        html_url_prefix = pb.sc(path='html_url_prefix', value=(('../'*fo.get_depth('html'))[:-1]))
+        if html_url_prefix == '':
+            html_url_prefix = pb.sc(path='html_url_prefix', value='.')
 
     # Load contents
     # ------------------------------------------------------------------
@@ -312,7 +316,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     fo.path['html']['file_absolute_path'].parent.mkdir(parents=True, exist_ok=True)   
     html_dst_path_posix = fo.path['html']['file_absolute_path'].as_posix()
 
-    md.AddToTagtree(pb.tagtree, fo.get_link('html'))
+    md.AddToTagtree(pb.tagtree, fo.path['html']['file_relative_path'].as_posix())
 
     # Write html
     with open(html_dst_path_posix, 'w', encoding="utf-8") as f:
@@ -371,7 +375,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
         md += '\n# Notes\n'
         for note_url in tagtree['notes']:
             note_name = note_url.split('/')[-1].replace(".html", "")
-            md += f'- [{note_name}]({note_url})\n'
+            md += f'- [{note_name}]({html_url_prefix}/{note_url})\n'
 
     # Compile html
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'])
@@ -475,7 +479,7 @@ def main():
         # Disable graph view
         if pb.gc('toggles/features/graph/enabled'):
             print(f"WARNING: disabling graph view - not supported with setting relative_path_html:True")
-            pc.config.disable_feature('graph')
+            pb.config.disable_feature('graph')
 
         # Enable no tab
         if pb.gc('toggles/no_tabs') == False:

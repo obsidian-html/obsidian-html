@@ -11,7 +11,7 @@ class CreateIndexFromDirStructure():
         self.exclude_files = pb.gc('toggles/features/create_index_from_dir_structure/exclude_files')
         self.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
         if pb.gc('toggles/relative_path_html'):
-            self.html_url_prefix = '..'
+            self.html_url_prefix = pb.sc(path='html_url_prefix', value='..')
         else:
             self.html_url_prefix = pb.gc("html_url_prefix")
 
@@ -141,6 +141,7 @@ class CreateIndexFromDirStructure():
 
         # write html to output
         pb = self.pb
+        
         html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=['single_tab_page-left-aligned'])
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html)
