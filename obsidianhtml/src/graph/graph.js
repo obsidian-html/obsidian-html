@@ -90,13 +90,13 @@ function run(uid, pinnedNode){
                         lables.on("click", function(d) {
                                 let svg_el = document.getElementById('A' + uid);
                                 let level = parseInt(svg_el.parentElement.parentElement.level);
-                                httpGetAsync(encodeURI(d.url), ReceiveCall, level+1, false); 
+                                httpGetAsync(encodeURI('/'+d.url), ReceiveCall, level+1, false); 
                                 return false;
                         });
                 }
                 else {
                         lables.on("click", function(d) {
-                                window.location.href = d.url;
+                                window.location.href = '{html_url_prefix}/'+d.url;
                                 return false;
                         });
                 }

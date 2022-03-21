@@ -1,9 +1,9 @@
+from __future__ import annotations
 import re                   # regex string finding/replacing
 from pathlib import Path    # 
 import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
-import shutil               # used to remove a non-empty directory, copy files
 from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, ConvertTitleToMarkdownId, MalformedTags, OpenIncludedFile
 from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
 
@@ -24,31 +24,24 @@ class MarkdownPage:
 
     file_tree = None        # Tree of files that are found in the root folder
 
-    def __init__(self, src_path, src_folder_path, file_tree):
+    def __init__(self, pb, fo:'OH_File', input_type, file_tree):
+        self.pb = pb
+        self.fo = fo
         self.file_tree = file_tree
-        self.src_path = src_path
-        self.src_folder_path = src_folder_path
-        self.rel_src_path = self.src_path.relative_to(src_folder_path)
+        
+        # remove?
+        self.src_path = fo.path[input_type]['file_absolute_path']
+        self.src_folder_path = fo.path[input_type]['folder_path']
+        self.rel_src_path = fo.path[input_type]['file_relative_path']
+        self.input_type = input_type
 
         self.links = []
         self.codeblocks = []
         self.codelines = []
         
         # Load contents of entrypoint and strip frontmatter yaml.
-        with open(src_path, encoding="utf-8") as f:
+        with open(self.src_path, encoding="utf-8") as f:
             self.metadata, self.page = frontmatter.parse(f.read())
-
-    def SetDestinationPath(self, dst_folder_path, entrypoint_src_path):
-        """Set destination path of the converted file. Both full and relative paths are set."""
-        self.dst_folder_path = dst_folder_path
-
-        if entrypoint_src_path == self.src_path:
-            self.isEntryPoint = True
-            self.dst_path = dst_folder_path.joinpath('index.md')
-
-        else:
-            self.dst_path = dst_folder_path.joinpath(self.rel_src_path.as_posix())
-        self.rel_dst_path = self.dst_path.relative_to(dst_folder_path)
 
     def StripCodeSections(self):
         """(Temporarily) Remove codeblocks/-lines so that they are not altered in all the conversions. Placeholders are inserted."""
@@ -72,7 +65,7 @@ class MarkdownPage:
             return
 
         if url == '':
-            url = str(self.dst_path)
+            url = self.fo.get_link('html')
 
         for tag in self.metadata['tags']:
             if (not isinstance(tag, str)):
@@ -118,20 +111,21 @@ class MarkdownPage:
         audio_template = OpenIncludedFile('html/audio_template.html')
         return audio_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
 
-    def ConvertObsidianPageToMarkdownPage(self, pb, dst_folder_path, entrypoint_path, include_depth=0, includer_page_depth=None):
+    def ConvertObsidianPageToMarkdownPage(self, origin:'OH_file'=None, include_depth=0, includer_page_depth=None):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
-        # -- Load contents
-        self.SetDestinationPath(dst_folder_path, entrypoint_path)
 
-        rel_obsidian_entrypoint_path = entrypoint_path.relative_to(self.src_folder_path)
-
+        # -- Set origin (calling page), this will always be self.fo unless origin is passed in
+        if origin is None:
+            origin = self.fo 
+        
         # -- Get page depth
-        if self.isEntryPoint:
-            page_folder_depth = 0        
-        elif includer_page_depth is not None:
+        page_folder_depth = self.fo.metadata['depth']
+
+        if includer_page_depth is not None:
             page_folder_depth = includer_page_depth
-        else:
-            page_folder_depth = self.rel_src_path.as_posix().count('/')
+            # overwrite
+            if self.fo.metadata['is_entrypoint']:
+                page_folder_depth = 0
 
         # -- [1] Replace code blocks with placeholders so they aren't altered
         # They will be restored at the end
@@ -158,13 +152,12 @@ class MarkdownPage:
 
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
-        
         for link in re.findall("(?<=\!\[\[)(.*?)(?=\])", self.page):
             new_link = '![]('+link+')'
 
             # Obsidian page inclusions use the same tag...
             # Skip if we don't match image suffixes. Inclusions are handled at the end.
-            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0] not in pb.gc('included_file_suffixes'):
+            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0] not in self.pb.gc('included_file_suffixes', cached=True):
                 new_link = f'<inclusion href="{link}" />'
 
             safe_link = re.escape('![['+link+']]')
@@ -178,17 +171,13 @@ class MarkdownPage:
             if clean_link_name not in self.file_tree.keys():
                 continue
 
-            # Build relative paths
-            src_file_path_str = self.file_tree[clean_link_name]['fullpath']
-            relative_path = Path(src_file_path_str).relative_to(self.src_folder_path)
-            suffix = relative_path.suffix[1:]
-            dst_file_path = self.dst_folder_path.joinpath(relative_path)
+            # Get shorthand info
+            lo = self.file_tree[clean_link_name]
+            suffix = lo.path['note']['suffix']
+            relative_path = lo.path['markdown']['file_relative_path']
 
-            # Create folders if necessary
-            dst_file_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Copy file over
-            shutil.copyfile(src_file_path_str, dst_file_path)
+            # Copy file over to markdown destination
+            lo.copy_file('ntm')
 
             # Adjust link in page
             file_name = urllib.parse.unquote(link)
@@ -197,9 +186,9 @@ class MarkdownPage:
             new_link = '![]('+urllib.parse.quote(relative_path)+')'
 
             # Handle video/audio usecase
-            if suffix in pb.gc('video_format_suffixes'):
+            if lo.metadata['is_video']:
                 new_link = self.GetVideoHTML(file_name, relative_path, suffix)
-            if suffix in pb.gc('audio_format_suffixes'):
+            if lo.metadata['is_audio']:
                 new_link = self.GetAudioHTML(file_name, relative_path, suffix)
             
             safe_link = re.escape('![]('+link+')')
@@ -228,30 +217,20 @@ class MarkdownPage:
             if file_name.split('/')[-1] not in self.file_tree.keys():
                 continue
 
-            # Determine paths
-            filepath = self.file_tree[file_name.split('/')[-1]]['fullpath']
-            relative_path_posix = Path(filepath).relative_to(self.src_folder_path).as_posix()
-            dst_filepath = self.dst_folder_path.joinpath(relative_path_posix)
+            # Get file info
+            lo = self.file_tree[file_name.split('/')[-1]]
+            file_link = lo.get_link('markdown', origin=origin)
 
-            if isMd: 
-                if relative_path_posix == rel_obsidian_entrypoint_path.as_posix():   
-                    relative_path_posix = 'index.md'
-
-            # Change the link in the markdown to link to the relative path
-            if pb.gc('toggles','relative_path_md'):
-                relative_path_posix = ('../' * page_folder_depth) + relative_path_posix
-                
-            new_link = ']('+relative_path_posix+')'
-
+            # Update link
+            new_link = ']('+file_link+')'
             safe_link = re.escape(']('+l+')')
             self.page = re.sub(f"(?<![\[\(])({safe_link})", new_link, self.page)
 
             if isMd == False:
                 # Copy file over to new location
-                dst_filepath.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(filepath, dst_filepath)
+                lo.copy_file('ntm')
 
-            
+
         # -- [6] Replace Obsidian links with proper markdown
         # This is any string in between [[ and ]], e.g. [[My Note]]
         md_links = re.findall("(?<=\[\[).+?(?=\])", self.page)
@@ -260,6 +239,8 @@ class MarkdownPage:
             # If a link does not have an alias, the link name will function as the alias.
             parts = l.split('|')
             filename = parts[0].split('/')[-1]
+
+            # Set alias i.e. [alias](link)
             alias = filename
             if len(parts) > 1:
                 alias = parts[1]
@@ -288,20 +269,11 @@ class MarkdownPage:
                 # Links can be made in Obsidian without creating the note.
                 # When we link to a nonexistant note, link to the not_created.md placeholder instead.
                 if filename not in self.file_tree.keys():
-                    relative_path_posix = '/not_created.md'
+                    link = '/not_created.md'
                 else:
-                    # Obtain the full path of the file in the directory tree
-                    # e.g. 'C:\Users\Installer\OneDrive\Obsidian\Notes\Work\Harbor Docs.md'
-                    full_path = self.file_tree[filename]['fullpath']
-                    relative_path_posix = Path(full_path).relative_to(self.src_folder_path).as_posix()
+                    link = self.file_tree[filename].get_link('markdown', origin=origin)
 
-                    if relative_path_posix == rel_obsidian_entrypoint_path.as_posix():    
-                        relative_path_posix = 'index.md'
-
-                    if pb.gc('toggles','relative_path_md'):
-                        relative_path_posix = ('../' * page_folder_depth) +  relative_path_posix
-
-                newlink = urllib.parse.quote(relative_path_posix)
+                newlink = urllib.parse.quote(link)
 
                 if hashpart != '':
                     hashpart = hashpart.replace(' ', '-').lower()
@@ -337,26 +309,28 @@ class MarkdownPage:
         # -- [10] Add code inclusions
         for l in re.findall(r'^(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')
-            file_name, file_record, header = GetObsidianFilePath(link, self.file_tree)
+            file_name, file_object, header = GetObsidianFilePath(link, self.file_tree)
 
-            if file_record == False:
+            if file_object == False:
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Could not find page {link}.")
                 continue
             
             self.links.append(file_name)
 
             if include_depth > 3:
-                self.page = self.page.replace(l, f"[{link}]({file_record['fullpath']}).")
+                print('a', origin)
+                link_path = file_object.get_link('markdown', origin=origin)
+                self.page = self.page.replace(l, f"[{link}]({link_path}).")
                 continue
 
-            incl_page_path = Path(file_record['fullpath']).resolve()
-            if incl_page_path.exists() == False or incl_page_path.suffix != '.md':
+            incl_page_path = file_object.path['note']['file_absolute_path']
+            if not file_object.is_valid_note('note'):
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Error including file or not a markdown file {link}.")
                 continue
             
             # Get code
-            included_page = MarkdownPage(incl_page_path, self.src_folder_path, self.file_tree)
-            included_page.ConvertObsidianPageToMarkdownPage(pb, self.dst_folder_path, entrypoint_path, include_depth=include_depth + 1, includer_page_depth=page_folder_depth)
+            included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
+            included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth)
 
             # Get subsection of code if header is present
             if header != '':

@@ -73,7 +73,7 @@ def get_default_config():
 
     # Get functions from package
     sys.path.insert(1, str(paths['root']))   # insert at 1, 0 is the script path (or '' in REPL)
-    from obsidianhtml.lib import CheckConfigRecurse, MergeDictRecurse     
+    from obsidianhtml.ConfigManager import CheckConfigRecurse, MergeDictRecurse     
 
     # Get system's default config
     with open(paths['sys_default_config'], 'r', encoding="utf-8") as f:
@@ -100,7 +100,7 @@ def customize_default_config(items, write_to_tmp_config=True):
 
     # Get functions from package
     sys.path.insert(1, str(paths['root']))   # insert at 1, 0 is the script path (or '' in REPL)
-    from obsidianhtml.lib import CheckConfigRecurse, MergeDictRecurse
+    from obsidianhtml.ConfigManager import CheckConfigRecurse, MergeDictRecurse
 
     # Convert list to dict tree
     custom = {}
