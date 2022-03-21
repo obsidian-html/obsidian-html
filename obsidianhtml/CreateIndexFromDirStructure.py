@@ -10,6 +10,7 @@ class CreateIndexFromDirStructure():
         self.exclude_subfolders = pb.gc('toggles/features/create_index_from_dir_structure/exclude_subfolders')
         self.exclude_files = pb.gc('toggles/features/create_index_from_dir_structure/exclude_files')
         self.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
+        
         if pb.gc('toggles/relative_path_html'):
             self.html_url_prefix = pb.sc(path='html_url_prefix', value='..')
         else:

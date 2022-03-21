@@ -16,7 +16,7 @@ import time
 import datetime
 import platform
 
-from .PathFinder import OH_File
+from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
@@ -109,18 +109,16 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     page_path = fo.path['markdown']['file_absolute_path']
     rel_dst_path = fo.path['html']['file_relative_path']
 
-    html_url_prefix = pb.gc('html_url_prefix')
     if pb.gc('toggles/relative_path_html', cached=True):
-        html_url_prefix = pb.sc(path='html_url_prefix', value=(('../'*fo.get_depth('html'))[:-1]))
-        if html_url_prefix == '':
-            html_url_prefix = pb.sc(path='html_url_prefix', value='.')
+        html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_dst_path.as_posix()))
+    else:
+        html_url_prefix = pb.gc('html_url_prefix')
 
     # Load contents
     # ------------------------------------------------------------------
     # Create an object that handles a lot of the logic of parsing the page paths, content, etc
     md = MarkdownPage(pb, fo, 'markdown', files)
     
-
     # Graph view integrations
     # ------------------------------------------------------------------
     # The nodelist will result in graph.json, which may have uses beyond the graph view
@@ -137,7 +135,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         node['id'] = md.metadata['graph_name']
 
     # Url is used so you can open the note/node by clicking on it
-    node['url'] = fo.get_link('html')
+    node['url'] = fo.path['html']['file_relative_path'].as_posix()
     pb.network_tree.AddNode(node)
 
     # Backlinks are set so when recursing, the links (edges) can be determined
@@ -344,13 +342,14 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     # Get relevant paths
     # ---------------------------------------------------------
-    html_url_prefix = pb.gc('html_url_prefix')
-    if pb.gc('toggles/relative_path_html', cached=True):
-        html_url_prefix = pb.sc(path='html_url_prefix', value=('../'*(level+2))[:-1])
     tags_folder = pb.paths['html_output_folder'].joinpath('obs.html/tags/')
     tag_dst_path = tags_folder.joinpath(f'{tagpath}index.html').resolve()
     tag_dst_path_posix = tag_dst_path.as_posix()
     rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
+
+    html_url_prefix = pb.gc('html_url_prefix')
+    if pb.gc('toggles/relative_path_html', cached=True):
+        html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_dst_path_as_posix))
 
     # Make root dir
     tags_folder.mkdir(parents=True, exist_ok=True)
@@ -381,8 +380,8 @@ def recurseTagList(tagtree, tagpath, pb, level):
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'])
 
     di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
-    pb.sc(path='html_url_prefix', value=html_url_prefix)
-    html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=html_body, dynamic_includes=di, container_wrapper_class_list=['single_tab_page-left-aligned'])
+
+    html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html_body, dynamic_includes=di, container_wrapper_class_list=['single_tab_page-left-aligned'])
 
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
@@ -679,7 +678,9 @@ def main():
                 except:
                     continue
 
-                page_depth = path.relative_to(paths['html_output_folder']).as_posix().count('/')
+                dst_rel_path_str = path.relative_to(paths['html_output_folder']).as_posix()
+                page_depth = dst_rel_path_str.count('/')
+                html_url_prefix = get_html_url_prefix(pb, dst_rel_path_str)
                 
                 # Get node_id
                 m = re.search(r'(?<=\{_obsidian_html_backlinks_pattern_:)(.*?)(?=\})', html)
@@ -698,7 +699,7 @@ def main():
                         if pb.gc('toggles/relative_path_html', cached=True):
                             if url == './index.html':
                                 url = ('../'*page_depth)+'index.html'
-                        snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
+                        snippet += f'\t<li><a class="backlink" href="{html_url_prefix}/{url}">{l["source"]}</a></li>\n'
                         i += 1
                 snippet += '</ul>'
 

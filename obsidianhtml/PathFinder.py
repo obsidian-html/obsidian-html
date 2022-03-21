@@ -190,10 +190,11 @@ class OH_File:
 
         # Relative
         if origin is None:
-            pd = self.metadata['depth']
+            prefix = get_rel_html_url_prefix(self.path['markdown']['file_relative_path'].as_posix())
         else:
-            pd = origin.metadata['depth']
-        self.link['markdown']['relative'] = (pd*'../')+web_abs_path
+            prefix = get_rel_html_url_prefix(origin.path['markdown']['file_relative_path'].as_posix())
+
+        self.link['markdown']['relative'] = prefix+'/'+web_abs_path
 
     def compile_html_link(self, origin:'OH_File'=None):
         self.link['html'] = {}
@@ -207,13 +208,11 @@ class OH_File:
 
         # Relative
         if origin is None:
-            pd = self.metadata['depth']
+            prefix = get_rel_html_url_prefix(self.path['html']['file_relative_path'].as_posix())
         else:
-            pd = origin.metadata['depth']
-        self.link['html']['relative'] = (pd*'../')+self.path['html']['file_relative_path'].as_posix()
+            prefix = get_rel_html_url_prefix(origin.path['html']['file_relative_path'].as_posix())
 
-        if self.link['html']['relative'][0] != '.':
-            self.link['html']['relative'] = './' + self.link['html']['relative']
+        self.link['html']['relative'] = prefix+'/'+self.path['html']['file_relative_path'].as_posix()
 
     def copy_file(self, mode):
         if mode == 'ntm':
@@ -225,3 +224,18 @@ class OH_File:
 
         dst_file_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src_file_path, dst_file_path)
+
+def get_rel_html_url_prefix(rel_path):
+    depth = rel_path.count('/')
+    if depth > 0:
+        prefix = ('../'*depth)[:-1]
+    else:
+        prefix = '.'
+    return prefix
+
+def get_html_url_prefix(pb, rel_path_str):
+    if pb.gc('toggles/relative_path_html', cached=True):
+        html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_path_str))
+    else:
+        html_url_prefix = pb.gc('html_url_prefix')
+    return html_url_prefix

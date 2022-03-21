@@ -175,9 +175,10 @@ def ExportStaticFiles(pb, graph_enabled, html_url_prefix):
         with open (static_folder.joinpath('graph.js'), 'w', encoding="utf-8") as f:
             f.write(graph_js)
 
-def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, title='', dynamic_includes=None, container_wrapper_class_list=None):
+def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_url_prefix=None, title='', dynamic_includes=None, container_wrapper_class_list=None):
     # Cache
-    html_url_prefix = pb.gc("html_url_prefix")
+    if html_url_prefix is None:
+        html_url_prefix = pb.gc("html_url_prefix")
 
     # Defaults
     if title == '':
