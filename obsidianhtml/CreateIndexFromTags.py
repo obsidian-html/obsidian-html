@@ -1,5 +1,3 @@
-from .lib import IsValidLocalMarkdownLink
-from .MarkdownPage import MarkdownPage
 import urllib.parse         # convert link characters like %
 
 import frontmatter
@@ -7,11 +5,13 @@ from pathlib import Path
 import platform
 import datetime
 
+from .PathFinder import OH_File
+
 def CreateIndexFromTags(pb):
     # get settings
     paths = pb.paths
     files = pb.files
-    settings = pb.gc('toggles','features','create_index_from_tags')
+    settings = pb.gc('toggles/features/create_index_from_tags')
 
     method          = settings['sort']['method']
     key_path        = settings['sort']['key_path']
@@ -19,7 +19,7 @@ def CreateIndexFromTags(pb):
     sort_reverse    = settings['sort']['reverse']
     none_on_bottom  = settings['sort']['none_on_bottom']
 
-    if pb.gc('toggles','verbose_printout'):
+    if pb.gc('toggles/verbose_printout', cached=True):
         print('> FEATURE: CREATE INDEX FROM TAGS: Enabled')
 
     # Test input
@@ -38,14 +38,14 @@ def CreateIndexFromTags(pb):
 
     # shorthand 
     include_tags = settings['tags']
-    if pb.gc('toggles','verbose_printout'):
+    if pb.gc('toggles/verbose_printout', cached=True):
         print('\tLooking for tags: ', include_tags)
 
 
     # overwrite defaults
     index_dst_path = paths['obsidian_folder'].joinpath('__tags_index.md').resolve()
 
-    if pb.gc('toggles','verbose_printout'):
+    if pb.gc('toggles/verbose_printout', cached=True):
         print('\tWill write the note index to: ', index_dst_path)
         print('\tWill overwrite entrypoints: obsidian_entrypoint, rel_obsidian_entrypoint')
 
@@ -60,12 +60,14 @@ def CreateIndexFromTags(pb):
         index_dict[t] = []
 
     for k in files.keys():
-        # Determine src file path
-        page_path_str = files[k]['fullpath']
-        page_path = Path(page_path_str).resolve()
+        fo = files[k]
 
+        # Determine src file path
+        page_path = fo.fullpath('note')
+        page_path_str = page_path.as_posix()
+        
         # Skip if not valid
-        if not IsValidLocalMarkdownLink(page_path_str):
+        if not fo.is_valid_note('note'):
             continue
 
         # Try to open file
@@ -84,7 +86,7 @@ def CreateIndexFromTags(pb):
             matched = False
             for t in include_tags:
                 if t in metadata['tags']:
-                    if pb.gc('toggles','verbose_printout'):
+                    if pb.gc('toggles/verbose_printout', cached=True):
                         print(f'\t\tMatched note {k} on tag {t}')
                     matched = True
             
@@ -135,24 +137,22 @@ def CreateIndexFromTags(pb):
                 # created time is not really accessible under Linux, we might add a case for OSX
                 if method == 'creation_time' and platform.system() != 'Windows' and platform.system() != 'Darwin':
                     raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
-                sort_value = files[k][method]
+                sort_value = fo.metadata[method]
 
-            if pb.gc('toggles','verbose_printout'):
+            if pb.gc('toggles/verbose_printout', cached=True):
                 print(f'\t\t\tSort value of note {k} is {sort_value}')
 
             # Add an entry into index_dict for each tag matched on this page
             for t in include_tags:
                 if t in metadata['tags']:
                     # copy file to temp filetree for checking later
-                    _files[k] = files[k].copy()
+                    _files[k] = files[k]
 
                     # Add entry to our index dict so we can parse this later
-                    md = MarkdownPage(page_path, paths['obsidian_folder'], files)
-                    md.SetDestinationPath(paths['html_output_folder'], paths['md_entrypoint'])
                     index_dict[t].append(
                         {
                             'file_key': k, 
-                            'md_rel_path_str': md.rel_dst_path.as_posix(),
+                            'md_rel_path_str': fo.path['markdown']['file_relative_path'].as_posix(),
                             'graph_name': graph_name,
                             'sort_value': sort_value
                         }
@@ -161,10 +161,10 @@ def CreateIndexFromTags(pb):
     if len(_files.keys()) == 0:
         raise Exception(f"No notes found with the given tags.")
 
-    if pb.gc('toggles','verbose_printout'):
+    if pb.gc('toggles/verbose_printout', cached=True):
         print(f'\tBuilding index.md')
 
-    index_md_content = f'# {pb.gc("site_name")}\n'
+    index_md_content = f'# {pb.gc("site_name", cached=True)}\n'
     for t in index_dict.keys():
         # Add header
         index_md_content += f'## {t}\n'
@@ -212,12 +212,19 @@ def CreateIndexFromTags(pb):
 
     # add file to file tree
     now = datetime.datetime.now().isoformat()
-    pb.files['__tags_index.md'] = {'fullpath': str(index_dst_path), 'processed': False, 'pathobj': index_dst_path, 'creation_time': now, 'modified_time': now}
+
+    fo_index_dst_path = OH_File(pb)
+    fo_index_dst_path.init_note_path(
+        index_dst_path,
+        compile_metadata = True
+    )
+    fo_index_dst_path.init_markdown_path()
+    pb.files['__tags_index.md'] = fo_index_dst_path
 
     # [17] Build graph node/links
-    if pb.gc('toggles','features','create_index_from_tags','add_links_in_graph_tree'):
+    if pb.gc('toggles/features/create_index_from_tags/add_links_in_graph_tree', cached=True):
 
-        if pb.gc('toggles','verbose_printout'):
+        if pb.gc('toggles/verbose_printout', cached=True):
             print(f'\tAdding graph links between index.md and the matched notes')
         
         node = pb.network_tree.NewNode()
@@ -237,7 +244,7 @@ def CreateIndexFromTags(pb):
                 link['target'] = node['id']
                 pb.network_tree.AddLink(link)
 
-    if pb.gc('toggles','verbose_printout'):
+    if pb.gc('toggles/verbose_printout', cached=True):
         print('< FEATURE: CREATE INDEX FROM TAGS: Done')
 
     return pb

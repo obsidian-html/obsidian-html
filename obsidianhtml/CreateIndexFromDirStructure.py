@@ -6,9 +6,17 @@ class CreateIndexFromDirStructure():
     def __init__(self, pb, path):
         self.pb = pb
         self.root = path
-        self.exclude_subfolders = pb.gc('toggles','features','create_index_from_dir_structure','exclude_subfolders')
-        self.exclude_files = pb.gc('toggles','features','create_index_from_dir_structure','exclude_files')
-        self.rel_output_path = pb.gc('toggles','features','create_index_from_dir_structure','rel_output_path')
+
+        self.exclude_subfolders = pb.gc('toggles/features/create_index_from_dir_structure/exclude_subfolders')
+        self.exclude_files = pb.gc('toggles/features/create_index_from_dir_structure/exclude_files')
+        self.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
+        
+        if pb.gc('toggles/relative_path_html'):
+            self.html_url_prefix = pb.sc(path='html_url_prefix', value='..')
+        else:
+            self.html_url_prefix = pb.gc("html_url_prefix")
+
+        self.verbose = pb.gc('toggles/verbose_printout')
 
         self.tree = self.get_tree(path)
         self.tree = self.build_tree_recurse(self.tree)
@@ -16,8 +24,8 @@ class CreateIndexFromDirStructure():
 
         # used in BuildIndex
         self.uid = 0
-        self.html_url_prefix = pb.gc("html_url_prefix")
         self.html = ''
+
 
     def get_tree(self, path, files=None, folders=None):
         if files is None:
@@ -36,14 +44,15 @@ class CreateIndexFromDirStructure():
         }
 
     def build_tree_recurse(self, tree):
-        for path in Path(tree['path']).resolve().glob('*'):
+        verbose = self.verbose
 
+        for path in Path(tree['path']).resolve().glob('*'):
             # Exclude configured subfolders
             _continue = False
             for folder in self.exclude_subfolders:
                 excl_folder_path = self.root.joinpath(folder)
                 if path.resolve().is_relative_to(excl_folder_path):
-                    if self.pb.gc('toggles','verbose_printout'):
+                    if verbose:
                         print(f'\tExcluded folder {excl_folder_path}: Excluded file {path.name}.')
                     _continue = True
                     break
@@ -61,7 +70,7 @@ class CreateIndexFromDirStructure():
             for ef in self.exclude_files:
                 excl_file_path = self.root.joinpath(ef)
                 if excl_file_path == path:
-                    if self.pb.gc('toggles','verbose_printout'):
+                    if verbose:
                         print(f'\tExcluded file {excl_file_path}.')
                     _continue = True
                     break
@@ -105,7 +114,7 @@ class CreateIndexFromDirStructure():
                 external_blank_html = ''
                 if Path(rel_path).suffix != '.html':
                     class_list = 'class="external-link"'
-                    if self.pb.gc('toggles','external_blank'):
+                    if self.pb.gc('toggles/external_blank'):
                         external_blank_html = 'target=\"_blank\" '
                 
                 html += '\t'*tab_level + f'<li><a href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{f["name"]}</a></li>\n'
@@ -120,7 +129,7 @@ class CreateIndexFromDirStructure():
         self.uid = 0
         html = _recurse(self.tree, -1)
 
-        if self.pb.gc('toggles','features','graph','enabled'):
+        if self.pb.gc('toggles/features/graph/enabled'):
             html += f'\n<script src="{self.html_url_prefix}/obs.html/static/graph.js" type="text/javascript"></script>\n'
 
         self.html = html
@@ -133,7 +142,8 @@ class CreateIndexFromDirStructure():
 
         # write html to output
         pb = self.pb
-        html = PopulateTemplate(pb, 'none', pb.gc('site_name'), pb.gc('html_url_prefix'), pb.dynamic_inclusions, pb.html_template, content=self.html)
+        
+        html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=['single_tab_page-left-aligned'])
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html)
 

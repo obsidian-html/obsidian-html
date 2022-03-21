@@ -28,6 +28,10 @@ md_entrypoint_path_str: 'output/md/index.md'
 # Use full path or relative path, but don't use ~/
 html_output_folder_path_str: 'output/html'
 
+# If extended logging is enabled under toggles/extended_logging
+# Extra information is written to this folder
+log_output_folder_path_str: 'output/log'
+
 ##########################################################################
 #                              OPERATIONS                                #
 ##########################################################################
@@ -89,6 +93,9 @@ toggles:
   # Can be overwritten ad-hoc by using "obsidianhtml -i config.yml -v" (the -v option)
   verbose_printout: False
 
+  # Write extra information to log_output_folder_path_str
+  extended_logging: False
+
   # This option should be False for Obsidian->Md, but can be True when compile_md == False
   # Setting it to True will cause an error when two files with the same file name are found anywhere in the input folder
   allow_duplicate_filenames_in_root: False
@@ -102,6 +109,15 @@ toggles:
 
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
   relative_path_md: True
+
+  # Whether the html paths will be relative. 
+  # Note: This is only useful if you want to open the html locally on your machine without using a webserver
+  #  and is generally not advised. This will also disable all features that need a webserver to function
+  #  such as the graph view.
+  relative_path_html: False
+
+  # Do not rewrite links to open them as tabs
+  no_tabs: False
 
   # Whether external http anchor links should have a target of "_blank"
   external_blank: False  
