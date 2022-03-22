@@ -570,12 +570,18 @@ def main():
 
         # Compile paths
         if pb.gc('toggles/compile_md', cached=True):
+            # compile note --> markdown
             fo.init_note_path(path)
             fo.compile_metadata(fo.path['note']['file_absolute_path'], cached=True)
-        if pb.gc('toggles/compile_html', cached=True):
-            fo.init_markdown_path()
+
+            if pb.gc('toggles/compile_html', cached=True):
+                # compile markdown --> html (based on the given note path)
+                fo.init_markdown_path()
+                fo.compile_metadata(fo.path['markdown']['file_absolute_path'], cached=True)
+        else:
+            # compile markdown --> html (based on the found markdown path)
+            fo.init_markdown_path(path)
             fo.compile_metadata(fo.path['markdown']['file_absolute_path'], cached=True)
-        
 
         # Add to tree
         pb.files[path.name] = fo
