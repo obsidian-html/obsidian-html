@@ -169,13 +169,15 @@ h2 + p {
 
 h3 {
     font-size: 13pt;
-    font-weight: 600;
+    font-weight: 500;
     border-bottom: 1px dashed #c0cae6;
     padding: 2px;
-    color: #000;  
+    color: #000000;
+    margin-bottom: 0.5rem;
 }
 h3 + p {
     margin-top: 0rem;
+    margin-bottom: 0.5rem;
 }
 
 

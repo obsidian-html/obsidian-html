@@ -83,10 +83,15 @@ def GetObsidianFilePath(link, file_tree):
     return (filename, file_tree[filename], header)
 
 def ConvertTitleToMarkdownId(title):
+    # remove whitespace and lowercase
     idstr = title.lower().strip()
+
+    # convert "hi hello - 'bye!'" --> "hi-hello---'bye!'" --> "hi-hello-'bye!'"
     idstr = idstr.replace(' ', '-')
     while '--' in idstr:
         idstr = idstr.replace('--', '-')
+
+    # remove special characters "hi-hello-'bye!'" --> "hi-hello-bye"
     idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -_')])
     return idstr
 
@@ -108,10 +113,13 @@ def OpenIncludedFileBinary(resource):
 def CreateStaticFilesFolders(html_output_folder):
     obsfolder = html_output_folder.joinpath('obs.html')
     os.makedirs(obsfolder, exist_ok=True)
+
     static_folder = obsfolder.joinpath('static')
     os.makedirs(static_folder, exist_ok=True)
+
     data_folder = obsfolder.joinpath('data')
     os.makedirs(data_folder, exist_ok=True)
+
     rss_folder = obsfolder.joinpath('rss')
     os.makedirs(rss_folder, exist_ok=True)
 

@@ -7,19 +7,39 @@ import os
 import inspect
 import shutil               # used to remove a non-empty directory, copy files
 
+'''
+This object class helps us with keeping track of all the paths.
+There are three types of paths:
+
+- obsidian notes: 'notes'
+- proper markdown notes: 'markdown'
+- html pages: 'html'
+
+The flow within ObsidianHtml is to get obsidian notes and convert them to markdown notes,
+then take the proper markdown notes and convert them to html.
+
+When we set the note path as a source, then we will know what the markdown path will be, based on the config.
+And when we know the markdown path we can set the html path.
+
+Because the first step can be skipped, there is some complexity, but otherwise, if we give the note path as a source,
+we can compile all the relevant paths in one pass.
+
+The links have some complexity because we can configure to use absolute links or relative links.
+For simplicity's sake, we just compile both link types within the same function. There are some functions to automatically
+get the correct link based on the configurations.
+'''
+
 class OH_File:
-    pb = None
-    path = None
-    link = None
-    metadata = None
+    pb = None                   # contains all config, paths, etc (global pass in config object)
+    path = None                 # hashtable with all relevant file paths
+    link = None                 # hashtable with all links
+    metadata = None             # information on the note, such as modified_date
 
-    oh_file_type = None
-
-    processed_ntm = False
-    processed_mth = False
+    processed_ntm = False       # whether the note has already been processed in the note --> markdown flow
+    processed_mth = False       # whether the note has already been processed in the markdown --> html flow
 
     def __init__(self, pb):
-        self.pb = pb 
+        self.pb = pb
 
         self.path = {}
         self.link = {}
@@ -37,28 +57,28 @@ class OH_File:
             return False
         if self.fullpath(output).suffix != '.md':
             return False
-
         return True
 
-    def init_note_path(self, source_file_absolute_path, source_folder_path=None, target_folder_path=None, compile_metadata=True):
+    def init_note_path(self, source_file_absolute_path, compile_metadata=True):
         self.oh_file_type = 'obs_to_md'
 
-        # File paths
-        if source_folder_path is None:
-            source_folder_path = self.pb.paths['obsidian_folder']
-        if target_folder_path is None:
-            target_folder_path = self.pb.paths['md_folder']
+        # Configured folders
+        source_folder_path = self.pb.paths['obsidian_folder']
+        target_folder_path = self.pb.paths['md_folder']
 
+        # Note
         self.path['note'] = {}
         self.path['note']['folder_path'] = source_folder_path
         self.path['note']['file_absolute_path'] = source_file_absolute_path
         self.path['note']['file_relative_path'] = source_file_absolute_path.relative_to(source_folder_path)
         self.path['note']['suffix'] = self.path['note']['file_absolute_path'].suffix[1:]
 
+        # Markdown
         self.path['markdown'] = {}
         self.path['markdown']['folder_path'] = target_folder_path
 
         if self.path['note']['file_relative_path'] == self.pb.paths['rel_obsidian_entrypoint']:
+            # rewrite path to index.md if the note is configured as the entrypoint
             self.metadata['is_entrypoint'] = True
             self.path['markdown']['file_absolute_path'] = target_folder_path.joinpath('index.md')
             self.path['markdown']['file_relative_path'] = self.path['markdown']['file_absolute_path'].relative_to(target_folder_path)
@@ -93,7 +113,6 @@ class OH_File:
             self.path['markdown']['file_relative_path'] = source_file_absolute_path.relative_to(source_folder_path)
             self.path['markdown']['suffix'] = source_file_absolute_path.suffix[1:]
 
-        
         self.path['html'] = {}
         self.path['html']['folder_path'] = target_folder_path
 
@@ -153,12 +172,6 @@ class OH_File:
         return self._get_depth(self.path[mode]['file_relative_path'])
     def _get_depth(self, rel_path):
         return rel_path.as_posix().count('/')
-
-    def compile_link(self, origin:'OH_File'=None):
-        if self.oh_file_type == 'obs_to_md':
-            self.compile_markdown_link(origin)
-        elif self.oh_file_type == 'md_to_html':
-            self.compile_html_link(origin)
 
     def get_link(self, link_type, origin:'OH_File'=None, origin_rel_dst_path_str=None):
         # print(inspect.stack()[1][3])
