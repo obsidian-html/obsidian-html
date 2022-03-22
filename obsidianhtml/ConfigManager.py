@@ -44,7 +44,6 @@ class Config:
     def verbose(self):
         return self.config['toggles']['verbose_printout']
 
-
     def disable_feature(self, feature_key_name):
         self.config['toggles']['features'][feature_key_name]['enabled'] = False
 

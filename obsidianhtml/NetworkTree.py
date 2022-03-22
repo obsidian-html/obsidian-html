@@ -1,6 +1,12 @@
 import json
 from datetime import date
 
+'''
+This class helps us building the graph.json by keeping track of which notes link to other notes.
+Here, a note is a "node" (hah), and a note linking to another note is a link. 
+For every note we also save its metadata, so that this information is available at later steps.
+'''
+
 class NetworkTree:
     verbose = None
     tree = None
@@ -51,12 +57,13 @@ class NetworkTree:
             self.node_lookup[n['id']] = n
     
     def OutputJson(self):
+        ''' the graph.json '''
         tree = StringifyDateRecurse(self.tree.copy())
         return json.dumps(tree)
 
 
 def StringifyDateRecurse(tree):
-
+    ''' We can't convert a date type to json, so we have to manually convert any dates in the tree to isoformatted date strings '''
     if isinstance(tree, dict):
         for key, value in tree.items():
             if isinstance(value, date):

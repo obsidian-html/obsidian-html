@@ -214,10 +214,7 @@ def CreateIndexFromTags(pb):
     now = datetime.datetime.now().isoformat()
 
     fo_index_dst_path = OH_File(pb)
-    fo_index_dst_path.init_note_path(
-        index_dst_path,
-        compile_metadata = True
-    )
+    fo_index_dst_path.init_note_path(index_dst_path)
     fo_index_dst_path.init_markdown_path()
     pb.files['__tags_index.md'] = fo_index_dst_path
 
