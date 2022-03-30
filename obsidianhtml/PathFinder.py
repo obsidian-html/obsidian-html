@@ -78,10 +78,12 @@ class OH_File:
         self.path['markdown']['folder_path'] = target_folder_path
 
         if self.path['note']['file_relative_path'] == self.pb.paths['rel_obsidian_entrypoint']:
-            # rewrite path to index.md if the note is configured as the entrypoint
+            # rewrite path to index.md if the note is configured as the entrypoint.
             self.metadata['is_entrypoint'] = True
             self.path['markdown']['file_absolute_path'] = target_folder_path.joinpath('index.md')
             self.path['markdown']['file_relative_path'] = self.path['markdown']['file_absolute_path'].relative_to(target_folder_path)
+
+            # also add self to pb.files under the key 'index.md' so it is findable
             self.pb.files['index.md'] = self
         else:
             self.path['markdown']['file_absolute_path'] = target_folder_path.joinpath(self.path['note']['file_relative_path'])
@@ -91,19 +93,16 @@ class OH_File:
 
         # Metadata
         self.metadata['depth'] = self._get_depth(self.path['note']['file_relative_path'])
-
-        # is_note, creation_time, modified_time, is_video, is_audio, is_includable
         if compile_metadata:
-            self.compile_metadata(source_file_absolute_path)
+            self.compile_metadata(source_file_absolute_path)            # is_note, creation_time, modified_time, is_video, is_audio, is_includable
 
-    def init_markdown_path(self, source_file_absolute_path=None, source_folder_path=None, target_folder_path=None):
+    def init_markdown_path(self, source_file_absolute_path=None):
         self.oh_file_type = 'md_to_html'
 
-        if source_folder_path is None:
-            source_folder_path = self.pb.paths['md_folder']
-        if target_folder_path is None:
-            target_folder_path = self.pb.paths['html_output_folder']
+        source_folder_path = self.pb.paths['md_folder']
+        target_folder_path = self.pb.paths['html_output_folder']
 
+        # compile the path['markdown'] section, or reuse the section from the previous step
         if source_file_absolute_path is None:
             source_file_absolute_path = self.path['markdown']['file_absolute_path']
         else:
@@ -113,10 +112,12 @@ class OH_File:
             self.path['markdown']['file_relative_path'] = source_file_absolute_path.relative_to(source_folder_path)
             self.path['markdown']['suffix'] = source_file_absolute_path.suffix[1:]
 
+        # html
         self.path['html'] = {}
         self.path['html']['folder_path'] = target_folder_path
 
         if self.path['markdown']['file_relative_path'] == self.pb.paths['rel_md_entrypoint_path']:
+            # rewrite path to index.html if the markdown note is configured as the entrypoint.
             self.metadata['is_entrypoint'] = True
             self.path['html']['file_absolute_path'] = target_folder_path.joinpath('index.html')
             self.path['html']['file_relative_path'] = self.path['html']['file_absolute_path'].relative_to(target_folder_path)
@@ -132,6 +133,8 @@ class OH_File:
             self.path['html']['file_relative_path'] = target_rel_path
             self.path['html']['suffix'] = self.path['html']['file_absolute_path'].suffix[1:]
 
+        # Metadata
+        # call to self.compile_metadata() should be done manually in the calling function
         self.metadata['depth'] = self._get_depth(self.path['html']['file_relative_path'])
 
     def compile_metadata(self, path, cached=False):
@@ -174,13 +177,6 @@ class OH_File:
         return rel_path.as_posix().count('/')
 
     def get_link(self, link_type, origin:'OH_File'=None, origin_rel_dst_path_str=None):
-        # print(inspect.stack()[1][3])
-        # print('target', self.path['note']['file_relative_path'], self.metadata['depth'])
-        # if origin is not None:
-        #     print('origin', origin.path['note']['file_relative_path'], origin.metadata['depth'])
-        # else:
-        #     print('origin', 'none')
-
         # Get origin_rel_dst_path_str
         if origin_rel_dst_path_str is None:
             if origin is not None:
@@ -188,7 +184,7 @@ class OH_File:
             else:
                 origin_rel_dst_path_str = self.path[link_type]['file_relative_path'].as_posix()
 
-        # recompile links if not compiled yet
+        # recompile links for the given origin_path and return correct link (absolute or relative)
         if link_type == 'markdown':
             self.compile_markdown_link(origin_rel_dst_path_str)
 
