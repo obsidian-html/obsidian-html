@@ -334,6 +334,7 @@ class TestMisc(ModeTemplate):
     """Use process_all & copy_vault_to_tempdir: False"""
     testcase_name = "MiscTests"
     testcase_custom_config_values = [
+        ('toggles/verbose_printout', True),
         ('toggles/process_all', True),
         ('toggles/features/backlinks/enabled', False),
         ('html_template_path_str', 'ci/configs/custom_html_template.html'),
