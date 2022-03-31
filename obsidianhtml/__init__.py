@@ -618,7 +618,7 @@ def main():
             for fo in unparsed:
                 i += 1
                 if pb.gc('toggles/verbose_printout', cached=True) == True:
-                    print(f'\t\t{i}/{l} - ' + fo.path['note']['file_absolute_path'])
+                    print(f'\t\t{i}/{l} - ' + str(fo.path['note']['file_absolute_path']))
                 recurseObisidianToMarkdown(fo, pb, log_level=2)
             print('\t< FEATURE: PROCESS ALL: Done')
 
@@ -658,7 +658,7 @@ def main():
             for fo in unparsed:
                 i += 1
                 if pb.gc('toggles/verbose_printout', cached=True) == True:
-                    print(f'\t\t{i}/{l} - ' + fo.path['markdown']['file_absolute_path'])
+                    print(f'\t\t{i}/{l} - ' + str(fo.path['markdown']['file_absolute_path']))
 
                 ConvertMarkdownPageToHtmlPage(fo, pb, log_level=2)
             print('\t< FEATURE: PROCESS ALL: Done')
