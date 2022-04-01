@@ -533,8 +533,10 @@ def main():
     # Load files
     # ---------------------------------------------------------
     input_dir = paths['obsidian_folder']
+    path_type = 'note'
     if not pb.gc('toggles/compile_md'):
         input_dir = paths['md_folder']
+        path_type = 'markdown'
 
     # Load all filenames in the root folder.
     # This data will be used to check which files are local, and to get their full path
@@ -563,7 +565,7 @@ def main():
 
         # Check if filename is duplicate
         if path.name in pb.files.keys() and pb.gc('toggles/allow_duplicate_filenames_in_root', cached=True) == False:
-            raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name]['fullpath']}.")
+            raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
 
         # Create object to help with handling all the info on the file
         fo = OH_File(pb)
