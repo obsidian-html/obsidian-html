@@ -526,9 +526,14 @@ def main():
     # ---------------------------------------------------------
     print('> CREATING OUTPUT FOLDERS')
     paths['md_folder'].mkdir(parents=True, exist_ok=True)
+    paths['md_folder'] = paths['md_folder'].resolve()
+
     paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
+    paths['html_output_folder'] = paths['html_output_folder'].resolve()
+    
     if pb.gc('toggles/extended_logging', cached=True):
         paths['log_output_folder'].mkdir(parents=True, exist_ok=True)
+        paths['log_output_folder'] = paths['log_output_folder'].resolve()
 
     # Load files
     # ---------------------------------------------------------
