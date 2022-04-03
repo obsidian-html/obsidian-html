@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+
+    <style>
+        body {
+            margin: 2rem;
+        }
+        .action-link {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        #response-container {
+            display: none;
+            padding: 1rem;
+            margin: 1rem 2rem;
+            font-size: 10pt;
+            border: 1px dashed #ccc;
+        }
+        
+        label {
+            margin-left: 0.3rem;
+            margin-right: 0.3rem;
+        }
+        
+        button {
+            font-size: 10pt;
+            margin: 0.3rem;
+            background-color: #0a365d;
+            border: 0px solid #fff;
+            color: white;
+            font-weight: normal;
+            border-radius: 0.4rem;
+        }   
+        .annotation {
+            margin: 0.3rem;
+            padding: 0.3rem;
+        }
+        .flex-row {
+            display: flex;
+            flex-direction: row;
+        }
+        .flex-row>.annotation {
+            flex: 4;
+        }
+        .flex-row>button {
+            flex: 2;
+        }         
+        
+        .blink_me {
+            animation: blinker 1s linear infinite;
+        }
+        
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <h1>Obsidian-HTML GUI</h1>
+    <p id='pywebview-status'><span class="blink_me">Initializing...</span></p>
+
+    <h2>Setup</h2>
+    <ul>
+        <li>
+            <a class="action-link" onclick="getVersion()">
+                Setup Obsidian-HTML
+            </a>
+        </li>
+        <li>
+            <a class="action-link" onclick="LaunchVaultGithubPagesInstaller()">
+                Setup Github Pages Publishing.
+            </a>
+        </li>
+    </ul>
+
+    <h2>Quicklinks</h2>
+    <ul>
+        <li>
+            <a class="action-link" onclick="LaunchVaultGithubPagesInstaller()">
+                Setup gitpages.
+            </a>
+        </li>
+    </ul>
+    
+
+
+    <div id="response-container"></div>
+    <script>
+        let nIntervId;
+        window.addEventListener('pywebviewready', function() {
+            var container = document.getElementById('pywebview-status')
+            container.innerHTML = 'GUI initialized'
+
+            //intervalID = setInterval(test, 500);
+            getVersion()
+        })
+
+
+
+        function test() {
+            pywebview.api.test().then(showResponse).catch(showResponse)
+        }
+
+        function temp_SetupGitpages() {
+            pywebview.api.temp_SetupGitpages().then(showResponse).catch(showResponse)
+        }
+
+
+        function showResponse(response) {
+            var container = document.getElementById('response-container')
+
+            container.innerText = response.message
+            container.style.display = 'block'
+        }
+
+        function getVersion() {
+            pywebview.api.getVersion().then(showResponse)
+        }
+
+        function LaunchVaultGithubPagesInstaller() {
+            pywebview.api.LaunchVaultGithubPagesInstaller().then(showResponse).catch(showResponse)
+        }
+
+        function getLocalPath() {
+            pywebview.api.pickFile().then(showResponse)
+        }
+
+        function catchException() {
+            pywebview.api.error().catch(showResponse)
+        }
+    </script>
+</body>
+
+</html>
