@@ -214,58 +214,113 @@
 
 	</style>
     <script>
-        let WINDOW_ID = 'self'
-    </script>    
+        let WINDOW_ID = '{{window_id}}'
+    </script>
 </head>
 
 <body>
+    <h1>Test {{window_id}}</h1>
+    	<div class="flex-row">
+	    <button onClick="getVaultPath()">Select vault</button><br />
+	    <div class="annotation" id="current-vault-path">None selected</div>
+	    <div class="info-icon" onClick="toggle('info-select-vault-path')">i</div>
+	</div>
+	<div class="info-line" id="info-select-vault-path" style="display: none;">
+	    Your Obsidian Vault folder. Select the first (sub)folder that by itself contains all the notes in your vault.
+	</div>
+	
+	<script>
+	    function getVaultPath(){
+	        input = {
+	            'action':'action/get_vault_path',
+	            'window_id': WINDOW_ID,
+	            'result_div_id': 'current-vault-path'
+	        }
+	        pywebview.api.call(input).then(showResponse).catch(showResponse)
+	    }
+	</script>
+
+    	
+	<div class="">
+	    <div class="flex-row">
+	        <button onClick="getEntrypointPath('set-entrypoint-path')">Select entrypoint note</button>
+	        <div class="annotation" id="set-entrypoint-path">None selected</div>
+	        <div class="info-icon" onClick="toggle('info-select-entrypoint-path')">i</div>
+	    </div>
+	    <div class="info-line" id="info-select-entrypoint-path" style="display: none;">
+	        The note that is to become the homepage of your new site. 
+	        In default mode, ObsidianHtml will start compiling your website starting with this node, and following any links to any other note.
+	        This note has to be in the vault selected above.
+	    </div> 
+	</div>
+	
+	<div class="hide">
+	    <div class="flex-row">
+	        <div class="spacer-2">Entrypoint</div>
+	        <div class="spacer-4" id="summary-entrypoint-path">Failed to load setting</div>
+	        <div class="info-icon" onClick="toggle('info-summary-entrypoint-path')">i</div>
+	    </div>
+	    <div class="info-line" id="info-summary-entrypoint-path" style="display: none;">
+	        The note that is to become the homepage of your new site. 
+	        In default mode, ObsidianHtml will start compiling your website starting with this note, and following any links to any other note.
+	        This note has to be in the vault selected above.
+	    </div>
+	</div>
+	
+	<script>
+	    function getEntrypointPath(result_div_id){
+	        input = {
+	            'action':'action/get_entrypoint_path',
+	            'window_id': WINDOW_ID,
+	            'result_div_id': result_div_id
+	        }
+	        pywebview.api.call(input).then(showResponse).catch(showResponse)
+	    }
+	</script>
 
 
-    <h1>Obsidian-HTML GUI</h1>
-    <p id='pywebview-status'><span class="blink_me">Initializing...</span></p>
+    <h2>Summary</h2>
+    	
+	<div class="hide">
+	    <div class="flex-row">
+	        <button onClick="getEntrypointPath('set-entrypoint-path')">Select entrypoint note</button>
+	        <div class="annotation" id="set-entrypoint-path">None selected</div>
+	        <div class="info-icon" onClick="toggle('info-select-entrypoint-path')">i</div>
+	    </div>
+	    <div class="info-line" id="info-select-entrypoint-path" style="display: none;">
+	        The note that is to become the homepage of your new site. 
+	        In default mode, ObsidianHtml will start compiling your website starting with this node, and following any links to any other note.
+	        This note has to be in the vault selected above.
+	    </div> 
+	</div>
+	
+	<div class="">
+	    <div class="flex-row">
+	        <div class="spacer-2">Entrypoint</div>
+	        <div class="spacer-4" id="summary-entrypoint-path">Failed to load setting</div>
+	        <div class="info-icon" onClick="toggle('info-summary-entrypoint-path')">i</div>
+	    </div>
+	    <div class="info-line" id="info-summary-entrypoint-path" style="display: none;">
+	        The note that is to become the homepage of your new site. 
+	        In default mode, ObsidianHtml will start compiling your website starting with this note, and following any links to any other note.
+	        This note has to be in the vault selected above.
+	    </div>
+	</div>
+	
+	<script>
+	    function getEntrypointPath(result_div_id){
+	        input = {
+	            'action':'action/get_entrypoint_path',
+	            'window_id': WINDOW_ID,
+	            'result_div_id': result_div_id
+	        }
+	        pywebview.api.call(input).then(showResponse).catch(showResponse)
+	    }
+	</script>
 
-    <h2>Setup</h2>
-    <ul>
-        <li>
-            <a class="action-link" onclick="LaunchSetupObsidianHtml()">
-                Setup Obsidian-HTML
-            </a>
-        </li>
-        <li>
-            <a class="action-link" onclick="LaunchSettingsOverview()">
-                View configured settings
-            </a>
-        </li>        
-    </ul>
-
-    <h2>Wizards</h2>
-    <ul>
-        <li>
-            <a class="action-link" onclick="LaunchVaultGithubPagesInstaller()">
-                Setup Github Pages Publishing.
-            </a>
-        </li>
-    </ul>
-
-    <h2>Quicklinks</h2>
-    <ul>
-        <li>
-            <a class="action-link" onclick="temp_SetupGitpages()">
-                Setup gitpages.
-            </a>
-        </li>
-    </ul>
-    
-
-
-    <div id="response-container"></div>
-
-    <div id="footer" style="border: none;">
-        <button class="action bottom" id="exit-button" onClick="api('close', {'window_id': WINDOW_ID}, 'outnull')">Close</button>
-    </div>
 
     <script>
-		// HTML Functions
+        		// HTML Functions
 		// -----------------------------------------------------------------------
 		function toggle(id) {
 		    let cont = document.getElementById(id)
@@ -315,51 +370,6 @@
 		    container.style.display = 'block'
 		}
 
-
-        // On load
-        // -----------------------------------------------------------------------
-        //let nIntervId;
-        window.addEventListener('pywebviewready', function() {
-            var container = document.getElementById('pywebview-status')
-            container.innerHTML = '<span style="color:green">GUI initialized</span>'
-
-            //intervalID = setInterval(test, 500);
-            getVersion()
-        })
-
-        // Page specific
-        // -----------------------------------------------------------------------        
-        function LaunchSettingsOverview() {
-            pywebview.api.LaunchSettingsOverview().then(showResponse).catch(showResponse)
-        }
-        function LaunchSetupObsidianHtml() {
-            pywebview.api.LaunchSetupObsidianHtml().then(showResponse).catch(showResponse)
-        }        
-
-        function test() {
-            pywebview.api.test().then(showResponse).catch(showResponse)
-        }
-
-        function temp_SetupGitpages() {
-            pywebview.api.temp_SetupGitpages().then(showResponse).catch(showResponse)
-        }
-
-        function getVersion() {
-            pywebview.api.getVersion().then(showResponse)
-        }
-
-        function LaunchVaultGithubPagesInstaller() {
-            pywebview.api.LaunchVaultGithubPagesInstaller().then(showResponse).catch(showResponse)
-        }
-
-        function getLocalPath() {
-            pywebview.api.pickFile().then(showResponse)
-        }
-
-        function catchException() {
-            pywebview.api.error().catch(showResponse)
-        }
-    </script>
+    </script>    
 </body>
-
 </html>

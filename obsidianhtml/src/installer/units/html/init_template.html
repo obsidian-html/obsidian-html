@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <css />
+    <script>
+        let WINDOW_ID = 'setup_obsidianhtml'
+    </script>
+</head>
+
+<body>
+    <h1>Setup ObsidianHtml</h1>
+    <p>
+        This wizard will help you configure ObsidianHtml correctly (or at least avoid common mistakes).
+    </p>
+
+    <div id="outnull"></div>
+    <p id='pywebview-status'><span class="blink_me">Initializing...</span></p>
+
+    <div id="step-1">
+        <h2>Select Vault</h2>
+        <input id="select-vault-path" />
+    </div>
+
+    <div id="step-2" style="display: none;">
+        <div class="flex-row">
+            <div class="spacer-2">Entrypoint</div>
+            <div class="spacer-4" id="annotation-entrypoint-path">Failed to load setting</div>
+            <div class="info-icon" onClick="toggle('info-1')">i</div>
+        </div>
+        <div class="info-line" id="info-1" style="display: none;">
+            The note that is to become the homepage of your new site.
+            In default mode, ObsidianHtml will start compiling your website starting with this note, and following any
+            links to any other note.
+            This note has to be in the vault selected above.
+        </div>
+    </div>
+
+    <div id="step-3" style="display: none;">
+        <h2>Outputs</h2>
+
+        <div class="flex-row">
+            <div class="spacer-2">Markdown output folder</div>
+            <div class="spacer-4" id="annotation-config-path">Failed to load setting</div>
+            <div class="info-icon" onClick="toggle('info-2')">i</div>
+        </div>
+        <div class="info-line" id="info-2" style="display: none;">
+            When ObsidianHtml converts your notes, it first compiles proper markdown notes. This setting determines
+            where those files are exported to.
+        </div>
+    </div>
+
+
+    <!--    ---------------------------------------------------------------------- -->
+    <div id="footer" style="border-top: none;">
+        <p>
+            Settings are automatically saved when set.
+        </p>
+
+        <button class="action bottom"
+            onClick="api('close', {'window_id': 'setup_obsidianhtml'}, 'response-clone')">Close</button>
+    </div>
+
+
+
+    <div id="response-container"></div>
+    <script>
+//{{core}}
+
+        // On load
+        // -----------------------------------------------------------------------
+        window.addEventListener('pywebviewready', function () {
+            var container = document.getElementById('pywebview-status')
+            container.innerHTML = '<span style="color:green">GUI initialized</span>'
+
+            // presets
+            pywebview.api.read_ledger({
+                'ids': ['vault_path', 'entrypoint_path', 'config_folder_path'],
+                'div_ids': ['annotation-vault-path', 'annotation-entrypoint-path', 'annotation-config-path']
+            }).then(setValuesOutput).catch(setValuesOutput)
+        })
+
+        // Page specific
+        // -----------------------------------------------------------------------
+        function setValuesOutput(response) {
+            document.getElementById(response.data[response.ids[0]].div_id).innerHTML = span_wrap('error while preloading data. ' + response.message, 500);
+
+            for (let i = 0; i < response.ids.length; i++) {
+
+                let id = response.ids[i]
+
+                let container = document.getElementById(response.data[id].div_id)
+
+                let val = response.data[id].value
+                if (val == '') {
+                    val = span_wrap('Not configured', 0)
+                }
+                container.innerHTML = val
+            }
+        }
+
+        function choose_optional_setup_gitpages(enable, disable) {
+            document.getElementById(enable).style.display = 'block';
+            document.getElementById(disable).style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

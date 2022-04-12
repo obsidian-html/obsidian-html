@@ -1,0 +1,37 @@
+
+<div class="{{config_classes}}">
+    <div class="flex-row">
+        <button onClick="getEntrypointPath('set-entrypoint-path{{uid}}')">Select entrypoint note</button>
+        <div class="annotation" id="set-entrypoint-path{{uid}}">None selected</div>
+        <div class="info-icon" onClick="toggle('info-select-entrypoint-path{{uid}}')">i</div>
+    </div>
+    <div class="info-line" id="info-select-entrypoint-path{{uid}}" style="display: none;">
+        The note that is to become the homepage of your new site. 
+        In default mode, ObsidianHtml will start compiling your website starting with this node, and following any links to any other note.
+        This note has to be in the vault selected above.
+    </div> 
+</div>
+
+<div class="{{summary_classes}}">
+    <div class="flex-row">
+        <div class="spacer-2">Entrypoint</div>
+        <div class="spacer-4" id="summary-entrypoint-path{{uid}}">Failed to load setting</div>
+        <div class="info-icon" onClick="toggle('info-summary-entrypoint-path{{uid}}')">i</div>
+    </div>
+    <div class="info-line" id="info-summary-entrypoint-path{{uid}}" style="display: none;">
+        The note that is to become the homepage of your new site. 
+        In default mode, ObsidianHtml will start compiling your website starting with this note, and following any links to any other note.
+        This note has to be in the vault selected above.
+    </div>
+</div>
+
+<script>
+    function getEntrypointPath(result_div_id){
+        input = {
+            'action':'action/get_entrypoint_path',
+            'window_id': WINDOW_ID,
+            'result_div_id': result_div_id
+        }
+        pywebview.api.call(input).then(showResponse).catch(showResponse)
+    }
+</script>

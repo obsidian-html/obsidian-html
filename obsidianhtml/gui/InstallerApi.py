@@ -22,7 +22,6 @@ class InstallerApi:
     
     obsidian_vault_path = None
     repo_name = ''
-    repo_clone_path = ''
     repo_url = ''
     git_username = ''
     git_email = ''
@@ -33,7 +32,7 @@ class InstallerApi:
         self.config_checker = main_api.config_checker
 
         self.windows = {
-            'parent': main_api.window,
+            'parent': main_api.windows['self'],
             'self': None,
             'setup_gitpages': None
         }
@@ -49,20 +48,7 @@ class InstallerApi:
         return func(**args)
 
     def read_ledger(self, request):
-        data = {}
-        div_ids = request['div_ids']
-        value_ids = request['ids']
-
-        for i, value_id in enumerate(value_ids):
-            value = self.ledger.get(value_id)
-
-            # Custom post-processing
-            if value_id == 'config_folder_path' and value == '':
-                value = (self.presetConfigPath())['message']
-
-            data[value_id] = {'value': value, 'div_id': div_ids[i]}
-
-        return {'message': 'krakaka', 'ids': value_ids, 'data': data}
+        return self.main_api.read_ledger(request)
 
     def pickAnyFile(self):
         file = open_dialog(self.windows['self'])
@@ -77,8 +63,8 @@ class InstallerApi:
         return {'message': f'{file}', 'code': 200}
 
 
-    def getVaultPath(self):
-        folder_path = open_dialog(self.windows['self'], mode="open_folder")
+    def getVaultPath(self, window_id):
+        folder_path = open_dialog(self.windows[window_id], mode="open_folder")
 
         self.ledger.set_value('vault_path', folder_path)
 
@@ -103,21 +89,6 @@ class InstallerApi:
 
         return {'message': f'{file_path}', 'code': 200}
 
-    def presetConfigPath(self):
-        # get configured value
-        config_folder_path = self.ledger.get('config_folder_path')
-
-        if config_folder_path == '':
-            # not configured, come up with a good default
-            folder = Path.home().as_posix()
-            if Path.home().joinpath('.config').exists():
-                folder = Path.home().joinpath('.config').as_posix()
-
-            # save to configurations
-            config_folder_path = Path(folder).joinpath('obsidianhtml') 
-            self.ledger.set_value('config_folder_path', config_folder_path)
-
-        return {'message': f'{config_folder_path}', 'code': 200}
 
     def getConfigPath(self):
         # get configured value
@@ -142,18 +113,27 @@ class InstallerApi:
 
         return {'message': f'{new_config_folder_path}', 'code': 200}
 
-    def getRepoPath(self):
-        folder = Path.home().as_posix()
-        if Path.home().joinpath('git').exists():
-            folder = Path.home().joinpath('git').as_posix()
-        elif Path.home().joinpath('Git').exists():
-            folder = Path.home().joinpath('Git').as_posix()
 
-        repo_path = open_dialog(self.windows['self'], mode="open_folder", directory=folder)
+    def getRepoPath(self, window_id):
+        repo_folder = self.ledger.get('repo_folder_path')
+
+        if repo_folder != '':
+            folder = repo_folder
+        else:
+            folder = Path.home().as_posix()
+            if Path.home().joinpath('git').exists():
+                folder = Path.home().joinpath('git').as_posix()
+            elif Path.home().joinpath('Git').exists():
+                folder = Path.home().joinpath('Git').as_posix()
+
+        repo_path = open_dialog(self.windows[window_id], mode="open_folder", directory=folder)
+
         if repo_path is None:
+            self.ledger.set_value('repo_folder_path', '')
             return {'message': 'None selected', 'code': 0}
-        return {'message': f'{repo_path}', 'code': 200}
 
+        self.ledger.set_value('repo_folder_path', repo_path)
+        return {'message': f'{repo_path}', 'code': 200}
 
     def OpenWindowSetupGitpage(self):
         api = self
@@ -186,16 +166,6 @@ class InstallerApi:
 
         return {'message': f'Success', 'code': 200, 'data':{'username': username, 'repo_name': repo_name, 'repo_url': repo_url, 'repo_exists': repo_exists}}
         #raise Exception(f'test exception {username}')
-
-    def presetRepoClonePath(self):
-        folder = Path.home().as_posix()
-        if Path.home().joinpath('git').exists():
-            folder = Path.home().joinpath('git').as_posix()
-        elif Path.home().joinpath('Git').exists():
-            folder = Path.home().joinpath('Git').as_posix()
-
-        self.repo_clone_path = Path(folder).joinpath(self.repo_name)
-        return {'message': f'{self.repo_clone_path}', 'code': 200}
 
     def CheckGit(self):
         issues = []
@@ -269,19 +239,25 @@ class InstallerApi:
 
 
     def FlightCheckCloneRepo(self):
+        repo_folder_path_str = self.ledger.get('repo_folder_path')
+        repo_folder_path = Path(repo_folder_path_str)
+
         response = {
-            'message': f'Will clone repo <b>{self.repo_url}</b> to local path <b>{self.repo_clone_path}</b>.\
+            'message': f'Will clone repo <b>{self.repo_url}</b> to local path <b>{repo_folder_path_str}</b>.\
                         If that sounds right, click Clone Repo.', 
             'code': 200, 
-            'data': ''
+            'data': {}
         }
 
-        repo_path = Path(self.repo_clone_path)
-        if repo_path.exists():
-            if repo_path.joinpath('.git').exists():
-                response['message'] = f'Repo already exists at {self.repo_clone_path}, if this is expected, you can (and should) skip the Clone step.'
+        response['data']['ready'] = False
+
+        if repo_folder_path.exists():
+            if repo_folder_path.joinpath('.git').exists():
+                response['message'] = f'Repo already exists at {repo_folder_path_str}, if this is expected, you can (and should) skip the Clone step.<p>This will <b>overwrite</b> the contents of this repo when you get to publishing!</p>'
+                response['data']['ready'] = True
+                self.ledger.set_value('gitpages_configured', True)
             else:
-                response['message'] = f'A folder already exists at {self.repo_clone_path}, but it is not a git repo (hidden .git folder is missing).'
+                response['message'] = f'A folder already exists at {repo_folder_path_str}, but it is not a git repo (hidden .git folder is missing).'
                 response['message'] += 'Delete or move this folder, or pick a different clone path in the previous step before you continue'
                 response['code'] = 405
 
@@ -290,9 +266,12 @@ class InstallerApi:
     def CloneRepo(self):
         response = {'message': '', 'code': 200, 'data': {'ready':True}}
 
+        repo_folder_path_str = self.ledger.get('repo_folder_path')
+        repo_folder_path = Path(repo_folder_path_str)
+        
         # Return ready if git folder already exists according to spec
-        if self.repo_clone_path.joinpath('.git/config').exists():
-            with open(self.repo_clone_path.joinpath('.git/config'), 'r', encoding='utf-8') as f:
+        if repo_folder_path.joinpath('.git/config').exists():
+            with open(repo_folder_path.joinpath('.git/config'), 'r', encoding='utf-8') as f:
                 content = f.read()
             for l in content.split('\n'):
                 if l.strip().startswith('url = '):
@@ -305,7 +284,7 @@ class InstallerApi:
                 return response
 
         # Clone
-        process = Popen(['git', 'clone', f"{self.repo_url}.git", self.repo_clone_path.as_posix()], stdout=PIPE, stderr=PIPE)
+        process = Popen(['git', 'clone', f"{self.repo_url}.git", repo_folder_path_str], stdout=PIPE, stderr=PIPE)
 
         stdout, stderr = process.communicate()
         stdout = stdout.decode("utf-8")
@@ -318,17 +297,17 @@ class InstallerApi:
             response['code'] = 500
             response['data'] = {'ready':False}
 
-        if not self.repo_clone_path.exists():
+        if not repo_folder_path.exists():
             response['code'] = 500
             response['message'] += " Repo not cloned."
             response['data'] = {'ready':False}
 
-        if not self.repo_clone_path.joinpath('.git').exists():
+        if not repo_folder_path.joinpath('.git').exists():
             response['code'] = 500
             response['message'] += " Local folder found, but .git subfolder is not present."
             response['data'] = {'ready':False}
         else:
-            with open(self.repo_clone_path.joinpath('.git/config'), 'r', encoding='utf-8') as f:
+            with open(repo_folder_path.joinpath('.git/config'), 'r', encoding='utf-8') as f:
                 content = f.read()
             for l in content.split('\n'):
                 if l.strip().startswith('url = '):
@@ -340,6 +319,20 @@ class InstallerApi:
                 response['data'] = {'ready':False}
 
         if response['code'] == 200:
-            response['message'] += f'<br/>Repo cloned at {self.repo_clone_path.as_posix()}'
+            response['message'] += f'<br/>Repo cloned at {repo_folder_path_str}'
 
         return response
+
+    def presetRepoClonePath(self, repo_name):
+        self.config_checker.presetRepoClonePath(repo_name)
+        value = self.ledger.get('repo_folder_path')
+        return {'message': f'{value}', 'code':200}
+
+    def check_gitpages_configured(self):
+        value = self.ledger.get("gitpages_configured")
+
+        if value:
+            return {'message': f'Gitpage settings are configured', 'data': True}
+        else:
+            return {'message': f'Gitpage settings are not yet configured', 'data': False}
+

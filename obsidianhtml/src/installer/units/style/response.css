@@ -1,0 +1,48 @@
+#pywebview-status {
+    position: absolute;
+    top: 0rem;
+    right: 1rem;
+}
+
+#response-container {
+    display: none;
+    padding: 3rem;
+    margin: 3rem 5rem;
+    font-size: 12pt;
+    border: 5px dashed #ccc;
+}
+
+.code-0 {
+    color: gray
+}
+
+.code-405 {
+    color: rgb(237, 10, 10);
+
+}
+
+.code-500 {
+    color: rgb(237, 10, 10);
+    font-weight: bold;
+}
+
+.code-500::before {
+    content: 'Internal Error: ';
+}
+
+.blink_me {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+        color: rgb(237, 10, 10);
+    }
+}
+
+.done {
+    background-color: #e9ffdf;
+    color: #14440a;
+    border: 1px dotted #248a07;
+}

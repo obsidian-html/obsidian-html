@@ -1,0 +1,65 @@
+body {
+    margin: 2rem;
+}
+
+h2 {
+    border-bottom: 1px solid #b3c0c8;
+}
+h3 {
+    border-bottom: 5px solid #f5f1ff;
+}        
+
+#footer {
+    margin-top: 4rem;
+    color: gray;
+    border-top: 2px solid #ddd;
+    text-align: center;
+}
+
+code {
+    color: green;
+}
+
+.info-icon {
+    float: right;
+    background-color: #3175f7;
+    width: 1.0rem;
+    height: 1rem;
+    padding: 0.1rem;
+    text-align: center;
+    padding-bottom: 0rem;
+    color: white;
+    font-weight: bold;
+    border-radius: 1rem;
+    line-height: 11pt;
+    cursor: pointer;
+}
+.info-line {
+    width: 100%;
+    background-color: whitesmoke;
+    padding: 1rem;
+    margin: 1rem;
+    margin-left: -1rem;
+    font-size: 10pt;
+}
+
+.optional {
+    margin: 1rem;
+    border: 1px dotted #375fd4;
+    padding: 1rem;
+    background-color: #e6efff;
+}
+
+.annotation {
+    margin: 0.3rem;
+    padding: 0.3rem;
+}
+  
+label {
+    margin-left: 0.3rem;
+    margin-right: 0.3rem;
+}
+
+.hide {
+    display: none
+}

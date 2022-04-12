@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <css />
+    <script>
+        let WINDOW_ID = 'self'
+    </script>    
+</head>
+
+<body>
+
+
+    <h1>Obsidian-HTML GUI</h1>
+    <p id='pywebview-status'><span class="blink_me">Initializing...</span></p>
+
+    <h2>Setup</h2>
+    <ul>
+        <li>
+            <a class="action-link" onclick="LaunchSetupObsidianHtml()">
+                Setup Obsidian-HTML
+            </a>
+        </li>
+        <li>
+            <a class="action-link" onclick="LaunchSettingsOverview()">
+                View configured settings
+            </a>
+        </li>        
+    </ul>
+
+    <h2>Wizards</h2>
+    <ul>
+        <li>
+            <a class="action-link" onclick="LaunchVaultGithubPagesInstaller()">
+                Setup Github Pages Publishing.
+            </a>
+        </li>
+    </ul>
+
+    <h2>Quicklinks</h2>
+    <ul>
+        <li>
+            <a class="action-link" onclick="temp_SetupGitpages()">
+                Setup gitpages.
+            </a>
+        </li>
+    </ul>
+    
+
+
+    <div id="response-container"></div>
+
+    <div id="footer" style="border: none;">
+        <button class="action bottom" id="exit-button" onClick="api('close', {'window_id': WINDOW_ID}, 'outnull')">Close</button>
+    </div>
+
+    <script>
+//{{core}}
+
+        // On load
+        // -----------------------------------------------------------------------
+        //let nIntervId;
+        window.addEventListener('pywebviewready', function() {
+            var container = document.getElementById('pywebview-status')
+            container.innerHTML = '<span style="color:green">GUI initialized</span>'
+
+            //intervalID = setInterval(test, 500);
+            getVersion()
+        })
+
+        // Page specific
+        // -----------------------------------------------------------------------        
+        function LaunchSettingsOverview() {
+            pywebview.api.LaunchSettingsOverview().then(showResponse).catch(showResponse)
+        }
+        function LaunchSetupObsidianHtml() {
+            pywebview.api.LaunchSetupObsidianHtml().then(showResponse).catch(showResponse)
+        }        
+
+        function test() {
+            pywebview.api.test().then(showResponse).catch(showResponse)
+        }
+
+        function temp_SetupGitpages() {
+            pywebview.api.temp_SetupGitpages().then(showResponse).catch(showResponse)
+        }
+
+        function getVersion() {
+            pywebview.api.getVersion().then(showResponse)
+        }
+
+        function LaunchVaultGithubPagesInstaller() {
+            pywebview.api.LaunchVaultGithubPagesInstaller().then(showResponse).catch(showResponse)
+        }
+
+        function getLocalPath() {
+            pywebview.api.pickFile().then(showResponse)
+        }
+
+        function catchException() {
+            pywebview.api.error().catch(showResponse)
+        }
+    </script>
+</body>
+
+</html>

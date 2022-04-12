@@ -102,6 +102,16 @@ def OpenIncludedFile(resource):
     with open(path, 'r', encoding="utf-8") as f:
         return f.read()
 
+def GetIncludedFilePaths(subpath=''):
+    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
+    path = os.path.join(path, subpath)
+    onlyfiles = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+    return onlyfiles
+
+def GetIncludedFilePath(resource):
+    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
+    return os.path.join(path, resource)
+
 @cache
 def OpenIncludedFileBinary(resource):
     path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]

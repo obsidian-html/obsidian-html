@@ -1,0 +1,19 @@
+<div class="flex-row">
+    <button onClick="getVaultPath()">Select vault</button><br />
+    <div class="annotation" id="current-vault-path">None selected</div>
+    <div class="info-icon" onClick="toggle('info-select-vault-path')">i</div>
+</div>
+<div class="info-line" id="info-select-vault-path" style="display: none;">
+    Your Obsidian Vault folder. Select the first (sub)folder that by itself contains all the notes in your vault.
+</div>
+
+<script>
+    function getVaultPath(){
+        input = {
+            'action':'action/get_vault_path',
+            'window_id': WINDOW_ID,
+            'result_div_id': 'current-vault-path'
+        }
+        pywebview.api.call(input).then(showResponse).catch(showResponse)
+    }
+</script>
