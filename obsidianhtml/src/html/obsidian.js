@@ -3,10 +3,16 @@
 // Globals
 var path_to_open = [];
 var no_tab_mode = {no_tabs};
+var show_dirtree = {show_dirtree_inline};
 var tab_mode = ! no_tab_mode;
 
 function LoadPage() {
         console.log('threshold', (1.2 * 40 * getComputedStyle(document.documentElement).fontSize.split("px")[0]));
+
+        if (true){
+                httpGetAsync('/obs.html/dir_index.html', load_dirtree_as_left_pane, 0, 'callbackpath')
+        }
+
         if (tab_mode){
                 SetLinks(0);
         }
@@ -37,6 +43,8 @@ function LoadPage() {
                 }
                 OpenPath(1);
         }
+
+
 }
 
 // Keybindings
@@ -63,6 +71,18 @@ function HandleKeyPress(e) {
 
 // FUNCTIONS 
 // ----------------------------------------------------------------------------
+// load dirtree as left-pane
+function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
+
+        let responseText = xmlHttp.responseText;
+        let text = responseText.split('<div class="container">')[1];
+        text = text.split('<!-- end content -->')[0];
+
+        let dir_tree_div = document.getElementById('dir_tree_view')
+        dir_tree_div.innerHTML = text;
+}
+
+
 function rem(rem) {
         return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
 }

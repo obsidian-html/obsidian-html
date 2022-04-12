@@ -90,6 +90,34 @@ body {
 }
 
 
+
+
+
+#dir_tree_view{
+    padding: 1rem;
+    padding-top: 1rem;
+    padding-top: 3rem;
+    overflow-y: scroll;
+    height: calc(90vh - 4rem);
+}
+body {
+    display: flex;
+    flex-direction: row;
+}
+#dir_tree_view {
+    flex: 1;
+}
+.container-wrapper {
+    flex: 4;
+    margin: 0rem;
+}
+
+
+
+
+
+
+
 @media (max-width: 800px) {
     .container {
         float: none;
