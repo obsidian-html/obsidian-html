@@ -247,6 +247,12 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         safe_link = r'<source src="'+re.escape(link)+r'"'
         md.page = re.sub(safe_link, new_link, md.page)
 
+    # [?] Documentation styling: Table of Contents
+    # ------------------------------------------------------------------
+    if pb.gc('toggles/features/styling', cached=True) == 'documentation':
+        md.page = md.page.replace('[TOC]', '')
+        md.page = '[TOC]\n' + md.page
+
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
