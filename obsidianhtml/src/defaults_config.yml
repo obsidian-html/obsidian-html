@@ -75,6 +75,19 @@ html_template_path_str: ''
 # Provide an array of custom inclusions (css, javascript, etc) that you would like to be included in the resultant html
 html_custom_inclusions: []
 
+navbar_links:
+  - name: Quickstart
+    link: Instructions/Quickstart.html
+  - name: News
+    link: MOCs/News.html
+  - name: About
+    link: General Information/About ObsidianHtml.html
+  - name: Modes
+    link: Configurations/Modes.html
+  - name: Features
+    link: MOCs/Features.html
+  - name: Configurations
+    link: Configurations/Configuration Options.html
 
 ##########################################################################
 #                    OPTIONAL BEHAVIOR / FEATURES                        #
@@ -123,7 +136,9 @@ toggles:
   external_blank: False  
   
   features:
-    styling: documentation
+    styling: 
+      module: documentation
+      accent_color: '#414cfd'
 
     # Include code to build the graph view per page 
     graph:

@@ -249,10 +249,10 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [?] Documentation styling: Table of Contents
     # ------------------------------------------------------------------
-    if pb.gc('toggles/features/styling', cached=True) == 'documentation':
+    if pb.gc('toggles/features/styling/module', cached=True) == 'documentation':
         md.page = md.page.replace('[TOC]', '')
         md.page = '[TOC]\n' + md.page
-
+                                        
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
@@ -312,6 +312,17 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
     html = PopulateTemplate(pb, node['id'], pb.dynamic_inclusions, pb.html_template, content=html_body)
+
+    # [?] Documentation styling: Navbar
+    # ------------------------------------------------------------------
+    html = html.replace('{pinnedNode}', node['id'])
+    
+    navbar_links = pb.gc('navbar_links', cached=True)
+    elements = []
+    for l in navbar_links:
+        el = f'<div class="navbar-link"><a href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a></div>'
+        elements.append(el)
+    html = html.replace('{{navbar_links}}', '\n'.join(elements))  
 
     # Save file
     # ------------------------------------------------------------------

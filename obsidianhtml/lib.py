@@ -155,7 +155,8 @@ def ExportStaticFiles(pb):
         
         # Templating
         if file_name[1] in ('main.css', 'obsidian.js'):
-            c = c.replace('{html_url_prefix}', html_url_prefix).replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
+            c = c.replace('{html_url_prefix}', html_url_prefix).replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))
+            c = c.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))
 
         # Write to dest
         with open (dst_path, 'w', encoding="utf-8") as f:

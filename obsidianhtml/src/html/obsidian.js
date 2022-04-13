@@ -10,7 +10,9 @@ function LoadPage() {
         console.log('threshold', (1.2 * 40 * getComputedStyle(document.documentElement).fontSize.split("px")[0]));
 
         if (true){
-                httpGetAsync('/obs.html/dir_index.html', load_dirtree_as_left_pane, 0, 'callbackpath');
+                //httpGetAsync('/obs.html/dir_index.html', load_dirtree_as_left_pane, 0, 'callbackpath');
+                http://localhost:8000/obs.html/data/graph.json
+                httpGetAsync('/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
 
                 let collection = document.getElementsByClassName("toc");
                 let right = document.getElementById('right_pane');
@@ -24,11 +26,23 @@ function LoadPage() {
                 var links = document.getElementsByTagName('a');
                 for (let i = 0; i < links.length; i++) {
                         let l = links[i];
-                        if (l.getAttribute("href")[0] == '#'){
-                                console.log(l.getAttribute("href"))
+                        if (l.getAttribute("href").includes('#')){
                                 l.onclick = function () {
+
+                                        let current_url = document.URL
+                                        current_url = decodeURI(current_url.replace(window.location.protocol+'//', '').replace(window.location.host, ''))
+                                        let link = this.getAttribute("href")
+                                        link = link.replace(current_url, '')
+
+                                        if (link[0] != '#'){
+                                                console.log(link, current_url, 'this should be fixed')
+                                                link = this.getAttribute("href").replace('#', '#!')
+                                                window.location.href = link;
+                                                return false;
+                                        }
+
                                         let levelcont = document.getElementsByClassName("container")[0];
-                                        var el = levelcont.querySelectorAll(this.getAttribute("href"))[0];
+                                        var el = levelcont.querySelectorAll(link)[0];
                                         if (el) {
                                                 el.parentElement.scrollTop = el.offsetTop - rem(1);
                                         }
@@ -38,6 +52,19 @@ function LoadPage() {
                         }
                 }
         }
+
+        // scroll to div
+        if (window.location.hash.length > 2 && window.location.hash[1] == '!'){
+                let link = '#' + window.location.hash.substring(2, window.location.hash.length)
+                let levelcont = document.getElementsByClassName("container")[0];
+                var el = levelcont.querySelectorAll(link)[0];
+                if (el) {
+                        el.parentElement.scrollTop = el.offsetTop - rem(1);
+                }
+        }        
+
+
+
 
         // Scroll container to #header link
         if (tab_mode && window.location.hash != '') {
@@ -94,21 +121,95 @@ function HandleKeyPress(e) {
 // FUNCTIONS 
 // ----------------------------------------------------------------------------
 // load dirtree as left-pane
+// function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
+
+//         let responseText = xmlHttp.responseText;
+//         let text = responseText.split('<div class="container">')[1];
+//         text = text.split('<!-- end content -->')[0];
+
+//         let left_pane = document.getElementById('left_pane')
+//         left_pane.innerHTML = text;
+// }
 function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
-
-        let responseText = xmlHttp.responseText;
-        let text = responseText.split('<div class="container">')[1];
-        text = text.split('<!-- end content -->')[0];
-
+        const jsonData = JSON.parse(xmlHttp.responseText);
         let left_pane = document.getElementById('left_pane')
-        left_pane.innerHTML = text;
+        let filename = ''
+        let folder = ''
+        // get current node
+        for (let i=0; i < jsonData.nodes.length; i++){
+                let node = jsonData.nodes[i];
+                if (node.id == CURRENT_NODE){
+                        // disable content nav if configured on the node
+                        if ("obs.html" in node.metadata && "disable_dir_nav" in node.metadata['obs.html']){
+                                if (node.metadata['obs.html'].disable_dir_nav){
+                                        left_pane.style.display = 'none'
+                                        return
+                                }
+                        }
+                        folder = node.url.split('/')
+                        filename = folder.pop()
+                        folder = folder.join('/')
 
-        // let right_pane = document.getElementById('right_pane')
-        // right_pane.innerHTML = text;     
+                        break;
+                }
+        }
+
+        // get all links in the same folder
+        let links = []
+        for (let i=0; i < jsonData.nodes.length; i++){
+                let node = jsonData.nodes[i];
+                if (node.url.startsWith(folder) == false){
+                        continue;
+                }
+                
+                let url = node.url
+                if (folder != ''){
+                        url = url.replace(folder+'/', '')
+                }
+                if (url.includes('/')){
+                        continue
+                }
+                links.push({'id': node.id, 'url':node.url})
+        }        
+
+        // skip if no links found        
+        if (links.length == 0){
+                //left_pane.style.display = 'none'
+                return
+        }
+
+        // sort list alphabetically
+        function compare_lname( a, b )
+        {
+                if ( a.id.toLowerCase() < b.id.toLowerCase()){
+                return -1;
+                }
+                if ( a.id.toLowerCase() > b.id.toLowerCase()){
+                return 1;
+                }
+                return 0;
+        }
+      
+        links.sort(compare_lname);        
+
+        let html = ''
+        let header = links[0]['url'].split('/')[0]
+        if (header == 'index.html'){
+                header = 'Contents'
+        }
+        html += '<span class="toc-header">'+header+'</span><ul>'
+        for (let i=0; i < links.length; i++){
+                if (links[i].id == CURRENT_NODE){
+                        html += '<li class="current_page_link"><a href="/'+links[i].url+'">'+links[i].id+'</a></li>'
+                }
+                else {
+                        html += '<li><a href="/'+links[i].url+'">'+links[i].id+'</a></li>'
+                }
+        }
+        html += '</ul>'
         
-        
+        left_pane.innerHTML += html;
 }
-
 
 function rem(rem) {
         return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -441,5 +542,18 @@ function CloseUpperContainers(level) {
                                 return;
                         }
                 }
+        }
+}
+
+function toggle(id, display_value){
+        el = document.getElementById(id);
+        if (el.style.display == 'none'){
+                el.style.display = display_value;
+        }
+        else if (el.style.display == display_value){
+                el.style.display = 'none';
+        }        
+        else {
+                el.style.display = display_value;
         }
 }
