@@ -142,7 +142,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
                         // disable content nav if configured on the node
                         if ("obs.html" in node.metadata && "disable_dir_nav" in node.metadata['obs.html']){
                                 if (node.metadata['obs.html'].disable_dir_nav){
-                                        left_pane.style.display = 'none'
+                                        //left_pane.style.display = 'none'
                                         return
                                 }
                         }
