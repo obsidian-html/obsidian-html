@@ -320,7 +320,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     navbar_links = pb.gc('navbar_links', cached=True)
     elements = []
     for l in navbar_links:
-        el = f'<div class="navbar-link"><a href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a></div>'
+        el = f'<a class="navbar-link"href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
         elements.append(el)
     html = html.replace('{{navbar_links}}', '\n'.join(elements))  
 
