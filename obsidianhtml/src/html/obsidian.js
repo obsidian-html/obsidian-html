@@ -44,7 +44,7 @@ function LoadPage() {
                                         let levelcont = document.getElementsByClassName("container")[0];
                                         var el = levelcont.querySelectorAll(link)[0];
                                         if (el) {
-                                                el.parentElement.scrollTop = el.offsetTop - rem(1);
+                                                el.parentElement.scrollTop = el.offsetTop - rem(6);
                                         }
                                         return false;
                                 };
@@ -59,18 +59,16 @@ function LoadPage() {
                 let levelcont = document.getElementsByClassName("container")[0];
                 var el = levelcont.querySelectorAll(link)[0];
                 if (el) {
-                        el.parentElement.scrollTop = el.offsetTop - rem(1);
+                        el.parentElement.scrollTop = el.offsetTop - rem(6);
                 }
         }        
-
-
 
 
         // Scroll container to #header link
         if (tab_mode && window.location.hash != '') {
                 let el = document.getElementById(window.location.hash.substr(2));
                 if (el) {
-                        el.parentElement.scrollTop = el.offsetTop - rem(1);
+                        el.parentElement.scrollTop = el.offsetTop - rem(6);
                 }
         }
 

@@ -1,6 +1,5 @@
 * {
     text-rendering: optimizeLegibility;
-    scroll-margin-top: 20rem;
   }
 
   body {
@@ -70,7 +69,7 @@ h4 + table {
     height: calc(100vh - 5rem);
     overflow-y: scroll;
     scrollbar-color: __accent_color__12 #ffffff;
-    scroll-margin-top: 20rem;
+    scroll-margin-top: 2rem;
 }
 .container img {
     max-width: 100%;
@@ -239,6 +238,12 @@ h4 + table {
     margin-left: -0.7rem;
     margin-top: 1rem;
 }
+
+
+h1, h2, h3, h4, h5 {
+    scroll-margin-top: 8rem;
+}
+
 
 @media (max-width: 1300px) {
     #left_pane {
