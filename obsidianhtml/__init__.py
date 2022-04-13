@@ -398,6 +398,16 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html_body, dynamic_includes=di, container_wrapper_class_list=['single_tab_page-left-aligned'])
 
+
+    html = html.replace('{pinnedNode}', 'tagspage')
+
+    navbar_links = pb.gc('navbar_links', cached=True)
+    elements = []
+    for l in navbar_links:
+        el = f'<a class="navbar-link"href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+        elements.append(el)
+    html = html.replace('{{navbar_links}}', '\n'.join(elements)) 
+    
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
     with open(tag_dst_path_posix, 'w', encoding="utf-8") as f:

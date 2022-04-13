@@ -154,6 +154,14 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
                 }
         }
 
+        // current node not found
+        if (filename == ''){
+                left_pane.style.maxWidth = '0.7rem'
+                left_pane.style.minWidth = '0.7rem'
+                left_pane.style.padding = '0rem'
+                return
+        }
+
         // get all links in the same folder
         let links = []
         for (let i=0; i < jsonData.nodes.length; i++){
@@ -174,7 +182,9 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
 
         // skip if no links found        
         if (links.length == 0){
-                //left_pane.style.display = 'none'
+                left_pane.style.maxWidth = '0.7rem'
+                left_pane.style.minWidth = '0.7rem'
+                left_pane.style.padding = '0rem'
                 return
         }
 
