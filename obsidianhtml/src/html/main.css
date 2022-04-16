@@ -136,8 +136,8 @@ h4 + table {
     max-width: max-content;
 }
 #right_pane{
-    padding-right: 1.7rem;
-    margin-left: -1.5rem;
+    padding-right: 3rem;
+    padding-left:0rem;
     font-family: 'Roboto-Regular';
     min-width: max-content;
     max-width: max-content;

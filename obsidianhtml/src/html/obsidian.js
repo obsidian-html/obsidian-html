@@ -15,8 +15,10 @@ function LoadPage() {
                 httpGetAsync('/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
 
                 let collection = document.getElementsByClassName("toc");
-                let right = document.getElementById('right_pane');
-                right.innerHTML = '<span class="toc-header">Table of contents</span>' + collection[0].innerHTML;
+                if (collection.length > 0){
+                        let right = document.getElementById('right_pane');
+                        right.innerHTML = '<span class="toc-header">Table of contents</span>' + collection[0].innerHTML;
+                }
         }
 
         if (tab_mode){
@@ -218,7 +220,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
         }
         html += '</ul>'
         
-        left_pane.innerHTML += html;
+        left_pane.innerHTML = html;
 }
 
 function rem(rem) {
