@@ -144,6 +144,17 @@ class CreateIndexFromDirStructure():
         pb = self.pb
         
         html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=['single_tab_page-left-aligned'])
+
+        html = html.replace('{pinnedNode}', 'dirtree')
+    
+        navbar_links = self.pb.gc('navbar_links', cached=True)
+        elements = []
+        for l in navbar_links:
+            el = f'<a class="navbar-link"href="{self.html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+            elements.append(el)
+        html = html.replace('{{navbar_links}}', '\n'.join(elements)) 
+
+
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html)
 

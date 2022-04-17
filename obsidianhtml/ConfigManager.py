@@ -41,6 +41,16 @@ class Config:
         else:
             self.pb.verbose = self.config['toggles']['verbose_printout']
 
+        # Set toggles/no_tabs
+        layout = self.config['toggles']['features']['styling']['layout']
+        if layout == 'tabs':
+            self.config['toggles']['no_tabs'] = False
+        else:
+            self.config['toggles']['no_tabs'] = True
+
+        # Set main css file
+        self.config['_css_file'] = f'main_{layout}.css'
+
     def verbose(self):
         return self.config['toggles']['verbose_printout']
 
@@ -113,6 +123,8 @@ def MergeDictRecurse(base_dict, update_dict, path=''):
         # don't overwrite a dict in the base config with a string, or something else
         # in general, we don't expect types to change
         if type(base_dict[k]) != type(v):
+            if base_dict[k] == '<REMOVED>':
+                raise Exception(f'\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Log/<fillin> for more information.')            
             raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
 
         # dict match -> recurse
@@ -124,6 +136,8 @@ def MergeDictRecurse(base_dict, update_dict, path=''):
         if isinstance(update_dict[k], list):
             base_dict[k] = v.copy()
         else:
+            if base_dict[k] == '<REMOVED>':
+                raise Exception(f'\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Log/<fillin> for more information.')
             base_dict[k] = v
 
     return base_dict.copy()

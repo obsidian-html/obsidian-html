@@ -7,7 +7,7 @@ import warnings
 import shutil               # used to remove a non-empty directory, copy files
 from string import ascii_letters, digits
 import tempfile             # used to create temporary files/folders
-from distutils.dir_util import copy_tree
+from shutil import copytree
 import time
 from functools import cache
 
@@ -28,7 +28,7 @@ def printHelpAndExit(exitCode:int):
     print('- Add -i </path/to/input.yml> to provide config')
     print('- Add -v for verbose output')
     print('- Add -h to get helptext')
-    print('- Add -eht <target/path/file.name> to export the html template.')
+    print('- Add -eht <target/path/file.name> <documentation/tabs/no_tabs> to export the html template.')
     print('- Add -gc to output all configurable keys and their default values.')
     exit(exitCode)
 
@@ -130,7 +130,7 @@ def ExportStaticFiles(pb):
 
     # define files to be copied over (standard copy, static_folder)
     copy_file_list = [
-        ['html/main.css', 'main.css'], 
+        [f'html/{pb.gc("_css_file")}', 'main.css'], 
         ['html/obsidian.js', 'obsidian.js'],
         ['html/mermaid.css', 'mermaid.css'],
         ['html/mermaid.min.js', 'mermaid.min.js'],
@@ -153,9 +153,23 @@ def ExportStaticFiles(pb):
         dst_path = static_folder.joinpath(file_name[1])
         html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
         
+        # Set pane divs
+        toc_pane_div = "right_pane"
+        content_pane_div = "left_pane"
+        if pb.gc('toggles/features/styling/layout') == 'documentation' and pb.gc('toggles/features/styling/flip_panes'):
+            toc_pane_div = "left_pane"
+            content_pane_div = "right_pane"
+
         # Templating
         if file_name[1] in ('main.css', 'obsidian.js'):
-            c = c.replace('{html_url_prefix}', html_url_prefix).replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
+            c = c.replace('{html_url_prefix}', html_url_prefix)\
+                 .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
+                 .replace('{documentation_mode}',str(int(pb.gc('toggles/features/styling/layout')=='documentation')))\
+                 .replace('{toc_pane}',str(int(pb.gc('toggles/features/styling/toc_pane'))))\
+                 .replace('{toc_pane_div}', toc_pane_div)\
+                 .replace('{content_pane_div}', content_pane_div)
+            c = c.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))\
+                 .replace('__max_note_width__', pb.gc('toggles/features/styling/max_note_width', cached=True))\
 
         # Write to dest
         with open (dst_path, 'w', encoding="utf-8") as f:
@@ -266,7 +280,7 @@ def CreateTemporaryCopy(source_folder_path, pb):
         print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
     
     # Copy vault to temp dir
-    copy_tree(source_folder_path, tmpdir.name, preserve_times=1)
+    copytree(source_folder_path, tmpdir.name, dirs_exist_ok=True)
     print("< COPYING VAULT: Done")
 
     return tmpdir
