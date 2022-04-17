@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+        <head>
+                <!-- Page information -->
+                <meta charset="UTF-8" />
+                <meta name="node_id" content="{node_id}">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <link rel="shortcut icon" href="/favicon.ico" />
+
+                <!-- Set title -->
+                <title>{title}</title>
+
+                <!-- Includes -->
+                <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/mermaid.css" />
+                <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/main.css" />
+                <script src="{html_url_prefix}/obs.html/static/mermaid.min.js"></script> 
+                {dynamic_includes}
+
+                <!-- Onload tweaks -->
+                <script>
+                        const CURRENT_NODE = '{pinnedNode}';
+                </script>
+        </head>
+
+<body onload="LoadPage();">
+        <div class="flex_col">
+                <div id="header" class="header">
+                        <div id="header_flex" class="flex_row">
+                                <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
+                                <div class="navbar-button" onclick="toggle('navbar', 'flex')">
+                                        ≡
+                                </div>
+                                <div id="navbar" class="navbar">
+                                {{navbar_links}}
+                                        <div class="icon-tray">
+                                                {rss_button}
+                                                <div style="width:1.6rem; height:1.6rem; float:right; margin-right:0.2rem">
+                                                        <a href="{html_url_prefix}/obs.html/tags/index.html" title="Open tag view">
+                                                                <img src = "{html_url_prefix}/obs.html/static/hashtag.svg" alt="RSS Feed link"/>
+                                                        </a>
+                                                </div>
+                                                {dirtree_button}
+                                        </div>                                
+                                </div>
+                        </div>
+                </div>
+                <div class="flex_row">
+                        <div id="left_pane"></div>
+                        <div class="container">
+                                        {content}
+                        <!-- end content -->
+                        </div>
+                        <div id="right_pane"></div>
+                </div>
+        </div>
+
+{footer_js_inclusions}
+
+</body>
+</html>

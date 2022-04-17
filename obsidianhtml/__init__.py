@@ -249,10 +249,9 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [?] Documentation styling: Table of Contents
     # ------------------------------------------------------------------
-    if pb.gc('toggles/features/styling/module', cached=True) == 'documentation':
-        md.page = md.page.replace('[TOC]', '')
-        md.page = '[TOC]\n' + md.page
-                                        
+    if pb.gc('toggles/features/styling/add_toc', cached=True):
+        if '[TOC]' not in md.page:
+            md.page = '[TOC]\n' + md.page
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
@@ -672,7 +671,8 @@ def main():
             with open(Path(pb.gc('html_template_path_str')).resolve()) as f:
                 html_template = f.read()
         except:
-            html_template = OpenIncludedFile('html/template.html')
+            layout = pb.gc('toggles/features/styling/layout')
+            html_template = OpenIncludedFile(f'html/template_{layout}.html')
 
         if '{content}' not in html_template:
             raise Exception('The provided html template does not contain the string `{content}`. This will break its intended use as a template.')

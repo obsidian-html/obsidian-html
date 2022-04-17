@@ -130,7 +130,7 @@ def ExportStaticFiles(pb):
 
     # define files to be copied over (standard copy, static_folder)
     copy_file_list = [
-        ['html/main.css', 'main.css'], 
+        [f'html/{pb.gc("_css_file")}', 'main.css'], 
         ['html/obsidian.js', 'obsidian.js'],
         ['html/mermaid.css', 'mermaid.css'],
         ['html/mermaid.min.js', 'mermaid.min.js'],
@@ -153,9 +153,21 @@ def ExportStaticFiles(pb):
         dst_path = static_folder.joinpath(file_name[1])
         html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
         
+        # Set pane divs
+        toc_pane_div = "right_pane"
+        content_pane_div = "left_pane"
+        if pb.gc('toggles/features/styling/layout') == 'documentation' and pb.gc('toggles/features/styling/flip_panes'):
+            toc_pane_div = "left_pane"
+            content_pane_div = "right_pane"
+
         # Templating
         if file_name[1] in ('main.css', 'obsidian.js'):
-            c = c.replace('{html_url_prefix}', html_url_prefix).replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))
+            c = c.replace('{html_url_prefix}', html_url_prefix)\
+                 .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
+                 .replace('{documentation_mode}',str(int(pb.gc('toggles/features/styling/layout')=='documentation')))\
+                 .replace('{toc_pane}',str(int(pb.gc('toggles/features/styling/toc_pane'))))\
+                 .replace('{toc_pane_div}', toc_pane_div)\
+                 .replace('{content_pane_div}', content_pane_div)
             c = c.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))
 
         # Write to dest
