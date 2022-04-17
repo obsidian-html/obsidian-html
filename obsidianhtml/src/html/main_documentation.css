@@ -69,6 +69,7 @@ h4 + table {
     overflow-y: scroll;
     scrollbar-color: __accent_color__12 #ffffff;
     scroll-margin-top: 2rem;
+    max-width: __max_note_width__;
 }
 .container img {
     max-width: 100%;
@@ -201,7 +202,7 @@ h4 + table {
 
 #homelink {
     width: 15.5rem;
-    background-color: #f1f2ff;
+    background-color: __accent_color__14;
     padding: 1rem;
     max-width: max-content;
     margin-top: -1rem;

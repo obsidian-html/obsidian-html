@@ -245,11 +245,11 @@ a.nonexistent-link:visited {
 
 
 blockquote {
-    background-color: #fffff0;
+    background-color: __accent_color__12;
     padding: 0rem 0rem 0rem 0.5rem;
     margin: 0rem;
     margin-bottom: 0.5rem;
-    border: 1px dashed #caa650;
+    border: 1px dashed white;
     color: #4f4538;    
 }
 
@@ -372,7 +372,7 @@ a.navbar-link:hover
 }
 #homelink {
     width: 15.5rem;
-    background-color: #f1f2ff;
+    background-color: __accent_color__14;
     padding: 1rem;
     padding-top:0.5rem;
     padding-bottom:0.5rem;

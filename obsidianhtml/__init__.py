@@ -438,14 +438,22 @@ def main():
     for i, v in enumerate(sys.argv):
         if v == '-eht':
             if len(sys.argv) < (i + 2):
-                print(f'No output path given.\n  Use `obsidianhtml -eht /target/path/to/template.html` to provide input.')
+                print(f'No output path given.\n  Use `obsidianhtml -eht /target/path/to/template.html <documentation/tabs/no_tabs>` to provide input.')
                 printHelpAndExit(1)
+            if len(sys.argv) < (i + 3):
+                print(f'No layout name given.\n  Use `obsidianhtml -eht /target/path/to/template.html <documentation/tabs/no_tabs>` to provide input.')
+                printHelpAndExit(1)
+            if sys.argv[i+2] not in ['documentation', 'tabs', 'no_tabs']:
+                print(f'Provided layout name of {sys.argv[i+2]} is unknown.\n  Use `obsidianhtml -eht /target/path/to/template.html <documentation/tabs/no_tabs>` to provide input.')
+                printHelpAndExit(1)
+
             export_html_template_target_path = Path(sys.argv[i+1]).resolve()
             export_html_template_target_path.parent.mkdir(parents=True, exist_ok=True)
-            html = OpenIncludedFile('html/template.html')
+            html = OpenIncludedFile(f'html/template_{sys.argv[i+2]}.html')
+
             with open (export_html_template_target_path, 'w', encoding="utf-8") as t:
                 t.write(html)
-            print(f"Exported html template to {str(export_html_template_target_path)}.")
+            print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
 
 

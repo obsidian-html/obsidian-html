@@ -3,6 +3,7 @@ import sys
 import subprocess
 import yaml
 import shutil
+import time
 
 # web stuff
 from bs4 import BeautifulSoup
@@ -85,6 +86,26 @@ def get_default_config():
 
     # Merge the two
     config = MergeDictRecurse(sys_config, default_config)
+
+    # Clean out removed keys
+    def rec(d):
+        if isinstance(d, list):
+            for item in d:
+                rec(item)
+        if isinstance(d, dict):
+            finished = False
+            while finished == False:
+                finished = True
+                for key in d.keys():
+                    if isinstance(d[key], str) and d[key] == '<REMOVED>':
+                        d.pop(key)
+                        finished = False
+                        break
+                    else:
+                        rec(d[key])
+    rec(config)
+
+
 
     return config
 
