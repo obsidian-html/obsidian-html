@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+        <head>
+                <!-- Page information -->
+                <meta charset="UTF-8" />
+                <meta name="node_id" content="{node_id}">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <link rel="shortcut icon" href="/favicon.ico" />
+
+                <!-- Set title -->
+                <title>{title}</title>
+
+                <!-- Includes -->
+                <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/mermaid.css" />
+                <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/main.css" />
+                <script src="{html_url_prefix}/obs.html/static/mermaid.min.js"></script> 
+                {dynamic_includes}
+
+                <!-- Onload tweaks -->
+                <script>
+                        // // add prefix to hash to avoid scrolling
+                        // if ({no_tabs} == 0){
+                        //         if (window.location.hash != '' && window.location.hash.substr(1)[0] != '!'){
+                        //                 window.location.hash = '!' + window.location.hash.substr(1);
+                        //         }
+                        // }
+                </script>
+        </head>
+
+<body onload="LoadPage();">
+        <div class="flex_col" id="site_column">
+                <div id="header" class="header" style="position:fixed">
+                        <div id="header_flex" class="flex_row">
+                                <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
+                                <div class="navbar-button" onclick="toggle('navbar', 'flex')">
+                                        ≡
+                                </div>
+                                <div id="navbar" class="navbar">
+                                {{navbar_links}}
+                                        <div class="icon-tray">
+                                                {rss_button}
+                                                <div style="width:1.6rem; height:1.6rem; float:right; margin-right:0.2rem">
+                                                        <a href="{html_url_prefix}/obs.html/tags/index.html" class="system-link" title="Open tag view">
+                                                                <img src = "{html_url_prefix}/obs.html/static/hashtag.svg" alt="Tags view"/>
+                                                        </a>
+                                                </div>
+                                                {dirtree_button}
+                                        </div>                                
+                                </div>
+                        </div>
+                </div>
+                <div id="header" class="header">
+                        <div id="header_flex" class="flex_row">
+                                <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
+                                <div class="navbar-button" onclick="toggle('navbar', 'flex')">
+                                        ≡
+                                </div>
+                                <div id="navbar" class="navbar">
+                                {{navbar_links}}
+                                        <div class="icon-tray">
+                                                {rss_button}
+                                                <div style="width:1.6rem; height:1.6rem; float:right; margin-right:0.2rem">
+                                                        <a href="{html_url_prefix}/obs.html/tags/index.html" title="Open tag view">
+                                                                <img src = "{html_url_prefix}/obs.html/static/hashtag.svg" alt="RSS Feed link"/>
+                                                        </a>
+                                                </div>
+                                                {dirtree_button}
+                                        </div>                                
+                                </div>
+                        </div>
+                </div>                
+                <div class="flex_row" id="container_row">
+                        <div class="container-wrapper {container_wrapper_class_list}">
+                                <div class="container">
+                                {content}
+                                <!-- end content -->
+                                </div>
+                        </div>
+                </div>
+        </div>
+
+        {footer_js_inclusions}
+</body>
+</html>

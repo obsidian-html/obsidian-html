@@ -3,19 +3,81 @@
 // Globals
 var path_to_open = [];
 var no_tab_mode = {no_tabs};
+var toc_pane = {toc_pane};
+var toc_pane_div = "{toc_pane_div}";
+var content_pane_div = "{content_pane_div}";
+// var toc_pane_div = "left_pane";
+// var content_pane_div = "right_pane";
+var documentation_mode = {documentation_mode};
+//var show_dirtree = {show_dirtree_inline};
 var tab_mode = ! no_tab_mode;
 
 function LoadPage() {
         console.log('threshold', (1.2 * 40 * getComputedStyle(document.documentElement).fontSize.split("px")[0]));
+
+        if (documentation_mode){
+                httpGetAsync('/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
+        }
+        if (toc_pane && no_tab_mode){
+                let collection = document.getElementsByClassName("toc");
+                if (collection.length > 0){
+                        let toc = collection[0];
+                        toc.style.display = 'none';
+                        let tpd = document.getElementById(toc_pane_div);
+                        tpd.display = 'block';
+                        tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + collection[0].innerHTML;
+                }
+        }
+
         if (tab_mode){
                 SetLinks(0);
         }
+        else {
+                var links = document.getElementsByTagName('a');
+                for (let i = 0; i < links.length; i++) {
+                        let l = links[i];
+                        if (l.getAttribute("href").includes('#')){
+                                l.onclick = function () {
+
+                                        let current_url = document.URL
+                                        current_url = decodeURI(current_url.replace(window.location.protocol+'//', '').replace(window.location.host, ''))
+                                        let link = this.getAttribute("href")
+                                        link = link.replace(current_url, '')
+
+                                        if (link[0] != '#'){
+                                                link = this.getAttribute("href").replace('#', '#!')
+                                                window.location.href = link;
+                                                return false;
+                                        }
+
+                                        let levelcont = document.getElementsByClassName("container")[0];
+                                        var el = levelcont.querySelectorAll(link)[0];
+                                        if (el) {
+                                                el.parentElement.scrollTop = el.offsetTop - rem(6);
+                                        }
+                                        return false;
+                                };
+                                continue
+                        }
+                }
+        }
+
+        // scroll to div
+        if (window.location.hash.length > 2 && window.location.hash[1] == '!'){
+                let link = '#' + window.location.hash.substring(2, window.location.hash.length)
+                let levelcont = document.getElementsByClassName("container")[0];
+                var el = levelcont.querySelectorAll(link)[0];
+                if (el) {
+                        el.parentElement.scrollTop = el.offsetTop - rem(6);
+                }
+        }        
+
 
         // Scroll container to #header link
         if (tab_mode && window.location.hash != '') {
                 let el = document.getElementById(window.location.hash.substr(2));
                 if (el) {
-                        el.parentElement.scrollTop = el.offsetTop - rem(1);
+                        el.parentElement.scrollTop = el.offsetTop - rem(6);
                 }
         }
 
@@ -37,6 +99,8 @@ function LoadPage() {
                 }
                 OpenPath(1);
         }
+
+
 }
 
 // Keybindings
@@ -63,6 +127,100 @@ function HandleKeyPress(e) {
 
 // FUNCTIONS 
 // ----------------------------------------------------------------------------
+// load dirtree as left-pane
+function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
+        const jsonData = JSON.parse(xmlHttp.responseText);
+        let cpd = document.getElementById(content_pane_div)
+        let filename = ''
+        let folder = ''
+        // get current node
+        for (let i=0; i < jsonData.nodes.length; i++){
+                let node = jsonData.nodes[i];
+                if (node.id == CURRENT_NODE){
+                        // disable content nav if configured on the node
+                        if ("obs.html" in node.metadata && "disable_dir_nav" in node.metadata['obs.html']){
+                                if (node.metadata['obs.html'].disable_dir_nav){
+                                        cpd.style.maxWidth = '0.7rem'
+                                        cpd.style.minWidth = '0.7rem'
+                                        cpd.style.padding = '0rem'
+                                        return
+                                }
+                        }
+                        folder = node.url.split('/')
+                        filename = folder.pop()
+                        folder = folder.join('/')
+
+                        break;
+                }
+        }
+
+        // current node not found
+        if (filename == ''){
+                cpd.style.maxWidth = '0.7rem'
+                cpd.style.minWidth = '0.7rem'
+                cpd.style.padding = '0rem'
+                return
+        }
+
+        // get all links in the same folder
+        let links = []
+        for (let i=0; i < jsonData.nodes.length; i++){
+                let node = jsonData.nodes[i];
+                if (node.url.startsWith(folder) == false){
+                        continue;
+                }
+                
+                let url = node.url
+                if (folder != ''){
+                        url = url.replace(folder+'/', '')
+                }
+                if (url.includes('/')){
+                        continue
+                }
+                links.push({'id': node.id, 'url':node.url})
+        }        
+
+        // skip if no links found        
+        if (links.length == 0){
+                cpd.style.maxWidth = '0.7rem'
+                cpd.style.minWidth = '0.7rem'
+                cpd.style.padding = '0rem'
+                return
+        }
+
+        // sort list alphabetically
+        function compare_lname( a, b )
+        {
+                if ( a.id.toLowerCase() < b.id.toLowerCase()){
+                return -1;
+                }
+                if ( a.id.toLowerCase() > b.id.toLowerCase()){
+                return 1;
+                }
+                return 0;
+        }
+      
+        links.sort(compare_lname);        
+
+        let html = ''
+        let header = links[0]['url'].split('/')[0]
+        if (header == 'index.html'){
+                header = 'Contents'
+        }
+        html += '<span class="toc-header">'+header+'</span><ul>'
+        for (let i=0; i < links.length; i++){
+                if (links[i].id == CURRENT_NODE){
+                        html += '<li class="current_page_link"><a href="/'+links[i].url+'">'+links[i].id+'</a></li>'
+                }
+                else {
+                        html += '<li><a href="/'+links[i].url+'">'+links[i].id+'</a></li>'
+                }
+        }
+        html += '</ul>'
+        
+        cpd.innerHTML = html;
+}
+
 function rem(rem) {
         return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
 }
@@ -149,8 +307,24 @@ function SetLinks(level) {
                         if (l.classList.contains('external-link')) {
                                 continue;
                         }
-                        if (l.classList.contains('anchor-link')) {
+                        if (l.classList.contains('navbar-link')) {
+                                continue;
+                        }                        
+
+                        if (no_tab_mode && l.getAttribute("href")[0] == '#'){
                                 l.onclick = function () {
+                                        let levelcont = document.getElementsByClassName("container")[0];
+                                        var el = levelcont.querySelectorAll("#table-of-contents")[0];
+                                        if (el) {
+                                                el.parentElement.scrollTop = el.offsetTop - rem(1);
+                                        }
+                                        return false;
+                                };
+                                continue
+                        }
+                        if (tab_mode && l.classList.contains('anchor-link')) {
+                                l.onclick = function () {
+                                        console.log('anch')
                                         levelcont = this.closest('div')
                                         var el = levelcont.querySelectorAll(this.getAttribute("href"))[0];
                                         if (el) {
@@ -174,19 +348,6 @@ function SetLinks(level) {
 function SetContainer(container) {
         // This function is called on every (newly created) container. 
         // One container holds one tab
-
-        if (tab_mode){
-                // Create clickback element
-                cb = document.createElement('div');
-                cb.className = 'container-clickback';
-                cb.id = 'cb' + container.id;
-                container.parentElement.appendChild(cb);
-
-                cb.onclick = function () {
-                        cont = document.getElementById(this.id.slice(2))
-                        window.scrollTo(Math.max(window.visualViewport.pageLeft - (70 - cont.getBoundingClientRect().left), 0), 0)
-                };
-        }
 
         // Set url
         // This will be set already if this is not the first tab
@@ -273,6 +434,9 @@ function httpGetAsync(theUrl, callback, level, callbackpath) {
 }
 
 function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
+        let container_row = document.getElementById('container_row')
+        let site_column = document.getElementById('site_column')
+
         respUrl = xmlHttp.responseURL;
         responseText = xmlHttp.responseText;
 
@@ -281,6 +445,8 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
 
         // Set body width to level * 40 rem
         document.body.style.width = (level * 40 + 200) + 'rem';
+        container_row.style.width = (level * 40 + 200) + 'rem';
+        site_column.style.width = (level * 40 + 200) + 'rem';
 
         // Get html
         let text = responseText.split('<div class="container">')[1];
@@ -298,7 +464,8 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
                 wrappercont = document.createElement('div');
                 wrappercont.className = 'container-wrapper';
                 wrappercont.id = 'wrapperlevel-' + level;
-                document.body.appendChild(wrappercont);
+
+                container_row.appendChild(wrappercont);
 
                 levelcont = document.createElement('div');
                 levelcont.className = 'container';
@@ -381,5 +548,18 @@ function CloseUpperContainers(level) {
                                 return;
                         }
                 }
+        }
+}
+
+function toggle(id, display_value){
+        el = document.getElementById(id);
+        if (el.style.display == 'none'){
+                el.style.display = display_value;
+        }
+        else if (el.style.display == display_value){
+                el.style.display = 'none';
+        }        
+        else {
+                el.style.display = display_value;
         }
 }

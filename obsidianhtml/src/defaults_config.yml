@@ -75,6 +75,7 @@ html_template_path_str: ''
 # Provide an array of custom inclusions (css, javascript, etc) that you would like to be included in the resultant html
 html_custom_inclusions: []
 
+navbar_links: []
 
 ##########################################################################
 #                    OPTIONAL BEHAVIOR / FEATURES                        #
@@ -117,12 +118,20 @@ toggles:
   relative_path_html: False
 
   # Do not rewrite links to open them as tabs
-  no_tabs: False
+  no_tabs: '<REMOVED>'
 
   # Whether external http anchor links should have a target of "_blank"
   external_blank: False  
   
   features:
+    styling: 
+      layout: documentation # documentation, tabs, no_tabs
+      max_note_width: 52rem # not supported for layout: tabs
+      add_toc: True    # add "[TOC]" (Table of Contents) when missing
+      toc_pane: True   # removes table of contents from the note and puts it in the right pane (not supported for layout:tabs)
+      flip_panes: False # switch right and left pane around. (does nothing unless in documentation layout.)
+      accent_color: '#414cfd'
+
     # Include code to build the graph view per page 
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)

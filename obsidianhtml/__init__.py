@@ -247,6 +247,11 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         safe_link = r'<source src="'+re.escape(link)+r'"'
         md.page = re.sub(safe_link, new_link, md.page)
 
+    # [?] Documentation styling: Table of Contents
+    # ------------------------------------------------------------------
+    if pb.gc('toggles/features/styling/add_toc', cached=True):
+        if '[TOC]' not in md.page:
+            md.page = '[TOC]\n' + md.page
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
@@ -306,6 +311,17 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
     html = PopulateTemplate(pb, node['id'], pb.dynamic_inclusions, pb.html_template, content=html_body)
+
+    # [?] Documentation styling: Navbar
+    # ------------------------------------------------------------------
+    html = html.replace('{pinnedNode}', node['id'])
+    
+    navbar_links = pb.gc('navbar_links', cached=True)
+    elements = []
+    for l in navbar_links:
+        el = f'<a class="navbar-link"href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+        elements.append(el)
+    html = html.replace('{{navbar_links}}', '\n'.join(elements))  
 
     # Save file
     # ------------------------------------------------------------------
@@ -381,6 +397,16 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html_body, dynamic_includes=di, container_wrapper_class_list=['single_tab_page-left-aligned'])
 
+
+    html = html.replace('{pinnedNode}', 'tagspage')
+
+    navbar_links = pb.gc('navbar_links', cached=True)
+    elements = []
+    for l in navbar_links:
+        el = f'<a class="navbar-link"href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+        elements.append(el)
+    html = html.replace('{{navbar_links}}', '\n'.join(elements)) 
+    
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
     with open(tag_dst_path_posix, 'w', encoding="utf-8") as f:
@@ -412,14 +438,22 @@ def main():
     for i, v in enumerate(sys.argv):
         if v == '-eht':
             if len(sys.argv) < (i + 2):
-                print(f'No output path given.\n  Use `obsidianhtml -eht /target/path/to/template.html` to provide input.')
+                print(f'No output path given.\n  Use `obsidianhtml -eht /target/path/to/template.html <documentation/tabs/no_tabs>` to provide input.')
                 printHelpAndExit(1)
+            if len(sys.argv) < (i + 3):
+                print(f'No layout name given.\n  Use `obsidianhtml -eht /target/path/to/template.html <documentation/tabs/no_tabs>` to provide input.')
+                printHelpAndExit(1)
+            if sys.argv[i+2] not in ['documentation', 'tabs', 'no_tabs']:
+                print(f'Provided layout name of {sys.argv[i+2]} is unknown.\n  Use `obsidianhtml -eht /target/path/to/template.html <documentation/tabs/no_tabs>` to provide input.')
+                printHelpAndExit(1)
+
             export_html_template_target_path = Path(sys.argv[i+1]).resolve()
             export_html_template_target_path.parent.mkdir(parents=True, exist_ok=True)
-            html = OpenIncludedFile('html/template.html')
+            html = OpenIncludedFile(f'html/template_{sys.argv[i+2]}.html')
+
             with open (export_html_template_target_path, 'w', encoding="utf-8") as t:
                 t.write(html)
-            print(f"Exported html template to {str(export_html_template_target_path)}.")
+            print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
 
 
@@ -645,7 +679,8 @@ def main():
             with open(Path(pb.gc('html_template_path_str')).resolve()) as f:
                 html_template = f.read()
         except:
-            html_template = OpenIncludedFile('html/template.html')
+            layout = pb.gc('toggles/features/styling/layout')
+            html_template = OpenIncludedFile(f'html/template_{layout}.html')
 
         if '{content}' not in html_template:
             raise Exception('The provided html template does not contain the string `{content}`. This will break its intended use as a template.')
