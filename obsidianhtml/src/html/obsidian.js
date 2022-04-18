@@ -182,10 +182,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
         }        
 
         // skip if no links found        
-        if (links.length == 0){
-                cpd.style.maxWidth = '0.7rem'
-                cpd.style.minWidth = '0.7rem'
-                cpd.style.padding = '0rem'
+        if (links.length < 2){
                 return
         }
 
@@ -201,7 +198,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
                 return 0;
         }
       
-        links.sort(compare_lname);        
+        links.sort(compare_lname);
 
         let html = ''
         let header = links[0]['url'].split('/')[0]
