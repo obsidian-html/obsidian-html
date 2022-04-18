@@ -6,17 +6,15 @@ var no_tab_mode = {no_tabs};
 var toc_pane = {toc_pane};
 var toc_pane_div = "{toc_pane_div}";
 var content_pane_div = "{content_pane_div}";
-// var toc_pane_div = "left_pane";
-// var content_pane_div = "right_pane";
+var html_url_prefix = "{html_url_prefix}";
 var documentation_mode = {documentation_mode};
-//var show_dirtree = {show_dirtree_inline};
 var tab_mode = ! no_tab_mode;
 
 function LoadPage() {
         console.log('threshold', (1.2 * 40 * getComputedStyle(document.documentElement).fontSize.split("px")[0]));
 
         if (documentation_mode){
-                httpGetAsync('/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
+                httpGetAsync(html_url_prefix+'/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
         }
         if (toc_pane && no_tab_mode){
                 let collection = document.getElementsByClassName("toc");
@@ -177,14 +175,14 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
                 if (url.includes('/')){
                         continue
                 }
+                if (node.url[0] != '/'){
+                        node.url = '/' + node.url;
+                }
                 links.push({'id': node.id, 'url':node.url})
         }        
 
         // skip if no links found        
-        if (links.length == 0){
-                cpd.style.maxWidth = '0.7rem'
-                cpd.style.minWidth = '0.7rem'
-                cpd.style.padding = '0rem'
+        if (links.length < 2){
                 return
         }
 
@@ -200,7 +198,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
                 return 0;
         }
       
-        links.sort(compare_lname);        
+        links.sort(compare_lname);
 
         let html = ''
         let header = links[0]['url'].split('/')[0]
@@ -210,10 +208,10 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
         html += '<span class="toc-header">'+header+'</span><ul>'
         for (let i=0; i < links.length; i++){
                 if (links[i].id == CURRENT_NODE){
-                        html += '<li class="current_page_link"><a href="/'+links[i].url+'">'+links[i].id+'</a></li>'
+                        html += '<li class="current_page_link"><a href="'+links[i].url+'">'+links[i].id+'</a></li>'
                 }
                 else {
-                        html += '<li><a href="/'+links[i].url+'">'+links[i].id+'</a></li>'
+                        html += '<li><a href="'+links[i].url+'">'+links[i].id+'</a></li>'
                 }
         }
         html += '</ul>'

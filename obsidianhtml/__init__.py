@@ -745,7 +745,9 @@ def main():
                     for l in backlinks:
                         if l['target'] == node_id:
                             url = pb.network_tree.node_lookup[l['source']]['url']
-                            snippet += f'\t<li><a class="backlink" href="{html_url_prefix}/{url}">{l["source"]}</a></li>\n'
+                            if url[0] != '/':
+                                url = '/'+url
+                            snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
                     snippet += '</ul>'
 
                 # replace placeholder with list & write output
