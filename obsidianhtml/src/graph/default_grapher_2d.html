@@ -1,5 +1,6 @@
 <script src="//unpkg.com/force-graph"></script>
 <script src="//unpkg.com/d3-force"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
     //onNodeHover
     function grapher(args) {
@@ -12,7 +13,7 @@
             (args.graph_container)
             .graphData(data)
             .width(args.width)
-            .height(400)
+            .height(args.height)
             .backgroundColor('#f4f4f4')
             .nodeLabel('id')
             .d3Force("charge", d3.forceManyBody().strength(-30))
@@ -80,7 +81,8 @@
                 return 0
             })
             .onNodeClick(node => {
-                graph_open_link(node.url, args)()
+                args.node = node
+                graph_open_link(args)()
             });
         });
     }

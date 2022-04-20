@@ -1,9 +1,18 @@
-function run(uid, pinnedNode)
+var current_node_id = '';
+var current_node_graph_id = '';
+var Graph = null;
+
+function run(uid, pinnedNode, pinnedNodeGraph)
 {
+    // set current node
+    current_node_id = pinnedNode;
+    current_node_graph_id = pinnedNodeGraph;
+
     // Get elements
     let _button = document.getElementById('B' + uid);
     let cont = document.getElementById('A'+uid);
-    let data = '{html_url_prefix}/obs.html/data/graph.json';
+    let data = get_graph_data();
+    let node_graph_data = get_node_graph_data();
 
     // toggle graph on or off
     var turn_on = true;
@@ -17,11 +26,55 @@ function run(uid, pinnedNode)
         cont.style.display = "block";
     }
 
-    let width = cont.clientWidth;
-    grapher({'graph_container': cont, 'width': width, 'current_node_id':pinnedNode, 'data': data})
+    args = get_graph_args(uid)
+    args.current_node_id = pinnedNode
+    args.current_node_graph_id = pinnedNodeGraph
+
+    grapher(args)
 }
 
-function graph_open_link(url, args){
+function get_graph_args(uid){
+        let cont = document.getElementById('A'+uid);
+        let data = get_graph_data();
+        let node_graph_data = get_node_graph_data();
+
+        let width = cont.clientWidth;
+        let height = cont.clientHeight;        
+
+        return {
+                'graph_container': cont, 
+                'width': width, 
+                'height': height, 
+                'current_node_id':null, 
+                'current_node_graph_id': null,
+                'data': data, 
+                'node_graph_data': node_graph_data,
+                'node': null, 
+                'link': null
+            }
+}
+
+function get_graph_data(){
+        return '{html_url_prefix}/obs.html/data/graph.json';
+}
+
+function get_node_graph_data(){
+        return '{html_url_prefix}/obs.html/data/node_graph.json';
+}
+
+
+function graph_left_click(args){
+        return graph_open_link(args)
+}
+
+function graph_right_click(args){
+        return function(){
+            return false
+        }
+}
+
+function graph_open_link(args){
+    let url = args.node.url;
     if (! {no_tabs})
     {
         return function() {
@@ -38,6 +91,16 @@ function graph_open_link(url, args){
         }
     }
 }
+
+function graph_select_node(args){
+        return function() {
+            current_node_id = args.node.id;
+            Graph.refresh();
+            return false;
+        }
+}
+
+
 
 
 

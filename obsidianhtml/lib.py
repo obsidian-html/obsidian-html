@@ -143,6 +143,7 @@ def ExportStaticFiles(pb):
     ]
     if pb.gc('toggles/features/graph/enabled', cached=True):
         copy_file_list.append(['graph/graph.css', 'graph.css'])
+        copy_file_list.append(['graph/graph.svg', 'graph.svg'])
 
     # copy static files over to the static folder
     for file_name in copy_file_list:
@@ -223,7 +224,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
 
     if pb.config.feature_is_enabled('graph', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
-        dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
+        #dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"
@@ -241,6 +242,12 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         template = template.replace('{rss_button}', code)
     else:
         template = template.replace('{rss_button}', '')
+
+    if pb.config.GetCachedConfig('graph_show_icon'):
+        code = OpenIncludedFile('graph/button_template.html')
+        template = template.replace('{graph_button}', code)
+    else:
+        template = template.replace('{graph_button}', '')
 
     if pb.config.GetCachedConfig('dirtree_show_icon'):
         # output path

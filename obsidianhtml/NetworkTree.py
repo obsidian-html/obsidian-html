@@ -10,14 +10,18 @@ For every note we also save its metadata, so that this information is available 
 class NetworkTree:
     verbose = None
     tree = None
+    nid_inc = 0
 
     def __init__(self, verbose):
         self.verbose = verbose
         self.tree = {'nodes': [], 'links': []}
         self.node_lookup = {}
 
+        self.node_graph = None
+        self.node_graph_lookup = None
+
     def NewNode(self):
-        return {'id': '', 'group': 1, 'url': '', 'metadata': {}, 'links': [], 'outward_links':[], 'inward_links':[]}
+        return {'id': '', 'nid': None, 'group': 1, 'url': '', 'metadata': {}, 'links': [], 'outward_links':[], 'inward_links':[]}
 
     def NewLink(self):
         return {'source': '', 'target': '', 'value': 1}        
@@ -33,6 +37,9 @@ class NetworkTree:
                 return
         
         # Add node
+        self.nid_inc += 1
+        node_obj['nid'] = self.nid_inc
+
         self.tree['nodes'].append(node_obj)
         if self.verbose:
             print("Node added")
@@ -69,11 +76,42 @@ class NetworkTree:
         # remove duplicates from links
         for node in self.tree['nodes']:
             node['links'] = list(dict.fromkeys(node['links']))
-    
+
     def OutputJson(self):
         ''' the graph.json '''
         tree = StringifyDateRecurse(self.tree.copy())
         return json.dumps(tree)
+
+
+    def CompileNoteGraphDataStructure(self):
+        d = {'id': '', 'title': '', 'linkTo': None, 'referencedBy': None}
+        id_lookup = {}
+        note_lookup = {}
+        note_graph = []
+        for node in self.tree['nodes']:
+            di = d.copy()
+            di['id'] = node['nid']
+            di['title'] = node['id']
+            di['linkTo'] = []
+            di['referencedBy'] = []
+            note_graph.append(di)
+            note_lookup[node['id']] = di
+        
+        for link in self.tree['links']:
+            src = note_lookup[link['source']]
+            dst = note_lookup[link['target']]
+            if src['id'] not in dst['referencedBy']:
+                dst['referencedBy'].append(src['id'])
+            if dst['id'] not in src['linkTo']:
+                src['linkTo'].append(dst['id'])
+
+        self.node_graph = note_graph
+        self.node_graph_lookup = note_lookup
+    
+    def OutputNodeGraphJson(self):
+        ''' the graph.json '''
+        node_graph = StringifyDateRecurse(self.node_graph.copy())
+        return json.dumps(node_graph)
 
 
 def StringifyDateRecurse(tree):
