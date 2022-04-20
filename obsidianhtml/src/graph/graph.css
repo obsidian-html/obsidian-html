@@ -21,6 +21,12 @@
     display: none;
     margin-top: 1rem;
 }
+.graph_div {
+    border:1px solid black;
+    margin-bottom: 0rem;
+    display: none;
+    margin-top: 1rem;
+}
 
 .graph_button {
     width: 100%;

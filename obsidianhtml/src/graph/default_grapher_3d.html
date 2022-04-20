@@ -1,0 +1,39 @@
+<script src="//unpkg.com/3d-force-graph"></script>
+<script>
+    function grapher(args) {
+        const Graph = ForceGraph3D()
+            (args.graph_container)
+            .jsonUrl('/obs.html/data/graph.json')
+            .width(args.width)
+            .height(400)
+            .nodeLabel('id')
+            .linkDirectionalParticles("value")
+            .linkDirectionalParticleSpeed(0.010)
+            .linkDirectionalParticleWidth(2.0)
+            .nodeColor(node => {
+                if (node.id == args.current_node_id){
+                    return '#ff0000'
+                }
+                let isConnected = false;
+                node.links.forEach(link => {
+                    if (link == args.current_node_id){
+                        isConnected = true;
+                    }
+                })
+                if (isConnected){
+                    return '#f7be49';
+                }
+                return '#ffffff'
+            })
+            .linkColor(link => {
+                if (link.source == args.current_node_id || link.target == args.current_node_id){
+                    return '#ff0000'
+                }
+                return '#dadada'
+            })
+            .linkOpacity(0.3)
+            .onNodeClick(node => {
+                graph_open_link(node.url, args)()
+            });
+    }
+</script>

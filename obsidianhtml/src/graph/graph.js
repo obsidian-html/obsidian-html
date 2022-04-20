@@ -1,5 +1,48 @@
+function run(uid, pinnedNode)
+{
+    // Get elements
+    let _button = document.getElementById('B' + uid);
+    let cont = document.getElementById('A'+uid);
+    let data = '{html_url_prefix}/obs.html/data/graph.json';
 
-function run(uid, pinnedNode){
+    // toggle graph on or off
+    var turn_on = true;
+    if (_button.innerHTML == 'Hide Graph'){
+        turn_on = false;
+        _button.innerHTML = 'Show Graph';
+        cont.style.display = "None";
+    }
+    else {
+        _button.innerHTML = "Hide Graph";
+        cont.style.display = "block";
+    }
+
+    let width = cont.clientWidth;
+    grapher({'graph_container': cont, 'width': width, 'current_node_id':pinnedNode, 'data': data})
+}
+
+function graph_open_link(url, args){
+    if (! {no_tabs})
+    {
+        return function() {
+            let level = parseInt(args.graph_container.parentElement.parentElement.level);
+            httpGetAsync(encodeURI('/'+url), ReceiveCall, level+1, false); 
+            return false;
+        }
+    }
+    else {
+        return function(){
+            window.location.href = '{html_url_prefix}/'+url;
+            //window.location.href = '/'+url;
+            return false;
+        }
+    }
+}
+
+
+
+
+function run_old(uid, pinnedNode){
     // Get elements
     var _button = document.getElementById('B' + uid);
     var _svg = document.getElementById('A' + uid);

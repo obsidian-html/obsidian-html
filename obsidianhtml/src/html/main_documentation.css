@@ -442,6 +442,10 @@ span.tag {
     width: 100%;
     height: 400px;
 }
+.graph_div {
+    width: 100%;
+    height: 400px;
+}
 
 .dir-container {
     padding-left:1rem;
