@@ -1,6 +1,8 @@
 from . import printHelpAndExit
 from .lib import OpenIncludedFile
 
+from pathlib import Path
+
 import inspect
 import yaml
 from functools import cache
@@ -108,6 +110,50 @@ class Config:
 
         elif descriptor == 'dirtree_show_icon':
             return (self.pb.gc('toggles/features/create_index_from_dir_structure/enabled') and self.pb.gc('toggles/features/create_index_from_dir_structure/styling/show_icon'))
+
+        elif descriptor == 'graph_show_icon':
+            return (self.pb.gc('toggles/features/graph/enabled') and self.pb.gc('toggles/features/graph/styling/show_icon'))
+
+    def LoadIncludedFiles(self):
+        # Get html template code. 
+        if self.pb.gc('toggles/compile_html', cached=True):
+            # Every note will become a html page, where the body comes from the note's markdown, 
+            # and the wrapper code from this template.
+            try:
+                with open(Path(self.pb.gc('html_template_path_str')).resolve()) as f:
+                    html_template = f.read()
+            except:
+                layout = self.pb.gc('toggles/features/styling/layout')
+                html_template = OpenIncludedFile(f'html/template_{layout}.html')
+
+            if '{content}' not in html_template:
+                raise Exception('The provided html template does not contain the string `{content}`. This will break its intended use as a template.')
+                exit(1)
+
+            self.pb.html_template = html_template
+
+        
+        if self.pb.gc('toggles/features/graph/enabled', cached=True):
+            # Get graph template
+            self.pb.graph_template = OpenIncludedFile('graph/graph_template.html')
+
+            # Get graph full page template
+            self.pb.graph_full_page_template = OpenIncludedFile('graph/graph_full_page.html')
+            
+            # Get grapher template code
+            temp = self.pb.gc('toggles/features/graph/template', cached=True)
+            if temp in ['2d', '3d', 'node_graph']:
+                self.pb.grapher = OpenIncludedFile(f'graph/default_grapher_{temp}.html')
+            else:
+                temp_path = Path(temp).resolve()
+                try:
+                    with open(temp_path) as f:
+                        self.pb.grapher = f.read()
+                except:
+                    raise Exception(f"Could not open user provided grapher file with path {temp_path}")
+
+
+
 
 
 def MergeDictRecurse(base_dict, update_dict, path=''):

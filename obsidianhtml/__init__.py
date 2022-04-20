@@ -301,15 +301,11 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if pb.gc('toggles/features/graph/enabled', cached=True):
-        # open grapher template code
-        temp = pb.gc('toggles/features/graph/template', cached=True)
-        if temp in ['2d', '3d']:
-            grapher = OpenIncludedFile(f'graph/default_grapher_{temp}.html')
-
         # compile graph
-        graph_template = OpenIncludedFile('graph/graph_template.html')
-        graph_template = graph_template.replace('{id}', simpleHash(html_body))\
+        grapher = pb.grapher
+        graph_template = pb.graph_template.replace('{id}', simpleHash(html_body))\
                                        .replace('{pinnedNode}', node['id'])\
+                                       .replace('{pinnedNodeGraph}', str(node['nid']))\
                                        .replace('{html_url_prefix}', html_url_prefix)\
                                        .replace('{grapher}', grapher)\
                                        .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))
@@ -326,7 +322,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     navbar_links = pb.gc('navbar_links', cached=True)
     elements = []
     for l in navbar_links:
-        el = f'<a class="navbar-link"href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+        el = f'<a class="navbar-link" href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
         elements.append(el)
     html = html.replace('{{navbar_links}}', '\n'.join(elements))  
 
@@ -406,13 +402,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
 
     html = html.replace('{pinnedNode}', 'tagspage')
-
-    navbar_links = pb.gc('navbar_links', cached=True)
-    elements = []
-    for l in navbar_links:
-        el = f'<a class="navbar-link"href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
-        elements.append(el)
-    html = html.replace('{{navbar_links}}', '\n'.join(elements)) 
+    html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
     
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
@@ -679,21 +669,13 @@ def main():
     if pb.gc('toggles/compile_html', cached=True):
         print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(paths["md_entrypoint"])})')
 
-        # Get html template code. 
-        # Every note will become a html page, where the body comes from the note's markdown, 
-        # and the wrapper code from this template.
-        try:
-            with open(Path(pb.gc('html_template_path_str')).resolve()) as f:
-                html_template = f.read()
-        except:
-            layout = pb.gc('toggles/features/styling/layout')
-            html_template = OpenIncludedFile(f'html/template_{layout}.html')
-
-        if '{content}' not in html_template:
-            raise Exception('The provided html template does not contain the string `{content}`. This will break its intended use as a template.')
-            exit(1)
-
-        pb.html_template = html_template
+        # compile navbarlinks
+        navbar_links = pb.gc('navbar_links', cached=True)
+        elements = []
+        for l in navbar_links:
+            el = f'<a class="navbar-link"href="{pb.gc("html_url_prefix")}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+            elements.append(el)
+        pb.navbar_links = elements
         
         # Start conversion from the entrypoint
         ep = pb.files[paths['md_entrypoint'].name]
@@ -765,13 +747,33 @@ def main():
         # Create tag page
         recurseTagList(pb.tagtree, '', pb, level=0)
 
+        # Create graph fullpage
+        if pb.gc('toggles/features/graph/enabled', cached=True):
+            # compile graph
+            grapher = pb.grapher
+            html = PopulateTemplate(pb, 'null', pb.dynamic_inclusions, pb.graph_full_page_template, content='')
+            html = html.replace('{grapher}', grapher)
+            html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
+
+            op = paths['html_output_folder'].joinpath('obs.html/graph/index.html')
+            op.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(op, 'w', encoding="utf-8") as f:
+                f.write(html)
+
         # Add Extra stuff to the output directories
         ExportStaticFiles(pb)
 
         # Write node json to static folder
         pb.network_tree.AddCrosslinks()
+
         with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
             f.write(pb.network_tree.OutputJson())
+
+        # Node graph needs a special data structure, compile this, and then output to node_graph.json
+        pb.network_tree.CompileNoteGraphDataStructure()
+        with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/node_graph.json'), 'w', encoding="utf-8") as f:
+            f.write(pb.network_tree.OutputNodeGraphJson())
 
     print('< COMPILING HTML FROM MARKDOWN CODE: Done')
 

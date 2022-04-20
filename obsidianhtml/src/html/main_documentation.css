@@ -241,7 +241,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .icon-tray {
-    width:6rem; 
+    width:8rem; 
     height:1.6rem; 
     margin-top: -0.1rem;
 }
@@ -435,16 +435,6 @@ span.tag {
     font-weight: 600;
     color: rgb(57, 88, 136);
     text-transform: capitalize;
-}
-
-
-.graph_svg {
-    width: 100%;
-    height: 400px;
-}
-.graph_div {
-    width: 100%;
-    height: 400px;
 }
 
 .dir-container {
