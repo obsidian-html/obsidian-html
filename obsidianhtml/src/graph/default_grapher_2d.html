@@ -2,7 +2,6 @@
 <script src="//unpkg.com/d3-force"></script>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
-    var current_node;
     var Graph;
     var centered = false;
 
@@ -15,6 +14,7 @@
 
     //onNodeHover
     function grapher(args) {
+        current_node_id = args.current_node_id
 
         //fetch('{html_url_prefix}/obs.html/data/graph.json').then(res => res.json()).then(data => {
         fetch(args.data).then(res => res.json()).then(data => {
