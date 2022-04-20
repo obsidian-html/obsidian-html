@@ -301,10 +301,17 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if pb.gc('toggles/features/graph/enabled', cached=True):
+        # open grapher template code
+        temp = pb.gc('toggles/features/graph/template', cached=True)
+        if temp in ['2d', '3d']:
+            grapher = OpenIncludedFile(f'graph/default_grapher_{temp}.html')
+
+        # compile graph
         graph_template = OpenIncludedFile('graph/graph_template.html')
         graph_template = graph_template.replace('{id}', simpleHash(html_body))\
                                        .replace('{pinnedNode}', node['id'])\
                                        .replace('{html_url_prefix}', html_url_prefix)\
+                                       .replace('{grapher}', grapher)\
                                        .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))
         html_body += f"\n{graph_template}\n"
 
@@ -762,6 +769,7 @@ def main():
         ExportStaticFiles(pb)
 
         # Write node json to static folder
+        pb.network_tree.AddCrosslinks()
         with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
             f.write(pb.network_tree.OutputJson())
 

@@ -17,7 +17,7 @@ class NetworkTree:
         self.node_lookup = {}
 
     def NewNode(self):
-        return {'id': '', 'group': 1, 'url': '', 'metadata': {}}
+        return {'id': '', 'group': 1, 'url': '', 'metadata': {}, 'links': [], 'outward_links':[], 'inward_links':[]}
 
     def NewLink(self):
         return {'source': '', 'target': '', 'value': 1}        
@@ -55,6 +55,20 @@ class NetworkTree:
     def compile_node_lookup(self):
         for n in self.tree['nodes']:
             self.node_lookup[n['id']] = n
+    
+    def AddCrosslinks(self):
+        for link in self.tree['links']:
+            src = self.node_lookup[link['source']]
+            dst = self.node_lookup[link['target']]
+
+            src['links'].append(dst['id'])
+            src['outward_links'].append(dst['id'])
+            dst['links'].append(src['id'])
+            dst['inward_links'].append(src['id'])
+
+        # remove duplicates from links
+        for node in self.tree['nodes']:
+            node['links'] = list(dict.fromkeys(node['links']))
     
     def OutputJson(self):
         ''' the graph.json '''

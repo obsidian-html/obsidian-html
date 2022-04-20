@@ -365,6 +365,11 @@ function SetContainer(container) {
                 svgs[0].id = svgs[0].id.replace('{level}', container.level)
         }
 
+        divs = container.querySelectorAll(".graph_div");
+        if (divs.length == 1) {
+                divs[0].id = divs[0].id.replace('{level}', container.level)
+        }        
+
         let buttons = container.querySelectorAll(".graph_button");
         if (buttons.length == 1) {
                 buttons[0].level = container.level;
