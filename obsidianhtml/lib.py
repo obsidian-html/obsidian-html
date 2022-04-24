@@ -7,7 +7,7 @@ import warnings
 import shutil               # used to remove a non-empty directory, copy files
 from string import ascii_letters, digits
 import tempfile             # used to create temporary files/folders
-from shutil import copytree
+from distutils.dir_util import copy_tree
 import time
 from functools import cache
 
@@ -287,7 +287,8 @@ def CreateTemporaryCopy(source_folder_path, pb):
         print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
     
     # Copy vault to temp dir
-    copytree(source_folder_path, tmpdir.name, dirs_exist_ok=True)
+    #copytree(source_folder_path, tmpdir.name, dirs_exist_ok=True)
+    copy_tree(source_folder_path, tmpdir.name, preserve_times=1)
     print("< COPYING VAULT: Done")
 
     return tmpdir
