@@ -56,6 +56,11 @@ included_file_suffixes: ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'pdf', 'mp4', 'webm
 video_format_suffixes: ['mp4', 'webm']
 audio_format_suffixes: ['wav', 'mp3']
 
+# Used to strip the http url hostpart of a link to get a relative link
+# e.g. for value "https://git.com/user/repo/-/wikis/mywiki/" then:
+#   "https://git.com/user/repo/-/wikis/mywiki/folder/markdown.md" --> /folder/markdown.md
+md_source_host_url: ''
+
 ##########################################################################
 #                             HTML OUTPUT                                #
 ##########################################################################
