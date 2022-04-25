@@ -58,18 +58,21 @@
         {grapher}
 
         <script>
+            function graph_open_link(args){
+                return graph_open_link_normal(args)
+            }                
             function graph_left_click(args){
                     return graph_select_node(args)
             }
             function graph_right_click(args){
                     return graph_open_link(args)
             }
-            
+
             args = get_graph_args('graph_full_page');
 
             const urlParams = new URLSearchParams(window.location.search);
             const pinnedNode = urlParams.get('node');
-            console.log(pinnedNode);
+            current_node_id = pinnedNode;
             args.current_node_id = pinnedNode;
 
             grapher(args)

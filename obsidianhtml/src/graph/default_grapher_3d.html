@@ -1,12 +1,9 @@
 <script src="//unpkg.com/3d-force-graph"></script>
 <script>
     function grapher(args) {
-        current_node_id = args.current_node_id
-        
-        let it = 0;
         window.Graph = ForceGraph3D()
             (args.graph_container)
-            .jsonUrl('/obs.html/data/graph.json')
+            .jsonUrl(args.data)
             .width(args.width)
             .height(args.height)
             .nodeLabel('id')

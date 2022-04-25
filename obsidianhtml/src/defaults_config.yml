@@ -135,10 +135,10 @@ toggles:
     # Include code to build the graph view per page 
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)
-      coalesce_force: '-100'
       template: 3d            # "2d", "3d", or path to own code
       styling:
         show_icon: True
+      coalesce_force: '-30'
 
     # Create an index.md with links to notes that have one of the given tags.
     # This index.md will serve as the entrypoint.

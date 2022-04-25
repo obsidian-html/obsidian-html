@@ -206,7 +206,7 @@ def ExportStaticFiles(pb):
 
         graph_js= OpenIncludedFile('graph/graph.js')
         graph_js = graph_js.replace('{html_url_prefix}', html_url_prefix)\
-                           .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
+                           .replace('{coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
                            .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
         with open (dst_path, 'w', encoding="utf-8") as f:
             f.write(graph_js)
