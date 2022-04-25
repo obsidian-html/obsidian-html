@@ -188,6 +188,16 @@ h4 + table {
     margin-left: 1.5rem;
     font-weight: bold;
 }
+.toc {
+    display: none;
+    
+    background-color: __accent_color__08;
+    padding: 1rem;
+    padding-top: 0.2rem;
+    border-radius: 0.6rem;
+    margin-bottom: 1rem;
+    padding-right: 2rem;    
+}
 .navbar {
     display: flex;
     flex-direction: row;

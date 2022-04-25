@@ -287,8 +287,62 @@ def CreateTemporaryCopy(source_folder_path, pb):
         print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
     
     # Copy vault to temp dir
-    #copytree(source_folder_path, tmpdir.name, dirs_exist_ok=True)
-    copy_tree(source_folder_path, tmpdir.name, preserve_times=1)
+    copytree(source_folder_path, tmpdir.name)
+    #copy_tree(source_folder_path, tmpdir.name, preserve_times=1)
     print("< COPYING VAULT: Done")
 
     return tmpdir
+
+
+class Error(EnvironmentError):
+    pass
+
+def copytree(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
+             ignore_dangling_symlinks=False):
+
+    names = os.listdir(src)
+    if ignore is not None:
+        ignored_names = ignore(src, names)
+    else:
+        ignored_names = set()
+
+    os.makedirs(dst, exist_ok=True)
+    errors = []
+    for name in names:
+        if name in ignored_names:
+            continue
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        try:
+            if os.path.islink(srcname):
+                linkto = os.readlink(srcname)
+                if symlinks:
+                    os.symlink(linkto, dstname)
+                else:
+                    # ignore dangling symlink if the flag is on
+                    if not os.path.exists(linkto) and ignore_dangling_symlinks:
+                        continue
+                    # otherwise let the copy occurs. copy2 will raise an error
+                    copy_function(srcname, dstname)
+            elif os.path.isdir(srcname):
+                copytree(srcname, dstname, symlinks, ignore, copy_function)
+            else:
+                # Will raise a SpecialFileError for unsupported file types
+                copy_function(srcname, dstname)
+        # catch the Error from the recursive copytree so that we can
+        # continue with other files
+        except Error as err:
+            print(err)
+            errors.extend(err.args[0])
+        except EnvironmentError as why:
+            errors.append((srcname, dstname, str(why), 'copyfile error'))
+    try:
+        shutil.copystat(src, dst)
+    except OSError as why:
+        if WindowsError is not None and isinstance(why, WindowsError):
+            # Copying file access times may fail on Windows
+            pass
+        else:
+            errors.extend((src, dst, str(why), 'copystat error'))
+    if errors:
+        raise Error(errors)
