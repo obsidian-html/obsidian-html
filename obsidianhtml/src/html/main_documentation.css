@@ -187,6 +187,16 @@ h4 + table {
 .container {
     padding-top: 0.5rem;
 }
+.toc {
+    display: none;
+    
+    background-color: __accent_color__08;
+    padding: 1rem;
+    padding-top: 0.2rem;
+    border-radius: 0.6rem;
+    margin-bottom: 1rem;
+    padding-right: 2rem;    
+}
 .toc-header {
     color: black;
     margin-left: 1.5rem;
