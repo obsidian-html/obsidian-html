@@ -133,7 +133,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         node['id'] = md.metadata['graph_name']
 
     # Url is used so you can open the note/node by clicking on it
-    node['url'] = rel_dst_path.as_posix()
+    node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()
     pb.network_tree.AddNode(node)
 
     # Backlinks are set so when recursing, the links (edges) can be determined

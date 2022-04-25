@@ -10,13 +10,9 @@
             current_node_id = args.node.id;
             return false;
         }
-    }    
+    }
 
-    //onNodeHover
     function grapher(args) {
-        current_node_id = args.current_node_id
-
-        //fetch('{html_url_prefix}/obs.html/data/graph.json').then(res => res.json()).then(data => {
         fetch(args.data).then(res => res.json()).then(data => {
             window.Graph = ForceGraph()
                 (args.graph_container)
@@ -25,7 +21,7 @@
                 .height(args.height)
                 .backgroundColor('#f4f4f4')
                 .nodeLabel('id')
-                .d3Force("charge", d3.forceManyBody().strength(-30))
+                .d3Force("charge", d3.forceManyBody().strength(args.coalesce_force))
                 .nodeColor(() => {return '#546bdd'})
                 .nodeCanvasObjectMode(() => 'after')
                 .nodeCanvasObject((node, ctx, globalScale) => {
@@ -46,7 +42,7 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillStyle = '#000000';
                         ctx.fillText(label, node.x, node.y+8);
-                    }                    
+                    }
                     
                     // color only main node
                     if (node.id != current_node_id){
