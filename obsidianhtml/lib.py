@@ -7,7 +7,6 @@ import warnings
 import shutil               # used to remove a non-empty directory, copy files
 from string import ascii_letters, digits
 import tempfile             # used to create temporary files/folders
-from distutils.dir_util import copy_tree
 import time
 from functools import cache
 

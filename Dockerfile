@@ -5,5 +5,7 @@ FROM python:3.10 as base
 RUN pip install --upgrade pip && pip install lxml markdown obsidianhtml-md-mermaid-fork python-frontmatter pygments regex requests beautifulsoup4 html5lib
 COPY . /obsidian-html
 RUN cd /obsidian-html
+RUN python --version  
+RUN python test_git_runner.py
 RUN cd /obsidian-html && python ci/tests/basic_regression_test.py
 #RUN cd /obsidian-html && python ci/tests/selenium_tests.py
