@@ -95,17 +95,22 @@ def ConvertTitleToMarkdownId(title):
     idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -_')])
     return idstr
 
+
 @cache
-def OpenIncludedFile(resource):
+def GetIncludedResourcePath(resource):
     path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
     path = os.path.join(path, resource)
+    return path
+
+@cache
+def OpenIncludedFile(resource):
+    path = GetIncludedResourcePath(resource)
     with open(path, 'r', encoding="utf-8") as f:
         return f.read()
 
 @cache
 def OpenIncludedFileBinary(resource):
-    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
-    path = os.path.join(path, resource)
+    path = GetIncludedResourcePath(resource)
     with open(path, 'rb') as f:
         return f.read()    
 
@@ -133,6 +138,7 @@ def ExportStaticFiles(pb):
         [f'html/{pb.gc("_css_file")}', 'main.css'], 
         ['html/obsidian.js', 'obsidian.js'],
         ['html/mermaid.css', 'mermaid.css'],
+        ['html/callouts.css', 'callouts.css'],
         ['html/mermaid.min.js', 'mermaid.min.js'],
         ['html/taglist.css', 'taglist.css'],
         ['html/external.svg', 'external.svg'],
@@ -219,15 +225,17 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     # Defaults
     if title == '':
         title = pb.gc('site_name', cached=True)
-    if dynamic_includes is not None:
-        dynamic_inclusions += dynamic_includes
+
+    dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/callouts.css" />' + "\n"
 
     if pb.config.feature_is_enabled('graph', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
-        #dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"
+    
+    if dynamic_includes is not None:
+        dynamic_inclusions += dynamic_includes
 
     if container_wrapper_class_list is None:
         container_wrapper_class_list = []

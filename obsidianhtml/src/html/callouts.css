@@ -1,0 +1,149 @@
+.container {
+    max-width: 800px;
+}
+.callout {
+    font-size: 11pt;
+    padding-bottom: 0.1rem;
+    margin-bottom: 1rem;
+    
+    background-color: #161616;
+    border-left: 4px solid rgb(var(--callout-color));
+    border-radius: 0.3rem 0 0 0.3rem;
+    color: white;
+
+    --callout-color: 68, 138, 255;
+}
+.callout a:link,
+.callout a:hover
+.callout a:visited {
+    color: #85c4fb;
+}
+.callout-folded {
+    max-height: 2.1rem;
+    overflow-y: clip;
+}
+.callout-folded-active {
+    max-height: none;
+}
+.callout p {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+.callout-icon{
+    margin-right: 3px;
+
+    color: rgb(var(--callout-color));
+}
+.callout-title {
+    display: flex;
+    margin-top: 0rem;
+    padding: 0.4rem;
+    font-weight: 700;
+
+    background-color: rgba(var(--callout-color), 0.3);
+    border-radius: 0.3rem 0rem 0rem 0rem;
+}
+.callout-folded .callout-title {
+    cursor: pointer;
+}
+
+.callout-title-icon,
+.callout-title-fold {
+    margin: 3px;
+    
+}
+.callout-title-name {
+    flex: auto;
+}
+
+.callout-title-fold {
+    transform: rotate(270deg);
+    width: 16px;
+    height: 16px;
+}
+.callout-folded-active .callout-title-fold {
+    transform: rotate(0deg);
+}
+
+.callout code {
+    background-color: rgb(var(--callout-color), 0.1);
+    padding-left: 0.2rem;
+    padding-right: 0.3rem;
+}
+
+
+.callout-info {
+    --callout-color: 0, 184, 212;
+}
+.callout-abstract {
+    --callout-color: 0, 176, 255; 
+}
+.callout-summary {
+    --callout-color: 0, 176, 255;
+}
+.callout-tldr {
+    --callout-color: 0, 176, 255;
+}
+.callout-todo {
+    --callout-color: 0, 184, 212;
+}
+.callout-tip {
+    --callout-color: 0, 191, 165;
+}
+.callout-important {
+    --callout-color: 0, 191, 165;
+}
+.callout-success {
+    --callout-color: 0, 200, 83;
+}
+.callout-check {
+    --callout-color: 0, 200, 83;
+}
+.callout-done {
+    --callout-color: 0, 200, 83;
+}
+.callout-question {
+    --callout-color: 100, 221, 23;
+}
+.callout-help {
+    --callout-color: 100, 221, 23;
+}
+.callout-faq {
+    --callout-color: 100, 221, 23;
+}
+.callout-warning {
+    --callout-color: 255, 145, 0;
+}
+.callout-caution {
+    --callout-color: 255, 145, 0;
+}
+.callout-attention {
+    --callout-color: 255, 145, 0;
+}
+.callout-failure {
+    --callout-color: 255, 82, 82;
+}
+.callout-fail {
+    --callout-color: 255, 82, 82;
+}
+.callout-missing {
+    --callout-color: 255, 82, 82;
+}
+.callout-danger {
+    --callout-color: 255, 23, 68;
+}
+.callout-error {
+    --callout-color: 255, 23, 68;
+}
+.callout-bug {
+    --callout-color: 245, 0, 87; 
+}
+.callout-example {
+    --callout-color: 124, 77, 255;
+}
+.callout-quote {
+    --callout-color: 158, 158, 158;
+}
+.callout-cite {
+    --callout-color: 158, 158, 158;
+}
