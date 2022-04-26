@@ -30,6 +30,8 @@ from .CreateIndexFromTags import CreateIndexFromTags
 from .CreateIndexFromDirStructure import CreateIndexFromDirStructure
 from .RssFeed import RssFeed
 
+from .CallOutExtension import CallOutExtension
+
 # Open source files in the package
 import importlib.resources as pkg_resources
 import importlib.util
@@ -275,7 +277,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     'codehilite ': {
         'linenums': True
     }}
-    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'], extension_configs=extension_configs)
+    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout'], extension_configs=extension_configs)
 
     # HTML Tweaks
     # ------------------------------------------------------------------
@@ -406,7 +408,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
             md += f'- [{note_name}]({html_url_prefix}/{note_url})\n'
 
     # Compile html
-    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork'])
+    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout'])
 
     di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
 
@@ -542,6 +544,7 @@ def main():
     # Add paths to pb
     # ---------------------------------------------------------
     pb.paths = paths
+
 
     # Compile dynamic inclusion list
     # ---------------------------------------------------------

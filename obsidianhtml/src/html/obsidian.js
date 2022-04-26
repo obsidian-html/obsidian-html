@@ -138,6 +138,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
         let cpd = document.getElementById(content_pane_div)
         let filename = ''
         let folder = ''
+
         // get current node
         for (let i=0; i < jsonData.nodes.length; i++){
                 let node = jsonData.nodes[i];
@@ -179,6 +180,9 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
                 if (folder != ''){
                         url = url.replace(folder+'/', '')
                 }
+                if (url[0] == '/'){
+                        url = url.substring(1);
+                }
                 if (url.includes('/')){
                         continue
                 }
@@ -208,10 +212,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
         links.sort(compare_lname);
 
         let html = ''
-        let header = links[0]['url'].split('/')[0]
-        if (header == 'index.html'){
-                header = 'Contents'
-        }
+        header = 'Directory Contents'
         html += '<span class="toc-header">'+header+'</span><ul>'
         for (let i=0; i < links.length; i++){
                 if (links[i].id == CURRENT_NODE){
@@ -574,5 +575,14 @@ function toggle(id, display_value){
         }        
         else {
                 el.style.display = display_value;
+        }
+}
+
+function fold_callout(el){
+        let div = el.parentElement
+        if (div.classList.contains("callout-folded-active")){
+                div.classList.remove("callout-folded-active")
+        } else {
+                div.classList.add("callout-folded-active")
         }
 }
