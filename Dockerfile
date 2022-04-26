@@ -9,4 +9,4 @@ RUN python obsidian-html/tst_git_runner.py
 RUN pip uninstall -y obsidianhtml
 RUN python obsidian-html/tst_git_runner.py
 RUN python obsidian-html/ci/tests/basic_regression_test.py
-#RUN cd /obsidian-html && python ci/tests/selenium_tests.py 
+#RUN cd /obsidian-html && python ci/tests/selenium_tests.py  
