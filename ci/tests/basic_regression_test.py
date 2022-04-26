@@ -241,7 +241,6 @@ class TestDefaultMode(ModeTemplate):
         self.assertEqual(video_urls[1], video_urls[0], msg="both video links should have the same url")
         
 
-
 class TestHtmlPrefixMode(ModeTemplate):
     """Configure a HTML prefix"""
     testcase_name = "HtmlPrefix"
