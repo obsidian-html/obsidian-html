@@ -715,10 +715,10 @@ def main():
 
         # [18] Add in backlinks
         # ------------------------------------------
-        if pb.gc('toggles/features/backlinks/enabled'):
-            # Make lookup so that we can easily find the url of a node
-            pb.network_tree.compile_node_lookup()
+        # Make lookup so that we can easily find the url of a node
+        pb.network_tree.compile_node_lookup()
 
+        if pb.gc('toggles/features/backlinks/enabled'):
             for fo in pb.files.values():
                 if not fo.metadata['is_note']:
                     continue
@@ -762,6 +762,9 @@ def main():
         # Create tag page
         recurseTagList(pb.tagtree, '', pb, level=0)
 
+        # Add Extra stuff to the output directories
+        ExportStaticFiles(pb)
+
         # Create graph fullpage
         if pb.gc('toggles/features/graph/enabled', cached=True):
             # compile graph
@@ -776,19 +779,14 @@ def main():
             with open(op, 'w', encoding="utf-8") as f:
                 f.write(html)
 
-        # Add Extra stuff to the output directories
-        ExportStaticFiles(pb)
+            # add crosslinks to graph data
+            pb.network_tree.AddCrosslinks()
 
-        # Write node json to static folder
-        pb.network_tree.AddCrosslinks()
+            # Write node json to static folder
+            with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
+                f.write(pb.network_tree.OutputJson())            
 
-        with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
-            f.write(pb.network_tree.OutputJson())
 
-        # Node graph needs a special data structure, compile this, and then output to node_graph.json
-        pb.network_tree.CompileNoteGraphDataStructure()
-        with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/node_graph.json'), 'w', encoding="utf-8") as f:
-            f.write(pb.network_tree.OutputNodeGraphJson())
 
     print('< COMPILING HTML FROM MARKDOWN CODE: Done')
 
