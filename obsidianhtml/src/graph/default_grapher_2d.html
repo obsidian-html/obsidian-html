@@ -2,14 +2,25 @@
 <script src="//unpkg.com/d3-force"></script>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
-    var Graph;
-    var centered = false;
 
     function graph_select_node(args){
         return function() {
             current_node_id = args.node.id;
+            window.Graph.zoomToFit(1000, rem(3), zoom_select)
             return false;
         }
+    }
+
+    function zoom_select(n){
+        if (n.id == current_node_id){
+            return true
+        }
+        for (let i=0;i<n.links.length;i++){
+            if (n.links[i] == current_node_id){
+                return true
+            }
+        }
+        return false
     }
 
     function grapher(args) {
@@ -18,6 +29,7 @@
                 (args.graph_container)
                 .graphData(data)
                 .width(args.width)
+                .maxZoom(10)
                 .height(args.height)
                 .backgroundColor('#f4f4f4')
                 .nodeLabel('id')
@@ -48,14 +60,6 @@
                     if (node.id != current_node_id){
                         return
                     }
-
-                    // Center/zoom on node
-                    if (centered == false){
-                        Graph.centerAt(node.x, node.y, 1000);
-                        Graph.zoom(2, 500);
-                    }
-                    centered = true;
-
 
                     // color node
                     ctx.beginPath();
@@ -92,7 +96,11 @@
                 .onNodeRightClick(node => {
                     args.node = node;
                     graph_right_click(args)()
-                });
+                })
+            
+            setTimeout( () => window.Graph.zoomToFit(1000, rem(3), zoom_select), 1000 );
         });
+
+        
     }
 </script>
