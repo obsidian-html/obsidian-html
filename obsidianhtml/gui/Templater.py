@@ -39,7 +39,7 @@ def CompileCss(css_list):
     for n in css_list:
         css.append(OpenIncludedFile(f'installer/units/style/{n}.css'))
     
-    return f'<style>\n{ AddTabs("\n".join(css), 2) }\n\t</style>'
+    return '<style>\n' + AddTabs("\n".join(css), 2) + '\n\t</style>'
 
 def CompileJs():
     return AddTabs(OpenIncludedFile(f'installer/units/js/core.js'), 2)

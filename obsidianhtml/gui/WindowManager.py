@@ -44,7 +44,7 @@ class WindowManager:
 
     def CreateWindow(self, window_id, window_title, html_path, parent_window_id = None):
         # fetch html
-        html = OpenIncludedFile(html_path)
+        html = OpenIncludedFile('installer/dist/' + html_path)
 
         # template html
         html = html.replace('{{window_id}}', window_id)

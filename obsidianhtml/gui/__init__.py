@@ -10,7 +10,7 @@ import webview # pywebview
 
 def Launch():
     api = Api()
-    api.LaunchWindow(window_id='test', window_title='test api', html_path='installer/test.html', parent_window_id=None)
+    api.LaunchWindow(window_id='test', window_title='test api', html_path='test.html', parent_window_id=None)
 
     webview.start()
 
