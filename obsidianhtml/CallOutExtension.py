@@ -5,7 +5,6 @@ import xml.etree.ElementTree as etree
 
 from .SharedResources import shared_obsidian_svgs
 
-
 def makeExtension(**kwargs):  # pragma: no cover
     return CallOutExtension(**kwargs)
 
@@ -31,7 +30,7 @@ class CallOutBlockProcessor(BlockProcessor):
         #original_block = blocks[0] 
         #blocks[0] = re.sub(self.RE_FENCE_START, '', blocks[0])
 
-        block = blocks[0]
+        block = blocks.pop(0)
 
         chunk = ''
         for i, line in enumerate(block.split('\n')):
@@ -80,7 +79,7 @@ class CallOutBlockProcessor(BlockProcessor):
 
                 continue
 
-            # build chunk
+            # remove leading >
             if line.startswith('>'):
                 line = line[1:]
             line = line.lstrip()
@@ -91,23 +90,20 @@ class CallOutBlockProcessor(BlockProcessor):
 
                 # setup new chunk
                 chunk = ''
-                #p = etree.SubElement(div, 'p')
                 continue
 
             chunk += line + '\n'
 
         if chunk != '':
-            # compile chunk
             self.parser.parseChunk(div, chunk)
 
-        blocks.pop(0)
         return True 
 
     def parseHeader(self, line):
         # output
         folded = False
 
-        # first parse into bracket_content and tail
+        # first parse line into bracket_content and tail
         start_bracket = False
         end_bracket = False
         bracket_content = ''
