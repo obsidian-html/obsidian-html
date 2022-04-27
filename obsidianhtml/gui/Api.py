@@ -74,4 +74,5 @@ class Api:
         return args
 
     def LaunchWindow(self, window_id, window_title, html_path, parent_window_id = None):
+        # html_path: relative to obsidianhtml/src/installer/dist/
         self.wm.LaunchWindow(window_id, window_title, html_path, parent_window_id)

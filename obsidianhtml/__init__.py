@@ -507,20 +507,6 @@ def main():
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
 
 
-    # Features/Toggles influencing other settings
-    # ------------------------------------------------------------------
-    
-    # if pb.gc('toggles/relative_path_html', cached=True):
-    #     # Disable graph view
-    #     if pb.gc('toggles/features/graph/enabled'):
-    #         print(f"WARNING: disabling graph view - not supported with setting relative_path_html:True")
-    #         pb.config.disable_feature('graph')
-
-    #     # Enable no tab
-    #     if pb.gc('toggles/no_tabs') == False:
-    #         print(f"WARNING: enabling setting no_tabs - tabbing not supported with relative_path_html:True")
-    #         pb.sc(path='toggles/no_tabs', value=True)
-
     # Copy vault to tempdir, so any bugs will not affect the user's vault
     # ---------------------------------------------------------
     if pb.gc('copy_vault_to_tempdir'):
