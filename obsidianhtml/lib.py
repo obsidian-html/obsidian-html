@@ -67,7 +67,7 @@ def simpleHash(text:str):
     for ch in text:
         hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     return str(hash)
-    
+
 def GetObsidianFilePath(link, file_tree):
     # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
     # a link can look like this: folder/note#chapter|alias
@@ -104,8 +104,7 @@ def ConvertTitleToMarkdownId(title):
 @cache
 def GetIncludedResourcePath(resource):
     path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
-    path = os.path.join(path, resource)
-    return path
+    return Path(os.path.join(path, resource))
 
 @cache
 def OpenIncludedFile(resource):
@@ -118,10 +117,6 @@ def GetIncludedFilePaths(subpath=''):
     path = os.path.join(path, subpath)
     onlyfiles = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
     return onlyfiles
-
-def GetIncludedFilePath(resource):
-    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
-    return os.path.join(path, resource)
 
 @cache
 def OpenIncludedFileBinary(resource):
