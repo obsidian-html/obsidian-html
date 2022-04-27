@@ -33,6 +33,7 @@ class CallOutBlockProcessor(BlockProcessor):
 
         block = blocks[0]
 
+        chunk = ''
         for i, line in enumerate(block.split('\n')):
             # first line has information for formatting, extract this
             # and use this space to init the callout div and title div
@@ -77,19 +78,27 @@ class CallOutBlockProcessor(BlockProcessor):
                     fold.set('class', 'callout-title-fold')
                     fold.text = self.svgs['fold']
 
-                p = etree.SubElement(div, 'p')
                 continue
 
+            # build chunk
             if line.startswith('>'):
                 line = line[1:]
             line = line.lstrip()
+
             if line == '':
-                p = etree.SubElement(div, 'p')
+                # compile chunk
+                self.parser.parseChunk(div, chunk)
+
+                # setup new chunk
+                chunk = ''
+                #p = etree.SubElement(div, 'p')
                 continue
-            if p.text is None:
-                p.text = line + '\n'
-                continue
-            p.text += line + '\n'
+
+            chunk += line + '\n'
+
+        if chunk != '':
+            # compile chunk
+            self.parser.parseChunk(div, chunk)
 
         blocks.pop(0)
         return True 
