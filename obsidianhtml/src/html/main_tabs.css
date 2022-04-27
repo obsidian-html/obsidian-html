@@ -401,7 +401,21 @@ a.navbar-link:hover
     border-radius: 0.3rem;    
     max-height: 1.5rem;
 }
-
+.toc-header {
+    color: black;
+    margin-left: 1.5rem;
+    font-weight: bold;
+}
+.toc {
+    display: none;
+    
+    background-color: __accent_color__08;
+    padding: 1rem;
+    padding-top: 0.2rem;
+    border-radius: 0.6rem;
+    margin-bottom: 1rem;
+    padding-right: 2rem;    
+}
 .icon-tray {
     margin-left: 1rem;
     margin-top: -0.1rem;

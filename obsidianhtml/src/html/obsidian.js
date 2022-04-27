@@ -6,29 +6,34 @@ var no_tab_mode = {no_tabs};
 var toc_pane = {toc_pane};
 var toc_pane_div = "{toc_pane_div}";
 var content_pane_div = "{content_pane_div}";
-// var toc_pane_div = "left_pane";
-// var content_pane_div = "right_pane";
+var html_url_prefix = "{html_url_prefix}";
 var documentation_mode = {documentation_mode};
-//var show_dirtree = {show_dirtree_inline};
 var tab_mode = ! no_tab_mode;
 
 function LoadPage() {
         console.log('threshold', (1.2 * 40 * getComputedStyle(document.documentElement).fontSize.split("px")[0]));
 
         if (documentation_mode){
-                httpGetAsync('/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
+                httpGetAsync(html_url_prefix+'/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
         }
-        if (toc_pane && no_tab_mode){
-                let collection = document.getElementsByClassName("toc");
-                if (collection.length > 0){
-                        let toc = collection[0];
-                        toc.style.display = 'none';
-                        let tpd = document.getElementById(toc_pane_div);
-                        tpd.display = 'block';
-                        tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + collection[0].innerHTML;
+        
+        let collection = document.getElementsByClassName("toc");
+        if (collection.length > 0){
+                let toc = collection[0];
+                if (toc.getElementsByTagName('li').length > 1){
+
+                        if (toc_pane && no_tab_mode){
+                                let tpd = document.getElementById(toc_pane_div);
+                                tpd.display = 'block';
+                                tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + collection[0].innerHTML;
+                        }
+                        else{
+                                toc.style.display = 'block';
+                                toc.innerHTML = '<h3>Table of Contents</h1>\n'+toc.innerHTML
+                        }
                 }
         }
-
+        
         if (tab_mode){
                 SetLinks(0);
         }
@@ -133,6 +138,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
         let cpd = document.getElementById(content_pane_div)
         let filename = ''
         let folder = ''
+
         // get current node
         for (let i=0; i < jsonData.nodes.length; i++){
                 let node = jsonData.nodes[i];
@@ -174,17 +180,20 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
                 if (folder != ''){
                         url = url.replace(folder+'/', '')
                 }
+                if (url[0] == '/'){
+                        url = url.substring(1);
+                }
                 if (url.includes('/')){
                         continue
+                }
+                if (node.url[0] != '/'){
+                        node.url = '/' + node.url;
                 }
                 links.push({'id': node.id, 'url':node.url})
         }        
 
         // skip if no links found        
-        if (links.length == 0){
-                cpd.style.maxWidth = '0.7rem'
-                cpd.style.minWidth = '0.7rem'
-                cpd.style.padding = '0rem'
+        if (links.length < 2){
                 return
         }
 
@@ -200,20 +209,17 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
                 return 0;
         }
       
-        links.sort(compare_lname);        
+        links.sort(compare_lname);
 
         let html = ''
-        let header = links[0]['url'].split('/')[0]
-        if (header == 'index.html'){
-                header = 'Contents'
-        }
+        header = 'Directory Contents'
         html += '<span class="toc-header">'+header+'</span><ul>'
         for (let i=0; i < links.length; i++){
                 if (links[i].id == CURRENT_NODE){
-                        html += '<li class="current_page_link"><a href="/'+links[i].url+'">'+links[i].id+'</a></li>'
+                        html += '<li class="current_page_link"><a href="'+links[i].url+'">'+links[i].id+'</a></li>'
                 }
                 else {
-                        html += '<li><a href="/'+links[i].url+'">'+links[i].id+'</a></li>'
+                        html += '<li><a href="'+links[i].url+'">'+links[i].id+'</a></li>'
                 }
         }
         html += '</ul>'
@@ -324,8 +330,11 @@ function SetLinks(level) {
                         }
                         if (tab_mode && l.classList.contains('anchor-link')) {
                                 l.onclick = function () {
-                                        console.log('anch')
                                         levelcont = this.closest('div')
+                                        if (levelcont.classList.contains('container') == false){
+                                                levelcont = levelcont.parentElement;
+                                        }
+                                        
                                         var el = levelcont.querySelectorAll(this.getAttribute("href"))[0];
                                         if (el) {
                                                 el.parentElement.scrollTop = el.offsetTop - rem(1);
@@ -366,6 +375,11 @@ function SetContainer(container) {
         if (svgs.length == 1) {
                 svgs[0].id = svgs[0].id.replace('{level}', container.level)
         }
+
+        divs = container.querySelectorAll(".graph_div");
+        if (divs.length == 1) {
+                divs[0].id = divs[0].id.replace('{level}', container.level)
+        }        
 
         let buttons = container.querySelectorAll(".graph_button");
         if (buttons.length == 1) {
@@ -561,5 +575,14 @@ function toggle(id, display_value){
         }        
         else {
                 el.style.display = display_value;
+        }
+}
+
+function fold_callout(el){
+        let div = el.parentElement
+        if (div.classList.contains("callout-folded-active")){
+                div.classList.remove("callout-folded-active")
+        } else {
+                div.classList.add("callout-folded-active")
         }
 }

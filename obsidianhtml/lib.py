@@ -7,7 +7,6 @@ import warnings
 import shutil               # used to remove a non-empty directory, copy files
 from string import ascii_letters, digits
 import tempfile             # used to create temporary files/folders
-from shutil import copytree
 import time
 from functools import cache
 
@@ -95,10 +94,16 @@ def ConvertTitleToMarkdownId(title):
     idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -_')])
     return idstr
 
+
 @cache
-def OpenIncludedFile(resource):
+def GetIncludedResourcePath(resource):
     path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
     path = os.path.join(path, resource)
+    return path
+
+@cache
+def OpenIncludedFile(resource):
+    path = GetIncludedResourcePath(resource)
     with open(path, 'r', encoding="utf-8") as f:
         return f.read()
 
@@ -114,8 +119,7 @@ def GetIncludedFilePath(resource):
 
 @cache
 def OpenIncludedFileBinary(resource):
-    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
-    path = os.path.join(path, resource)
+    path = GetIncludedResourcePath(resource)
     with open(path, 'rb') as f:
         return f.read()    
 
@@ -143,6 +147,7 @@ def ExportStaticFiles(pb):
         [f'html/{pb.gc("_css_file")}', 'main.css'], 
         ['html/obsidian.js', 'obsidian.js'],
         ['html/mermaid.css', 'mermaid.css'],
+        ['html/callouts.css', 'callouts.css'],
         ['html/mermaid.min.js', 'mermaid.min.js'],
         ['html/taglist.css', 'taglist.css'],
         ['html/external.svg', 'external.svg'],
@@ -153,6 +158,7 @@ def ExportStaticFiles(pb):
     ]
     if pb.gc('toggles/features/graph/enabled', cached=True):
         copy_file_list.append(['graph/graph.css', 'graph.css'])
+        copy_file_list.append(['graph/graph.svg', 'graph.svg'])
 
     # copy static files over to the static folder
     for file_name in copy_file_list:
@@ -215,7 +221,7 @@ def ExportStaticFiles(pb):
 
         graph_js= OpenIncludedFile('graph/graph.js')
         graph_js = graph_js.replace('{html_url_prefix}', html_url_prefix)\
-                           .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
+                           .replace('{coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
                            .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
         with open (dst_path, 'w', encoding="utf-8") as f:
             f.write(graph_js)
@@ -228,15 +234,17 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     # Defaults
     if title == '':
         title = pb.gc('site_name', cached=True)
-    if dynamic_includes is not None:
-        dynamic_inclusions += dynamic_includes
+
+    dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/callouts.css" />' + "\n"
 
     if pb.config.feature_is_enabled('graph', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
-        dynamic_inclusions += '<script src="https://d3js.org/d3.v4.min.js"></script>' + "\n"
 
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"
+    
+    if dynamic_includes is not None:
+        dynamic_inclusions += dynamic_includes
 
     if container_wrapper_class_list is None:
         container_wrapper_class_list = []
@@ -251,6 +259,12 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         template = template.replace('{rss_button}', code)
     else:
         template = template.replace('{rss_button}', '')
+
+    if pb.config.GetCachedConfig('graph_show_icon'):
+        code = OpenIncludedFile('graph/button_template.html')
+        template = template.replace('{graph_button}', code)
+    else:
+        template = template.replace('{graph_button}', '')
 
     if pb.config.GetCachedConfig('dirtree_show_icon'):
         # output path
@@ -290,7 +304,62 @@ def CreateTemporaryCopy(source_folder_path, pb):
         print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
     
     # Copy vault to temp dir
-    copytree(source_folder_path, tmpdir.name, dirs_exist_ok=True)
+    copytree(source_folder_path, tmpdir.name)
+    #copy_tree(source_folder_path, tmpdir.name, preserve_times=1)
     print("< COPYING VAULT: Done")
 
     return tmpdir
+
+
+class Error(EnvironmentError):
+    pass
+
+def copytree(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
+             ignore_dangling_symlinks=False):
+
+    names = os.listdir(src)
+    if ignore is not None:
+        ignored_names = ignore(src, names)
+    else:
+        ignored_names = set()
+
+    os.makedirs(dst, exist_ok=True)
+    errors = []
+    for name in names:
+        if name in ignored_names:
+            continue
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        try:
+            if os.path.islink(srcname):
+                linkto = os.readlink(srcname)
+                if symlinks:
+                    os.symlink(linkto, dstname)
+                else:
+                    # ignore dangling symlink if the flag is on
+                    if not os.path.exists(linkto) and ignore_dangling_symlinks:
+                        continue
+                    # otherwise let the copy occurs. copy2 will raise an error
+                    copy_function(srcname, dstname)
+            elif os.path.isdir(srcname):
+                copytree(srcname, dstname, symlinks, ignore, copy_function)
+            else:
+                # Will raise a SpecialFileError for unsupported file types
+                copy_function(srcname, dstname)
+        # catch the Error from the recursive copytree so that we can
+        # continue with other files
+        except Error as err:
+            print(err)
+            errors.extend(err.args[0])
+        except EnvironmentError as why:
+            errors.append((srcname, dstname, str(why), 'copyfile error'))
+    try:
+        shutil.copystat(src, dst)
+    except OSError as why:
+        if WindowsError is not None and isinstance(why, WindowsError):
+            # Copying file access times may fail on Windows
+            pass
+        else:
+            errors.extend((src, dst, str(why), 'copystat error'))
+    if errors:
+        raise Error(errors)

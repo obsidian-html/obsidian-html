@@ -188,6 +188,16 @@ h4 + table {
     margin-left: 1.5rem;
     font-weight: bold;
 }
+.toc {
+    display: none;
+    
+    background-color: __accent_color__08;
+    padding: 1rem;
+    padding-top: 0.2rem;
+    border-radius: 0.6rem;
+    margin-bottom: 1rem;
+    padding-right: 2rem;    
+}
 .navbar {
     display: flex;
     flex-direction: row;
@@ -237,7 +247,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .icon-tray {
-    width:6rem; 
+    width:8rem; 
     height:1.6rem; 
     margin-top: -0.1rem;
 }

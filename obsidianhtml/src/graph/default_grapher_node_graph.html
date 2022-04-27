@@ -1,0 +1,34 @@
+<script src="https://cdn.jsdelivr.net/npm/d3@6.2.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/force-graph@1.40.3/dist/force-graph.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/note-graph@latest/dist/note-graph.umd.js"></script>
+
+
+<script>
+    var graphView;
+    var graphModel;
+
+    async function grapher(args) {
+        let current_node = args.current_node_id;
+
+        const notes = await (
+            await fetch(args.node_graph_data)
+        ).json()
+        graphModel = new NOTE_GRAPH.NoteGraphModel(notes)
+
+        graphView = new NOTE_GRAPH.NoteGraphView({
+            container: args.graph_container,
+            graphModel,
+            enableNodeDrag: true,
+            width: args.width,
+            height: args.height
+        })
+
+        console.log(args.current_node_graph_id);
+
+        if (args.current_node_graph_id){
+            graphView.actions.selectNode(graphView.model, parseInt(args.current_node_graph_id), false)
+            graphView.updateViewModeInteractiveState()
+        }
+
+    }
+</script>

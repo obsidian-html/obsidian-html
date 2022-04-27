@@ -24,7 +24,7 @@
                 </script>
         </head>
 
-<body onload="LoadPage();">
+<body>
         <div class="flex_col">
                 <div id="header" class="header">
                         <div id="header_flex" class="flex_row">
@@ -47,17 +47,41 @@
                                 </div>
                         </div>
                 </div>
-                <div class="flex_row">
-                        <div id="left_pane"></div>
-                        <div class="container">
-                                        {content}
-                        <!-- end content -->
-                        </div>
-                        <div id="right_pane"></div>
+                <div class="graph_full_page">
+                    <div id="Agraph_full_page" class="graph_div_full"></div>
                 </div>
+                {content}
         </div>
 
+        <script src="{html_url_prefix}/obs.html/static/graph.js" type="text/javascript"></script>
+        
+        {grapher}
+
+        <script>
+            function graph_open_link(args){
+                return graph_open_link_normal(args)
+            }                
+            function graph_left_click(args){
+                    return graph_select_node(args)
+            }
+            function graph_right_click(args){
+                    return graph_open_link(args)
+            }
+
+            args = get_graph_args('graph_full_page');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const pinnedNode = urlParams.get('node');
+            current_node_id = pinnedNode;
+            args.current_node_id = pinnedNode;
+
+            grapher(args)
+
+
+        </script>
+
 {footer_js_inclusions}
+
 
 </body>
 </html>
