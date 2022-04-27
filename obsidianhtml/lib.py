@@ -62,6 +62,12 @@ def WriteFileLog(files, log_file_name, include_processed=False):
     with open(log_file_name, 'w', encoding='utf-8') as f:
         f.write(s)
 
+def simpleHash(text:str):
+    hash=0
+    for ch in text:
+        hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    return str(hash)
+    
 def GetObsidianFilePath(link, file_tree):
     # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
     # a link can look like this: folder/note#chapter|alias

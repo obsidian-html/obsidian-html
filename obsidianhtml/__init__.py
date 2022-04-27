@@ -23,7 +23,7 @@ from .MarkdownLink import MarkdownLink
 from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, \
                     PopulateTemplate, \
-                    printHelpAndExit, WriteFileLog
+                    printHelpAndExit, WriteFileLog, simpleHash
 from .PicknickBasket import PicknickBasket
 
 from .CreateIndexFromTags import CreateIndexFromTags
@@ -425,13 +425,6 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     # Return link of this page, to be used by caller for building its page
     return rel_dst_path_as_posix
-
-def simpleHash(text:str):
-    hash=0
-    for ch in text:
-        hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    return str(hash)
-
 
 def main():
     # Show help text
