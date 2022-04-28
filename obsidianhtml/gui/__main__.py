@@ -1,5 +1,6 @@
 from obsidianhtml.gui import LaunchInstaller, Launch
 from obsidianhtml.gui.Templater import CompileHtml
+from obsidianhtml.lib import GetIncludedResourcePath
 
 import sys
 
@@ -9,13 +10,16 @@ def main():
             CompileHtml()
         elif sys.argv[1] == 'compile+run':
             CompileHtml()
-            #LaunchInstaller()
             Launch()
         else:
             raise Exception(f'Argument {sys.argv[1]} unknown')
     else:
-        #LaunchInstaller()
+        if isDistFolderPresent() == False:
+            CompileHtml()
         Launch()
+
+def isDistFolderPresent():
+    return GetIncludedResourcePath('installer/dist').exists()
 
 if __name__ == "__main__":
     main()
