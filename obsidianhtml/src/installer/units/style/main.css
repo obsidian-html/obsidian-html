@@ -60,6 +60,7 @@ label {
     margin-right: 0.3rem;
 }
 
-.hide {
+.hide,
+.hidden {
     display: none
 }

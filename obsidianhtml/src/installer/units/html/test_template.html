@@ -6,11 +6,19 @@
     <css />
     <script>
         let WINDOW_ID = '{{window_id}}'
+        let load_list = []
     </script>
 </head>
 
 <body>
     <h1>Template {{window_id}}</h1>
+    <div id="outnull"></div>
+    <p id='pywebview-status'><span class="blink_me">Initializing...</span></p>
+    <div id="error-box" class="hidden">
+        <div class="close-error-box" onclick="this.parentElement.classList.add('hidden');">x</div>
+        <div id="error-list"></div>
+    </div>
+
     <component id="select-vault-path" type="config" />
     <component id="select-entrypoint-path" type="config" />
 
@@ -19,6 +27,10 @@
 
     <script>
         //{{core}}
-    </script>    
+        window.addEventListener('pywebviewready', function () {
+            coreOnPywebviewReady();
+        })
+
+    </script>
 </body>
 </html>

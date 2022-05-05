@@ -3,7 +3,7 @@ import regex as re
 
 def CompileHtml():
     # load reusable code to put in the templates
-    css = CompileCss(['main', 'flex', 'response','action_components'])
+    css = CompileCss(['main', 'flex', 'response','action_components', 'error'])
     core_js = CompileJs()
     components = GetComponents()
 
@@ -60,7 +60,7 @@ def InsertComponents(components, html):
     # Do a regex replacement of component tags in the html, with the code in the 
     # corresponding component files.
     component_tags = re.findall(r'(\<component.*?\>)', html)
-    for c in component_tags:
+    for uid, c in enumerate(component_tags):
         cid = re.findall(r'(?<=id=")([^"]*)', c)[0]
         comp = AddTabs(components[cid], 1)
 
@@ -77,6 +77,9 @@ def InsertComponents(components, html):
                 comp = comp.replace('{{summary_classes}}', 'hide')
             else:
                 print(f"error: type {ctype} unknown @ {c}")
+
+        # Replace all occurences of {{uid}} with a unique number (for this page)
+        comp = comp.replace('{{uid}}', str(uid))
         
         # insert into html code
         html = html.replace(c, comp)

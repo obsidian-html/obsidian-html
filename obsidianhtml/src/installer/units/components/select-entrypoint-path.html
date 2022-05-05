@@ -26,12 +26,23 @@
 </div>
 
 <script>
+    // register
+    load_list.push({
+        'id': 'entrypoint_path',
+        'div_id': 'set-entrypoint-path{{uid}}'
+    })
+    load_list.push({
+        'id': 'entrypoint_path',
+        'div_id': 'summary-entrypoint-path{{uid}}'
+    })
+
     function getEntrypointPath(result_div_id){
         input = {
             'action':'action/get_entrypoint_path',
             'window_id': WINDOW_ID,
             'result_div_id': result_div_id
         }
+        coreOnClick();
         pywebview.api.call(input).then(showResponse).catch(showResponse)
     }
 </script>

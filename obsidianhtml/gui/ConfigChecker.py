@@ -1,3 +1,5 @@
+from pathlib import Path
+
 class ConfigChecker:
     main_api = None
     ledger = None
@@ -5,17 +7,10 @@ class ConfigChecker:
         self.main_api = main_api
         self.ledger = main_api.ledger
 
-    def DetermineDefaultConfigFolderPath(self):
-        config_folder_path = dirs = AppDirs("obsidianhtml", "obsidianhtml")
-
-    def presetConfigPath(self):
-        # get configured value
+    def isConfigFolderPresent(self):
         config_folder_path = self.ledger.get('config_folder_path')
+        return Path(config_folder_path).exists()
 
-        if config_folder_path == '':
-            config_folder_path = self.DetermineDefaultConfigFolderPath()
-            self.ledger.set_value('config_folder_path', config_folder_path)
-        
     def presetRepoClonePath(self, repo_name):
         value = self.ledger.get('repo_folder_path')
         if value == '':

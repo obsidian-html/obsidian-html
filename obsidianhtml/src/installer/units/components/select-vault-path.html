@@ -8,12 +8,20 @@
 </div>
 
 <script>
+    // register
+    load_list.push({
+        'id': 'vault_path',
+        'div_id': 'current-vault-path',
+    })
+    
+    // button action
     function getVaultPath(){
         input = {
             'action':'action/get_vault_path',
             'window_id': WINDOW_ID,
             'result_div_id': 'current-vault-path'
         }
+        coreOnClick();
         pywebview.api.call(input).then(showResponse).catch(showResponse)
     }
 </script>

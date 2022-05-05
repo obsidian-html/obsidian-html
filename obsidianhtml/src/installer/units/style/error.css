@@ -1,0 +1,25 @@
+#error-box {
+    width: 100vw;
+    background-color: #090909d1;
+    position: absolute;
+    top: 80vh;
+    left: 0;
+    height: 20vh;
+    overflow-y: scroll;
+}
+.close-error-box {
+    width: 16px;
+    float: right;
+    font-family: sans;
+    color: white;
+    cursor: pointer;
+    font-size: 10pt;
+    border: 1px solid white;
+    text-align: center;
+}
+#error-list {
+    margin: 1rem;
+    color: white;
+    font-family: sans;
+    font-size: 10pt;
+}
