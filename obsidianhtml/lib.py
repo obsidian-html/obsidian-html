@@ -161,6 +161,9 @@ def ExportStaticFiles(pb):
         copy_file_list.append(['graph/graph.css', 'graph.css'])
         copy_file_list.append(['graph/graph.svg', 'graph.svg'])
 
+    if pb.gc('toggles/features/math_latex/enabled', cached=True):
+        copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
+
     # copy static files over to the static folder
     for file_name in copy_file_list:
         # Get file from package
@@ -240,6 +243,11 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
 
     if pb.config.feature_is_enabled('graph', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
+
+    if pb.config.feature_is_enabled('math_latex', cached=True):
+        dynamic_inclusions += '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + "\n"
+        dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js" /></script>' + "\n"
 
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"

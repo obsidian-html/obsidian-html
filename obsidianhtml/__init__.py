@@ -274,10 +274,14 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
     extension_configs = {
-    'codehilite ': {
-        'linenums': True
-    }}
-    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout'], extension_configs=extension_configs)
+        'codehilite': {
+            'linenums': False
+        },
+        'pymdownx.arithmatex': {
+            'generic': True
+        }
+    }
+    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
 
     # HTML Tweaks
     # ------------------------------------------------------------------
@@ -408,7 +412,15 @@ def recurseTagList(tagtree, tagpath, pb, level):
             md += f'- [{note_name}]({html_url_prefix}/{note_url})\n'
 
     # Compile html
-    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout'])
+    extension_configs = {
+        'codehilite': {
+            'linenums': False
+        },
+        'pymdownx.arithmatex': {
+            'generic': True
+        }
+    }    
+    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
 
     di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
 
