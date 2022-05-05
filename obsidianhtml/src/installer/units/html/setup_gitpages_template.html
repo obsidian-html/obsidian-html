@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <css />
+    <script>
+        let WINDOW_ID = 'setup_gitpages'
+    </script>    
+</head>
+
+<body>
+    <div id="outnull"></div>
+    <p id='pywebview-status'><span class="blink_me">Initializing...</span></p>
+
+    <h1>Setup Gitpages</h1>
+    <p>For this step you need to do three things:</p>
+    <ul>
+        <li>Create a github account (if you don't have one yet)</li>
+        <li>Install Git on your system</li>
+        <li>Create a new repository named exactly '(your username).github.io'</li>
+        <li>Clone the repository locally</li>
+    </ul>
+    <p>
+        You can do this yourself, the 
+        <a class="external-link" onclick="api('openUrlInDefaultBrowser', {'url':'https://pages.github.com/'},'outnull')">
+            gitpages documentation
+        </a> is pretty good
+    </p>
+
+    <p>If you succeed in doing this manually, you can close this window and continue with the installer setup. 
+        Otherwise, you can continue below. Make sure that you have at least 
+        <a class="external-link" onclick="api('openUrlInDefaultBrowser', {'url':'https://github.com/signup'},'outnull')">
+            a github account
+        </a> before you continue below.
+    </p>
+
+    <!--    ---------------------------------------------------------------------- -->    
+
+ 
+    <h2>Configure Repo</h2>
+    <div class="flex-row">
+        <label for="github-username">Github username: </label>
+        <input id="github-username" type="text" />
+        <div class="spacer-1">&nbsp;</div>
+    </div>
+    <div class="flex-row">
+        <button class="action" onClick="CheckGithubUsername('github-username')">Check</button><br/>
+        <div class="spacer-4">&nbsp;</div>
+    </div>    
+
+    <div class="annotation" id="output-github-username-check"></div>
+
+    <!--    ---------------------------------------------------------------------- -->
+    <div id="step-1" style="display: none;">
+        <h2>Check prequisites</h2>
+        <p>In this step we will test if Git is installed and whether it is configured correctly.</p>
+        <div class="flex-row">
+            <button class="action" onClick="CheckGit('output-git-check')">Check Prerequisites</button><br/>
+            <div class="spacer-4">&nbsp;</div>
+        </div>
+
+        <div class="annotation" id="output-git-check"></div>
+
+        <div id="step-install-git"  style="display: none;">
+            <h3>Install Git</h3>
+            <p>Git was not found on your system. Follow one of the following links to install Git on your system.</p>
+            <ul>
+                <li><b>Linux: </b> 
+                    <a class="external-link" onclick="api('openUrlInDefaultBrowser', {'url':'https://git-scm.com/download/linux'},'outnull')">
+                        https://git-scm.com/download/linux
+                    </a>
+                </li>
+                <li><b>macOS: </b>
+                    <a class="external-link" onclick="api('openUrlInDefaultBrowser', {'url':'https://git-scm.com/download/mac'},'outnull')">
+                        https://git-scm.com/download/mac
+                    </a>
+                </li>
+                <li><b>Windows: </b>
+                    <a class="external-link" onclick="api('openUrlInDefaultBrowser', {'url':'https://gitforwindows.org/'},'outnull')">
+                        https://gitforwindows.org/
+                    </a> <br/><i>(When in doubt: pick Git Bash and install with default settings.)</i>
+                </li>
+            </ul>
+            <p class="hint">Run check again after a successful installation.</p>
+        </div>
+
+        <div id="step-set-username"  style="display: none;">
+            <h3>Set git user.name</h3>
+            <p>No username setting was found in your global settings.</p>
+            <div class="aside">
+                This installer will work with local settings, but in that case you must skip this sub-installer 
+                and do the git repo creation and git clone steps manually.
+            </div>
+
+            <div class="flex-row">
+                <div class="spacer-4">
+                    <label for="github-username">Github user.name: </label> <br/>
+                    <input class="input_left" id="github-set-username" type="text" />
+                </div>
+                <div class="annotation" id="output-github-username-set"></div>
+            </div>
+            <div class="flex-row">
+                <button class="action" onClick="SetGithubUsername('github-set-username', 'output-github-username-set')">Set</button>
+                <div class="spacer-4">&nbsp;</div>
+            </div>
+            <p class="hint">Run check again after a successful set.</p>
+        </div>
+
+        <div id="step-set-email"  style="display: none;">
+            <h3>Set git user.email</h3>
+            <p>No username setting was found in your global settings.</p>
+            <div class="aside">
+                This installer will work with local settings, but in that case you must skip this sub-installer 
+                and do the git repo creation and git clone steps manually.
+            </div>
+
+            <div class="flex-row">
+                <div class="spacer-4">
+                    <label for="github-set-email">Github user.email: </label><br/>
+                    <input class="input_left" id="github-set-email" type="text" />
+                </div>
+                <div class="annotation" id="output-github-email-set"></div>
+            </div>
+            <div class="flex-row">
+                <button class="action" onClick="SetGithubEmail('github-set-email', 'output-github-email-set')">Set</button>
+                <div class="spacer-4">&nbsp;</div>
+            </div>
+            <p class="hint">Run check again after a successful set.</p>
+        </div>
+    </div>
+
+
+    <!--    ---------------------------------------------------------------------- -->
+
+    <div id="step-2" style="display: none;">
+        <h2>Choose where to clone your repo to</h2>
+        <div class="flex-row">
+            <button onClick="api('getRepoPath', {'window_id': WINDOW_ID}, 'annotation-setup-repo')">Set clone location</button><br/>
+            <div class="annotation" id="annotation-setup-repo">&nbsp;</div>
+        </div>
+
+        <h2>Clone</h2>
+        <p>This step will clone the configured repo to the configured local folder.</p>
+
+        <p>Please first run the pre-clone check to guarantee that all the values are populated correctly in the backend.</p>
+        <div class="flex-row">
+            <button class="action" onClick="CheckCloneRepo('response-clone')">Check</button><br/>
+            <div class="spacer-4">&nbsp;</div>
+        </div>
+        <div id="response-clone"></div>
+        <div class="flex-row">
+            <button class="action" onClick="CloneRepo('response-clone')">Clone</button><br/>
+            <div class="spacer-4">&nbsp;</div>
+        </div>
+    </div>
+
+    
+
+    <!--    ---------------------------------------------------------------------- -->
+    <div id="step-3" style="display: none;">
+        <h2>Done setting up git pages</h2>
+        <p>All local settings are ready to start publishing to your own gitpage. We haven't created the website yet, but we can continue in the main installation wizard with getting you set up for that.</p>
+        <p>Close this window and continue in the main installer to complete setting up gitpage publishing.</p>
+    </div>
+
+    <!--    ---------------------------------------------------------------------- -->
+
+    <div id="footer" style="border: none;">
+        <button class="action bottom" id="exit-button" onClick="api('close', {'window_id': WINDOW_ID}, 'outnull')">Close</button>
+    </div>
+    
+    <script>
+//{{core}}
+
+        // On load
+        // -----------------------------------------------------------------------
+        window.addEventListener('pywebviewready', function() {
+            var container = document.getElementById('pywebview-status')
+            container.innerHTML = '<span style="color:green">GUI initialized</span>'
+
+            // presets
+            api('presetConfigPath', {}, 'annotation-config-path')
+        })
+
+        // Page specific
+        // -----------------------------------------------------------------------
+        function updateInput(elementId) {
+            return function(response) {
+                var element = document.getElementById(elementId)
+
+                if (response.code == 200){
+                    element.style.backgroundColor = 'green'
+                } else {
+                    element.style.backgroundColor = 'red'
+                    alert(response.message)
+                }
+            }
+        }
+
+        function alertError(input_id){
+            return function(response) {
+                document.getElementById(input_id).style.backgroundColor = 'red'
+                alert(response.message)
+            }
+        }
+
+        function choose_optional_setup_gitpages(enable, disable){
+            document.getElementById(enable).style.display = 'block';
+            document.getElementById(disable).style.display = 'none';
+        }
+
+        function CheckGithubUsername(input_id){
+            // hide next steps
+            document.getElementById('step-1').style.display = 'none'
+            document.getElementById('output-git-check').style.display = 'none'
+            document.getElementById('step-2').style.display = 'none'
+
+            input_el = document.getElementById(input_id)
+            input_el.style.backgroundColor = 'orange'
+            username = input_el.value
+            if (username == ''){
+                alert('Please type in your username')
+                return
+            }
+
+            action = function(response){
+                fn = updateInput(input_id)
+                fn(response)
+
+                CheckGithubUsernameOutput(response)
+            }
+
+            catch_action = alertError(input_id)
+            pywebview.api.call('CheckGithubUsername', {'username':username}).then(action).catch(catch_action)
+        }
+
+        function CheckGithubUsernameOutput(response){
+            div = document.getElementById('output-github-username-check')
+
+            if (response.code != 200){
+                div.style.display = 'none'
+            }
+            else {
+                // Fill in field for setting git global config
+                PresetGithubUsername(response.data.username)
+
+                // Give feedback to user
+                div.style.display = 'block'
+                if (response.data.repo_exists == true){
+                    html = 'Your github page repository name is '
+                    html += '<a class="external-link" onclick="api(\'openUrlInDefaultBrowser\', {\'url\':\''+response.data.repo_url+'\'},\'outnull\')">'+response.data.repo_name+'</a>. '
+                    html += '<br/><br/><b>Note</b>: if you continue with this installer, the contents of this repo will be completely replaced!'
+                    div.innerHTML = html
+
+                    // Try to determine optimal clone location based on repo name
+                    api('presetRepoClonePath', {'repo_name': response.data.repo_name}, 'annotation-setup-repo')
+
+                    // Enable next steps
+                    document.getElementById('step-1').style.display = 'block'
+                }
+                else {
+                    // Username valid, but repo not created
+                    html = '<p>Your github page repository name is <code>'+response.data.repo_name+'</code>.</p><p>It does not yet exist.<p>'
+                    html += '<p>Go here <a class="external-link" onclick="api(\'openUrlInDefaultBrowser\', {\'url\':\'https://github.com/new\'},\'outnull\')">https://github.com/new</a> and fill in the following settings: '
+                    html += '<ul><li><b>Repository name</b>: <input value="'+response.data.repo_name+'" /></li><li>Leave all the rest on default!</li><li>Click on <b>Create Repository</b></li></ul></p>'
+                    html += '<p>When done, click check again.</p>' 
+                    div.innerHTML = html
+                }
+            }
+        }
+
+        function CheckGit(resultdiv_id){
+            // hide next steps
+            document.getElementById('step-2').style.display = 'none'
+
+            // hide correction divs
+            document.getElementById('step-set-username').style.display = 'none'
+            document.getElementById('step-set-email').style.display = 'none'
+            document.getElementById('step-install-git').style.display = 'none'
+                    
+            action = CheckGitOutputEnclosure(resultdiv_id)
+            pywebview.api.call('CheckGit').then(action).catch(action)            
+        }
+        function CheckGitOutputEnclosure (resultdiv_id) {
+            return function (response) {
+                showResponse(response, resultdiv_id)
+                window.scrollBy(0, 100);
+                CheckGitOutput(response, resultdiv_id)
+            }
+        }
+        function CheckGitOutput(response, resultdiv_id) {
+            let ok = true
+            for (let i = 0; i < response.data.length; i++) {
+                if (response.data[i]['name'] == 'git_username_not_configured') {
+                    document.getElementById('step-set-username').style.display = 'block'
+                    ok = false
+                }
+                else if (response.data[i]['name'] == 'git_email_not_configured') {
+                    document.getElementById('step-set-email').style.display = 'block'
+                    ok = false
+                }
+                else if (response.data[i]['name'] == 'git_not_installed') {
+                    document.getElementById('step-install-git').style.display = 'block'
+                    ok = false
+                } 
+            }
+
+            if (ok) {
+                // Enable next steps
+                document.getElementById('step-2').style.display = 'block'
+            }
+        }
+
+        function PresetGithubUsername(username){
+            document.getElementById("github-set-username").value = username
+        }
+        function SetGithubUsername(input_id, resultdiv_id){
+            username = document.getElementById(input_id).value
+
+            action = showResponseEnclosure(resultdiv_id)
+            pywebview.api.call('SetGitUsername', {'username':username}).then(action).catch(action)
+        }
+
+        function SetGithubEmail(input_id, resultdiv_id){
+            email = document.getElementById(input_id).value
+
+            action = showResponseEnclosure(resultdiv_id)
+            pywebview.api.call('SetGitEmail', {'email':email}).then(action).catch(action)
+        }        
+        
+        function CheckCloneRepo(resultdiv_id){
+            action = CheckCloneRepoOutputEnclosure(resultdiv_id)
+            pywebview.api.call('FlightCheckCloneRepo').then(action).catch(action)
+        }    
+        
+        function CheckCloneRepoOutputEnclosure(resultdiv_id){
+            return function (response) {
+                showResponse(response, resultdiv_id)
+                CheckCloneRepoOutput(response, resultdiv_id)
+            }
+        }
+        function CheckCloneRepoOutput(response, resultdiv_id){
+            if (response.data.ready){
+                document.getElementById('step-3').style.display = 'block'
+                set_form_status(true)
+            } else {
+                document.getElementById('step-3').style.display = 'none'
+            }
+        }
+        function CloneRepo(resultdiv_id){
+            action = CheckCloneRepoOutputEnclosure(resultdiv_id)
+            pywebview.api.call('CloneRepo').then(action).catch(action)
+        }
+
+
+
+    </script>
+</body>
+
+</html>

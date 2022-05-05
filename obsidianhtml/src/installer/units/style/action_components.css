@@ -1,0 +1,47 @@
+.action-link {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+button {
+    font-size: 10pt;
+    margin: 0.3rem;
+    background-color: #0a365d;
+    border: 0px solid #fff;
+    color: white;
+    font-weight: normal;
+    border-radius: 0.4rem;
+    cursor: pointer;
+}
+.bottom {
+    margin-left: -2rem;
+    width: calc(100vw);
+    position: fixed;
+    bottom: -0.3rem;
+    border-top: 1px solid #9090a4;
+}    
+
+#footer button {
+    padding: 1rem;
+    display: block;
+    width: 100%;
+    border-radius: 0;
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+    background-color: #c8c8d9;
+    color: #191d59;
+}
+#footer button.bottom {
+    padding: 0.5rem;
+}
+
+#footer button.done {
+    background-color: #e0eeb9;
+    color: #14440a;
+}
+div.done button {
+    background-color: #bae5ab;
+    color: #14440a;
+}
+

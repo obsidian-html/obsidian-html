@@ -132,6 +132,9 @@ toggles:
       flip_panes: False # switch right and left pane around. (does nothing unless in documentation layout.)
       accent_color: '#414cfd'
 
+    math_latex:
+      enabled: True
+
     # Include code to build the graph view per page 
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)

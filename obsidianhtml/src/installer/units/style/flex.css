@@ -1,0 +1,45 @@
+.spacer-1 {
+    margin: 0rem;
+    padding:0rem;
+}
+.spacer-2 {
+    margin: 0rem;
+    padding:0rem;
+}
+.spacer-3 {
+    margin: 0rem;
+    padding:0rem;
+}
+.spacer-4 {
+    margin: 0rem;
+    padding:0rem;
+}
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 0.5rem;
+}
+.flex-row>.annotation {
+    flex: 4;
+}
+.flex-row>div.label {
+    flex: 1;
+}
+.flex-row>.spacer-1 {
+    flex: 1;
+}  
+.flex-row>.spacer-2 {
+    flex: 2;
+}  
+.flex-row>.spacer-3 {
+    flex: 3;
+}  
+.flex-row>.spacer-4 {
+    flex: 4;
+}                                
+.flex-row>input {
+    flex: auto;
+}        
+.flex-row>button {
+    flex: 1;
+} 

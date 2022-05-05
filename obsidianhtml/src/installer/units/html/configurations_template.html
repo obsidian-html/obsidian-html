@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <css />
+    <script>
+        let WINDOW_ID = 'configurations'
+    </script>    
+</head>
+
+<body>
+    <h1>Configurations</h1>
+
+    <div id="outnull"></div>
+    <p id='pywebview-status'><span class="blink_me">Initializing...</span></p>
+
+    <h2>Inputs</h2>
+
+    <div class="flex-row">
+        <div class="spacer-2">Vault path</div>
+        <div class="spacer-4" id="annotation-vault-path">Failed to load setting</div>
+        <div class="info-icon" onClick="toggle('info-0')">i</div>
+    </div>
+    <div class="info-line" id="info-0" style="display: none;">
+        Your Obsidian Vault folder.
+    </div>
+
+    <div class="flex-row">
+        <div class="spacer-2">Entrypoint</div>
+        <div class="spacer-4" id="annotation-entrypoint-path">Failed to load setting</div>
+        <div class="info-icon" onClick="toggle('info-1')">i</div>
+    </div>
+    <div class="info-line" id="info-1" style="display: none;">
+        The note that is to become the homepage of your new site. 
+        In default mode, ObsidianHtml will start compiling your website starting with this note, and following any links to any other note.
+        This note has to be in the vault selected above.
+    </div>
+
+
+    <h2>Outputs</h2>
+
+    <div class="flex-row">
+        <div class="spacer-2">Markdown output folder</div>
+        <div class="spacer-4" id="annotation-markdown-output-path">Failed to load setting</div>
+        <div class="info-icon" onClick="toggle('info-2')">i</div>
+    </div>
+    <div class="info-line" id="info-2" style="display: none;">
+        When ObsidianHtml converts your notes, it first compiles proper markdown notes. This setting determines where those files are exported to.
+    </div>
+
+    <div class="flex-row">
+        <div class="spacer-2">Markdown entrypoint path</div>
+        <div class="spacer-4" id="annotation-markdown-entrypoint-path">Failed to load setting</div>
+        <div class="info-icon" onClick="toggle('info-3')">i</div>
+    </div>
+    <div class="info-line" id="info-3" style="display: none;">
+        <p>
+            By default this is <code>(markdown output folder)/index.md</code>. 
+        </p>
+        <p>
+            This setting is analogous to the entrypoint setting for your notes, just for the markdown to html conversion,
+            instead of the obsidian to markdown conversion. 
+        </p>
+        <p>
+            You can ignore this setting at the moment.
+        </p>
+    </div>
+
+    <h2>Wizard Settings</h2>
+    <h3 style="border:none">Publish to Gitpage</h3>
+    <div class="flex-row">
+        <div class="spacer-2">Repo folder path</div>
+        <div class="spacer-4" id="annotation-repo-path">Failed to load setting</div>
+        <div class="info-icon" onClick="toggle('info-5')">i</div>
+    </div>
+    <div class="info-line" id="info-5" style="display: none;">
+        When using --publish this is the repo that the html will be written to.
+    </div>
+
+    <h2>General Settings</h2>
+    <div class="flex-row">
+        <div class="spacer-2">Global config folder</div>
+        <div class="spacer-4" id="annotation-config-path">Failed to load setting</div>
+        <div class="info-icon" onClick="toggle('info-4')">i</div>
+    </div>
+    <div class="info-line" id="info-4" style="display: none;">
+        This folder contains all the settings that you define here. When you run the gui it will use these settings. 
+        <p>
+            If you run <code>obsidianhtml -i config.yml</code> the settings set in the gui are ignored. 
+        </p>
+        <p>
+            To use the gui settings in the commandline run <code>obsidianhtml --publish</code>.
+        </p>
+    </div>
+
+    <!--    ---------------------------------------------------------------------- -->
+
+    <div id="footer" style="border: none;">
+        <button class="action bottom" onClick="api('close', {'window_id': 'configurations'}, 'response-clone')">Close</button>
+    </div>
+
+
+    <div id="response-container"></div>
+    <script>
+
+//{{core}}
+
+        // On load
+        // -----------------------------------------------------------------------
+        window.addEventListener('pywebviewready', function () {
+            var container = document.getElementById('pywebview-status')
+            container.innerHTML = '<span style="color:green">GUI initialized</span>'
+
+            // presets
+            pywebview.api.read_ledger({
+                'ids': [
+                    'vault_path', 
+                    'entrypoint_path', 
+                    'config_folder_path', 
+                    'markdown_folder_path', 
+                    'markdown_entrypoint_path',
+                    'repo_folder_path'
+                ],
+                'div_ids': [
+                    'annotation-vault-path', 
+                    'annotation-entrypoint-path', 
+                    'annotation-config-path', 
+                    'annotation-markdown-output-path', 
+                    'annotation-markdown-entrypoint-path',
+                    'annotation-repo-path'
+                ]
+            }).then(setValuesOutput).catch(setValuesOutput)
+        })
+
+        // Page specific
+        // -----------------------------------------------------------------------
+        function setValuesOutput(response) {
+            document.getElementById(response.data[response.ids[0]].div_id).innerHTML = span_wrap('error while preloading data. ' + response.message, 500);
+
+            for (let i = 0; i < response.ids.length; i++) {
+
+                let id = response.ids[i]
+
+                let container = document.getElementById(response.data[id].div_id)
+
+                let val = response.data[id].value
+                if (val == '') {
+                    val = span_wrap('Not configured', 0)
+                }
+                container.innerHTML = val
+            }
+        }
+
+        function choose_optional_setup_gitpages(enable, disable) {
+            document.getElementById(enable).style.display = 'block';
+            document.getElementById(disable).style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

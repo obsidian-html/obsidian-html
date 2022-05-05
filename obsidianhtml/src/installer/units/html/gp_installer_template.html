@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <css />
+    <script>
+        let WINDOW_ID = 'self'
+    </script>
+</head>
+
+<body>
+
+    <p id='pywebview-status'><span class="blink_me">Initializing...</span></p>
+
+    <h1>GithubPages Installer</h1>
+    <p>This installer will configure an action for publishing your vault directly to a <a
+            href="https://pages.github.com/">github page</a>.</p>
+    <p>This setup needs to be done once, after that, you can publish again by running
+        <br /><code>obsidianhtml --publish githubpages</code> from the terminal.
+    </p>
+
+    <h2>Set inputs</h2>
+
+    <input id="select-vault-path" />
+
+
+    <div class="flex-row">
+        <button onClick="api('getEntrypointPath', {}, 'annotation-entrypoint-path')">Select entrypoint
+            note</button><br />
+        <div class="annotation" id="annotation-entrypoint-path">None selected</div>
+        <div class="info-icon" onClick="toggle('info-1')">i</div>
+    </div>
+    <div class="info-line" id="info-1" style="display: none;">
+        In default mode, ObsidianHtml will start compiling your website starting with this node, and following any links to any other note.
+        This note has to be in the vault selected above.
+    </div>    
+
+    <h2>Set gitpages repo</h2>
+    <div>
+        <input type="radio" id="huey" name="drone" value="huey"
+            onclick="choose_optional_setup_gitpages('set-up-git','select-git-repo')" checked>
+        <label for="huey">Help me with setting up the gitpages repo</label>
+    </div>
+    <div>
+        <input type="radio" id="dewey" name="drone" value="dewey"
+            onclick="choose_optional_setup_gitpages('select-git-repo','set-up-git')">
+        <label for="dewey">I have already set up a gitpages repo and cloned it locally</label>
+    </div>
+
+    <div id="set-up-git" class="optional">
+        <div class="flex-row">
+            <button onClick="api('OpenWindowSetupGitpage', {}, 'annotation-setup-repo')">Set up gitpages</button><br />
+            <div class="annotation" id="annotation-setup-repo">&nbsp;</div>
+        </div>
+    </div>
+
+    <div id="select-git-repo" class="optional" style="display: none;">
+        <div class="flex-row">
+            <button onClick="api('getRepoPath', {}, 'annotation-repo-path')">Select gitpages repo folder</button><br />
+            <div class="annotation" id="annotation-repo-path">None selected.</div>
+        </div>
+    </div>
+
+    <div id="response-container"></div>
+
+    <!--    ---------------------------------------------------------------------- -->
+
+    <div id="footer" style="border: none;">
+        <button class="action bottom" id="exit-button" onClick="close_window()">Close</button>
+    </div>
+
+    <script>
+//{{core}}
+
+        // Intervals
+        // -----------------------------------------------------------------------
+        let CheckGitpagesSetupDone_IntervId;
+
+        // On load
+        // -----------------------------------------------------------------------
+        window.addEventListener('pywebviewready', function () {
+            var container = document.getElementById('pywebview-status')
+            container.innerHTML = '<span style="color:green">GUI initialized</span>'
+
+            // presets
+            pywebview.api.read_ledger({
+                'ids': ['vault_path', 'entrypoint_path', 'config_folder_path'],
+                'div_ids': ['annotation-vault-path', 'annotation-entrypoint-path', 'annotation-config-path']
+            }).then(setValuesOutput).catch(setValuesOutput)
+
+            StartCheck_gitlab_setup_done()
+        })
+
+        // Page specific
+        // -----------------------------------------------------------------------       
+        function close_window(){
+            clearInterval(CheckGitpagesSetupDone_IntervId);
+            api('close', {'window_id': WINDOW_ID}, 'outnull')
+        }
+        function StartCheck_gitlab_setup_done(){
+            check = function(){
+                let action = function(response){
+                    if (response.data == true){
+                        document.getElementById('annotation-setup-repo').innerHTML = response.message
+                        document.getElementById('set-up-git').classList.add('done')
+                    }
+                }
+                pywebview.api.check_gitpages_configured().then(action).catch(action)
+            }
+            CheckGitpagesSetupDone_IntervId = setInterval(check, 500);
+        }
+
+        function setValuesOutput(response) {
+            document.getElementById(response.data[response.ids[0]].div_id).innerHTML = span_wrap('error while preloading data. ' + response.message, 500);
+
+            for (let i = 0; i < response.ids.length; i++) {
+
+                let id = response.ids[i]
+
+                let container = document.getElementById(response.data[id].div_id)
+
+                let val = response.data[id].value
+                if (val == '') {
+                    val = span_wrap('Not configured', 0)
+                }
+                container.innerHTML = val
+            }
+        }
+
+        function choose_optional_setup_gitpages(enable, disable) {
+            document.getElementById(enable).style.display = 'block';
+            document.getElementById(disable).style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

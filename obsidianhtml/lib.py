@@ -62,6 +62,12 @@ def WriteFileLog(files, log_file_name, include_processed=False):
     with open(log_file_name, 'w', encoding='utf-8') as f:
         f.write(s)
 
+def simpleHash(text:str):
+    hash=0
+    for ch in text:
+        hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    return str(hash)
+
 def GetObsidianFilePath(link, file_tree):
     # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
     # a link can look like this: folder/note#chapter|alias
@@ -98,14 +104,19 @@ def ConvertTitleToMarkdownId(title):
 @cache
 def GetIncludedResourcePath(resource):
     path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
-    path = os.path.join(path, resource)
-    return path
+    return Path(os.path.join(path, resource))
 
 @cache
 def OpenIncludedFile(resource):
     path = GetIncludedResourcePath(resource)
     with open(path, 'r', encoding="utf-8") as f:
         return f.read()
+
+def GetIncludedFilePaths(subpath=''):
+    path = importlib.util.find_spec("obsidianhtml.src").submodule_search_locations[0]
+    path = os.path.join(path, subpath)
+    onlyfiles = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+    return onlyfiles
 
 @cache
 def OpenIncludedFileBinary(resource):
@@ -149,6 +160,9 @@ def ExportStaticFiles(pb):
     if pb.gc('toggles/features/graph/enabled', cached=True):
         copy_file_list.append(['graph/graph.css', 'graph.css'])
         copy_file_list.append(['graph/graph.svg', 'graph.svg'])
+
+    if pb.gc('toggles/features/math_latex/enabled', cached=True):
+        copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
 
     # copy static files over to the static folder
     for file_name in copy_file_list:
@@ -229,6 +243,11 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
 
     if pb.config.feature_is_enabled('graph', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
+
+    if pb.config.feature_is_enabled('math_latex', cached=True):
+        dynamic_inclusions += '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + "\n"
+        dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js" /></script>' + "\n"
 
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"
