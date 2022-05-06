@@ -169,6 +169,12 @@ class MarkdownPage:
 
             # Only handle local image files (images located in the root folder)
             if clean_link_name not in self.file_tree.keys():
+                if self.pb.gc('toggles/verbose_printout', cached=True):
+                    print(f"\t\tImage/file with obsidian link of '{clean_link_name}' (original {link}) will not be copied over in this step.")
+                    if '://' in link:
+                        print("\t\t\t<continued> The link seems to be external (contains ://)")
+                    else:
+                        print("\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
                 continue
 
             # Get shorthand info
