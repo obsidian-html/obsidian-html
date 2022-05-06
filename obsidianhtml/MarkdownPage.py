@@ -164,7 +164,7 @@ class MarkdownPage:
             self.page = re.sub(safe_link, new_link, self.page)
 
         # -- [4] Handle local image/video/audio links (copy them over to output)
-        for link in re.findall("(?<=\!\[\]\()(.*)(?=\))", self.page):
+        for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", self.page):
             clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
 
             # Only handle local image files (images located in the root folder)
@@ -174,7 +174,7 @@ class MarkdownPage:
                     if '://' in link:
                         print("\t\t\t<continued> The link seems to be external (contains ://)")
                     else:
-                        print("\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
+                        print(f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
                 continue
 
             # Get shorthand info
