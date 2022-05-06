@@ -569,12 +569,15 @@ function toggle(id, display_value){
         el = document.getElementById(id);
         if (el.style.display == 'none'){
                 el.style.display = display_value;
+                return true
         }
         else if (el.style.display == display_value){
                 el.style.display = 'none';
+                return false
         }        
         else {
                 el.style.display = display_value;
+                return true
         }
 }
 

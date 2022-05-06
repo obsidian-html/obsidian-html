@@ -155,6 +155,13 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     if pb.gc('toggles/verbose_printout', cached=True):
         print('\t'*log_level, f"html: converting {page_path.as_posix()}")
 
+
+    # Add page to search file
+    # ------------------------------------------------------------------
+    if pb.gc('toggles/features/search/enabled', cached=True):
+        pb.search.AddPage(url=node['url'], title=node['id'], text=md.page)
+
+
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
     # ------------------------------------------------------------------
@@ -710,6 +717,7 @@ def main():
         pb.network_tree.compile_node_lookup()
 
         if pb.gc('toggles/features/backlinks/enabled'):
+            print('\t> FEATURE: BACKLINKS')
             for fo in pb.files.values():
                 if not fo.metadata['is_note']:
                     continue
@@ -749,6 +757,8 @@ def main():
                 html = re.sub('\{_obsidian_html_backlinks_pattern_:'+re.escape(node_id)+'}', snippet, html)
                 with open(dst_abs_path, 'w', encoding="utf-8") as f:
                     f.write(html)
+            
+            print('\t< FEATURE: BACKLINKS: Done')
 
         # Create tag page
         recurseTagList(pb.tagtree, '', pb, level=0)
@@ -775,8 +785,13 @@ def main():
 
             # Write node json to static folder
             with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
-                f.write(pb.network_tree.OutputJson())            
+                f.write(pb.network_tree.OutputJson())
 
+
+        if pb.gc('toggles/features/search/enabled', cached=True):
+            # Write search json to static folder
+            with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json'), 'w', encoding="utf-8") as f:
+                f.write(pb.search.OutputJson())
 
 
     print('< COMPILING HTML FROM MARKDOWN CODE: Done')

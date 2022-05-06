@@ -1,0 +1,29 @@
+<div id="search">
+    <div id="search-slab" king_ramses="return the slaaab">
+            <div id="search-controls">
+                    <h3>Search Notes</h3>
+                    <input id="search_string" type="text" />
+                    <div class="tooltip">
+                            <input type="checkbox" id="hard_search" name="hard" />
+                            <span class="tooltiptext">Hard search (require exact match)</span>
+                    </div>
+                    <div id="search-results-box">
+                            <div id="search-results"></div>
+                    </div>
+            </div>
+    </div>
+</div>
+<script>
+    document.getElementById("search").addEventListener('click', e => {
+            if(e.target !== e.currentTarget){
+                    return
+            }
+            toggle('search', 'block');
+    })
+    document.getElementById("search_string").addEventListener("input", function(event) {
+            setTimeout( () =>bsearch('search_string', 'hard_search'), 100 );
+    }); 
+    document.getElementById("hard_search").addEventListener("click", function(event) {
+            setTimeout( () =>bsearch('search_string', 'hard_search'), 100 );
+    });                 
+</script>
