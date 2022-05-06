@@ -230,6 +230,9 @@ class OH_File:
             src_file_path = self.path['markdown']['file_absolute_path']
             dst_file_path = self.path['html']['file_absolute_path']
 
+        if self.pb.gc('toggles/verbose_printout', cached=True):
+            print(f'Copying file over (mode={mode}) from {src_file_path} to {dst_file_path}')
+
         dst_file_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src_file_path, dst_file_path)
 
