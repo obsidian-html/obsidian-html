@@ -1,5 +1,6 @@
 from .NetworkTree import NetworkTree
 from .ConfigManager import CheckConfigRecurse, MergeDictRecurse, Config
+from .Search import SearchHead
 
 
 class PicknickBasket:
@@ -14,6 +15,7 @@ class PicknickBasket:
     def __init__(self):
         self.tagtree = {'notes': [], 'subtags': {}}
         self.network_tree = NetworkTree(self.verbose)
+        self.search = SearchHead()
     
     def loadConfig(self, input_yml_path_str=False):
         self.config = Config(self, input_yml_path_str)

@@ -114,6 +114,9 @@ class Config:
         elif descriptor == 'graph_show_icon':
             return (self.pb.gc('toggles/features/graph/enabled') and self.pb.gc('toggles/features/graph/styling/show_icon'))
 
+        elif descriptor == 'search_show_icon':
+            return (self.pb.gc('toggles/features/search/enabled') and self.pb.gc('toggles/features/search/styling/show_icon'))
+
     def LoadIncludedFiles(self):
         # Get html template code. 
         if self.pb.gc('toggles/compile_html', cached=True):

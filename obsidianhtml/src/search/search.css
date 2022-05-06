@@ -1,0 +1,96 @@
+#search {
+    position: absolute;
+    z-index: 1;
+    background-color: #0000008f;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+}
+#search-slab {
+    max-width: __max_note_width__;
+    margin: auto;
+    padding: 1rem;
+    width: calc(100vw - 2rem);
+}
+#search-controls {
+    padding: 1rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: calc(100% - 2.5rem);
+    padding-left: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+#search-results-box {
+    height: calc(100vh - 11rem);
+    margin-top: 1rem;
+    background-color: white;
+    max-width: __max_note_width__;
+    display: none;
+}
+#search-results {
+    height: calc(100% - 1rem);
+    overflow-y: scroll;
+}
+
+#search h3 {
+    border: 0px;
+    margin-top: 0px;
+}
+#search-controls button {
+    padding: 0.1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-left: 0.5rem;
+
+    font-family: 'Roboto-Regular';
+    font-weight: bold;
+}
+#hard_search {
+    margin-left: 0.6rem;
+}
+#search ul {
+    padding-left: 0px;
+    margin-top: 0px;
+}
+#search li {
+    max-height: 5.5rem;
+    margin-bottom: 1rem;
+    overflow: clip;
+}
+.score {
+    color: #719b74;
+    font-family: 'SourceCodePro-Regular';
+    font-size: 10pt;
+}
+#search_string{
+    width: 80%;
+    padding: 0.2rem;
+    padding-left: 0.5rem;
+}
+
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+  
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: rgba(0, 0, 0, 0.631);
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+
+    position: absolute;
+    z-index: 1;
+  }
+
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    width: 120px;
+    top: 100%;
+    left: 50%;
+    margin-left: -60px; 
+  }

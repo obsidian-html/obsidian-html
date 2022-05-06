@@ -145,6 +145,7 @@ def ExportStaticFiles(pb):
 
     # define files to be copied over (standard copy, static_folder)
     copy_file_list = [
+        [f'html/global_main.css', 'global_main.css'], 
         [f'html/{pb.gc("_css_file")}', 'main.css'], 
         ['html/obsidian.js', 'obsidian.js'],
         ['html/mermaid.css', 'mermaid.css'],
@@ -160,6 +161,11 @@ def ExportStaticFiles(pb):
     if pb.gc('toggles/features/graph/enabled', cached=True):
         copy_file_list.append(['graph/graph.css', 'graph.css'])
         copy_file_list.append(['graph/graph.svg', 'graph.svg'])
+
+    if pb.gc('toggles/features/search/enabled', cached=True):
+        copy_file_list.append(['search/search.svg', 'search.svg'])
+        copy_file_list.append(['search/search.js', 'search.js'])
+        copy_file_list.append(['search/search.css', 'search.css'])
 
     if pb.gc('toggles/features/math_latex/enabled', cached=True):
         copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
@@ -181,7 +187,7 @@ def ExportStaticFiles(pb):
             content_pane_div = "right_pane"
 
         # Templating
-        if file_name[1] in ('main.css', 'obsidian.js'):
+        if file_name[1] in ('main.css', 'global_main.css', 'obsidian.js', 'search.js', 'search.css'):
             c = c.replace('{html_url_prefix}', html_url_prefix)\
                  .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
                  .replace('{documentation_mode}',str(int(pb.gc('toggles/features/styling/layout')=='documentation')))\
@@ -249,6 +255,11 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>' + "\n"
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js" /></script>' + "\n"
 
+    if pb.config.feature_is_enabled('search', cached=True):
+        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/search.css" />' + "\n"
+        dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/search.js" /></script>' + "\n"
+
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"
     
@@ -275,6 +286,13 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     else:
         template = template.replace('{graph_button}', '')
 
+    if pb.config.GetCachedConfig('search_show_icon'):
+        code = OpenIncludedFile('search/button_template.html')
+        template = template.replace('{search_button}', code)
+    else:
+        template = template.replace('{search_button}', '')
+
+
     if pb.config.GetCachedConfig('dirtree_show_icon'):
         # output path
         output_path = html_url_prefix + '/' + pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path', cached=True)
@@ -287,6 +305,13 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         template = template.replace('{dirtree_button}', code)
     else:
         template = template.replace('{dirtree_button}', '')
+
+
+    if pb.config.feature_is_enabled('search', cached=True):
+        template = template.replace('{search_html}', OpenIncludedFile('search/search.html'))
+    else:
+        template = template.replace('{search_html}', '')
+
 
     # Replace placeholders
     template = template\

@@ -250,14 +250,6 @@ h1, h2, h3, h4, h5 {
     scroll-margin-top: 8rem;
 }
 
-.icon-tray {
-    width:8rem; 
-    height:1.6rem; 
-    margin-top: -0.1rem;
-}
-
-
-
 @font-face {
     font-family: 'SourceCodePro-Regular';
     src: url('{html_url_prefix}/obs.html/static/SourceCodePro-Regular.ttf') format('truetype');
@@ -541,6 +533,9 @@ span.tag {
         margin-top: 1.5rem
     }
 }
+
+
+
 
 
 .codehilite { 

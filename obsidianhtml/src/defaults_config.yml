@@ -135,6 +135,11 @@ toggles:
     math_latex:
       enabled: True
 
+    search:
+      enabled: True
+      styling:
+        show_icon: True
+
     # Include code to build the graph view per page 
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)

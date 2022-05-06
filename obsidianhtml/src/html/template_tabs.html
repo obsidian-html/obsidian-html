@@ -13,6 +13,7 @@
                 <title>{title}</title>
 
                 <!-- Includes -->
+                <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/global_main.css" />
                 <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/mermaid.css" />
                 <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/main.css" />
                 <script src="{html_url_prefix}/obs.html/static/mermaid.min.js"></script> 
@@ -30,6 +31,7 @@
         </head>
 
 <body onload="LoadPage();">
+        {search_html}
         <div class="flex_col" id="site_column">
                 <div id="header" class="header" style="position:fixed">
                         <div id="header_flex" class="flex_row">
@@ -48,6 +50,7 @@
                                                 </div>
                                                 {dirtree_button}
                                                 {graph_button}
+                                                {search_button}
                                         </div>                                
                                 </div>
                         </div>
