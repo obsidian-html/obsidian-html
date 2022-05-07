@@ -1,4 +1,6 @@
 import json
+import re
+
 
 class SearchHead:
     def __init__(self):
@@ -8,7 +10,8 @@ class SearchHead:
         p = {
             'title': title,
             'url': url,
-            'keywords': GetKeywords(text)
+            'keywords': GetKeywords(text),
+            'md': text
         }
         self.data.append(p)
 

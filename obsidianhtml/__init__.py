@@ -15,6 +15,7 @@ import warnings
 import time
 import datetime
 import platform
+import gzip
 
 from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
 
@@ -787,11 +788,10 @@ def main():
             with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
                 f.write(pb.network_tree.OutputJson())
 
-
         if pb.gc('toggles/features/search/enabled', cached=True):
-            # Write search json to static folder
-            with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json'), 'w', encoding="utf-8") as f:
-                f.write(pb.search.OutputJson())
+            # Compress search json and write to static folder
+            with gzip.open(pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json.gzip'), 'wb', compresslevel=5) as f:
+                f.write(pb.search.OutputJson().encode('utf-8'))
 
 
     print('< COMPILING HTML FROM MARKDOWN CODE: Done')

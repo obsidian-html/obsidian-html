@@ -6,11 +6,14 @@ var fuse;                               // fuzzy search object
 var index;
 
 
+
 // Get data
 // -----------------------------------------------------------------------------------------------
 
-fetch('{html_url_prefix}/obs.html/data/search.json').then(res => res.json()).then(data => {
-    SEARCH_DATA = data;
+//fetch('{html_url_prefix}/obs.html/data/search.json').then(res => res.json()).then(data => {
+
+GzipUnzipLocalFile('{html_url_prefix}/obs.html/data/search.json.gzip').then(data => {
+    SEARCH_DATA = JSON.parse(data);
 
     index = new FlexSearch.Document({
         id: "id",
@@ -30,7 +33,7 @@ fetch('{html_url_prefix}/obs.html/data/search.json').then(res => res.json()).the
 
         i++;
     });
-})
+});
 
 
 // Functions
@@ -146,3 +149,14 @@ function GetHtmlFlex(fs_results, hard_search){
     html += '</ul>'
     return html
 }
+
+async function GzipUnzipLocalFile(request_url) {
+    return fetch(request_url)                                                   // make request
+            .then(res => res.blob())                                            // read byte data in blob form and continue when fully read
+            .then(blob => blob.arrayBuffer())                                   // convert blob to arraybuffer and continue when done
+            .then(ab => {
+                data = pako.inflate(ab)                                         // go from zipped arraybuffer to unzipped arraybuffer
+                return String.fromCharCode.apply(null, new Uint16Array(data));  // convert arraybuffer to string
+            })
+}
+
