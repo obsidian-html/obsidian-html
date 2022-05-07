@@ -12,29 +12,6 @@ var index;
 fetch('{html_url_prefix}/obs.html/data/search.json').then(res => res.json()).then(data => {
     SEARCH_DATA = data;
 
-    const options = {
-        // isCaseSensitive: false,
-        includeScore: true,
-        // shouldSort: true,
-        includeMatches: true,
-        // findAllMatches: false,
-        // minMatchCharLength: 1,
-        // location: 0,
-        threshold: 0.5,
-        // distance: 100,
-        // useExtendedSearch: false,
-        ignoreLocation: true,
-        // ignoreFieldNorm: false,
-        // fieldNormWeight: 1,
-        keys: [
-            "title",
-            "keywords"
-        ]
-    };
-
-    // fuse = new Fuse(SEARCH_DATA, options)
-    // console.log('fuse search loaded');
-
     index = new FlexSearch.Document({
         id: "id",
         index: ["title", "content"],
@@ -54,8 +31,6 @@ fetch('{html_url_prefix}/obs.html/data/search.json').then(res => res.json()).the
         i++;
     });
 })
-
-
 
 
 // Functions
