@@ -257,7 +257,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
 
     if pb.config.feature_is_enabled('search', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/search.css" />' + "\n"
-        dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>' + "\n"
+        dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.2/dist/flexsearch.bundle.js"></script>' + "\n"
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/search.js" /></script>' + "\n"
 
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):

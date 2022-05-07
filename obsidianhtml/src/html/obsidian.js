@@ -230,6 +230,9 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath){
 function rem(rem) {
         return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
 }
+function vh(){
+        return Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+}
 
 function CenterNote(level) {
         let cont = document.getElementById('level-' + level);

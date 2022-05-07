@@ -22,11 +22,10 @@
     padding-bottom: 1.5rem;
 }
 #search-results-box {
-    height: calc(100vh - 11rem);
+    height: 0rem;
     margin-top: 1rem;
     background-color: white;
     max-width: __max_note_width__;
-    display: none;
 }
 #search-results {
     height: calc(100% - 1rem);
@@ -50,13 +49,18 @@
     margin-left: 0.6rem;
 }
 #search ul {
-    padding-left: 0px;
+    padding-left: 0.3rem;
     margin-top: 0px;
 }
 #search li {
     max-height: 5.5rem;
     margin-bottom: 1rem;
-    overflow: clip;
+    padding: 0.5rem;
+    overflow: hidden;
+}
+#search li:hover {
+    background-color: #c9dadb;
+    cursor: pointer;
 }
 .score {
     color: #719b74;
@@ -64,9 +68,13 @@
     font-size: 10pt;
 }
 #search_string{
-    width: 80%;
-    padding: 0.2rem;
+    width: calc(100% - 1.5rem);
+    padding: 0.3rem;
     padding-left: 0.5rem;
+}
+#search-instructions {
+    margin-top: 1rem;
+    margin-left: 0.7rem;
 }
 
 
