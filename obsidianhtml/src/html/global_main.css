@@ -1,3 +1,138 @@
+/* ----------------------------------------     General    ------------------------------------------------- */
+* {
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    color: rgb(51, 51, 51);
+}
+
+/* ----------------------------------------      Core      ---------------------------------------- */
+blockquote {
+    background-color: __accent_color__12;
+    padding: 0rem 0rem 0rem 0.5rem;
+    margin: 0rem;
+    margin-bottom: 0.5rem;
+    border: 1px dashed white;
+    color: #4f4538;    
+}
+
+blockquote p {
+    margin: 0.4rem;
+}
+
+
+/* ---------------------------------------- Table troubles ---------------------------------------- */
+table {
+    margin: 1.5rem;
+    margin-left: 0rem;
+    text-align: left;
+    border-collapse: collapse;
+}
+td {
+    border-bottom: 1px solid #ececec;
+    padding: 0.3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+td:nth-child(2n) {
+    border-left: 1px dotted #cecece;
+}
+td:first-child {
+    min-width: max-content;
+}
+th:first-child, td:first-child{
+    padding-left: 0rem;
+}
+tr:last-child td {
+    border-bottom: 0px;
+}
+th {
+    text-transform: capitalize;
+    border: 0px;
+    padding: 0.3rem;
+    padding-left: 1rem;
+    font-weight: normal;
+    font-style: italic;
+    color: #9fbcd7;    
+}
+h1 + table {
+    margin-top:0rem;
+}
+h2 + table {
+    margin-top:0rem;
+}
+h3 + table {
+    margin-top:0rem;
+}
+h4 + table {
+    margin-top:0rem;
+}
+
+/* ---------------------------------------   Link colors / decoration  ---------------------------------------------*/
+/* unvisited link */
+a:link {
+    color: rgb(10, 132, 255);
+    text-decoration: none;
+}
+
+/* visited link */
+a:visited {
+    color: rgb(60, 158, 255);
+    text-decoration: none;
+}
+
+/* mouse over link */
+a:hover {
+    color: rgb(10, 132, 255);
+    text-decoration: underline;
+}
+
+/* selected link */
+a:active {
+    color: rgb(10, 132, 255);
+    text-decoration: none;
+} 
+
+a.nonexistent-link:link  ,
+a.nonexistent-link:hover,
+a.nonexistent-link:active,
+a.nonexistent-link:visited {
+    color:rgb(156, 156, 156);
+}
+
+.header a,
+.header a:link,
+.header a:visited {
+    color: #161616;
+}
+
+a.navbar-link:visited
+{
+    color: #161616;
+}
+.navbar-link:hover {
+    background-color: __accent_color__;
+    color: white;
+    text-decoration: none;
+}
+a.navbar-link:hover
+{
+    text-decoration: none;
+    color: white;
+}
+
+
+#homelink:visited {
+    color: __accent_color__;
+}
+#homelink:link {
+    color: __accent_color__;
+}
+
+/* ----------------------------------------    One-offs   ---------------------------------------- */
+
 .icon-tray {
     width:10rem; 
     height:1.6rem; 

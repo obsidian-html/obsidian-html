@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <!-- Page information -->
+        <meta charset="UTF-8" />
+        <meta name="node_id" content="About ObsidianHtml">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <!-- Set title -->
+        <title>ObsidianHtml/Documentation</title>
+
+        <!-- Includes -->
+        <link rel="stylesheet" href="/obs.html/static/global_main.css" />
+        <link rel="stylesheet" href="/obs.html/static/main.css" />
+        <link rel="stylesheet" href="/obs.html/static/callouts.css" />
+        <script src="/obs.html/static/load_mathjax.js" /></script>
+    </head>
+
+    <body>
+        {content}
+    </body>
+
+    <script>
+        function fold_callout(el) {
+            let div = el.parentElement
+            if (div.classList.contains("callout-folded-active")) {
+                div.classList.remove("callout-folded-active")
+            } else {
+                div.classList.add("callout-folded-active")
+            }
+        }
+    </script>
+</html>
