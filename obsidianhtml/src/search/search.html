@@ -1,4 +1,4 @@
-<div id="search">
+<div id="search-master-div">
     <div id="search-slab" king_ramses="return the slaaab">
             <div id="search-controls">
                     <input id="search_string" placeholder="Type to search notes" type="text" />
@@ -18,11 +18,11 @@
     </div>
 </div>
 <script>
-    document.getElementById("search").addEventListener('click', e => {
+    document.getElementById("search-master-div").addEventListener('click', e => {
             if(e.target !== e.currentTarget){
                     return
             }
-            toggle('search', 'block');
+            toggle('search-master-div', 'block');
     })
     document.getElementById("search_string").addEventListener("input", function(event) {
             console.log(event);
@@ -34,7 +34,7 @@
 
     window.addEventListener('keydown', e => {
         if((e.key=='Escape'||e.key=='Esc'||e.keyCode==27)){
-            document.getElementById('search').style.display = 'none';
+            document.getElementById('search-master-div').style.display = 'none';
             return false;
         }
     }, true);

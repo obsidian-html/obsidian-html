@@ -1,4 +1,4 @@
-#search {
+#search-master-div {
     position: absolute;
     z-index: 1;
     background-color: #0000008f;
@@ -32,7 +32,7 @@
     overflow-y: scroll;
 }
 
-#search h3 {
+#search-master-div h3 {
     border: 0px;
     margin-top: 0px;
 }
@@ -48,18 +48,18 @@
 #hard_search {
     margin-left: 0.6rem;
 }
-#search ul {
+#search-master-div ul {
     padding-left: 0.3rem;
     margin-top: 0px;
 }
-#search li {
+#search-master-div li {
     max-height: 5.5rem;
     margin-bottom: 1rem;
     padding: 0.5rem;
     overflow: hidden;
 }
-#search li:hover {
-    background-color: #c9dadb;
+#search-master-div li:hover {
+    background-color: __accent_color__14;
     cursor: pointer;
 }
 .score {
