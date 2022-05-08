@@ -34,3 +34,4 @@ function rem(rem) {
 function vh() {
     return Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 }
+function print(...vals){ console.log(...vals)}
