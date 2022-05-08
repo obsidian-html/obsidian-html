@@ -262,7 +262,8 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
 
     # Header inclusions
     dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/obsidian_core_header.js"></script>' + "\n"
-
+    dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/encoding.js"></script>' + "\n"
+    
     if pb.config.feature_is_enabled('callouts', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/callouts.css" />' + "\n"
 
