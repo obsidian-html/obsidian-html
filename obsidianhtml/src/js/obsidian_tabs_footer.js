@@ -115,6 +115,7 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
     // Arm new links
     SetLinks(level);
     SetContainer(levelcont);
+    LoadTableOfContents(levelcont);
 
     // Continue path opening (if started with path opening)
     if (callbackpath) {

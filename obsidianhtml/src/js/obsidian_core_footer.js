@@ -9,7 +9,7 @@ var mermaid_enabled = {mermaid_enabled};
 var toc_pane_div = "{toc_pane_div}";
 var content_pane_div = "{content_pane_div}";
 var html_url_prefix = "{html_url_prefix}";
-var documentation_mode = { documentation_mode };
+var documentation_mode = {documentation_mode};
 var tab_mode = !no_tab_mode;
 
 
@@ -23,21 +23,9 @@ function LoadPage() {
         httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
     }
 
-    let collection = document.getElementsByClassName("toc");
+    let collection = document.getElementsByClassName("container")
     if (collection.length > 0) {
-        let toc = collection[0];
-        if (toc.getElementsByTagName('li').length > 1) {
-
-            if (toc_pane && no_tab_mode) {
-                let tpd = document.getElementById(toc_pane_div);
-                tpd.display = 'block';
-                tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + collection[0].innerHTML;
-            }
-            else {
-                toc.style.display = 'block';
-                toc.innerHTML = '<h3>Table of Contents</h1>\n' + toc.innerHTML
-            }
-        }
+        LoadTableOfContents(collection[0])
     }
 
     if (tab_mode) {
@@ -110,6 +98,27 @@ function LoadPage() {
         }
         OpenPath(1);
     }
+}
+
+function LoadTableOfContents(container_div)
+{
+    let collection = container_div.getElementsByClassName('toc')
+    if (collection.length > 0) {
+        let toc = collection[0];
+        if (toc.getElementsByTagName('li').length > 1) {
+
+            if (toc_pane && no_tab_mode) {
+                let tpd = document.getElementById(toc_pane_div);
+                tpd.display = 'block';
+                tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + collection[0].innerHTML;
+            }
+            else {
+                toc.style.display = 'block';
+                toc.innerHTML = '<h3>Table of Contents</h1>\n' + toc.innerHTML
+            }
+        }
+    }
+
 }
 
 
