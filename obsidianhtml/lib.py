@@ -156,6 +156,7 @@ def ExportStaticFiles(pb):
         ['index_from_dir_structure/dirtree.svg', 'dirtree.svg'],
         ['js/obsidian_core_header.js', 'obsidian_core_header.js'],
         ['js/obsidian_core_footer.js', 'obsidian_core_footer.js'],
+        ['js/encoding.js', 'encoding.js'],
         ['index_from_dir_structure/dirtree.js', 'dirtree.js'],
     ]
 
