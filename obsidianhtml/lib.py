@@ -146,7 +146,7 @@ def ExportStaticFiles(pb):
     # define files to be copied over (standard copy, static_folder)
     copy_file_list = [
         ['html/global_main.css', 'global_main.css'], 
-        [f'html/{pb.gc("_css_file")}', 'main.css'], 
+        [f'html/layouts/{pb.gc("_css_file")}', 'main.css'], 
         ['html/mermaid.css', 'mermaid.css'],
         ['html/callouts.css', 'callouts.css'],
         ['html/taglist.css', 'taglist.css'],
@@ -181,6 +181,9 @@ def ExportStaticFiles(pb):
 
     if pb.gc('toggles/features/styling/layout', cached=True) == 'documentation':
         copy_file_list.append(['js/load_dirtree_footer.js', 'load_dirtree_footer.js'])
+
+    if pb.gc('toggles/features/styling/layout', cached=True) == 'tabs':
+        copy_file_list.append(['js/obsidian_tabs_footer.js', 'obsidian_tabs_footer.js'])        
 
     # copy static files over to the static folder
     for file_name in copy_file_list:
@@ -294,6 +297,9 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
 
     if pb.gc('toggles/features/styling/layout', cached=True) == 'documentation':
         footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/load_dirtree_footer.js" type="text/javascript"></script>' + "\n"
+
+    if pb.gc('toggles/features/styling/layout', cached=True) == 'tabs':
+        footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/obsidian_tabs_footer.js" type="text/javascript"></script>' + "\n"
 
     # Include toggled components
     if pb.config.GetCachedConfig('rss_show_icon'):

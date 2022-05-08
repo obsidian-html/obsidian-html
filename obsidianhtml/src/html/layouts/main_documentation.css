@@ -1,5 +1,4 @@
   body {
-    margin: 0rem;
     width: 100vw;
     height: 100vh;
     position: static;
@@ -9,25 +8,13 @@
 .container {
     flex-grow: 1;
     flex: auto;
-    padding: 2rem;
-    height: calc(100vh - 5rem);
+
     overflow-y: scroll;
+
+    height: calc(100vh - 5rem);
     scrollbar-color: __accent_color__12 #ffffff;
     scroll-margin-top: 2rem;
     max-width: __max_note_width__;
-}
-.container img {
-    max-width: 100%;
-    padding: 0.2rem;
-}
-.container video {
-    margin: auto;  
-    max-width: 100%;
-}
-.container audio {
-    margin: auto;  
-    border-radius: 1.5rem;
-    background-color: black;
 }
 .single_tab_page {
     width: 80vw;
@@ -38,10 +25,7 @@
     width: auto;
     margin: 0rem;
 }
-.container:after {
-    content: "\a";
-    white-space: pre;
-}
+
 .container-clickback {
     position: absolute;
     background-color: rgb(240, 240, 240);

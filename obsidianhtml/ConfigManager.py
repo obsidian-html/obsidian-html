@@ -127,7 +127,7 @@ class Config:
                     html_template = f.read()
             except:
                 layout = self.pb.gc('toggles/features/styling/layout')
-                html_template = OpenIncludedFile(f'html/template_{layout}.html')
+                html_template = OpenIncludedFile(f'html/layouts/template_{layout}.html')
 
             if '{content}' not in html_template:
                 raise Exception('The provided html template does not contain the string `{content}`. This will break its intended use as a template.')
