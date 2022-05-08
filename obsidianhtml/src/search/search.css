@@ -77,6 +77,16 @@
     margin-left: 0.7rem;
 }
 
+.search-highlights{
+    margin-top: 0.2rem;
+}
+.search-highlights em {
+    background-color: #1a17ff14;
+    font-style: normal;
+}
+.search-highlights g {
+    color: #c8dfea;;
+}
 
 .tooltip {
     position: relative;

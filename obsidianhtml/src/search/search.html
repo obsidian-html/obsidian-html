@@ -17,6 +17,7 @@
             </div>
     </div>
 </div>
+
 <script>
     document.getElementById("search-master-div").addEventListener('click', e => {
             if(e.target !== e.currentTarget){
@@ -25,7 +26,6 @@
             toggle('search-master-div', 'block');
     })
     document.getElementById("search_string").addEventListener("input", function(event) {
-            console.log(event);
             setTimeout( () =>run_search('search_string', 'hard_search'), 100 );
     }); 
     document.getElementById("hard_search").addEventListener("click", function(event) {
