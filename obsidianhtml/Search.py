@@ -11,13 +11,22 @@ class SearchHead:
             'title': title,
             'url': url,
             'keywords': GetKeywords(text),
-            'md': text
+            'md': SanatizeText(text)
         }
         self.data.append(p)
 
     def OutputJson(self):
         ''' the search.json '''
         return json.dumps(self.data)
+
+def SanatizeText(text):
+    text = text.lower()
+    text = text.replace('\n', ' ↩ ')
+    text = re.sub(r'[\s]{2,}', ' ', text)
+    text = re.sub(r'[\s↩]{2,}', ' ↩ ', text)
+
+    return text
+
 
 def GetKeywords(text):
     # clean up text

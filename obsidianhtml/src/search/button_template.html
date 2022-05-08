@@ -4,8 +4,10 @@
         <script>
                 function openSearch(){
                         if (toggle('search-master-div', 'block')){
-                                document.getElementById('search_string').focus()
-                                document.getElementById('search_string').select()
+                                let ss = document.getElementById('search_string');
+                                ss.value = '';
+                                ss.focus()
+                                ss.select()
                         }
                 }
         </script>
