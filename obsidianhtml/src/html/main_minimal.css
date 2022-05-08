@@ -10,7 +10,9 @@ body {
     scrollbar-color: __accent_color__12 #ffffff;
     scroll-margin-top: 2rem;
     max-width: __max_note_width__;
+    margin:auto;
 }
+
 .codehilite {
     color: rgb(98, 35, 16);
 }

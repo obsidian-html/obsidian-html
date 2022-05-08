@@ -8,27 +8,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <!-- Set title -->
-        <title>ObsidianHtml/Documentation</title>
+        <title>{title}</title>
 
         <!-- Includes -->
         <link rel="stylesheet" href="/obs.html/static/global_main.css" />
         <link rel="stylesheet" href="/obs.html/static/main.css" />
-        <link rel="stylesheet" href="/obs.html/static/callouts.css" />
-        <script src="/obs.html/static/load_mathjax.js" /></script>
+        {dynamic_includes}
+
     </head>
 
     <body>
-        {content}
+        <div class="container">
+            {content}
+        </div>
+        
+        {footer_js_inclusions}        
     </body>
-
-    <script>
-        function fold_callout(el) {
-            let div = el.parentElement
-            if (div.classList.contains("callout-folded-active")) {
-                div.classList.remove("callout-folded-active")
-            } else {
-                div.classList.add("callout-folded-active")
-            }
-        }
-    </script>
 </html>

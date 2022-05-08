@@ -145,31 +145,42 @@ def ExportStaticFiles(pb):
 
     # define files to be copied over (standard copy, static_folder)
     copy_file_list = [
-        [f'html/global_main.css', 'global_main.css'], 
+        ['html/global_main.css', 'global_main.css'], 
         [f'html/{pb.gc("_css_file")}', 'main.css'], 
-        ['html/obsidian.js', 'obsidian.js'],
         ['html/mermaid.css', 'mermaid.css'],
         ['html/callouts.css', 'callouts.css'],
-        ['html/mermaid.min.js', 'mermaid.min.js'],
         ['html/taglist.css', 'taglist.css'],
         ['html/external.svg', 'external.svg'],
         ['html/hashtag.svg', 'hashtag.svg'],
         ['rss/rss.svg', 'rss.svg'],
-        ['index_from_dir_structure/dirtree.js', 'dirtree.js'],
         ['index_from_dir_structure/dirtree.svg', 'dirtree.svg'],
+        ['js/obsidian_core_header.js', 'obsidian_core_header.js'],
+        ['js/obsidian_core_footer.js', 'obsidian_core_footer.js'],
+        ['index_from_dir_structure/dirtree.js', 'dirtree.js'],
     ]
-    if pb.gc('toggles/features/graph/enabled', cached=True):
+
+    if pb.config.feature_is_enabled('graph', cached=True):
         copy_file_list.append(['graph/graph.css', 'graph.css'])
         copy_file_list.append(['graph/graph.svg', 'graph.svg'])
 
-    if pb.gc('toggles/features/search/enabled', cached=True):
+    if pb.config.feature_is_enabled('mermaid_diagrams', cached=True):
+        copy_file_list.append(['js/mermaid.9.0.1.min.js', 'mermaid.9.0.1.min.js']),
+        copy_file_list.append(['js/mermaid.9.0.1.min.js.map', 'mermaid.9.0.1.min.js.map']),
+
+    if pb.config.feature_is_enabled('code_highlight', cached=True):
+        copy_file_list.append(['html/codehilite.css', 'codehilite.css'])
+
+    if pb.config.feature_is_enabled('search', cached=True):
         copy_file_list.append(['search/search.svg', 'search.svg'])
         copy_file_list.append(['search/pako.js', 'pako.js'])
         copy_file_list.append(['search/search.js', 'search.js'])
         copy_file_list.append(['search/search.css', 'search.css'])
 
-    if pb.gc('toggles/features/math_latex/enabled', cached=True):
+    if pb.config.feature_is_enabled('math_latex', cached=True):
         copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
+
+    if pb.gc('toggles/features/styling/layout', cached=True) == 'documentation':
+        copy_file_list.append(['js/load_dirtree_footer.js', 'load_dirtree_footer.js'])
 
     # copy static files over to the static folder
     for file_name in copy_file_list:
@@ -188,11 +199,14 @@ def ExportStaticFiles(pb):
             content_pane_div = "right_pane"
 
         # Templating
-        if file_name[1] in ('main.css', 'global_main.css', 'obsidian.js', 'search.js', 'search.css'):
+        if file_name[1] in ('main.css', 'global_main.css', 
+                            'obsidian_core_header.js', 'obsidian_core_footer.js', 
+                            'search.js', 'search.css'):
             c = c.replace('{html_url_prefix}', html_url_prefix)\
                  .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
                  .replace('{documentation_mode}',str(int(pb.gc('toggles/features/styling/layout')=='documentation')))\
                  .replace('{toc_pane}',str(int(pb.gc('toggles/features/styling/toc_pane'))))\
+                 .replace('{mermaid_enabled}',str(int(pb.gc('toggles/features/mermaid_diagrams/enabled'))))\
                  .replace('{toc_pane_div}', toc_pane_div)\
                  .replace('{content_pane_div}', content_pane_div)
             c = c.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))\
@@ -242,38 +256,44 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     if html_url_prefix is None:
         html_url_prefix = pb.gc("html_url_prefix")
 
-    # Defaults
-    if title == '':
-        title = pb.gc('site_name', cached=True)
+    # Header inclusions
+    dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/obsidian_core_header.js"></script>' + "\n"
 
-    dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/callouts.css" />' + "\n"
+    if pb.config.feature_is_enabled('callouts', cached=True):
+        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/callouts.css" />' + "\n"
 
     if pb.config.feature_is_enabled('graph', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
 
+    if pb.config.feature_is_enabled('code_highlight', cached=True):
+        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/codehilite.css" />' + "\n"
+
+    if pb.config.feature_is_enabled('mermaid_diagrams', cached=True):
+        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/mermaid.9.0.1.min.js"></script>' + "\n"    
+
     if pb.config.feature_is_enabled('math_latex', cached=True):
         dynamic_inclusions += '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + "\n"
         dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>' + "\n"
-        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js" /></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js"></script>' + "\n"
 
     if pb.config.feature_is_enabled('search', cached=True):
         dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/search.css" />' + "\n"
         dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.2/dist/flexsearch.bundle.js"></script>' + "\n"
-        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/pako.js" /></script>' + "\n"
-        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/search.js" /></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/pako.js"></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/search.js"></script>' + "\n"
 
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
-        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js" /></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js"></script>' + "\n"
     
     if dynamic_includes is not None:
         dynamic_inclusions += dynamic_includes
 
-    if container_wrapper_class_list is None:
-        container_wrapper_class_list = []
-    if pb.gc('toggles/no_tabs', cached=True):
-        container_wrapper_class_list.append('single_tab_page')        
+    # Footer Inclusions
+    footer_js_inclusions = f'<script src="{html_url_prefix}/obs.html/static/obsidian_core_footer.js" type="text/javascript"></script>' + "\n"
 
-    footer_js_inclusions = f'<script src="{html_url_prefix}/obs.html/static/obsidian.js" type="text/javascript"></script>'
+    if pb.gc('toggles/features/styling/layout', cached=True) == 'documentation':
+        footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/load_dirtree_footer.js" type="text/javascript"></script>' + "\n"
 
     # Include toggled components
     if pb.config.GetCachedConfig('rss_show_icon'):
@@ -294,7 +314,6 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     else:
         template = template.replace('{search_button}', '')
 
-
     if pb.config.GetCachedConfig('dirtree_show_icon'):
         # output path
         output_path = html_url_prefix + '/' + pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path', cached=True)
@@ -308,12 +327,19 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     else:
         template = template.replace('{dirtree_button}', '')
 
-
     if pb.config.feature_is_enabled('search', cached=True):
         template = template.replace('{search_html}', OpenIncludedFile('search/search.html'))
     else:
         template = template.replace('{search_html}', '')
 
+    # Misc
+    if title == '':
+        title = pb.gc('site_name', cached=True)
+
+    if container_wrapper_class_list is None:
+        container_wrapper_class_list = []
+    if pb.gc('toggles/no_tabs', cached=True):
+        container_wrapper_class_list.append('single_tab_page')    
 
     # Replace placeholders
     template = template\

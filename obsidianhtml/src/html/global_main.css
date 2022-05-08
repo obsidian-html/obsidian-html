@@ -8,6 +8,21 @@ body {
     color: rgb(51, 51, 51);
 }
 
+@font-face {
+    font-family: 'SourceCodePro-Regular';
+    src: url('{html_url_prefix}/obs.html/static/SourceCodePro-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: monospace;
+}
+
+@font-face {
+    font-family: 'Roboto-Regular';
+    src: url('{html_url_prefix}/obs.html/static/Roboto-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
 /* ----------------------------------------      Core      ---------------------------------------- */
 blockquote {
     background-color: __accent_color__12;
