@@ -235,3 +235,12 @@ function fold_callout(el) {
         div.classList.add("callout-folded-active")
     }
 }
+
+// general option, to replace function above
+function fold(el) {
+    if (el.classList.contains("fold-active")) {
+        el.classList.remove("fold-active")
+    } else {
+        el.classList.add("fold-active")
+    }
+}

@@ -98,11 +98,28 @@ function GetResultsFlex(search_string, hard_search) {
 }
 
 function GetHtmlFlex(fs_results, search_string, hard_search) {
+    let template = `
+<li>
+    <div class="search-result-title">
+        <div class="search-result-title-name" onclick="click_list_link(this)">
+            <a href="{{url}}">{{title}}</a>
+        </div>
+        <div class="search-result-icon" onclick="fold(this.parentElement.parentElement);"> 
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ChevronDown"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+    </div>
+    <div class="search-highlights" onclick="click_list_link(this)">'
+        {{content}}
+    </div>
+</li>
+`;
+
     html = '<ul>\n'
     fs_results.forEach(res => {
-        html += '\t<li onclick="click_inner_link(this)"><a href="' + res.url + '">' + res.title + '</a> '
-        html += '<div class="search-highlights">' + highlight(SEARCH_DATA[res.id].md, search_string, false, 20).join(" ") + '</div></li>'
-        html += '\n'
+        let element = template;
+        html += element.replace('{{url}}', res.url)
+                    .replace('{{title}}', res.title)
+                    .replace('{{content}}', highlight(SEARCH_DATA[res.id].md, search_string, false, 20).join(" "))
     });
     html += '</ul>'
     return html
