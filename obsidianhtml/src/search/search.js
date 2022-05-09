@@ -132,6 +132,16 @@ function highlight(input_string, match_string, match_middle, border) {
     let nonwordchars2 = '[]() \n.,`↩#…;'  // don't include /,<,> lest the <em> tags are disturbed in a later step.
     let nonwordchars = nonwordchars2 + '/<>'
 
+    function html_encode(ch){
+        if (ch == '<'){
+            return '&lt;'
+        }
+        if (ch == '>'){
+            return '&gt;'
+        }
+        return ch
+    }
+
     // Find match starts and ends
     for (let i = 0; i < s.length; i++) {
         let ch = s[i];
@@ -192,7 +202,7 @@ function highlight(input_string, match_string, match_middle, border) {
             if (i == hl_start){
                 emph_chunk += '<em>'
             }
-            emph_chunk += chunk[i]
+            emph_chunk += html_encode(chunk[i])
             if (i == hl_end){
                 emph_chunk += '</em>'
             }
@@ -244,12 +254,4 @@ function highlight(input_string, match_string, match_middle, border) {
     }
 
     return chunks
-}
-
-function test(){
-    let input = SEARCH_DATA[10].md;
-    let match = "graph";
-    let match_middle = true;
-    let border = 20;
-    return highlight(input, match, match_middle, border)
 }
