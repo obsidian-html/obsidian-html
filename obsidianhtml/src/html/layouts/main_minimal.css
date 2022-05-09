@@ -26,4 +26,9 @@ body {
         background-color: white;
         box-shadow: unset;
     }
+    .codehilite {
+        width: calc(100vw - 4rem);
+        overflow-x: scroll;
+    } 
+    
 }
