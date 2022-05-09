@@ -36,10 +36,10 @@
         if((e.key=='Escape'||e.key=='Esc'||e.keyCode==27)){
             document.getElementById('search-master-div').style.display = 'none';
             return false;
-        }
+        } 
     }, true);
 
-    function click_inner_link(element){
-        element.getElementsByTagName('a')[0].click()
+    function click_list_link(element){
+        element.parentElement.getElementsByTagName('a')[0].click()
     }
 </script>
