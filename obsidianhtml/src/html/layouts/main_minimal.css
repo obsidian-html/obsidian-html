@@ -16,3 +16,14 @@ body {
 .codehilite {
     color: rgb(98, 35, 16);
 } 
+
+@media (max-width: 840px) {
+    body {
+        margin: 0rem;
+        background-color: unset;
+    }
+    .container {
+        background-color: white;
+        box-shadow: unset;
+    }
+}
