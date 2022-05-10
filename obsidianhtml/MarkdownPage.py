@@ -219,6 +219,10 @@ class MarkdownPage:
                 # Add to list to recurse to the link later
                 self.links.append(file_name)
 
+            # Don't continue processing for external links 
+            if '://' in file_name:
+                continue
+
             # Don't continue processing for non local files
             if file_name.split('/')[-1] not in self.file_tree.keys():
                 continue

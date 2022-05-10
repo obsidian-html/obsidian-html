@@ -4,10 +4,10 @@
     padding-bottom: 0.1rem;
     margin-bottom: 1rem;
     
-    background-color: #161616;
+    background-color: #ffffff;
     border-left: 4px solid rgb(var(--callout-color));
     border-radius: 0.3rem 0 0 0.3rem;
-    color: white;
+    color: #333333;
 
     --callout-color: 68, 138, 255;
 }
