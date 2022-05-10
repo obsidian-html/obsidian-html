@@ -341,17 +341,6 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # ------------------------------------------------------------------
     html = PopulateTemplate(pb, node['id'], pb.dynamic_inclusions, pb.html_template, content=html_body)
 
-    # [?] Documentation styling: Navbar
-    # ------------------------------------------------------------------
-    html = html.replace('{pinnedNode}', node['id'])
-    
-    navbar_links = pb.gc('navbar_links', cached=True)
-    elements = []
-    for l in navbar_links:
-        el = f'<a class="navbar-link" href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
-        elements.append(el)
-    html = html.replace('{{navbar_links}}', '\n'.join(elements))  
-
     # Save file
     # ------------------------------------------------------------------
     fo.path['html']['file_absolute_path'].parent.mkdir(parents=True, exist_ok=True)   

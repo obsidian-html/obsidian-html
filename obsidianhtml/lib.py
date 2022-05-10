@@ -349,6 +349,15 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     if pb.gc('toggles/no_tabs', cached=True):
         container_wrapper_class_list.append('single_tab_page')    
 
+    
+    # Navbar
+    navbar_links = pb.gc('navbar_links', cached=True)
+    elements = []
+    for l in navbar_links:
+        el = f'<a class="navbar-link" href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+        elements.append(el)
+    navbar_links_html = '\n'.join(elements)
+
     # Replace placeholders
     template = template\
         .replace('{node_id}', node_id)\
@@ -358,6 +367,8 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         .replace('{html_url_prefix}', html_url_prefix)\
         .replace('{container_wrapper_class_list}', ' '.join(container_wrapper_class_list))\
         .replace('{no_tabs}', str(int(pb.gc('toggles/no_tabs', cached=True))))\
+        .replace('{pinnedNode}', node_id)\
+        .replace('{{navbar_links}}', navbar_links_html)\
         .replace('{content}', content)
 
     return template

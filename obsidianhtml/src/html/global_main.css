@@ -175,3 +175,11 @@ a.navbar-link:hover
     height:1.6rem; 
     margin-top: -0.1rem;
 }
+
+
+/* --------------------------------------- Fixes -------------------------------------------------- */
+.container #homelink{
+    background-color: unset;
+    padding: unset;
+    margin: unset;
+}
