@@ -4,10 +4,10 @@
     padding-bottom: 0.1rem;
     margin-bottom: 1rem;
     
-    background-color: #ffffff;
+    background-color: rgb(22, 22, 22);
     border-left: 4px solid rgb(var(--callout-color));
-    border-radius: 0.3rem 0 0 0.3rem;
-    color: #333333;
+    border-radius: 0.1rem 0 0 0.1rem;
+    color: rgb(220, 221, 222);
 
     --callout-color: 68, 138, 255;
 }
@@ -144,4 +144,24 @@
 }
 .callout-cite {
     --callout-color: 158, 158, 158;
+}
+
+
+.callout-folded-active .callout-title {
+    padding-bottom: 3px;
+}
+
+/* light theme */
+.callout {
+    color: rgb(46, 51, 56);
+    background-color: rgb(242, 243, 245);
+}
+.callout-title {
+    background-color: rgba(var(--callout-color), 0.1);
+}
+.callout a,
+.callout a:hover,
+.callout a:visited,
+.callout a:link {
+    color: rgb(112, 93, 207)
 }
