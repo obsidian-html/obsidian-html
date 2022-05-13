@@ -15,16 +15,15 @@ var tab_mode = !no_tab_mode;
 
 // Functions 
 // ----------------------------------------------------------------------------
-
 function LoadPage() {
 
     let theme_name = window.localStorage.getItem('theme_name');
     if (!theme_name){
         window.localStorage.setItem('theme_name', 'obs-light');
     }
-    set_theme(window.localStorage.getItem('theme_name'));
-    document.getElementById('page_holder').style.display = 'block';
 
+    set_theme(window.localStorage.getItem('theme_name'));
+    document.getElementById('page_holder').style.visibility = 'visible';
 
     if (documentation_mode) {
         httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');

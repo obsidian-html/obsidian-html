@@ -4,7 +4,8 @@
     --table-border-color-rgb: 98, 98, 98;
     color: rgb(var(--normal-text-color));
 }
-.theme-obs-light {
+.theme-obs-light,
+.theme-obs-light * {
     --normal-text-color: 51, 51, 51;
 
     --bg-color: #f2f3f5a6;
@@ -29,10 +30,9 @@
     --header-bg: #f6f7f8;
     --code-hightlight-color: #9c27ec;
     --homelink-color: #2d68b1;
-
-    
 }
-.theme-obs-dark {
+.theme-obs-dark,
+.theme-obs-dark * {
     --normal-text-color: 220, 221, 222;
     
     --bg-color: #000000;
@@ -57,7 +57,8 @@
     --code-hightlight-color: #c877ff;
     --homelink-color: var(--color-accent3);
 }
-.theme-light {
+.theme-light,
+.theme-light * {
     --normal-text-color: 51, 51, 51;
 
     --bg-color: #f2f3f5a6;
@@ -99,8 +100,10 @@
     margin: 0rem;
     margin-top: 0rem;
     padding-top: 2rem;
-    padding-bottom: 0.3rem;
     background-color: var(--header-bg);
+}
+.theme-light .header {
+    padding-bottom: 0.3rem;
 }
 
 .theme-obs-light #homelink,
@@ -112,16 +115,32 @@
 .theme-obs-dark #homelink:visited,
 .theme-obs-dark #homelink:link,
 .theme-obs-dark #homelink:hover {
-    margin-left: 2rem;
+    margin-left: 3rem;
     margin-right: 2.5rem;
     background-color: unset;
     color: var(--homelink-color);
     width: 14rem;
 }
+
+.theme-light #homelink,
+.theme-light #homelink:visited,
+.theme-light #homelink:link,
+.theme-light #homelink:hover {
+    color: var(--homelink-color);
+    width: 15.5rem;
+    padding: 1rem;
+    max-width: max-content;
+    margin-top: -1rem;
+    margin-left: 0rem;
+    margin-right: 2.5rem;
+    border-radius: 0.3rem;    
+    max-height: 1.5rem;
+    background-color: rgb(var(--accent-color), 0.08);
+}
+
 .theme-obs-dark .container,
 .theme-obs-light .container {
     padding-top: 2rem;
-    background-color: var(--bg-note);
     border-top: 3px solid var(--divider-color);
 }
 .theme-obs-light #left_pane,
@@ -176,7 +195,7 @@
     }
 }
 
-.theme-obs-dark #theme-popup,
+/* .theme-obs-dark #theme-popup,
 .theme-obs-light #theme-popup {
     width: 200px;
     background-color: var(--divider-color);
@@ -188,12 +207,12 @@
     margin:auto;
     margin-bottom: 1rem;
     display: none;
-}
+} */
 .theme-obs-dark #theme-popup {
     background-color: var(--bg-accent);
 }
 
-.theme-obs-dark #theme-popup select,
+/* .theme-obs-dark #theme-popup select,
 .theme-obs-light #theme-popup select {
     background-color: var(--bg-accent2);
     color: var(--color-accent2);
@@ -201,7 +220,7 @@
     padding: 0.3rem;
     border-radius: 0.2rem;
     margin-left: 0.3rem;
-}
+} */
 
 .theme-button.active {
     background-color: var(--bg-accent2) !important;

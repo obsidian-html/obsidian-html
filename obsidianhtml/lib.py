@@ -151,7 +151,6 @@ def ExportStaticFiles(pb):
         ['html/callouts.css', 'callouts.css'],
         ['html/taglist.css', 'taglist.css'],
         ['html/themes/theme-obsidian.css', 'theme-obsidian.css'],
-        ['html/themes/theme-light.css', 'theme-light.css'],
         ['html/external.svg', 'external.svg'],
         ['html/hashtag.svg', 'hashtag.svg'],
         ['rss/rss.svg', 'rss.svg'],
@@ -216,7 +215,10 @@ def ExportStaticFiles(pb):
                  .replace('{toc_pane_div}', toc_pane_div)\
                  .replace('{content_pane_div}', content_pane_div)
             c = c.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))\
+                 .replace('__loading_bg_color__', pb.gc('toggles/features/styling/loading_bg_color', cached=True))\
                  .replace('__max_note_width__', pb.gc('toggles/features/styling/max_note_width', cached=True))\
+
+                 
 
         # Write to dest
         with open (dst_path, 'w', encoding="utf-8") as f:

@@ -8,12 +8,11 @@ body {
 .container {
     flex-grow: 1;
     flex: auto;
+    flex: 10;
 
     height: calc(100vh - 5rem);
     overflow-y: scroll;
-    scrollbar-color: __accent_color__12 #ffffff;
-    scroll-margin-top: 2rem;
-    max-width: __max_note_width__;
+    padding-top: 0.5rem;
 }
 .container-clickback {
     position: absolute;
@@ -26,8 +25,6 @@ body {
     cursor: pointer;
 }
 
-
-
 .single_tab_page {
     width: 80vw;
     max-width: 75rem;
@@ -38,20 +35,9 @@ body {
     margin: 0rem;
 }
 
-::-webkit-scrollbar {
-    width: 0.4rem;
-    height: 0.4rem;
-    background-color: #ffffff; /* or add it to the track */
-  }
-::-webkit-scrollbar-thumb{
-    background-color: #7c7f8c;
-    border: 0px;
-    border-radius: 10px;
-}
 .container-wrapper {
     flex-grow: 1;
 }
-
 
 #right_pane,
 #left_pane{
@@ -59,7 +45,6 @@ body {
     padding-top: 0.9rem;
     overflow-y: scroll;
     height: calc(90vh - 4rem);
-    scrollbar-color: __accent_color__12 #ffffff;
 }
 #left_pane{
     padding-left: 1.7rem;
@@ -104,9 +89,7 @@ body {
 #right_pane li {
     padding-top: 0.3rem;
 }
-.container {
-    padding-top: 0.5rem;
-}
+
 .toc {
     display: none;
     
@@ -146,8 +129,8 @@ body {
     display: none;
     width: calc(100vw - 4rem);
     text-align: center;
-    background-color: __accent_color__2b;
-    color: __accent_color__;
+    background-color: rgb(var(--accent-color), 0.17);
+    color: rgb(var(--accent-color));
     padding: 0.7rem;
     border-radius: 0.4rem;
     padding-top: 0.2rem;
@@ -291,7 +274,7 @@ a.navbar-link:visited
     color: #161616;
 }
 .navbar-link:hover {
-    background-color: __accent_color__;
+    background-color: rgb(var(--accent-color));
     color: white;
     text-decoration: none;
 }
@@ -303,10 +286,10 @@ a.navbar-link:hover
 */
 
 #homelink:visited {
-    color: __accent_color__;
+    color: rgb(var(--accent-color));
 }
 #homelink:link {
-    color: __accent_color__;
+    color: rgb(var(--accent-color));
 }
 
 .external-link::after {
@@ -384,7 +367,6 @@ span.tag {
     }
 
     .container {
-        float: none;
         width: calc(100vw - 4rem);
     }
     .container:after {

@@ -1,13 +1,47 @@
 /* ----------------------------------------     General    ------------------------------------------------- */
 * {
     text-rendering: optimizeLegibility;
+
+    --accent-color: __accent_color__;
+    --loading-bg-color: __loading_bg_color__;
+
+    --normal-text-color: 0, 255, 0;
+
+    --bg-color: #2a832a;
+    --bg-note: #192a19;
+
+    --bg-accent: #2a832a;
+    --color-accent: #00ff00;
+
+    --bg-accent2: #2a832a;
+    --color-accent2: #00ff00;
+
+    --bg-accent3: #2a832a;
+    --color-accent3: ##00ff00;
+
+    --divider-color:  #003800;
+    
+    --callout-bg: #2a832a;
+    --callout-color: #00ff00;
+    --callout-alpha: 0.1;
+
+    --header-bg: #2a832a;
+    --code-hightlight-color: #93ff93;
+    --homelink-color: #003300;
+    --table-header-color: #9fbcd7;
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     color: rgb(var(--normal-text-color));
     margin: 0rem;
+    background-color: rgb(var(--loading-bg-color));
 } 
+.header {padding-bottom: 1rem;}
+
+#page_holder {
+    visibility: hidden;
+}
 
 @font-face {
     font-family: 'SourceCodePro-Regular';
@@ -41,8 +75,14 @@ blockquote p {
 
 /* Containers */
 .container {
+    background-color: var(--bg-note);
     padding: 2rem;
+    scrollbar-color: var(--code-hightlight-color) var(--bg-note);
+    scroll-margin-top: 2rem;
+    max-width: __max_note_width__;
+    flex: 10;
 }
+
 .container:after {
     content: "\a\a\a\a\a\a\a\a\a";
     white-space: pre;
@@ -60,6 +100,23 @@ blockquote p {
     border-radius: 1.5rem;
     background-color: black;
 }
+
+
+::-webkit-scrollbar {
+    width: 0.3rem;
+    height: 0.4rem;
+    background-color: var(--bg-note);
+  }
+::-webkit-scrollbar-thumb{
+    background-color: var(--code-hightlight-color);
+    border: 0px;
+    border-radius: 10px;
+}
+#right_pane,
+#left_pane{
+    scrollbar-color: var(--code-hightlight-color) var(--bg-note);
+}
+
 
 /* ---------------------------------------- Table troubles ---------------------------------------- */
 table {
@@ -93,7 +150,7 @@ th {
     padding-left: 1rem;
     font-weight: normal;
     font-style: italic;
-    color: #9fbcd7;    
+    color: var(--table-header-color);
 }
 h1 + table {
     margin-top:0rem;
@@ -140,12 +197,6 @@ a.nonexistent-link:visited {
     color:rgb(156, 156, 156);
 }
 
-.header a,
-.header a:link,
-.header a:visited {
-    color: #161616;
-}
-
 a.navbar-link:visited,
 a.navbar-link:hover,
 a.navbar-link:link
@@ -155,14 +206,14 @@ a.navbar-link:link
 }
 a.navbar-link:hover
 {
-    background-color: __accent_color__90;
+    background-color: rgb(var(--accent-color), 0.56);
 }
 
 #homelink:visited {
-    color: __accent_color__;
+    color: rgb(var(--accent-color));
 }
 #homelink:link {
-    color: __accent_color__;
+    color: rgb(var(--accent-color));
 }
 
 /* ----------------------------------------    One-offs   ---------------------------------------- */
@@ -173,6 +224,7 @@ a.navbar-link:hover
     margin-top: -0.1rem;
 }
 
+/* Theme selector */
 .theme-button {
     width: calc(1.6rem - 6px);
     height: calc(1.6rem - 6px);
@@ -188,6 +240,28 @@ a.navbar-link:hover
     color: #989c9d;
     font-weight: bold;
 }    
+#theme-popup {
+    background-color: var(--divider-color);
+    color: rgb(var(--normal-text-color));
+
+    width: 200px;
+    padding: 1rem;
+    border-radius: 0.2rem;
+    font-size: 10pt;
+    text-align: center;
+    margin:auto;
+    margin-bottom: 1rem;
+    display: none;
+}
+#theme-popup select {
+    background-color: var(--bg-accent2);
+    color: var(--color-accent2);
+    border: none;
+    padding: 0.3rem;
+    border-radius: 0.2rem;
+    margin-left: 0.3rem;
+}
+
 
 /* --------------------------------------- Fixes -------------------------------------------------- */
 .container #homelink{
@@ -195,11 +269,6 @@ a.navbar-link:hover
     padding: unset;
     margin: unset;
 }
-
-#page_holder {
-    display: none;
-}
-
 
 .icon-tray div
 {
@@ -240,7 +309,12 @@ h3 + p {
 }
 
 
+
+
 @media (max-width: 602px) {
+    .header {
+        padding-bottom: 0.3rem;
+    }
     .navbar {
         margin: auto
     }

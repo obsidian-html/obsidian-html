@@ -16,7 +16,6 @@
                 <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/global_main.css" />
                 <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/main.css" />
                 <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/theme-obsidian.css" />
-                <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/theme-light.css" />
                 {dynamic_includes}
 
                 <!-- Onload tweaks -->
@@ -25,14 +24,14 @@
                 </script>
         </head>
 
-<body onload="LoadPage();" style="background-color: #202020" class="theme-obs-light">
+<body onload="LoadPage();" class="theme-obs-light">
         {search_html}
 
         <div id="page_holder" class="flex_col">
                 <div id="header" class="header">
                         <div id="header_flex" class="flex_row">
                                 <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
-                                <div class="navbar-button" onclick="toggle('navbar', 'flex')">
+                                <div class="navbar-button" onclick="toggle_menu()">
                                         ≡
                                 </div>
                                 <div id="navbar" class="navbar">

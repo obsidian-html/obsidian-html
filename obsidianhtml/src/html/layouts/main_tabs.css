@@ -1,3 +1,15 @@
+
+
+#header #homelink,
+#header #homelink:visited,
+#header #homelink:link,
+#header #homelink:hover {
+    margin-left: -1rem;
+    margin-right: 2.5rem;
+}
+
+/* ---------------------- */
+
 body {
     overflow-y: hidden;
     overflow-x: scroll;
@@ -8,8 +20,7 @@ body {
     height: calc(100vh - 5rem);
     overflow: scroll;  
     overflow-y: scroll;
-    scrollbar-color: __accent_color__12 #ffffff;
-    scroll-margin-top: 2rem;
+
 }
 .container-wrapper {
     max-width: calc(45rem + 3rem);
@@ -44,7 +55,7 @@ body {
     background-color: #ffffff; /* or add it to the track */
   }
 ::-webkit-scrollbar-thumb{
-    background-color: __accent_color__12;
+    background-color: rgb(var(--accent-color), 0.07);
     border: 0px;
     border-radius: 10px;
 }
@@ -52,7 +63,6 @@ body {
 
 @media (max-width: 800px) {
     .container {
-        float: none;
         width: calc(100vw - 4rem);
     }
     .container:after {
@@ -253,8 +263,8 @@ span.tag {
     display: none;
     width: calc(100vw - 4rem);
     text-align: center;
-    background-color: __accent_color__2b;
-    color: __accent_color__;
+    background-color: rgb(var(--accent-color), 0.17);
+    color: rgb(var(--accent-color));
     padding: 0.7rem;
     border-radius: 0.4rem;
     padding-top: 0.2rem;
@@ -278,10 +288,10 @@ span.tag {
 }
 
 #homelink:visited {
-    color: __accent_color__;
+    color: rgb(var(--accent-color));
 }
 #homelink:link {
-    color: __accent_color__;
+    color: rgb(var(--accent-color));
 }
 #homelink {
     width: 15.5rem;
