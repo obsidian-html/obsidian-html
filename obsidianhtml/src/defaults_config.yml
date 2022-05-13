@@ -132,6 +132,11 @@ toggles:
       flip_panes: False # switch right and left pane around. (does nothing unless in documentation layout.)
       accent_color: '#414cfd'
 
+    theme_picker:
+      enabled: True
+      styling:
+        show_icon: True
+
     code_highlight:
       enabled: True
     mermaid_diagrams:
@@ -144,6 +149,11 @@ toggles:
       enabled: True
 
     search:
+      enabled: True
+      styling:
+        show_icon: True
+
+    tags_page:
       enabled: True
       styling:
         show_icon: True

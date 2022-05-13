@@ -10,12 +10,18 @@
     overflow-x: auto;
 }
 
-code {font-family: 'SourceCodePro-Regular'; font-size: 10pt; font-weight: 500; background-color: aliceblue;
-    color: #9c27ec;}
-    .codehilite code {
-        color: inherit;
-        background-color: inherit;
-    }
+code {
+    font-family: 'SourceCodePro-Regular'; 
+    font-size: 10pt; 
+    font-weight: 500; 
+    background-color: var(--bg-accent);
+    color: var(--code-hightlight-color);
+    padding: 0.1rem;
+}
+.codehilite * {
+    color: white;
+    background-color: inherit;
+}
 
 pre { line-height: 125%; font-family: 'SourceCodePro-Regular'; font-size: 10pt;  }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }

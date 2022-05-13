@@ -28,43 +28,6 @@ body {
     cursor: pointer;
 }
 
-  
-table {
-    margin: 1.5rem;
-    margin-left: 0rem;
-    text-align: left;
-    border-collapse: collapse;
-}
-td {
-    border-bottom: 1px solid #ececec;
-    padding: 0.3rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
-td:nth-child(2n) {
-    border-left: 1px dotted #cecece;
-}
-td:first-child {
-    min-width: max-content;
-}
-th:first-child, td:first-child{
-    padding-left: 0rem;
-}
-tr:last-child td {
-    border-bottom: 0px;
-}
-th {
-    text-transform: capitalize;
-    border: 0px;
-    padding: 0.3rem;
-    padding-left: 1rem;
-    font-weight: normal;
-    font-style: italic;
-    color: #9fbcd7;    
-}
-
-
-
 .single_tab_page {
     width: 80vw;
     max-width: 75rem;
@@ -126,9 +89,6 @@ th {
     width: 100vw;
     padding: 1rem;
     padding-left: 2rem;
-    border-bottom: 3px solid #f0f0f0;
-
-    background-color: white;
 }
 h1, h2, h3, h4, h5 {
     scroll-margin-top: 4rem;
@@ -149,7 +109,6 @@ h1:not(:first-child) {
 
 h2 {
     font-size: 14pt;
-    color: #000;
     border-bottom: 1px dotted #777070;
     font-weight: 600;
     padding-bottom: 0.2rem;
@@ -162,18 +121,6 @@ h2 + p {
     margin-top: 0rem;
 }
 
-h3 {
-    font-size: 13pt;
-    font-weight: 500;
-    border-bottom: 1px dashed #c0cae6;
-    padding: 2px;
-    color: #000000;
-    margin-bottom: 0.5rem;
-}
-h3 + p {
-    margin-top: 0rem;
-    margin-bottom: 0.5rem;
-}
 
 
 .anchor {
@@ -215,19 +162,6 @@ li {
     text-decoration: none;
   } 
 
-  
-a.nonexistent-link:link  ,
-a.nonexistent-link:hover,
-a.nonexistent-link:active,
-a.nonexistent-link:visited {
-    color:rgb(156, 156, 156);
-}
-
-.header a:link,
-.header a:active,
-.header a:visited {
-    color: rgb(117, 114, 114);
-}
 
 .external-link::after {
     background: transparent url({html_url_prefix}/obs.html/static/external.svg) 0 0 no-repeat;
@@ -241,19 +175,6 @@ a.nonexistent-link:visited {
     filter: invert(90%) sepia(6%) saturate(9%) hue-rotate(14deg) brightness(90%) contrast(93%);
 }
 
-
-blockquote {
-    background-color: __accent_color__12;
-    padding: 0rem 0rem 0rem 0.5rem;
-    margin: 0rem;
-    margin-bottom: 0.5rem;
-    border: 1px dashed white;
-    color: #4f4538;    
-}
-
-blockquote p {
-    margin: 0.4rem;
-}
 
 
 span.tag {
@@ -306,13 +227,20 @@ span.tag {
     align-items: stretch;
     width: 100vw;
 }
-.header {
+/* .header {
     margin: 1rem;
     margin-left:-1rem;
-    background-color: white;
+    background-color: var(--header-bg);
     scroll-margin-top: 20rem;
     overflow-anchor: none;
     padding-bottom: 0.5rem;
+} */
+.header {
+    margin: 1rem;
+    margin-bottom:2rem;
+    background-color: var(--header-bg);
+    scroll-margin-top: 20rem;
+    overflow-anchor: none;
 }
 .navbar {
     display: flex;
@@ -335,8 +263,8 @@ span.tag {
     margin-bottom: 0.7rem;    
     cursor: pointer;
     width: calc(100vw - 4rem);
-    margin-left: -0.7rem;
-    margin-top: 1rem;
+    /* margin-left: -0.7rem; */
+    /* margin-top: 1rem; */
 }
 .navbar-link {
     display: block;
@@ -348,20 +276,7 @@ span.tag {
     margin-bottom: 0.7rem;
     max-height: 1.5rem;
 }
-a.navbar-link:visited
-{
-    color: #161616;
-}
-.navbar-link:hover {
-    background-color: __accent_color__;
-    color: white;
-    text-decoration: none;
-}
-a.navbar-link:hover
-{
-    text-decoration: none;
-    color: white;
-}
+
 #homelink:visited {
     color: __accent_color__;
 }
@@ -381,11 +296,7 @@ a.navbar-link:hover
     border-radius: 0.3rem;    
     max-height: 1.5rem;
 }
-.toc-header {
-    color: black;
-    margin-left: 1.5rem;
-    font-weight: bold;
-}
+
 .toc {
     display: none;
     
@@ -408,7 +319,10 @@ a.navbar-link:hover
     #header_flex2 {
         flex-direction: column;
         margin-top: -1rem;
-    }    
+    }
+    .header {
+        padding: 0px;
+    }
     .navbar {
         margin-top: 1rem;
         margin-left: -0.7rem;
@@ -422,7 +336,8 @@ a.navbar-link:hover
     }
     .navbar-button {
         display: block;
-        margin-top: 0;
+        margin: auto;
+        margin-top: -1rem;
         margin-bottom: 1rem;
     }
     #homelink {
@@ -454,12 +369,6 @@ a.navbar-link:hover
     overflow-x: auto;
 }
 
-code {font-family: 'SourceCodePro-Regular'; font-size: 10pt; font-weight: 500; background-color: aliceblue;
-    color: #9c27ec;}
-    .codehilite code {
-        color: inherit;
-        background-color: inherit;
-    }
 
 pre { line-height: 125%; font-family: 'SourceCodePro-Regular'; font-size: 10pt;  }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }

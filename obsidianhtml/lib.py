@@ -150,6 +150,8 @@ def ExportStaticFiles(pb):
         ['html/mermaid.css', 'mermaid.css'],
         ['html/callouts.css', 'callouts.css'],
         ['html/taglist.css', 'taglist.css'],
+        ['html/themes/theme-obsidian.css', 'theme-obsidian.css'],
+        ['html/themes/theme-light.css', 'theme-light.css'],
         ['html/external.svg', 'external.svg'],
         ['html/hashtag.svg', 'hashtag.svg'],
         ['rss/rss.svg', 'rss.svg'],
@@ -304,25 +306,41 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/obsidian_tabs_footer.js" type="text/javascript"></script>' + "\n"
 
     # Include toggled components
-    if pb.config.GetCachedConfig('rss_show_icon'):
+    if pb.config.ShowIcon('rss'):
         code = OpenIncludedFile('rss/button_template.html')
         template = template.replace('{rss_button}', code)
     else:
         template = template.replace('{rss_button}', '')
 
-    if pb.config.GetCachedConfig('graph_show_icon'):
+    if pb.config.ShowIcon('graph'):
         code = OpenIncludedFile('graph/button_template.html')
         template = template.replace('{graph_button}', code)
     else:
         template = template.replace('{graph_button}', '')
 
-    if pb.config.GetCachedConfig('search_show_icon'):
+    if pb.config.ShowIcon('search'):
         code = OpenIncludedFile('search/button_template.html')
         template = template.replace('{search_button}', code)
     else:
         template = template.replace('{search_button}', '')
 
-    if pb.config.GetCachedConfig('dirtree_show_icon'):
+    if pb.config.ShowIcon('tags_page'):
+        code = OpenIncludedFile('tags_page/button_template.html')
+        template = template.replace('{tags_page_button}', code)
+    else:
+        template = template.replace('{tags_page_button}', '')
+
+    if pb.config.ShowIcon('theme_picker'):
+        code = OpenIncludedFile('html/themes/button_template.html')
+        template = template.replace('{theme_button}', code)
+        code = OpenIncludedFile('html/themes/popup.html')
+        template = template.replace('{theme_popup}', code)
+    else:
+        template = template.replace('{theme_button}', '')
+        template = template.replace('{theme_popup}', code)
+
+
+    if pb.config.ShowIcon('create_index_from_dir_structure'):
         # output path
         output_path = html_url_prefix + '/' + pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path', cached=True)
 
@@ -334,6 +352,11 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         template = template.replace('{dirtree_button}', code)
     else:
         template = template.replace('{dirtree_button}', '')
+
+    if pb.config.feature_is_enabled('search', cached=True):
+        template = template.replace('{search_html}', OpenIncludedFile('search/search.html'))
+    else:
+        template = template.replace('{search_html}', '')
 
     if pb.config.feature_is_enabled('search', cached=True):
         template = template.replace('{search_html}', OpenIncludedFile('search/search.html'))

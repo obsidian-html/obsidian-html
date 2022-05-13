@@ -14,8 +14,6 @@
     font-size: 10px;
     cursor: pointer;
 }
-
-
   
 .graph_svg {
     width: 100%;
@@ -43,10 +41,15 @@
 
 .graph_button {
     width: 100%;
-border: none;
-color: #464b64;
-margin-top: 1rem;
-margin-bottom: 2rem;
+    border: none;
+
+    background-color: var(--divider-color);
+    color: var(--color-accent);
+    cursor: pointer;
+    
+    padding: 0.3rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
 }
 
 .graph_header_div {

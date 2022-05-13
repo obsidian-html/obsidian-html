@@ -5,7 +5,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    color: rgb(51, 51, 51);
+    color: rgb(var(--normal-text-color));
     margin: 0rem;
 } 
 
@@ -26,12 +26,13 @@ body {
 
 /* ----------------------------------------      Core      ---------------------------------------- */
 blockquote {
-    background-color: __accent_color__12;
     padding: 0rem 0rem 0rem 0.5rem;
     margin: 0rem;
     margin-bottom: 0.5rem;
-    border: 1px dashed white;
-    color: #4f4538;    
+
+    background-color: var(--bg-accent);
+    border: 1px dashed var(--bg-accent3);
+    color: var(--color-accent3);
 }
 
 blockquote p {
@@ -43,7 +44,7 @@ blockquote p {
     padding: 2rem;
 }
 .container:after {
-    content: "\a";
+    content: "\a\a\a\a\a\a\a\a\a";
     white-space: pre;
 }
 .container img {
@@ -68,13 +69,13 @@ table {
     border-collapse: collapse;
 }
 td {
-    border-bottom: 1px solid #ececec;
+    border-bottom: 1px solid rgb(var(--table-border-color-rgb), 0.3);
     padding: 0.3rem;
     padding-left: 1rem;
     padding-right: 1rem;
 }
 td:nth-child(2n) {
-    border-left: 1px dotted #cecece;
+    border-left: 1px dotted rgb(var(--table-border-color-rgb), 0.3);
 }
 td:first-child {
     min-width: max-content;
@@ -145,21 +146,17 @@ a.nonexistent-link:visited {
     color: #161616;
 }
 
-a.navbar-link:visited
+a.navbar-link:visited,
+a.navbar-link:hover,
+a.navbar-link:link
 {
-    color: #161616;
-}
-.navbar-link:hover {
-    background-color: __accent_color__;
-    color: white;
+    color: rgb(var(--normal-text-color));
     text-decoration: none;
 }
 a.navbar-link:hover
 {
-    text-decoration: none;
-    color: white;
+    background-color: __accent_color__90;
 }
-
 
 #homelink:visited {
     color: __accent_color__;
@@ -171,15 +168,93 @@ a.navbar-link:hover
 /* ----------------------------------------    One-offs   ---------------------------------------- */
 
 .icon-tray {
-    width:10rem; 
+    width:12rem; 
     height:1.6rem; 
     margin-top: -0.1rem;
 }
 
+.theme-button {
+    width: calc(1.6rem - 6px);
+    height: calc(1.6rem - 6px);
+    border: 3px solid #f0f0f0;
+    margin-right: 0.2rem;
+    float: right;
+
+    cursor: pointer;
+    font-family: serif;
+    text-align: center;
+    line-height: 20px;
+    font-size: 11pt;
+    color: #989c9d;
+    font-weight: bold;
+}    
 
 /* --------------------------------------- Fixes -------------------------------------------------- */
 .container #homelink{
     background-color: unset;
     padding: unset;
     margin: unset;
+}
+
+#page_holder {
+    display: none;
+}
+
+
+.icon-tray div
+{
+    border: 3px solid var(--bg-accent);
+    width: calc(1.6rem - 6px);
+    height: calc(1.6rem - 6px);
+    border: 3px solid #f0f0f0;
+    margin-right: 0.2rem;
+    float: right;
+    cursor: pointer;
+}
+
+.toc-header {
+    color:rgb(var(--normal-text-color));
+    margin-left: 1.5rem;
+    font-weight: bold;
+}
+
+#left_pane ul a,
+#right_pane ul a {
+    color: var(--color-accent);
+}
+#left_pane ul a:hover,
+#right_pane ul a:hover {
+    color: var(--muted-link-color);
+    text-decoration: none;
+}
+h3 {
+    font-size: 13pt;
+    font-weight: 500;
+    border-bottom: 1px dashed var(--bg-accent3);
+    padding: 2px;
+    margin-bottom: 0.5rem;
+}
+h3 + p {
+    margin-top: 0rem;
+    margin-bottom: 0.5rem;
+}
+
+
+@media (max-width: 602px) {
+    .navbar {
+        margin: auto
+    }
+     #navbar {
+        padding-top: 1rem;
+        width: unset;
+    }
+    .navbar-button {
+        margin: auto;
+        margin-top: -1rem;        
+        margin-left: unset;
+        margin:auto;
+        background-color: unset;
+        color: unset;
+        margin-top: -1rem;
+    }
 }

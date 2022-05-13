@@ -8,6 +8,7 @@
 .container {
     flex-grow: 1;
     flex: auto;
+    flex:10;
 
     overflow-y: scroll;
 
@@ -105,15 +106,6 @@
 #right_pane li {
     padding-top: 0.3rem;
 }
-#left_pane ul a,
-#right_pane ul a {
-    color: #373c42;
-}
-#left_pane ul a:hover,
-#right_pane ul a:hover {
-    color: #2d68b1;
-    text-decoration: none;
-}
 .container {
     padding-top: 0.5rem;
 }
@@ -127,11 +119,7 @@
     margin-bottom: 1rem;
     padding-right: 2rem;    
 }
-.toc-header {
-    color: black;
-    margin-left: 1.5rem;
-    font-weight: bold;
-}
+
 .navbar {
     display: flex;
     flex-direction: row;
@@ -167,10 +155,9 @@
     border-radius: 0.4rem;
     padding-top: 0.2rem;
     padding-bottom: 0.2rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.7rem;    
     cursor: pointer;
     width: calc(100vw - 4rem);
+    margin-bottom: 0.7rem;    
     margin-left: -0.7rem;
     margin-top: 1rem;
 }
@@ -185,7 +172,7 @@ h1, h2, h3, h4, h5 {
     margin-left: 2rem;
     margin-top:2rem;
     margin-bottom:2rem;
-    background-color: white;
+    background-color: var(--header-bg);
     scroll-margin-top: 20rem;
     overflow-anchor: none;
 }
@@ -199,7 +186,6 @@ h1 {
     margin-bottom: 16px;
     color: inherit;
     font-weight: 600;
-    border-bottom: 1px solid #d6d5df;
     padding-bottom: 0.2rem;
 }
 h1:not(:first-of-type) {
@@ -208,7 +194,6 @@ h1:not(:first-of-type) {
 
 h2 {
     font-size: 14pt;
-    color: #000;
     border-bottom: 1px dotted #777070;
     font-weight: 600;
     padding-bottom: 0.2rem;
@@ -220,20 +205,6 @@ h1 + h2 {
 h2 + p {
     margin-top: 0rem;
 }
-
-h3 {
-    font-size: 13pt;
-    font-weight: 500;
-    border-bottom: 1px dashed #c0cae6;
-    padding: 2px;
-    color: #000000;
-    margin-bottom: 0.5rem;
-}
-h3 + p {
-    margin-top: 0rem;
-    margin-bottom: 0.5rem;
-}
-
 
 .anchor {
     visibility: hidden;
@@ -362,8 +333,6 @@ span.tag {
     }
     .navbar-button {
         display: block;
-        margin-top: 0;
-        margin-bottom: 1rem;
     }
     #homelink {
         display: none

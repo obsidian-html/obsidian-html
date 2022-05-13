@@ -1,0 +1,15 @@
+<div id="theme-button" class="theme-button" title="Change theme" onclick="toggle_theme_popup(this)">
+    T
+</div>
+<script>
+    function toggle_theme_popup(el){
+        cl_toggle(el.id, 'active');
+        toggle('theme-popup','block')
+
+        let h2 = document.getElementById('header2')
+        if (h2){
+            let pu = document.getElementById('header2').getElementsByClassName('popup')[0];
+            toggle_el(pu,'block');
+        }
+    }
+</script>

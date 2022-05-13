@@ -104,18 +104,8 @@ class Config:
         return self.get_config(path)
 
     @cache
-    def GetCachedConfig(self, descriptor):
-        if descriptor == 'rss_show_icon':
-            return (self.pb.gc('toggles/features/rss/enabled') and self.pb.gc('toggles/features/rss/styling/show_icon'))
-
-        elif descriptor == 'dirtree_show_icon':
-            return (self.pb.gc('toggles/features/create_index_from_dir_structure/enabled') and self.pb.gc('toggles/features/create_index_from_dir_structure/styling/show_icon'))
-
-        elif descriptor == 'graph_show_icon':
-            return (self.pb.gc('toggles/features/graph/enabled') and self.pb.gc('toggles/features/graph/styling/show_icon'))
-
-        elif descriptor == 'search_show_icon':
-            return (self.pb.gc('toggles/features/search/enabled') and self.pb.gc('toggles/features/search/styling/show_icon'))
+    def ShowIcon(self, feature_name):
+        return (self.pb.gc(f'toggles/features/{feature_name}/enabled') and self.pb.gc(f'toggles/features/{feature_name}/styling/show_icon'))
 
     def LoadIncludedFiles(self):
         # Get html template code. 

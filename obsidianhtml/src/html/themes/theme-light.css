@@ -1,0 +1,22 @@
+
+
+.theme-light #theme-popup {
+    width: 200px;
+    background-color: #b9b9b9;
+    padding: 1rem;
+    border-radius: 0.2rem;
+    color: black;
+    font-size: 10pt;
+    text-align: center;
+    margin:auto;
+    margin-bottom: 1rem;
+    display: none;
+
+}
+.theme-light #theme-popup select {
+    background-color: white;
+    border: none;
+    padding: 0.3rem;
+    border-radius: 0.2rem;
+    margin-left: 0.3rem;
+}

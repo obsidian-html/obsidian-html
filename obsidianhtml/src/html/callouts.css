@@ -1,13 +1,27 @@
+.callout-folded .callout-content {
+    display: none;
+}
+.active .callout-content {
+    display: block
+}
+.callout-title-fold {
+    transform: rotate(270deg);
+    width: 16px;
+    height: 16px;
+}
+.active .callout-title-fold {
+    transform: rotate(0deg);
+}
 
 .callout {
     font-size: 11pt;
     padding-bottom: 0.1rem;
     margin-bottom: 1rem;
     
-    background-color: rgb(22, 22, 22);
+    background-color: var(--callout-bg);
     border-left: 4px solid rgb(var(--callout-color));
     border-radius: 0.1rem 0 0 0.1rem;
-    color: rgb(220, 221, 222);
+    color: var(--callout-color);
 
     --callout-color: 68, 138, 255;
 }
@@ -16,13 +30,11 @@
 .callout a:visited {
     color: #85c4fb;
 }
-.callout-folded {
+/* .callout-folded {
     max-height: 2.1rem;
     overflow-y: clip;
-}
-.callout-folded-active {
-    max-height: none;
-}
+} */
+
 .callout p {
     padding-left: 1rem;
     padding-right: 1rem;
@@ -38,7 +50,7 @@
     padding: 0.4rem;
     font-weight: 700;
 
-    background-color: rgba(var(--callout-color), 0.3);
+    background-color: rgba(var(--callout-color), var(--callout-alpha));
     border-radius: 0.3rem 0rem 0rem 0rem;
 }
 .callout-folded .callout-title {
@@ -54,14 +66,7 @@
     flex: auto;
 }
 
-.callout-title-fold {
-    transform: rotate(270deg);
-    width: 16px;
-    height: 16px;
-}
-.callout-folded-active .callout-title-fold {
-    transform: rotate(0deg);
-}
+
 
 .callout code {
     background-color: rgb(var(--callout-color), 0.1);
@@ -151,7 +156,7 @@
     padding-bottom: 3px;
 }
 
-/* light theme */
+/* light theme 
 .callout {
     color: rgb(46, 51, 56);
     background-color: rgb(242, 243, 245);
@@ -159,6 +164,7 @@
 .callout-title {
     background-color: rgba(var(--callout-color), 0.1);
 }
+*/
 .callout a,
 .callout a:hover,
 .callout a:visited,

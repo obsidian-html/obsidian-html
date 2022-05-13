@@ -1,3 +1,8 @@
+
+
+
+
+
 #search-master-div {
     position: absolute;
     z-index: 1;
@@ -14,7 +19,7 @@
 }
 #search-controls {
     padding: 1rem;
-    background-color: white;
+    background-color: var(--bg-note);
     border-radius: 0.5rem;
     width: 100%;
     max-width: calc(100% - 2.5rem);
@@ -24,7 +29,6 @@
 #search-results-box {
     height: 0rem;
     margin-top: 1rem;
-    background-color: white;
     max-width: __max_note_width__;
 }
 #search-results {
@@ -57,6 +61,7 @@
     margin-bottom: 1rem;
     padding: 0.5rem;
     overflow: hidden;
+    color: rgb(var(--normal-text-color));
 }
 #search-master-div li.fold-active {
     max-height: unset;
@@ -65,7 +70,7 @@
 }
 
 #search-master-div li:hover {
-    background-color: __accent_color__0d;
+    background-color: var(--bg-accent);
     cursor: pointer;
 }
 .score {
@@ -75,8 +80,12 @@
 }
 #search_string{
     width: calc(100% - 1.5rem);
-    padding: 0.3rem;
-    padding-left: 0.5rem;
+    padding: 0.6rem;
+    border-radius: 0.2rem;
+    border: 0px;
+    background-color: var(--bg-accent);
+    color: rgb(var(--normal-text-color));
+    font-size: 12pt;
 }
 #search-instructions {
     margin-top: 1rem;
@@ -87,11 +96,11 @@
     margin-top: 0.2rem;
 }
 .search-highlights em {
-    background-color: #1a17ff14;
+    background-color: #8a3aff2b;
     font-style: normal;
 }
 .search-highlights g {
-    color: #c8dfea;;
+    color: rgb(var(--normal-text-color), 0.3);
 }
 
 .tooltip {
