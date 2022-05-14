@@ -145,12 +145,6 @@ def ExportStaticFiles(pb):
 
     # define files to be copied over (standard copy, static_folder)
     copy_file_list = [
-        ['html/global_main.css', 'global_main.css'], 
-        [f'html/layouts/{pb.gc("_css_file")}', 'main.css'], 
-        
-        ['html/callouts.css', 'callouts.css'],
-        ['html/taglist.css', 'taglist.css'],
-        ['html/themes/theme-obsidian.css', 'theme-obsidian.css'],
         ['html/external.svg', 'external.svg'],
         ['html/hashtag.svg', 'hashtag.svg'],
         ['rss/rss.svg', 'rss.svg'],
@@ -161,9 +155,16 @@ def ExportStaticFiles(pb):
         ['index_from_dir_structure/dirtree.js', 'dirtree.js'],
     ]
 
+    css_files_list = [
+        ['html/global_main.css', 'global_main.css'], 
+        [f'html/layouts/{pb.gc("_css_file")}', 'main.css'], 
+        ['html/taglist.css', 'taglist.css'],
+        ['html/themes/theme-obsidian.css', 'theme-obsidian.css'],
+    ]
+
     if pb.config.feature_is_enabled('graph', cached=True):
         copy_file_list.append(['imported/3d-force-graph.v1.70.10.min.js', '3d-force-graph.js'])
-        copy_file_list.append(['graph/graph.css', 'graph.css'])
+        css_files_list.append(['graph/graph.css', 'graph.css'])
         copy_file_list.append(['graph/graph.svg', 'graph.svg'])
 
     if pb.config.feature_is_enabled('mermaid_diagrams', cached=True):
@@ -172,18 +173,21 @@ def ExportStaticFiles(pb):
         copy_file_list.append(['html/mermaid.css', 'mermaid.css'])
 
     if pb.config.feature_is_enabled('code_highlight', cached=True):
-        copy_file_list.append(['html/codehilite.css', 'codehilite.css'])
+        css_files_list.append(['html/codehilite.css', 'codehilite.css'])
 
     if pb.config.feature_is_enabled('search', cached=True):
         copy_file_list.append(['search/search.svg', 'search.svg'])
         copy_file_list.append(['search/pako.js', 'pako.js'])
         copy_file_list.append(['search/search.js', 'search.js'])
-        copy_file_list.append(['search/search.css', 'search.css'])
+        css_files_list.append(['search/search.css', 'search.css'])
         copy_file_list.append(['imported/flexsearch.v0.7.2.bundle.js', 'flexsearch.bundle.js'])
 
     if pb.config.feature_is_enabled('math_latex', cached=True):
         copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
         copy_file_list.append(['imported/mathjax.v3.es5.tex-chtml.js', 'tex-chtml.js'])
+
+    if pb.config.feature_is_enabled('callouts', cached=True):
+        css_files_list.append(['html/callouts.css', 'callouts.css'])
 
     if pb.gc('toggles/features/styling/layout', cached=True) == 'documentation':
         copy_file_list.append(['js/load_dirtree_footer.js', 'load_dirtree_footer.js'])
@@ -193,14 +197,7 @@ def ExportStaticFiles(pb):
 
     # create master.css file
     css = ''
-    css_files = ['html/global_main.css', 
-                 f'html/layouts/{pb.gc("_css_file")}', 
-                 'html/themes/theme-obsidian.css', 
-                 'html/callouts.css', 
-                 'search/search.css', 
-                 'html/codehilite.css',
-                 'graph/graph.css']
-    for filepath in css_files:
+    for filepath, _ in css_files_list:
         css += '\n\n' + OpenIncludedFile(filepath)
     
     dstpth = GetIncludedResourcePath('html').joinpath('master.css')
