@@ -11,20 +11,11 @@ var content_pane_div = "{content_pane_div}";
 var html_url_prefix = "{html_url_prefix}";
 var documentation_mode = {documentation_mode};
 var tab_mode = !no_tab_mode;
-
+var gzip_hash = '{gzip_hash}'
 
 // Functions 
 // ----------------------------------------------------------------------------
 function LoadPage() {
-
-    let theme_name = window.localStorage.getItem('theme_name');
-    if (!theme_name){
-        window.localStorage.setItem('theme_name', 'obs-light');
-    }
-
-    set_theme(window.localStorage.getItem('theme_name'));
-    document.getElementById('page_holder').style.visibility = 'visible';
-
     if (documentation_mode) {
         httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
     }
@@ -88,9 +79,11 @@ function LoadPage() {
 
     // Init starting container
     FirstContainer = document.getElementsByClassName('container')[0];
-    FirstContainer.id = 'level-0';
-    FirstContainer.level = '0';
-    SetContainer(FirstContainer);
+    if (FirstContainer){
+        FirstContainer.id = 'level-0';
+        FirstContainer.level = '0';
+        SetContainer(FirstContainer);
+    }
 
     // Open the path on loading the page
     // This is everything after ?path=

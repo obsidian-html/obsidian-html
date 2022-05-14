@@ -33,7 +33,7 @@ function get_graph_args(uid){
         let width = cont.clientWidth;
         let height = cont.clientHeight;
 
-        return {
+        let args = {
                 'graph_container': cont, 
                 'width': width, 
                 'height': height, 
@@ -43,6 +43,7 @@ function get_graph_args(uid){
                 'link': null,
                 'coalesce_force': '{coalesce_force}'
             }
+        return args
 }
 
 function get_graph_data(){

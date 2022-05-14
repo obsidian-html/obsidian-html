@@ -11,6 +11,7 @@ class PicknickBasket:
     paths = None
     html_template = None
     dynamic_inclusions = None
+    gzip_hash = ''
 
     def __init__(self):
         self.tagtree = {'notes': [], 'subtags': {}}

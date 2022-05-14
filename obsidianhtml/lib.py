@@ -147,7 +147,7 @@ def ExportStaticFiles(pb):
     copy_file_list = [
         ['html/global_main.css', 'global_main.css'], 
         [f'html/layouts/{pb.gc("_css_file")}', 'main.css'], 
-        ['html/mermaid.css', 'mermaid.css'],
+        
         ['html/callouts.css', 'callouts.css'],
         ['html/taglist.css', 'taglist.css'],
         ['html/themes/theme-obsidian.css', 'theme-obsidian.css'],
@@ -162,12 +162,14 @@ def ExportStaticFiles(pb):
     ]
 
     if pb.config.feature_is_enabled('graph', cached=True):
+        copy_file_list.append(['imported/3d-force-graph.v1.70.10.min.js', '3d-force-graph.js'])
         copy_file_list.append(['graph/graph.css', 'graph.css'])
         copy_file_list.append(['graph/graph.svg', 'graph.svg'])
 
     if pb.config.feature_is_enabled('mermaid_diagrams', cached=True):
-        copy_file_list.append(['js/mermaid.9.0.1.min.js', 'mermaid.9.0.1.min.js']),
-        copy_file_list.append(['js/mermaid.9.0.1.min.js.map', 'mermaid.9.0.1.min.js.map']),
+        copy_file_list.append(['imported/mermaid.9.0.1.min.js', 'mermaid.9.0.1.min.js'])
+        copy_file_list.append(['imported/mermaid.9.0.1.min.js.map', 'mermaid.9.0.1.min.js.map'])
+        copy_file_list.append(['html/mermaid.css', 'mermaid.css'])
 
     if pb.config.feature_is_enabled('code_highlight', cached=True):
         copy_file_list.append(['html/codehilite.css', 'codehilite.css'])
@@ -177,15 +179,34 @@ def ExportStaticFiles(pb):
         copy_file_list.append(['search/pako.js', 'pako.js'])
         copy_file_list.append(['search/search.js', 'search.js'])
         copy_file_list.append(['search/search.css', 'search.css'])
+        copy_file_list.append(['imported/flexsearch.v0.7.2.bundle.js', 'flexsearch.bundle.js'])
 
     if pb.config.feature_is_enabled('math_latex', cached=True):
         copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
+        copy_file_list.append(['imported/mathjax.v3.es5.tex-chtml.js', 'tex-chtml.js'])
 
     if pb.gc('toggles/features/styling/layout', cached=True) == 'documentation':
         copy_file_list.append(['js/load_dirtree_footer.js', 'load_dirtree_footer.js'])
 
     if pb.gc('toggles/features/styling/layout', cached=True) == 'tabs':
-        copy_file_list.append(['js/obsidian_tabs_footer.js', 'obsidian_tabs_footer.js'])        
+        copy_file_list.append(['js/obsidian_tabs_footer.js', 'obsidian_tabs_footer.js'])
+
+    # create master.css file
+    css = ''
+    css_files = ['html/global_main.css', 
+                 f'html/layouts/{pb.gc("_css_file")}', 
+                 'html/themes/theme-obsidian.css', 
+                 'html/callouts.css', 
+                 'search/search.css', 
+                 'html/codehilite.css',
+                 'graph/graph.css']
+    for filepath in css_files:
+        css += '\n\n' + OpenIncludedFile(filepath)
+    
+    dstpth = GetIncludedResourcePath('html').joinpath('master.css')
+    with open (dstpth, 'w', encoding="utf-8") as f:
+        f.write(css)
+    copy_file_list.append(['html/master.css', 'master.css'])
 
     # copy static files over to the static folder
     for file_name in copy_file_list:
@@ -204,7 +225,7 @@ def ExportStaticFiles(pb):
             content_pane_div = "right_pane"
 
         # Templating
-        if file_name[1] in ('main.css', 'global_main.css', 
+        if file_name[1] in ('master.css', 'main.css', 'global_main.css', 
                             'obsidian_core_header.js', 'obsidian_core_footer.js', 
                             'search.js', 'search.css'):
             c = c.replace('{html_url_prefix}', html_url_prefix)\
@@ -213,12 +234,11 @@ def ExportStaticFiles(pb):
                  .replace('{toc_pane}',str(int(pb.gc('toggles/features/styling/toc_pane'))))\
                  .replace('{mermaid_enabled}',str(int(pb.gc('toggles/features/mermaid_diagrams/enabled'))))\
                  .replace('{toc_pane_div}', toc_pane_div)\
-                 .replace('{content_pane_div}', content_pane_div)
+                 .replace('{content_pane_div}', content_pane_div)\
+                 .replace('{gzip_hash}', pb.gzip_hash)
             c = c.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))\
                  .replace('__loading_bg_color__', pb.gc('toggles/features/styling/loading_bg_color', cached=True))\
                  .replace('__max_note_width__', pb.gc('toggles/features/styling/max_note_width', cached=True))\
-
-                 
 
         # Write to dest
         with open (dst_path, 'w', encoding="utf-8") as f:
@@ -267,30 +287,33 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     # Header inclusions
     dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/obsidian_core_header.js"></script>' + "\n"
     dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/encoding.js"></script>' + "\n"
+    dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/master.css" />' + "\n"
     
     if pb.config.feature_is_enabled('callouts', cached=True):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/callouts.css" />' + "\n"
+        pass
+        #dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/callouts.css" />' + "\n"
 
     if pb.config.feature_is_enabled('graph', cached=True):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
+        pass
+        #dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
 
-    if pb.config.feature_is_enabled('code_highlight', cached=True):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/codehilite.css" />' + "\n"
+    #if pb.config.feature_is_enabled('code_highlight', cached=True):
+        #dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/codehilite.css" />' + "\n"
 
     if pb.config.feature_is_enabled('mermaid_diagrams', cached=True):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
-        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/mermaid.9.0.1.min.js"></script>' + "\n"    
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/mermaid.9.0.1.min.js"></script>' + "\n"
+        #dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
 
     if pb.config.feature_is_enabled('math_latex', cached=True):
-        dynamic_inclusions += '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + "\n"
-        dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/tex-chtml.js"></script>' + "\n"
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js"></script>' + "\n"
+        #dynamic_inclusions += '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + "\n"
 
     if pb.config.feature_is_enabled('search', cached=True):
-        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/search.css" />' + "\n"
-        dynamic_inclusions += '<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.2/dist/flexsearch.bundle.js"></script>' + "\n"
+        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/flexsearch.bundle.js"></script>' + "\n"
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/pako.js"></script>' + "\n"
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/search.js"></script>' + "\n"
+        #dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/search.css" />' + "\n"
 
     if pb.config.feature_is_enabled('create_index_from_dir_structure', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/dirtree.js"></script>' + "\n"

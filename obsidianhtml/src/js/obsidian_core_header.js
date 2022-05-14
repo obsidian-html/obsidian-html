@@ -9,6 +9,9 @@ function HandleKeyPress(e) {
         func(e)
     })
 }
+document.addEventListener('DOMContentLoaded', load_theme);
+
+
 
 
 // Functions 
@@ -89,6 +92,16 @@ function fold(el) {
     } else {
         el.classList.add("fold-active")
     }
+}
+
+
+function load_theme() {
+    let theme_name = window.localStorage.getItem('theme_name');
+    if (!theme_name){
+        window.localStorage.setItem('theme_name', 'obs-light');
+    }
+    set_theme(window.localStorage.getItem('theme_name'));
+    document.getElementById('antiflash').style.display = 'none'; 
 }
 
 function set_theme(theme_name){

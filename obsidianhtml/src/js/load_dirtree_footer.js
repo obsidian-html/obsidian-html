@@ -1,9 +1,13 @@
 // load dirtree as left-pane
 function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath) {
     const jsonData = JSON.parse(xmlHttp.responseText);
-    let cpd = document.getElementById(content_pane_div)
     let filename = ''
     let folder = ''
+
+    let cpd = document.getElementById(content_pane_div)
+    if (!cpd){
+        return false
+    }
 
     // get current node
     for (let i = 0; i < jsonData.nodes.length; i++) {
