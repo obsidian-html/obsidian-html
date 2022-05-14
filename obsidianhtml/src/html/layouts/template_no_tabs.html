@@ -15,6 +15,7 @@
                 <!-- Includes -->
                 <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/global_main.css" />
                 <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/main.css" />
+                <link rel="stylesheet" href="{html_url_prefix}/obs.html/static/theme-obsidian.css" />
                 {dynamic_includes}
 
                 <!-- Onload tweaks -->
@@ -23,36 +24,34 @@
                 </script>
         </head>
 
-<body onload="LoadPage();">
+<body onload="LoadPage();" class="theme-obs-light">
         {search_html}
 
-        <div class="flex_col">
+        <div id="page_holder" class="flex_col">
                 <div id="header" class="header">
                         <div id="header_flex" class="flex_row">
                                 <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
-                                <div class="navbar-button" onclick="toggle('navbar', 'flex')">
+                                <div class="navbar-button" onclick="toggle_menu()">
                                         ≡
                                 </div>
                                 <div id="navbar" class="navbar">
                                 {{navbar_links}}
                                         <div class="icon-tray">
                                                 {rss_button}
-                                                <div style="width:1.6rem; height:1.6rem; float:right; margin-right:0.2rem">
-                                                        <a href="{html_url_prefix}/obs.html/tags/index.html" title="Open tag view">
-                                                                <img src = "{html_url_prefix}/obs.html/static/hashtag.svg" alt="RSS Feed link"/>
-                                                        </a>
-                                                </div>
+                                                {tags_page_button}
                                                 {dirtree_button}
                                                 {graph_button}
                                                 {search_button}
-                                        </div>                                
+                                                {theme_button}
+                                        </div>
                                 </div>
                         </div>
+                        {theme_popup}
                 </div>
                 <div class="flex_row">
                         <div class="container">
-                                        {content}
-                        <!-- end content -->
+                                {content}
+                                <!-- end content -->
                         </div>
                         <div id="right_pane"></div>
                 </div>

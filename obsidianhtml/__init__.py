@@ -22,7 +22,7 @@ from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
 from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
-                    GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, \
+                    GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, CreateStaticFilesFolders, \
                     PopulateTemplate, \
                     printHelpAndExit, WriteFileLog, simpleHash
 from .PicknickBasket import PicknickBasket
@@ -328,7 +328,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if pb.gc('toggles/features/graph/enabled', cached=True):
         # compile graph
-        grapher = pb.grapher
+        grapher = pb.grapher.replace('{html_url_prefix}', html_url_prefix)
         graph_template = pb.graph_template.replace('{id}', simpleHash(html_body))\
                                        .replace('{pinnedNode}', node['id'])\
                                        .replace('{pinnedNodeGraph}', str(node['nid']))\
@@ -340,6 +340,18 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
     html = PopulateTemplate(pb, node['id'], pb.dynamic_inclusions, pb.html_template, content=html_body)
+
+    html = html.replace('{pinnedNode}', node['id'])\
+               .replace('{html_url_prefix}', html_url_prefix)
+
+    # [?] Documentation styling: Navbar
+    # ------------------------------------------------------------------
+    navbar_links = pb.gc('navbar_links', cached=True)
+    elements = []
+    for l in navbar_links:
+        el = f'<a class="navbar-link" href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+        elements.append(el)
+    html = html.replace('{{navbar_links}}', '\n'.join(elements))  
 
     # Save file
     # ------------------------------------------------------------------
@@ -753,13 +765,10 @@ def main():
         # Create tag page
         recurseTagList(pb.tagtree, '', pb, level=0)
 
-        # Add Extra stuff to the output directories
-        ExportStaticFiles(pb)
-
         # Create graph fullpage
         if pb.gc('toggles/features/graph/enabled', cached=True):
             # compile graph
-            grapher = pb.grapher
+            grapher = pb.grapher.replace('{html_url_prefix}', pb.gc('html_url_prefix'))
             html = PopulateTemplate(pb, 'null', pb.dynamic_inclusions, pb.graph_full_page_template, content='')
             html = html.replace('{grapher}', grapher)
             html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
@@ -774,14 +783,21 @@ def main():
             pb.network_tree.AddCrosslinks()
 
             # Write node json to static folder
+            CreateStaticFilesFolders(pb.paths['html_output_folder'])
             with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
                 f.write(pb.network_tree.OutputJson())
 
         if pb.gc('toggles/features/search/enabled', cached=True):
             # Compress search json and write to static folder
-            with gzip.open(pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json.gzip'), 'wb', compresslevel=5) as f:
-                f.write(pb.search.OutputJson().encode('utf-8'))
+            gzip_path = pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json.gzip')
+            gzip_content = pb.search.OutputJson()
+            pb.gzip_hash = simpleHash(gzip_content)
 
+            with gzip.open(gzip_path, 'wb', compresslevel=5) as f:
+                f.write(gzip_content.encode('utf-8'))
+            
+        # Add Extra stuff to the output directories
+        ExportStaticFiles(pb)
 
     print('< COMPILING HTML FROM MARKDOWN CODE: Done')
 

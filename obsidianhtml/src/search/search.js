@@ -8,12 +8,30 @@ var index;
 
 // Get data
 // -----------------------------------------------------------------------------------------------
+setTimeout(LoadSearchData, 500);
 
-//fetch('{html_url_prefix}/obs.html/data/search.json').then(res => res.json()).then(data => {
+function LoadSearchData(){
+    let search_data = window.localStorage.getItem('search_data');
+    let search_hash = window.localStorage.getItem('search_hash');
 
-GzipUnzipLocalFile('{html_url_prefix}/obs.html/data/search.json.gzip').then(data => {
-    SEARCH_DATA = JSON.parse(data);
+    if (gzip_hash != search_hash || !search_data){
+        // refresh data
+        GzipUnzipLocalFile('{html_url_prefix}/obs.html/data/search.json.gzip').then(data => {
+            SEARCH_DATA = JSON.parse(data);
+            window.localStorage.setItem('search_data', data);
+            window.localStorage.setItem('search_hash', gzip_hash);
 
+            InitFlexSearch();
+        });
+    }
+    else {
+        // just load cached data
+        SEARCH_DATA = JSON.parse(search_data);
+        InitFlexSearch();
+    }
+}
+
+function InitFlexSearch(){
     index = new FlexSearch.Document({
         id: "id",
         index: ["title", "content"],
@@ -32,7 +50,7 @@ GzipUnzipLocalFile('{html_url_prefix}/obs.html/data/search.json.gzip').then(data
 
         i++;
     });
-});
+}
 
 
 // Functions

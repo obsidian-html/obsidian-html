@@ -4,11 +4,7 @@ body {
     
 }
 .container {
-    scrollbar-color: __accent_color__12 #ffffff;
-    scroll-margin-top: 2rem;
-    max-width: __max_note_width__;
     margin:auto;
-
     background-color: white;
     box-shadow: 4px 4px 11px 0px rgba(0,0,0,0.38);
 }
@@ -23,12 +19,10 @@ body {
         background-color: unset;
     }
     .container {
-        background-color: white;
         box-shadow: unset;
     }
     .codehilite {
         width: calc(100vw - 4rem);
         overflow-x: scroll;
     } 
-    
 }

@@ -43,7 +43,7 @@ function CloseUpperContainers(level) {
 
 function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
     let container_row = document.getElementById('container_row')
-    let site_column = document.getElementById('site_column')
+    let page_holder = document.getElementById('page_holder')
 
     respUrl = xmlHttp.responseURL;
     responseText = xmlHttp.responseText;
@@ -54,7 +54,7 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
     // Set body width to level * 40 rem
     document.body.style.width = (level * 40 + 200) + 'rem';
     container_row.style.width = (level * 40 + 200) + 'rem';
-    site_column.style.width = (level * 40 + 200) + 'rem';
+    page_holder.style.width = (level * 40 + 200) + 'rem';
 
     // Get html
     let text = responseText.split('<div class="container">')[1];

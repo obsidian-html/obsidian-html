@@ -77,6 +77,10 @@ class CallOutBlockProcessor(BlockProcessor):
                     fold.set('class', 'callout-title-fold')
                     fold.text = self.svgs['fold']
 
+                # add data div
+                data_div = etree.SubElement(div, 'div')
+                data_div.set('class', 'callout-content')
+
                 continue
 
             # remove leading >
@@ -86,7 +90,7 @@ class CallOutBlockProcessor(BlockProcessor):
 
             if line == '':
                 # compile chunk
-                self.parser.parseChunk(div, chunk)
+                self.parser.parseChunk(data_div, chunk)
 
                 # setup new chunk
                 chunk = ''
@@ -95,7 +99,7 @@ class CallOutBlockProcessor(BlockProcessor):
             chunk += line + '\n'
 
         if chunk != '':
-            self.parser.parseChunk(div, chunk)
+            self.parser.parseChunk(data_div, chunk)
 
         return True 
 

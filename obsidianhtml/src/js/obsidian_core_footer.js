@@ -11,14 +11,11 @@ var content_pane_div = "{content_pane_div}";
 var html_url_prefix = "{html_url_prefix}";
 var documentation_mode = {documentation_mode};
 var tab_mode = !no_tab_mode;
-
+var gzip_hash = '{gzip_hash}'
 
 // Functions 
 // ----------------------------------------------------------------------------
-
 function LoadPage() {
-    console.log('threshold', (1.2 * 40 * getComputedStyle(document.documentElement).fontSize.split("px")[0]));
-
     if (documentation_mode) {
         httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
     }
@@ -82,9 +79,11 @@ function LoadPage() {
 
     // Init starting container
     FirstContainer = document.getElementsByClassName('container')[0];
-    FirstContainer.id = 'level-0';
-    FirstContainer.level = '0';
-    SetContainer(FirstContainer);
+    if (FirstContainer){
+        FirstContainer.id = 'level-0';
+        FirstContainer.level = '0';
+        SetContainer(FirstContainer);
+    }
 
     // Open the path on loading the page
     // This is everything after ?path=
@@ -211,36 +210,3 @@ function SetHeaders(container) {
 }
 
 
-function toggle(id, display_value) {
-    el = document.getElementById(id);
-    if (el.style.display == 'none') {
-        el.style.display = display_value;
-        return true
-    }
-    else if (el.style.display == display_value) {
-        el.style.display = 'none';
-        return false
-    }
-    else {
-        el.style.display = display_value;
-        return true
-    }
-}
-
-function fold_callout(el) {
-    let div = el.parentElement
-    if (div.classList.contains("callout-folded-active")) {
-        div.classList.remove("callout-folded-active")
-    } else {
-        div.classList.add("callout-folded-active")
-    }
-}
-
-// general option, to replace function above
-function fold(el) {
-    if (el.classList.contains("fold-active")) {
-        el.classList.remove("fold-active")
-    } else {
-        el.classList.add("fold-active")
-    }
-}
