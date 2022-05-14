@@ -1312,13 +1312,8 @@ blockquote {
     color: rgb(112, 93, 207)
 }
 
-
-
-
-
-
 #search-master-div {
-    position: absolute;
+    position: fixed;
     z-index: 1;
     background-color: #0000008f;
     width: 100vw;
