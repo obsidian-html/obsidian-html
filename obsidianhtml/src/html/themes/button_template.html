@@ -3,7 +3,10 @@
 </div>
 <script>
     function toggle_theme_popup(el){
+        // make theme button show that it's active by adding the .active class
         cl_toggle(el.id, 'active');
+
+        // show the theme selector
         toggle('theme-popup','block')
 
         let h2 = document.getElementById('header2')
