@@ -3,7 +3,12 @@
         </div>
         <script>
                 function openSearch(){
+                        // set 'search-master-div' to follow the viewport in case of tabs mode
+                        document.getElementById('search-master-div').style.left = window.visualViewport.pageLeft + 'px';
+
+                        // toggle search popup and continue with extra code if it is enabled this time
                         if (toggle('search-master-div', 'block')){
+                                // clear input and put focus on it so that we can start typing immediately
                                 let ss = document.getElementById('search_string');
                                 ss.value = '';
                                 ss.focus()
