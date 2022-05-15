@@ -147,6 +147,7 @@ def ExportStaticFiles(pb):
     copy_file_list = [
         ['html/external.svg', 'external.svg'],
         ['html/hashtag.svg', 'hashtag.svg'],
+        ['html/taglist.css', 'taglist.css'],
         ['rss/rss.svg', 'rss.svg'],
         ['index_from_dir_structure/dirtree.svg', 'dirtree.svg'],
         ['js/obsidian_core_header.js', 'obsidian_core_header.js'],
@@ -158,7 +159,6 @@ def ExportStaticFiles(pb):
     css_files_list = [
         ['html/global_main.css', 'global_main.css'], 
         [f'html/layouts/{pb.gc("_css_file")}', 'main.css'], 
-        ['html/taglist.css', 'taglist.css'],
         ['html/themes/theme-obsidian.css', 'theme-obsidian.css'],
     ]
 
