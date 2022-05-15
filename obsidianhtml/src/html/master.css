@@ -895,10 +895,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .codehilite .il { color: #666666 } /* Literal.Number.Integer.Long */
 
 
-.graph_button {
-    display: None;
-}
-
 /* colors */
 * {
     --muted-link-color: #2d68b1;
