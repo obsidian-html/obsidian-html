@@ -188,10 +188,15 @@
     .theme-obs-dark .header {
         background-color: var(--divider-color);
     }
-    .theme-obs-light .navbar ,
-    .theme-obs-dark .navbar {
+
+    .theme-light .header {
+        margin: 1rem;
+    }
+    .theme-light .navbar-button {
         margin-top: 0rem;
-        margin-left: auto;
+    }
+    .theme-light #navbar {
+        margin-left: 0rem;
     }
 }
 

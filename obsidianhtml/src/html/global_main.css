@@ -403,15 +403,15 @@ h3 + p {
      #navbar {
         padding-top: 1rem;
         width: unset;
+        margin-top: 0rem;
+        margin-left: auto;
     }
     .navbar-button {
         margin: auto;
         margin-top: -1rem;        
         margin-left: unset;
-        margin:auto;
         background-color: unset;
         color: unset;
-        margin-top: -1rem;
     }
 }
 
