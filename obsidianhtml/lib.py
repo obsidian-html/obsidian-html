@@ -150,8 +150,7 @@ def ExportStaticFiles(pb):
         ['html/taglist.css', 'taglist.css'],
         ['rss/rss.svg', 'rss.svg'],
         ['index_from_dir_structure/dirtree.svg', 'dirtree.svg'],
-        ['js/obsidian_core_header.js', 'obsidian_core_header.js'],
-        ['js/obsidian_core_footer.js', 'obsidian_core_footer.js'],
+        ['js/obsidian_core.js', 'obsidian_core.js'],
         ['js/encoding.js', 'encoding.js'],
         ['index_from_dir_structure/dirtree.js', 'dirtree.js'],
     ]
@@ -223,7 +222,7 @@ def ExportStaticFiles(pb):
 
         # Templating
         if file_name[1] in ('master.css', 'main.css', 'global_main.css', 
-                            'obsidian_core_header.js', 'obsidian_core_footer.js', 
+                            'obsidian_core.js', 
                             'search.js', 'search.css'):
             c = c.replace('{html_url_prefix}', html_url_prefix)\
                  .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
@@ -282,7 +281,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         html_url_prefix = pb.gc("html_url_prefix")
 
     # Header inclusions
-    dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/obsidian_core_header.js"></script>' + "\n"
+    dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/obsidian_core.js"></script>' + "\n"
     dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/encoding.js"></script>' + "\n"
     dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/master.css" />' + "\n"
     
@@ -319,8 +318,8 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         dynamic_inclusions += dynamic_includes
 
     # Footer Inclusions
-    footer_js_inclusions = f'<script src="{html_url_prefix}/obs.html/static/obsidian_core_footer.js" type="text/javascript"></script>' + "\n"
-
+    footer_js_inclusions = ''
+    
     if pb.gc('toggles/features/styling/layout', cached=True) == 'documentation':
         footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/load_dirtree_footer.js" type="text/javascript"></script>' + "\n"
 

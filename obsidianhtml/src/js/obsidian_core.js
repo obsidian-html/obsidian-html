@@ -1,8 +1,6 @@
 // Init
 // ----------------------------------------------------------------------------
-// Globals
-var path_to_open = [];
-
+// Globals (filled in by backend)
 var no_tab_mode = {no_tabs};
 var toc_pane = {toc_pane};
 var mermaid_enabled = {mermaid_enabled};
@@ -11,11 +9,75 @@ var content_pane_div = "{content_pane_div}";
 var html_url_prefix = "{html_url_prefix}";
 var documentation_mode = {documentation_mode};
 var tab_mode = !no_tab_mode;
-var gzip_hash = '{gzip_hash}'
+var gzip_hash = '{gzip_hash}'                       // used to check whether the localStorage data is stale
 
-// Functions 
+
+// Onloads
 // ----------------------------------------------------------------------------
-function LoadPage() {
+
+document.addEventListener('DOMContentLoaded', load_theme);  //set theme as quickly as possible to avoid flickering
+document.addEventListener('DOMContentLoaded', load_page);   // all the code that needs to be run when everything is loaded
+
+
+// Keybindings
+// ----------------------------------------------------------------------------
+
+// to add a function callback on a keypress just run `OBSHTML_KEYPRESS_FUNCTIONS.push(my_func)`
+var OBSHTML_KEYPRESS_FUNCTIONS = []
+document.addEventListener('keypress', HandleKeyPress);
+function HandleKeyPress(e) {
+    OBSHTML_KEYPRESS_FUNCTIONS.forEach(func => {
+        func(e)
+    })
+}
+
+
+// Orchestration functions
+// ----------------------------------------------------------------------------
+
+function load_theme() {
+    let theme_div = document.getElementById('theme');
+    if (!theme_div){
+        // if the theme selection div is not present, assume that the template does not support theming
+        return false
+    }
+
+    let theme_name = window.localStorage.getItem('theme_name');
+    if (!theme_name){
+        window.localStorage.setItem('theme_name', 'obs-light');
+    }
+    set_theme(window.localStorage.getItem('theme_name'));
+    document.getElementById('antiflash').style.display = 'none'; 
+}
+
+function set_theme(theme_name){
+    let theme_div = document.getElementById('theme');
+    if (!theme_div){
+        // if the theme selection div is not present, assume that the template does not support theming
+        return false
+    }
+
+    let body = document.body;
+
+    // update localstorage 
+    window.localStorage.setItem('theme_name', theme_name);
+
+    // update select element
+    theme_div.value = theme_name
+    let theme_class = 'theme-'+theme_name;
+
+    // remove previous theme class
+    body.classList.forEach(class_name => {
+        if (class_name.startsWith('theme-')){
+            body.classList.remove(class_name);
+        }
+    });
+
+    // add new
+    body.classList.add(theme_class);
+}
+
+function load_page() {
     if (documentation_mode) {
         httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
     }
@@ -120,9 +182,6 @@ function LoadTableOfContents(container_div)
 
 }
 
-
-// FUNCTIONS 
-// ----------------------------------------------------------------------------
 function SetContainer(container) {
     // This function is called on every (newly created) container. 
     // One container holds one tab
@@ -209,4 +268,106 @@ function SetHeaders(container) {
     }
 }
 
+// this function is called when the user clicks on the menu button (mobile mode)
+function toggle_menu(){
+    // In tabs mode there will be a hidden header that needs to follow what the main header does
+    // (html hack for having a fixed header and correct vertical scrolling...)
+    let h2 = document.getElementById('header2')
+
+    
+    let res = toggle('navbar', 'flex')
+    if (!res){
+        // If the menu is turned off --> also close the theme selector
+        disable('theme-popup');
+
+        if (h2){
+            // Do the same but also for the mirror header (tabs mode only)
+            let pu = document.getElementById('header2').getElementsByClassName('popup')[0];
+            disable_el(pu);
+        }
+    }
+
+    if (h2){
+        // Also toggle the mirror header (tabs mode only)
+        let res = toggle('navbar2', 'flex');
+    }
+}
+
+// Core Functions 
+// ----------------------------------------------------------------------------
+
+function httpGetAsync(theUrl, callback, level, callbackpath) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function () {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp, level, theUrl, callbackpath);
+    }
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
+
+// Helper Functions 
+// ----------------------------------------------------------------------------
+
+function rem(rem) {
+    return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+}
+function vh() {
+    return Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+}
+function print(...vals){ console.log(...vals)}
+
+function toggle(id, display_value) {
+    el = document.getElementById(id);
+    return toggle_el(el, display_value);
+}
+function toggle_el(el, display_value) {
+    if (el.style.display == 'none') {
+        el.style.display = display_value;
+        return true
+    }
+    else if (el.style.display == display_value) {
+        el.style.display = 'none';
+        return false
+    }
+    else {
+        el.style.display = display_value;
+        return true
+    }
+}
+
+function disable(id){
+    disable_el(document.getElementById(id));
+}
+function disable_el(el){
+    el.style.display = 'none';
+}
+
+function cl_toggle(id, class_name) {
+    let el = document.getElementById(id);
+    if (el.classList.contains(class_name)) {
+        el.classList.remove(class_name)
+    } else {
+        el.classList.add(class_name)
+    }
+}
+
+function fold_callout(el) {
+    let div = el.parentElement
+    if (div.classList.contains("active")) {
+        div.classList.remove("active")
+    } else {
+        div.classList.add("active")
+    }
+}
+
+// general option, to replace function above
+function fold(el) {
+    if (el.classList.contains("fold-active")) {
+        el.classList.remove("fold-active")
+    } else {
+        el.classList.add("fold-active")
+    }
+}
 

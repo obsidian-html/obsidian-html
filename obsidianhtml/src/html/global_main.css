@@ -390,8 +390,11 @@ h3 + p {
     margin-bottom: 0.5rem;
 }
 
-
-
+@media (max-width: 840px) {
+    .toc {
+        display: block;
+    }
+}
 
 @media (max-width: 602px) {
     .header {
@@ -403,15 +406,15 @@ h3 + p {
      #navbar {
         padding-top: 1rem;
         width: unset;
+        margin-top: 0rem;
+        margin-left: auto;
     }
     .navbar-button {
         margin: auto;
         margin-top: -1rem;        
         margin-left: unset;
-        margin:auto;
         background-color: unset;
         color: unset;
-        margin-top: -1rem;
     }
 }
 
