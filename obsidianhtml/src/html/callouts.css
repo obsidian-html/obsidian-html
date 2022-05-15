@@ -48,6 +48,7 @@
     display: flex;
     margin-top: 0rem;
     padding: 0.4rem;
+    padding-bottom: 0rem;
     font-weight: 700;
 
     background-color: rgba(var(--callout-color), var(--callout-alpha));
