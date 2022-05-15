@@ -390,8 +390,11 @@ h3 + p {
     margin-bottom: 0.5rem;
 }
 
-
-
+@media (max-width: 840px) {
+    .toc {
+        display: block;
+    }
+}
 
 @media (max-width: 602px) {
     .header {
