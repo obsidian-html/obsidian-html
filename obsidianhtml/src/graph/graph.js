@@ -1,5 +1,6 @@
 var current_node_id = '';
 var Graph = null;
+var graph_dependencies_loaded = false;
 
 function run(uid, pinnedNode)
 {
@@ -20,10 +21,15 @@ function run(uid, pinnedNode)
         cont.style.display = "block";
     }
 
-    args = get_graph_args(uid)
-    args.current_node_id = pinnedNode
+    // Init graph
+    if (!graph_dependencies_loaded){
+        args = get_graph_args(uid)
+        args.current_node_id = pinnedNode
 
-    grapher(args)
+        grapher(args)
+
+        graph_dependencies_loaded = true
+    }   
 }
 
 function get_graph_args(uid){

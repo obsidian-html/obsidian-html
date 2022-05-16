@@ -307,6 +307,22 @@ function httpGetAsync(theUrl, callback, level, callbackpath) {
 }
 
 
+function load_script_on_demand(path, callback){
+    // create script tag
+    var elScript = document.createElement('script');
+    elScript.setAttribute('type','text/javascript');
+    elScript.setAttribute('charset', 'utf-8');
+
+    // set path to load, and callback to be run when loaded
+    elScript.setAttribute( 'src', path);
+    elScript.onload = callback;
+
+    // add script tag to the end of body
+    document.getElementsByTagName("body")[0].appendChild( elScript );
+}
+
+
+
 // Helper Functions 
 // ----------------------------------------------------------------------------
 

@@ -1,7 +1,15 @@
-<script src="{html_url_prefix}/obs.html/static/3d-force-graph.js"></script>
-
+<!-- <script defer src="{html_url_prefix}/obs.html/static/3d-force-graph.js"></script> -->
 <script>
     function grapher(args) {
+        load_script_on_demand(
+            '/obs.html/static/3d-force-graph.js', 
+            function(){
+                initGraph(args)
+            }
+        )
+    }
+
+    function initGraph(args) {
         window.Graph = ForceGraph3D()
             (args.graph_container)
             .jsonUrl(args.data)
