@@ -54,15 +54,6 @@ function get_graph_args(uid){
         return args
 }
 
-function get_graph_data(){
-        return '{html_url_prefix}/obs.html/data/graph.json';
-}
-
-function get_node_graph_data(){
-        return '{html_url_prefix}/obs.html/data/node_graph.json';
-}
-
-
 function graph_left_click(args){
         return graph_open_link(args)
 }

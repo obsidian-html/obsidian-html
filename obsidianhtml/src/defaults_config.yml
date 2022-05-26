@@ -158,6 +158,7 @@ toggles:
       enabled: True
       styling:
         show_icon: True
+        show_in_note_footer: True
 
     # Include code to build the graph view per page 
     graph:

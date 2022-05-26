@@ -60,6 +60,11 @@ class MarkdownPage:
         for i, value in enumerate(self.codelines):
             self.page = self.page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")  
 
+    def add_tag(self, tag):
+        if 'tags' not in self.metadata:
+            self.metadata['tags'] = []
+        self.metadata['tags'].append(tag)
+    
     def AddToTagtree(self, tagtree, url=''):
         if 'tags' not in self.metadata:
             return
@@ -313,9 +318,12 @@ class MarkdownPage:
         for l in re.findall("(?<!\S)#[^\s#`]+", self.page):
             tag = l.replace('.', '').replace('#', '')
             new_md_str = f"**{tag}**"
+
+            self.add_tag(tag)
+
             safe_str = re.escape(l)
             self.page = re.sub(safe_str, new_md_str, self.page)
-
+            
         # -- [10] Add code inclusions
         for l in re.findall(r'^(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')

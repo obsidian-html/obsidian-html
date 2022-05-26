@@ -320,9 +320,17 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # [15] Tag not created links with a class so they can be decorated differently
     html_body = html_body.replace(f'<a href="{html_url_prefix}/not_created.html">', f'<a href="{html_url_prefix}/not_created.html" class="nonexistent-link">')
 
+    html_body += '\n<div class="note-footer">\n'
+
     # [18] add backlinks to page 
     if pb.gc('toggles/features/backlinks/enabled', cached=True):
-        html_body += '{_obsidian_html_backlinks_pattern_:'+node['id']+'}'    
+        html_body += '<div class="backlinks">\n{_obsidian_html_backlinks_pattern_:'+node['id']+'}\n</div>\n'    
+
+    # [18] add tags to page 
+    if pb.gc('toggles/features/tags_page/styling/show_in_note_footer', cached=True):
+        html_body += '<div class="tags">\n{_obsidian_html_tags_footer_pattern_:'+node['id']+'}\n</div>\n'    
+
+    html_body += '\n</div>' #class="note-footer"
 
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
@@ -718,8 +726,8 @@ def main():
         # Make lookup so that we can easily find the url of a node
         pb.network_tree.compile_node_lookup()
 
-        if pb.gc('toggles/features/backlinks/enabled'):
-            print('\t> FEATURE: BACKLINKS')
+        if pb.gc('toggles/features/backlinks/enabled') or pb.gc('toggles/features/tags_page/styling/show_in_note_footer'):
+            print('\t> FEATURE: NOTE-FOOTER')
             for fo in pb.files.values():
                 if not fo.metadata['is_note']:
                     continue
@@ -735,32 +743,56 @@ def main():
                         html = f.read()
                 except:
                     continue
-                
-                # Get node_id
-                m = re.search(r'(?<=\{_obsidian_html_backlinks_pattern_:)(.*?)(?=\})', html)
-                if m is None:
-                    continue
-                node_id = m.group(0)
 
                 # Compile backlinks list
-                backlinks = [x for x in pb.network_tree.tree['links'] if x['target'] == node_id]
-                snippet = ''
-                if len(backlinks) > 0:
-                    snippet = "<h2>Backlinks</h2>\n<ul>\n"
-                    for l in backlinks:
-                        if l['target'] == node_id:
-                            url = pb.network_tree.node_lookup[l['source']]['url']
-                            if url[0] != '/':
-                                url = '/'+url
-                            snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
-                    snippet += '</ul>'
+                if pb.gc('toggles/features/backlinks/enabled'):                
+                    # Get node_id
+                    m = re.search(r'(?<=\{_obsidian_html_backlinks_pattern_:)(.*?)(?=\})', html)
+                    if m is None:
+                        continue
+                    node_id = m.group(0)
 
-                # replace placeholder with list & write output
-                html = re.sub('\{_obsidian_html_backlinks_pattern_:'+re.escape(node_id)+'}', snippet, html)
+                    backlinks = [x for x in pb.network_tree.tree['links'] if x['target'] == node_id]
+                    snippet = ''
+                    if len(backlinks) > 0:
+                        snippet = "<h2>Backlinks</h2>\n<ul>\n"
+                        for l in backlinks:
+                            if l['target'] == node_id:
+                                url = pb.network_tree.node_lookup[l['source']]['url']
+                                if url[0] != '/':
+                                    url = '/'+url
+                                snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
+                        snippet += '</ul>'
+
+                    # replace placeholder with list & write output
+                    html = re.sub('\{_obsidian_html_backlinks_pattern_:'+re.escape(node_id)+'}', snippet, html)
+
+                # Compile tags list
+                if pb.gc('toggles/features/tags_page/styling/show_in_note_footer'):
+                    # Get node
+                    m = re.search(r'(?<=\{_obsidian_html_tags_footer_pattern_:)(.*?)(?=\})', html)
+                    if m is None:
+                        continue
+                    node_id = m.group(0)
+                    node = pb.network_tree.node_lookup[node_id]
+
+                    # Replace placeholder
+                    snippet = ''
+                    if 'tags' in node['metadata'] and len(node['metadata']['tags']) > 0:
+                        snippet = "<h2>Tags</h2>\n<ul>\n"
+                        for tag in node['metadata']['tags']:
+                            url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
+                            snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
+                        snippet += '</ul>'
+
+                    # replace placeholder with list & write output
+                    html = re.sub('\{_obsidian_html_tags_footer_pattern_:'+re.escape(node_id)+'}', snippet, html)
+
                 with open(dst_abs_path, 'w', encoding="utf-8") as f:
                     f.write(html)
             
-            print('\t< FEATURE: BACKLINKS: Done')
+            print('\t< FEATURE: NOTE-FOOTER: Done')
+
 
         # Create tag page
         recurseTagList(pb.tagtree, '', pb, level=0)

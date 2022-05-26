@@ -488,4 +488,14 @@
     .dir-button {
         color: rgb(var(--normal-text-color));
     }
+
+    .note-footer {
+        display: flex;
+    }
+    .note-footer .backlinks {
+        flex:1;
+    }
+    .note-footer .tags {
+        flex:1;
+    }
 }

@@ -321,7 +321,12 @@ function load_script_on_demand(path, callback){
     document.getElementsByTagName("body")[0].appendChild( elScript );
 }
 
-
+function get_graph_data(){
+    return get_html_url_prefix()+'/obs.html/data/graph.json';
+}
+function get_html_url_prefix(){
+    return '{html_url_prefix}'  // this value is replaced by the actual url prefix when compiled
+}
 
 // Helper Functions 
 // ----------------------------------------------------------------------------
