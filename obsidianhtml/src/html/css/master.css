@@ -558,7 +558,7 @@
         background-color: inherit;
     }
 
-    pre { line-height: 125%; font-family: 'SourceCodePro-Regular'; font-size: 10pt;  }
+    pre { line-height: 1.2rem; font-family: 'SourceCodePro-Regular'; font-size: 10pt;  }
     td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
     span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
     td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
