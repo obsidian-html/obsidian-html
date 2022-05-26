@@ -44,15 +44,18 @@
         --color-accent3: #989c9d;
 
         --divider-color: #1a1a1a;
-        
-        --callout-bg: #161616;
-        --callout-color: rgb(220, 221, 222); 
-        --callout-alpha: 0.3;
 
         --header-bg: #000000;
         --code-hightlight-color: #c877ff;
         --homelink-color: var(--color-accent3);
     }
+    .theme-obs-dark .callout,
+    .theme-obs-dark .callout * {
+        --callout-bg: rgb(22, 22, 22);
+        --callout-color: 68, 138, 255;
+        --callout-alpha: 0.1;
+     }
+
     .theme-light,
     .theme-light * {
         --normal-text-color: 51, 51, 51;
@@ -72,7 +75,6 @@
         --divider-color:  #b9b9b9;
         
         --callout-bg: white;
-        --callout-color: rgb(46, 51, 56);
         --callout-alpha: 0;
 
         --header-bg: #FFFFFF;

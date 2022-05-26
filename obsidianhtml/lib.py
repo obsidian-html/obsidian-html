@@ -145,9 +145,9 @@ def ExportStaticFiles(pb):
 
     # define files to be copied over (standard copy, static_folder)
     copy_file_list = [
-        ['html/external.svg', 'external.svg'],
-        ['html/hashtag.svg', 'hashtag.svg'],
-        ['html/taglist.css', 'taglist.css'],
+        ['svgs/external.svg', 'external.svg'],
+        ['svgs/hashtag.svg', 'hashtag.svg'],
+        ['html/css/taglist.css', 'taglist.css'],
         ['rss/rss.svg', 'rss.svg'],
         ['index_from_dir_structure/dirtree.svg', 'dirtree.svg'],
         ['js/obsidian_core.js', 'obsidian_core.js'],
@@ -156,9 +156,8 @@ def ExportStaticFiles(pb):
     ]
 
     css_files_list = [
-        ['html/global_main.css', 'global_main.css'], 
-        [f'html/layouts/{pb.gc("_css_file")}', 'main.css'], 
-        ['html/themes/theme-obsidian.css', 'theme-obsidian.css'],
+        ['html/css/global_main.css', 'global_main.css'], 
+        [f'html/layouts/{pb.gc("_css_file")}', 'main.css']
     ]
 
     if pb.config.feature_is_enabled('graph', cached=True):
@@ -169,10 +168,10 @@ def ExportStaticFiles(pb):
     if pb.config.feature_is_enabled('mermaid_diagrams', cached=True):
         copy_file_list.append(['imported/mermaid.9.0.1.min.js', 'mermaid.9.0.1.min.js'])
         copy_file_list.append(['imported/mermaid.9.0.1.min.js.map', 'mermaid.9.0.1.min.js.map'])
-        copy_file_list.append(['html/mermaid.css', 'mermaid.css'])
+        copy_file_list.append(['html/css/mermaid.css', 'mermaid.css'])
 
     if pb.config.feature_is_enabled('code_highlight', cached=True):
-        css_files_list.append(['html/codehilite.css', 'codehilite.css'])
+        css_files_list.append(['html/css/codehilite.css', 'codehilite.css'])
 
     if pb.config.feature_is_enabled('search', cached=True):
         copy_file_list.append(['search/search.svg', 'search.svg'])
@@ -186,7 +185,7 @@ def ExportStaticFiles(pb):
         copy_file_list.append(['imported/mathjax.v3.es5.tex-chtml.js', 'tex-chtml.js'])
 
     if pb.config.feature_is_enabled('callouts', cached=True):
-        css_files_list.append(['html/callouts.css', 'callouts.css'])
+        css_files_list.append(['html/css/callouts.css', 'callouts.css'])
 
     if pb.gc('toggles/features/styling/layout', cached=True) == 'documentation':
         copy_file_list.append(['js/load_dirtree_footer.js', 'load_dirtree_footer.js'])
@@ -195,14 +194,15 @@ def ExportStaticFiles(pb):
         copy_file_list.append(['js/obsidian_tabs_footer.js', 'obsidian_tabs_footer.js'])
 
     # create master.css file
+    css_files_list.append( ['html/themes/theme-obsidian.css', 'theme-obsidian.css'])
     css = ''
     for filepath, _ in css_files_list:
         css += '\n\n' + OpenIncludedFile(filepath)
     
-    dstpth = GetIncludedResourcePath('html').joinpath('master.css')
+    dstpth = GetIncludedResourcePath('html').joinpath('css/master.css')
     with open (dstpth, 'w', encoding="utf-8") as f:
         f.write(css)
-    copy_file_list.append(['html/master.css', 'master.css'])
+    copy_file_list.append(['html/css/master.css', 'master.css'])
 
     # copy static files over to the static folder
     for file_name in copy_file_list:
@@ -242,8 +242,8 @@ def ExportStaticFiles(pb):
 
     # copy binary files to dst (byte copy, static_folder)
     copy_file_list_byte = [
-        ['html/SourceCodePro-Regular.ttf', 'SourceCodePro-Regular.ttf'],
-        ['html/Roboto-Regular.ttf', 'Roboto-Regular.ttf']
+        ['html/fonts/SourceCodePro-Regular.ttf', 'SourceCodePro-Regular.ttf'],
+        ['html/fonts/Roboto-Regular.ttf', 'Roboto-Regular.ttf']
     ]
     for file_name in copy_file_list_byte:
         c = OpenIncludedFileBinary(file_name[0])
@@ -251,7 +251,7 @@ def ExportStaticFiles(pb):
             f.write(c)
 
     # Custom copy
-    c = OpenIncludedFile('html/not_created.html')
+    c = OpenIncludedFile('html/templates/not_created.html')
     dst_path = pb.paths['html_output_folder'].joinpath('not_created.html')
     html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
 

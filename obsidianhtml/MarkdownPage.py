@@ -95,7 +95,7 @@ class MarkdownPage:
             mime_type = mime_type_lut[suffix]
         except:
             mime_type = ''
-        video_template = OpenIncludedFile('html/video_template.html')
+        video_template = OpenIncludedFile('html/templates/video_template.html')
         return video_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
 
     def GetAudioHTML(self, file_name, relative_path_corrected, suffix):
@@ -108,7 +108,7 @@ class MarkdownPage:
             mime_type = mime_type_lut[suffix]
         except:
             mime_type = ''
-        audio_template = OpenIncludedFile('html/audio_template.html')
+        audio_template = OpenIncludedFile('html/templates/audio_template.html')
         return audio_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
 
     def ConvertObsidianPageToMarkdownPage(self, origin:'OH_file'=None, include_depth=0, includer_page_depth=None):

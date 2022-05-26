@@ -16,7 +16,6 @@
 
     .callout {
         font-size: 11pt;
-        padding-bottom: 0.1rem;
         margin-bottom: 1rem;
         
         background-color: var(--callout-bg);
@@ -24,22 +23,20 @@
         border-radius: 0.1rem 0 0 0.1rem;
         color: var(--callout-color);
     }
+    .callout.active {
+        padding-bottom: 0.1rem;
+    }
     .callout,
     .callout * {
         --callout-bg: rgb(242, 243, 245);
         --callout-color: 68, 138, 255;
         --callout-alpha: 0.1;
-
      }
     .callout a:link,
     .callout a:hover
     .callout a:visited {
         color: #85c4fb;
     }
-    /* .callout-folded {
-        max-height: 2.1rem;
-        overflow-y: clip;
-    } */
 
     .callout p {
         padding-left: 1rem;
@@ -72,8 +69,6 @@
     .callout-title-name {
         flex: auto;
     }
-
-
 
     .callout code {
         background-color: rgb(var(--callout-color), 0.1);
@@ -165,20 +160,6 @@
         --callout-color: 158, 158, 158;
     }
 
-
-    .callout-folded-active .callout-title {
-        padding-bottom: 3px;
-    }
-
-    /* light theme 
-    .callout {
-        color: rgb(46, 51, 56);
-        background-color: rgb(242, 243, 245);
-    }
-    .callout-title {
-        background-color: rgba(var(--callout-color), 0.1);
-    }
-    */
     .callout a,
     .callout a:hover,
     .callout a:visited,
