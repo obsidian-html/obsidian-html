@@ -1,5 +1,6 @@
 var current_node_id = '';
 var Graph = null;
+var graph_dependencies_loaded = false;
 
 function run(uid, pinnedNode)
 {
@@ -13,17 +14,24 @@ function run(uid, pinnedNode)
     // toggle graph on or off
     if (_button.innerHTML == 'Hide Graph'){
         _button.innerHTML = 'Show Graph';
-        cont.style.display = "None";
+        cont.style.display = "none";
     }
     else {
         _button.innerHTML = "Hide Graph";
         cont.style.display = "block";
     }
 
-    args = get_graph_args(uid)
-    args.current_node_id = pinnedNode
+    // Init graph
+    if (!graph_dependencies_loaded){
+        args = get_graph_args(uid)
+        args.current_node_id = pinnedNode
 
-    grapher(args)
+        cont.style.display = "none";            // close div after reading out its width, then open div right before loading the graph to avoid opening an empty div
+        
+        grapher(args)                           // ask graph to initialize itself
+
+        graph_dependencies_loaded = true
+    }   
 }
 
 function get_graph_args(uid){
@@ -45,15 +53,6 @@ function get_graph_args(uid){
             }
         return args
 }
-
-function get_graph_data(){
-        return '{html_url_prefix}/obs.html/data/graph.json';
-}
-
-function get_node_graph_data(){
-        return '{html_url_prefix}/obs.html/data/node_graph.json';
-}
-
 
 function graph_left_click(args){
         return graph_open_link(args)

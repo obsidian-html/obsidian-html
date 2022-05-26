@@ -1,28 +1,30 @@
-body {
-    margin: 1rem;
-    background-color: #e3e3e3;
-    
-}
-.container {
-    margin:auto;
-    background-color: white;
-    box-shadow: 4px 4px 11px 0px rgba(0,0,0,0.38);
-}
-
-.codehilite {
-    color: rgb(98, 35, 16);
-} 
-
-@media (max-width: 840px) {
+@layer layout {
     body {
-        margin: 0rem;
-        background-color: unset;
+        margin: 1rem;
+        background-color: #e3e3e3;
+        
     }
     .container {
-        box-shadow: unset;
+        margin:auto;
+        background-color: white;
+        box-shadow: 4px 4px 11px 0px rgba(0,0,0,0.38);
     }
+
     .codehilite {
-        width: calc(100vw - 4rem);
-        overflow-x: scroll;
+        color: rgb(98, 35, 16);
     } 
+
+    @media (max-width: 840px) {
+        body {
+            margin: 0rem;
+            background-color: unset;
+        }
+        .container {
+            box-shadow: unset;
+        }
+        .codehilite {
+            width: calc(100vw - 4rem);
+            overflow-x: scroll;
+        } 
+    }
 }

@@ -10,4 +10,4 @@ tmp/*
 **/.ipynb_checkpoints/**
 **/geckodriver.log
 /obsidianhtml/src/installer/dist/**
-/obsidianhtml/src/html/master.css
+**/master.css
