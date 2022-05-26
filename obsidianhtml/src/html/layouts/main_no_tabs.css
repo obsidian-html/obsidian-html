@@ -38,29 +38,6 @@
         max-height: 1.5rem;
     }
 
-    /* unvisited link */
-    a:link {
-        color: rgb(10, 132, 255);
-        text-decoration: none;
-    }
-    
-    /* visited link */
-    a:visited {
-        color: rgb(60, 158, 255);
-        text-decoration: none;
-    }
-    
-    /* mouse over link */
-    a:hover {
-        color: rgb(10, 132, 255);
-        text-decoration: underline;
-    }
-    
-    /* selected link */
-    a:active {
-        color: rgb(10, 132, 255);
-        text-decoration: none;
-    } 
 
     .navbar-link {
         display: block;
