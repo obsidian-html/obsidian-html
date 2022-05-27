@@ -1,6 +1,7 @@
+import * as grapher_2d from '{html_url_prefix}/obs.html/static/default_grapher_2d.js';
+import * as grapher_3d from '{html_url_prefix}/obs.html/static/default_grapher_3d.js';
 
-
-// PUBLIC
+// INFORMATION
 //////////////////////////////////////////////////////////////////////////////
 // These help in avoiding reloading dependencies when they are already loaded
 var graph_dependencies_loaded = {}
@@ -27,6 +28,7 @@ var default_colors = {
 }
 
 // Graph listing mutations
+//////////////////////////////////////////////////////////////////////////////
 var graphs = {};                                // each graph has an object in this hashtable. see new_graph_listing() for type
 
 function new_graph_listing(){
@@ -72,10 +74,9 @@ function remove_graph(uid, cont, close){
 }
 
 // Initialisation
-
+//////////////////////////////////////////////////////////////////////////////
 function run(button, ntid, pinned_node)
 {
-    console.log(button)
     // Get elements
     let level = button.getAttribute('level');
     let uid = ntid + level
@@ -114,10 +115,10 @@ function enable_graph(uid){
     args.current_node_id = graphs[uid].current_node_id
     
     if (graphs[uid].type_d == '2D'){
-        grapher_2d(args)
+        grapher_2d.run(args)
     }
     else if (graphs[uid].type_d == '3D'){
-        grapher_3d(args)
+        grapher_3d.run(args)
     }
 
     graphs[uid].active = true;
@@ -126,7 +127,6 @@ function enable_graph(uid){
 
 // the args hashtable is sent to the grapher function to tell it what it needs to know to draw the graph
 function get_graph_args(uid){
-    console.log('A'+uid)
         let cont = document.getElementById('A'+uid);
         let data = get_graph_data();
 
@@ -198,8 +198,6 @@ function graph_select_node(args){
     graphs[args.uid].graph.refresh();
     return false;
 }
-
-
 
 // HELPER FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
@@ -275,14 +273,8 @@ export {
     switch_graph_type,
     run, 
     graphs, 
-    graph_left_click, 
-    graph_right_click,
-    remove_graph,
     graph_dependencies_loaded, 
     default_actions,
-    act,
-    // to be made internal (graph full page uses these)
-    get_graph_args,
     graph_select_node,
     graph_open_link_normal,
     graph_open_link
