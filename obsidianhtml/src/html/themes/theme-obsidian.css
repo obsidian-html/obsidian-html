@@ -48,6 +48,8 @@
         --header-bg: #000000;
         --code-hightlight-color: #c877ff;
         --homelink-color: var(--color-accent3);
+
+        --graph-bg: #161616;
     }
     .theme-obs-dark .callout,
     .theme-obs-dark .callout * {
@@ -192,10 +194,25 @@
         }
         .theme-light .navbar-button {
             margin-top: 0rem;
+            margin-left: auto;
         }
-        .theme-light #navbar {
-            margin-left: 0rem;
+        .theme-light #header_flex {
+            width: 100%
         }
+        .theme-light .icon-tray,
+        .theme-obs-dark .icon-tray,
+        .theme-obs-light .icon-tray {
+            width: unset;
+        }
+        .theme-light #navbar,
+        .theme-obs-dark #navbar,
+        .theme-obs-light #navbar {
+            margin-left: auto;
+        }
+        .theme-light .icon-tray {
+            margin-bottom: 1rem;
+        }
+
     }
 
     /* .theme-obs-dark #theme-popup,

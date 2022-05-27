@@ -119,7 +119,7 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
 
     // Continue path opening (if started with path opening)
     if (callbackpath) {
-        OpenPath(level + 1);
+        OpenPath(level + 1, callbackpath);
     }
     else {
         // Start to build new href like https://localhost:8000/?path=
@@ -259,11 +259,12 @@ function FindNoteMaxLevelRecurse(level) {
     return FindNoteMaxLevelRecurse(level + 1)
 }
 
-function OpenPath(level) {
-    if (path_to_open.length > 0) {
+
+function OpenPath(level, path_to_open) {
+    if (path_to_open && path_to_open.length > 0) {
         let path = path_to_open.shift();
         if (path != '') {
-            httpGetAsync(path, ReceiveCall, level, true);
+            httpGetAsync(path, ReceiveCall, level, path_to_open);
         }
     }
 }

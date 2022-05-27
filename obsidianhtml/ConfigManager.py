@@ -135,15 +135,19 @@ class Config:
             
             # Get grapher template code
             temp = self.pb.gc('toggles/features/graph/template', cached=True)
-            if temp in ['2d', '3d', 'node_graph']:
-                self.pb.grapher = OpenIncludedFile(f'graph/default_grapher_{temp}.html')
-            else:
-                temp_path = Path(temp).resolve()
-                try:
-                    with open(temp_path) as f:
-                        self.pb.grapher = f.read()
-                except:
-                    raise Exception(f"Could not open user provided grapher file with path {temp_path}")
+            self.pb.graphers = []
+            #self.pb.graphers.append(OpenIncludedFile(f'graph/default_grapher_3d.html'))
+            #self.pb.graphers.append(OpenIncludedFile(f'graph/default_grapher_2d.html'))
+            
+            # if temp in ['2d', '3d', 'node_graph']:
+            #     self.pb.grapher = OpenIncludedFile(f'graph/default_grapher_{temp}.html')
+            # else:
+            #     temp_path = Path(temp).resolve()
+            #     try:
+            #         with open(temp_path) as f:
+            #             self.pb.grapher = f.read()
+            #     except:
+            #         raise Exception(f"Could not open user provided grapher file with path {temp_path}")
 
 
 
