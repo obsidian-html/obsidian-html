@@ -336,12 +336,16 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if pb.gc('toggles/features/graph/enabled', cached=True):
         # compile graph
-        grapher = pb.grapher.replace('{html_url_prefix}', html_url_prefix)
+        grapher_code = ''
+        for grapher in pb.graphers:
+            grapher = grapher.replace('{html_url_prefix}', pb.gc('html_url_prefix'))
+            grapher_code += '\n' + grapher
+
         graph_template = pb.graph_template.replace('{id}', simpleHash(html_body))\
                                        .replace('{pinnedNode}', node['id'])\
                                        .replace('{pinnedNodeGraph}', str(node['nid']))\
                                        .replace('{html_url_prefix}', html_url_prefix)\
-                                       .replace('{grapher}', grapher)\
+                                       .replace('{grapher}', grapher_code)\
                                        .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))
         html_body += f"\n{graph_template}\n"
 
@@ -800,9 +804,13 @@ def main():
         # Create graph fullpage
         if pb.gc('toggles/features/graph/enabled', cached=True):
             # compile graph
-            grapher = pb.grapher.replace('{html_url_prefix}', pb.gc('html_url_prefix'))
+            grapher_code = ''
+            for grapher in pb.graphers:
+                grapher = grapher.replace('{html_url_prefix}', pb.gc('html_url_prefix'))
+                grapher_code += '\n' + grapher
+
             html = PopulateTemplate(pb, 'null', pb.dynamic_inclusions, pb.graph_full_page_template, content='')
-            html = html.replace('{grapher}', grapher)
+            html = html.replace('{grapher}', grapher_code)
             html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
 
             op = paths['html_output_folder'].joinpath('obs.html/graph/index.html')

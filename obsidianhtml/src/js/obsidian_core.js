@@ -79,7 +79,7 @@ function set_theme(theme_name){
 
 function load_page() {
     if (documentation_mode) {
-        httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, 'callbackpath');
+        httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, false);
     }
 
     let collection = document.getElementsByClassName("container")
@@ -150,6 +150,7 @@ function load_page() {
     // Open the path on loading the page
     // This is everything after ?path=
     if (tab_mode) {
+        let path_to_open = ''
         var href = window.location.href;
         if (href.includes('?path=')) {
             path_to_open = href.split('?path=')[1].split('/');
@@ -157,7 +158,7 @@ function load_page() {
                 path_to_open[i] = decodeURIComponent(path_to_open[i]);
             }
         }
-        OpenPath(1);
+        OpenPath(1, path_to_open);
     }
 }
 
@@ -201,21 +202,28 @@ function SetContainer(container) {
     }
 
     // set graph svg and button to have unique id across tabs
-    svgs = container.querySelectorAll(".graph_svg");
-    if (svgs.length == 1) {
-        svgs[0].id = svgs[0].id.replace('{level}', container.level)
+    let graph_div = container.querySelectorAll(".graph_div");
+    if (graph_div.length == 1) {
+        graph_div[0].id = graph_div[0].id.replace('{level}', container.level)
     }
 
-    divs = container.querySelectorAll(".graph_div");
-    if (divs.length == 1) {
-        divs[0].id = divs[0].id.replace('{level}', container.level)
+    let graph_show_button = container.querySelectorAll(".graph_show_button");
+    if (graph_show_button.length == 1) {
+        graph_show_button[0].setAttribute('level', container.level);
+        graph_show_button[0].id = graph_show_button[0].id.replace('{level}', container.level)
     }
-
-    let buttons = container.querySelectorAll(".graph_button");
-    if (buttons.length == 1) {
-        buttons[0].level = container.level;
-        buttons[0].id = buttons[0].id.replace('{level}', container.level)
+    let graph_type_button = container.querySelectorAll(".graph_type_button");
+    if (graph_type_button.length == 1) {
+        // fetch or set default graph type value
+        let type_d = window.localStorage.getItem('graph_type_d');
+        if (!type_d){
+            window.localStorage.setItem('graph_type_d', '2D');
+            type_d = '2D';
+        }
+        graph_type_button[0].innerHTML = type_d;
+        graph_type_button[0].id = graph_type_button[0].id.replace('{level}', container.level)
     }
+    
 }
 
 // Adds link icon to headers and creates the anchor link to the header.
@@ -307,7 +315,8 @@ function httpGetAsync(theUrl, callback, level, callbackpath) {
 }
 
 
-function load_script_on_demand(path, callback){
+function load_script_on_demand(path, callback, callback_args){
+    console.log('loading', path);
     // create script tag
     var elScript = document.createElement('script');
     elScript.setAttribute('type','text/javascript');
@@ -315,7 +324,10 @@ function load_script_on_demand(path, callback){
 
     // set path to load, and callback to be run when loaded
     elScript.setAttribute( 'src', path);
-    elScript.onload = callback;
+    elScript.addEventListener('load', (event) => {
+        callback(...callback_args);
+    });
+    //elScript.onload = callback;
 
     // add script tag to the end of body
     document.getElementsByTagName("body")[0].appendChild( elScript );
@@ -391,4 +403,6 @@ function fold(el) {
         el.classList.add("fold-active")
     }
 }
+
+
 

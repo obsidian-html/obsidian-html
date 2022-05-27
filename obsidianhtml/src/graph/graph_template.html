@@ -1,9 +1,23 @@
-<script src="{html_url_prefix}/obs.html/static/graph.js" type="text/javascript"></script>
-
 <div class="graph">
     <div id="A{id}{level}" class="graph_div"></div>
-    <button class="graph_button" id="B{id}{level}" level="{level}" onclick="run('{id}'+this.level, '{pinnedNode}');">Show Graph</button>
+    
+    <div class="graph-button-row" style="display:flex;">
+        <button class="graph_button graph_show_button" id="B{id}{level}" level="{level}" note_temp_id="{id}" onclick="window.ObsHtmlGraph.run(this, '{id}', '{pinnedNode}');">
+            Show Graph
+        </button>
+        <button class="graph_button graph_type_button" id="C{id}{level}" style="flex:1" onclick="window.ObsHtmlGraph.switch_graph_type(this);">
+            2D
+        </button>
+    </div>
 </div>
+
+<script type="module">
+    if (window.ObsHtmlGraph == undefined){
+        import('{html_url_prefix}/obs.html/static/graph.js').then((Module) => {
+            window.ObsHtmlGraph = Module;
+        })
+    }
+</script>
 
 
 {grapher}
