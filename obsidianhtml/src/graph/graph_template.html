@@ -15,6 +15,7 @@
     if (window.ObsHtmlGraph == undefined){
         import('{html_url_prefix}/obs.html/static/graph.js').then((Module) => {
             window.ObsHtmlGraph = Module;
+            window.ObsHtmlGraph.arm_page(document.getElementById('page_holder'))
         })
     }
 </script>

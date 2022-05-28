@@ -324,7 +324,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [18] add backlinks to page 
     if pb.gc('toggles/features/backlinks/enabled', cached=True):
-        html_body += '<div class="backlinks">\n{_obsidian_html_backlinks_pattern_:'+node['id']+'}\n</div>\n'    
+        html_body += '{_obsidian_html_backlinks_pattern_:'+node['id']+'}\n'
 
     # [18] add tags to page 
     if pb.gc('toggles/features/tags_page/styling/show_in_note_footer', cached=True):
@@ -335,17 +335,10 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # [17] Add in graph code to template (via {content})
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if pb.gc('toggles/features/graph/enabled', cached=True):
-        # compile graph
-        grapher_code = ''
-        for grapher in pb.graphers:
-            grapher = grapher.replace('{html_url_prefix}', pb.gc('html_url_prefix'))
-            grapher_code += '\n' + grapher
-
         graph_template = pb.graph_template.replace('{id}', simpleHash(html_body))\
                                        .replace('{pinnedNode}', node['id'])\
                                        .replace('{pinnedNodeGraph}', str(node['nid']))\
                                        .replace('{html_url_prefix}', html_url_prefix)\
-                                       .replace('{grapher}', grapher_code)\
                                        .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))
         html_body += f"\n{graph_template}\n"
 
@@ -767,6 +760,9 @@ def main():
                                     url = '/'+url
                                 snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
                         snippet += '</ul>'
+                        snippet = f'<div class="backlinks">\n{snippet}\n</div>\n'
+                    else:
+                        snippet = f'<div class="backlinks" style="display:none"></div>\n'
 
                     # replace placeholder with list & write output
                     html = re.sub('\{_obsidian_html_backlinks_pattern_:'+re.escape(node_id)+'}', snippet, html)
@@ -804,13 +800,7 @@ def main():
         # Create graph fullpage
         if pb.gc('toggles/features/graph/enabled', cached=True):
             # compile graph
-            grapher_code = ''
-            for grapher in pb.graphers:
-                grapher = grapher.replace('{html_url_prefix}', pb.gc('html_url_prefix'))
-                grapher_code += '\n' + grapher
-
             html = PopulateTemplate(pb, 'null', pb.dynamic_inclusions, pb.graph_full_page_template, content='')
-            html = html.replace('{grapher}', grapher_code)
             html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
 
             op = paths['html_output_folder'].joinpath('obs.html/graph/index.html')

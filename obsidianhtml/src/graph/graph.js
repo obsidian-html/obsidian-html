@@ -1,12 +1,28 @@
-import * as grapher_2d from '{html_url_prefix}/obs.html/static/default_grapher_2d.js';
-import * as grapher_3d from '{html_url_prefix}/obs.html/static/default_grapher_3d.js';
+// // DYNAMIC
+// ///////////////////////////////////////////////////////////////////////////////
+// import * as grapher_custom from '/obs.html/static/graphers/custom.js';
+// import * as grapher_3d from '/obs.html/static/graphers/3d.js';
+// import * as grapher_2d from '/obs.html/static/graphers/2d.js';
+
+// var graphers = [
+// 	{'id': 'custom', 'name': 'custom', 'module': grapher_custom},
+// 	{'id': '3d', 'name': '3d', 'module': grapher_3d},
+// 	{'id': '2d', 'name': '2d', 'module': grapher_2d}
+// ]
+// var graphers_hash = {
+// 	'custom': {'id': 'custom', 'name': 'custom', 'module': grapher_custom},
+// 	'3d': {'id': '3d', 'name': '3d', 'module': grapher_3d},
+// 	'2d': {'id': '2d', 'name': '2d', 'module': grapher_2d}
+// }
+
 
 // INFORMATION
 //////////////////////////////////////////////////////////////////////////////
 // These help in avoiding reloading dependencies when they are already loaded
 var graph_dependencies_loaded = {}
-graph_dependencies_loaded['2d'] = false;
-graph_dependencies_loaded['3d'] = false;
+graphers.forEach(grapher => {
+    graph_dependencies_loaded[grapher.id] = false;
+});
 
 // Set functions to be called via a hashtable so that we can overwrite certain functions per graph type
 var default_actions = {
@@ -20,7 +36,7 @@ var default_colors = {
     'bg': 'var(--graph-bg)',    // only color where var value is allowed
     'node_inactive': '#909099',
     'node_active': '#7f6df2',
-    'node_semiactive': '#c6bff7',
+    'node_semiactive': '#b6abff',
     'node_active_border': '#dcddde',
     'link_active': '#7f6df2',
     'link_inactive': '#2e2e2e',
@@ -35,9 +51,10 @@ function new_graph_listing(){
     return {
         'current_node_id': '',                  // the currently selected node
         'pinned_node': '',                      // the node that this graph belongs to
+        'grapher_module': null,                 // the code that is responsible for creating  the graph object below. should be a module that exports a run() method.
         'graph': null,                          // the actual graph object responsible for showing the graph
         'active': false,                        // whether the graph is currently loaded and visible
-        'type_d': '',                           // e.g. '2D'
+        'grapher_id': '',                       // e.g. '2D'
         'container': null,                      // the div that contains the graph
         'width': 0,                             // width of the container in px
         'height': 0,                            // height of the container in px
@@ -46,11 +63,12 @@ function new_graph_listing(){
     }
 }
 
-function add_graph(uid, pinned_node, type_d, container){
+function add_graph(uid, pinned_node, grapher_id, container){
     graphs[uid] = new_graph_listing()
     graphs[uid]['current_node_id'] = pinned_node
     graphs[uid]['pinned_node'] = pinned_node
-    graphs[uid]['type_d'] = type_d
+    graphs[uid]['grapher_id'] = grapher_id
+    graphs[uid]['grapher_module'] = graphers_hash[grapher_id].module
     graphs[uid]['container'] = container
 
     // to set width and height we need to momentarily ensure that the div is visible
@@ -75,6 +93,34 @@ function remove_graph(uid, cont, close){
 
 // Initialisation
 //////////////////////////////////////////////////////////////////////////////
+function arm_page(container){
+    // fetch or set default graph type values
+    let grapher_name = window.localStorage.getItem('grapher_name');
+    if (!grapher_name){
+        window.localStorage.setItem('grapher_name', graphers[0].name);
+        grapher_name = graphers[0].name;
+    }
+
+    let grapher_id = window.localStorage.getItem('grapher_id');
+    if (!grapher_id){
+        window.localStorage.setItem('grapher_id', graphers[0].id);
+        grapher_id = graphers[0].id;
+    }
+
+    // update graph buttons that don't have a grapher_id attribute set
+    let graph_type_buttons = container.querySelectorAll(".graph_type_button");
+    graph_type_buttons.forEach(
+        graph_type_button => 
+        {
+            let grapher_id_button = graph_type_button.getAttribute('grapher_id')
+            if (!grapher_id_button){
+                graph_type_button.setAttribute('grapher_id', grapher_id)
+                graph_type_button.innerHTML = grapher_name
+            }
+        }
+    );
+}
+
 function run(button, ntid, pinned_node)
 {
     // Get elements
@@ -84,12 +130,12 @@ function run(button, ntid, pinned_node)
     let cont = document.getElementById('A'+uid);
     let type_button = document.getElementById('C'+uid);
     
-    let type_d = type_button.innerHTML.trim();
+    let grapher_id = type_button.getAttribute('grapher_id')
 
     // add new graph listing if not yet exists
     // this listing allows us to keep track of data related to the specific graph on the "backend"
     if (uid in graphs == false){
-        add_graph(uid, pinned_node, type_d, cont)
+        add_graph(uid, pinned_node, grapher_id, cont)
     }
 
     // toggle graph on or off
@@ -111,18 +157,12 @@ function run(button, ntid, pinned_node)
 
 function enable_graph(uid){
     let args = get_graph_args(uid)
-
     args.current_node_id = graphs[uid].current_node_id
-    
-    if (graphs[uid].type_d == '2D'){
-        grapher_2d.run(args)
-    }
-    else if (graphs[uid].type_d == '3D'){
-        grapher_3d.run(args)
-    }
+
+    graphs[uid]['grapher_module'].run(args)
 
     graphs[uid].active = true;
-    graph_dependencies_loaded[graphs[uid].type_d] = true
+    graph_dependencies_loaded[graphs[uid].grapher_id] = true
 }
 
 // the args hashtable is sent to the grapher function to tell it what it needs to know to draw the graph
@@ -147,6 +187,76 @@ function get_graph_args(uid){
                 'coalesce_force': '{coalesce_force}'
             }
         return args
+}
+
+// UPDATE/RELOAD ACTIONS
+///
+
+// this function is called when a graph type button is clicked
+function switch_graph_type(button){
+    let uid = button.id.substring(1);
+
+    // toggle button
+    let grapher_listing = _toggle_graph_type_button(button);
+
+    // update info with new grapher choice
+    let graph = set_grapher(grapher_listing, uid)
+
+    // exit if graph does not exist (graph not open atm)
+    if (graph == undefined){
+        return
+    }
+
+    // switch out graph if active
+    if (graph.active){
+        graph.container.style.display = "none";
+        remove_graph(uid, graph.container, false);
+
+        enable_graph(uid);
+    }
+}
+
+function _toggle_graph_type_button(button){
+    // get next list id
+    let next_list_i = -1;
+    let grapher_id = button.getAttribute('grapher_id')
+    for(let i=0; i<graphers.length; i++){
+        if (graphers[i].id == grapher_id){
+            if (i < (graphers.length-1)){
+                next_list_i = i+1
+            } else {
+                next_list_i = 0
+            }
+            break
+        }
+    }
+    if (next_list_i == -1){
+        console.log('ERROR: could not find list id for grapher id of "' + grapher_id + '"')
+    }
+
+    // update button
+    button.setAttribute('grapher_id', graphers[next_list_i].id)
+    button.innerHTML = graphers[next_list_i].name
+
+    return graphers[next_list_i];
+}
+function set_grapher(grapher_listing, uid){
+    // update localstorage
+    // local storage keeps track of the user's latest choice for grapher, to use this as the next default
+    window.localStorage.setItem('grapher_id', grapher_listing.id);
+    window.localStorage.setItem('grapher_name', grapher_listing.name);
+
+    // update button
+    // button updates itself, this is skipped
+
+    // update graph to which the button belongs
+    if (uid){
+        if (uid in graphs){
+            graphs[uid]['grapher_module'] = graphers_hash[grapher_listing.id].module
+            return graphs[uid];
+        }
+        return false;
+    }
 }
 
 // OVERWRITABLE ACTIONS
@@ -206,44 +316,7 @@ function act(args, action_name){
     return graphs[args.uid].actions[action_name]
 }
 
-function switch_graph_type(button){
-    // toggle button
-    _toggle_graph_type_button(button);
 
-    // get type_d
-    let type_d = button.innerHTML.trim();
-    window.localStorage.setItem('graph_type_d', type_d);
-
-    // get stuff
-    let uid = button.id.substring(1);
-    let g = window.ObsHtmlGraph.graphs[uid];
-    let cont = document.getElementById('A'+uid);
-
-    // exit if g does not exist (graph not open atm)
-    if (g == undefined){
-        return
-    }
-
-    // switch out graph if active
-    if (g.active){
-        cont.style.display = "none";
-        remove_graph(uid, cont, false);
-
-        graphs[uid].type_d = type_d
-
-        enable_graph(uid);
-    }
-
-}
-function _toggle_graph_type_button(button){
-    // set button to show other text
-    if (button.innerHTML.trim() == '2D'){
-        button.innerHTML = '3D'
-    }
-    else {
-        button.innerHTML = '2D'
-    }
-}
 
 function test(){
     console.log('bla')
@@ -277,5 +350,6 @@ export {
     default_actions,
     graph_select_node,
     graph_open_link_normal,
-    graph_open_link
+    graph_open_link,
+    arm_page
 };
