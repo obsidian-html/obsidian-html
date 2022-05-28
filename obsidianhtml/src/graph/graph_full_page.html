@@ -65,9 +65,6 @@
 
         </div>
         
-        {grapher}
-
-
         <script type="module">
             document.addEventListener('DOMContentLoaded', load_fullpage_graph);
 
@@ -83,6 +80,7 @@
                 
                 import('{html_url_prefix}/obs.html/static/graph.js').then((Module) => {
                     window.ObsHtmlGraph = Module;
+                    window.ObsHtmlGraph.arm_page(document.getElementById('page_holder'))
 
                     // overwrites
                     window.ObsHtmlGraph.default_actions['open_link'] = function (args){

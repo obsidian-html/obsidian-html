@@ -266,7 +266,34 @@ def ExportStaticFiles(pb):
     with open (pb.paths['html_output_folder'].joinpath('favicon.ico'), 'wb') as f:
         f.write(c)
 
+
     if pb.gc('toggles/features/graph/enabled', cached=True):
+        # create grapher files
+        dynamic_imports = '// DYNAMIC\n' + ('/'*79) + '\n'
+        grapher_list = []
+        grapher_hash = []
+
+        graph_folder = static_folder.joinpath('graphers/')
+        graph_folder.mkdir(parents=True, exist_ok=True) 
+
+        for grapher in pb.graphers:
+            # save file in graphers folder
+            dst_path = graph_folder.joinpath(f'{grapher["id"]}.js')
+            with open (dst_path, 'w', encoding="utf-8") as f:
+                f.write(grapher["contents"])
+            
+            # add to dynamic imports in grapher.js
+            dynamic_imports += f"import * as grapher_{grapher['id']} from '{html_url_prefix}/obs.html/static/graphers/{grapher['id']}.js';\n"
+
+            # add to grapher list
+            grapher_list.append("{'id': '" + grapher['id'] + "', 'name': '" + grapher['name'] + "', 'module': grapher_" + grapher['id'] + "}")
+            grapher_hash.append("'" + grapher['id'] + "': " + grapher_list[-1])
+        
+        dynamic_imports += '\n'
+        grapher_list = 'var graphers = [\n\t' + ',\n\t'.join(grapher_list) + '\n]\n'
+        grapher_hash = 'var graphers_hash = {\n\t' + ',\n\t'.join(grapher_hash) + '\n}\n'
+
+        # create graph.js
         dst_path = static_folder.joinpath('graph.js')
         html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
 
@@ -274,8 +301,11 @@ def ExportStaticFiles(pb):
         graph_js = graph_js.replace('{html_url_prefix}', html_url_prefix)\
                            .replace('{coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
                            .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True)))) 
+        graph_js = dynamic_imports + grapher_list + grapher_hash + graph_js
+
         with open (dst_path, 'w', encoding="utf-8") as f:
             f.write(graph_js)
+
 
 def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_url_prefix=None, title='', dynamic_includes=None, container_wrapper_class_list=None):
     # Cache

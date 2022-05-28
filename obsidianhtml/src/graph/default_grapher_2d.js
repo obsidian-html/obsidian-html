@@ -1,53 +1,31 @@
+// This function is called by obshtml when it wants to open the graph
 function run(args) {
-    function start(){
-        args.graph_container.style.display = "block";       // open div right before loading the graph to avoid opening an empty div
-        initGraph_2d(args)
-        window.ObsHtmlGraph.graph_dependencies_loaded['2d'] = true;
-    }
-
     if (window.ObsHtmlGraph.graph_dependencies_loaded['2d'] == false){
+        // load three dependencies in succession and then run initGraph(args)
         load_script_on_demand(
-            '//unpkg.com/force-graph', load_script_on_demand, ["//unpkg.com/d3-force", load_script_on_demand, ["https://d3js.org/d3.v4.min.js", start, []]]
+            '//unpkg.com/force-graph', load_script_on_demand, ["//unpkg.com/d3-force", load_script_on_demand, ["https://d3js.org/d3.v4.min.js", initGraph, [args]]]
         )
+        // tell obshtml that the dependencies have been loaded
+        window.ObsHtmlGraph.graph_dependencies_loaded['2d'] = true;
+
     }
     else {
-        start();
+        // just run directly
+        initGraph(args)
     }
 }
 
+function initGraph(args) {
+    // open div right before loading the graph to avoid opening an empty div
+    args.graph_container.style.display = "block";
 
-function graph_select_node_2d(args){
-    let g = window.ObsHtmlGraph.graphs[args.uid];
-    g.current_node_id = args.node.id;
-
-    g.graph.zoomToFit(1000, rem(3), function(n){return zoom_select_2d(n, args)})
-    return false;
-}
-
-function zoom_select_2d(n, args){
-    let g = window.ObsHtmlGraph.graphs[args.uid];
-    if (g == undefined){ // graph closed before settimeout got around to zooming
-        return false
-    }
-
-    if (n.id == g.current_node_id){
-        return true
-    }
-    for (let i=0;i<n.links.length;i++){
-        if (n.links[i] == g.current_node_id){
-            return true
-        }
-    }
-    return false
-}
-
-function initGraph_2d(args) {
+    // Load data then start graph
     fetch(args.data).then(res => res.json()).then(data => {
 
         // overwrites
         let g = window.ObsHtmlGraph.graphs[args.uid];
         g.actions['select_node'] = function(args, graph){
-            return graph_select_node_2d(args, graph)
+            return graph_select_node(args, graph)
         }
 
         g.graph = ForceGraph()
@@ -130,12 +108,41 @@ function initGraph_2d(args) {
                 g.actions['right_click'](args)
             })
         
-        setTimeout( () => g.graph.zoomToFit(1000, rem(3), function(n){return zoom_select_2d(n, args)}), 1000 );
+        setTimeout( () => g.graph.zoomToFit(1000, rem(3), function(n){return zoom_select(n, args)}), 1000 );
     });
-
-    
 }
 
+// HELPER FUNCTIONS
+/////////////////////////////////////////////////////////////////////////////////////
+
+function graph_select_node(args){
+    let g = window.ObsHtmlGraph.graphs[args.uid];
+    g.current_node_id = args.node.id;
+
+    g.graph.zoomToFit(1000, rem(3), function(n){return zoom_select(n, args)})
+    return false;
+}
+
+function zoom_select(n, args){
+    let g = window.ObsHtmlGraph.graphs[args.uid];
+    if (g == undefined){ // graph closed before settimeout got around to zooming
+        return false
+    }
+
+    if (n.id == g.current_node_id){
+        return true
+    }
+    for (let i=0;i<n.links.length;i++){
+        if (n.links[i] == g.current_node_id){
+            return true
+        }
+    }
+    return false
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+// export the run() method so that it can be called by obshtml
 export { 
     run
 };

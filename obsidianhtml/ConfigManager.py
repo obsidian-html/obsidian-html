@@ -134,23 +134,22 @@ class Config:
             self.pb.graph_full_page_template = OpenIncludedFile('graph/graph_full_page.html')
             
             # Get grapher template code
-            temp = self.pb.gc('toggles/features/graph/template', cached=True)
             self.pb.graphers = []
-            #self.pb.graphers.append(OpenIncludedFile(f'graph/default_grapher_3d.html'))
-            #self.pb.graphers.append(OpenIncludedFile(f'graph/default_grapher_2d.html'))
+            i = 0
+            for grapher in self.pb.gc('toggles/features/graph/templates', cached=True):
+                gid = grapher['id']
+
+                # get contents of the file
+                if grapher['path'].startswith('builtin<'):
+                    grapher['contents'] = OpenIncludedFile(f'graph/default_grapher_{gid}.js')
+                else:
+                    try:
+                        with open(Path(grapher['path']).resolve()) as f:
+                            grapher['contents'] = f.read()
+                    except:
+                        raise Exception(f"Could not open user provided grapher file with path {temp_path}")
             
-            # if temp in ['2d', '3d', 'node_graph']:
-            #     self.pb.grapher = OpenIncludedFile(f'graph/default_grapher_{temp}.html')
-            # else:
-            #     temp_path = Path(temp).resolve()
-            #     try:
-            #         with open(temp_path) as f:
-            #             self.pb.grapher = f.read()
-            #     except:
-            #         raise Exception(f"Could not open user provided grapher file with path {temp_path}")
-
-
-
+                self.pb.graphers.append(grapher)
 
 
 def MergeDictRecurse(base_dict, update_dict, path=''):
