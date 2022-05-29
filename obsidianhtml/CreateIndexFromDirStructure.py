@@ -96,7 +96,7 @@ class CreateIndexFromDirStructure():
             if tab_level >= 0:
                 #print('\t'*tab_level, tree['name'])
                 html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
-                html += '\t'*tab_level + f'<div id="folder-container-{self.uid}" class="dir-container">\n'
+                html += '\t'*tab_level + f'<div id="folder-container-{self.uid}" class="dir-container requires_js">\n'
             tab_level += 1
             self.uid += 1
 

@@ -1,4 +1,4 @@
-@layer defaults, plugins, layout, themes, user;
+@layer defaults, plugins, layout, themes, overwrites, user;
 
 @layer defaults {
     /* ----------------------------------------     General    ------------------------------------------------- */
@@ -303,9 +303,9 @@
     /* ----------------------------------------    One-offs   ---------------------------------------- */
 
     .icon-tray {
-        width:12rem; 
         height:1.6rem; 
         margin-top: -0.1rem;
+        display:flex
     }
 
     /* Theme selector */
@@ -361,7 +361,7 @@
         height: calc(1.6rem - 6px);
         border: 3px solid #f0f0f0;
         margin-right: 0.2rem;
-        float: right;
+        flex: 1
         cursor: pointer;
     }
 
@@ -405,7 +405,7 @@
         .navbar {
             margin: auto
         }
-        #navbar {
+        .navbar {
             padding-top: 1rem;
             width: unset;
             margin-top: 0rem;
@@ -417,6 +417,10 @@
             margin-left: unset;
             background-color: unset;
             color: unset;
+        }
+        .icon-tray {
+            position: initial;
+            margin:auto;
         }
     }
 
@@ -497,5 +501,58 @@
     }
     .note-footer .tags {
         flex:1;
+    }
+
+    .dir-container {
+        padding-left:1rem;
+        display: none;
+        padding-left: 1.5rem;
+    }
+    .dir-button {
+        background-color: transparent;
+        border: none;
+        font-size: 12pt;
+        display: block;
+        cursor: pointer;
+        margin-bottom: 0.2rem;
+        font-family: 'Roboto-Regular';
+    }
+    .dir-list {
+        margin-top: 0.2rem;
+        padding-left: 0.2rem;
+        margin-bottom: 0.2rem;
+    }
+    .dir-list li {
+        list-style-type: none;
+    }
+}
+
+@layer overwrites {
+    /* -------------------------------  Make site work when js is disabled ----------------------------- */
+    /* 
+        .requires_js will be removed when js is loaded 
+    */
+    .requires_js {
+        display: none
+    }
+    .dir-container.requires_js {
+        display: block
+    }
+    .navbar.requires_js {
+        margin-bottom: 0px;
+        margin-top: 0px;
+        margin-left: 1rem !important;
+        margin-right: 1rem;
+        flex-direction: row;
+        display: flex
+    }
+    .requires_js .icon-tray {
+        margin: unset;
+    }
+    .requires_js .navbar-link {
+        width: unset;
+    }
+    .requires_js.navbar-button {
+        display: none
     }
 }

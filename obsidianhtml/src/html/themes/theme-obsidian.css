@@ -204,9 +204,9 @@
         .theme-obs-light .icon-tray {
             width: unset;
         }
-        .theme-light #navbar,
-        .theme-obs-dark #navbar,
-        .theme-obs-light #navbar {
+        .theme-light .navbar,
+        .theme-obs-dark .navbar,
+        .theme-obs-light .navbar {
             margin-left: auto;
         }
         .theme-light .icon-tray {

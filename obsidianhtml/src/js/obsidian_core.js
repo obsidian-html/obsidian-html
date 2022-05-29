@@ -47,6 +47,7 @@ function load_theme() {
         window.localStorage.setItem('theme_name', 'obs-light');
     }
     set_theme(window.localStorage.getItem('theme_name'));
+    console.log('e2')
     document.getElementById('antiflash').style.display = 'none'; 
 }
 
@@ -78,6 +79,9 @@ function set_theme(theme_name){
 }
 
 function load_page() {
+    // let page know that js is enabled
+    signal_js_enabled(document.body)
+
     if (documentation_mode) {
         httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, false);
     }
@@ -200,6 +204,22 @@ function SetContainer(container) {
     if (mermaid_enabled){
         mermaid.init()
     }
+
+    // callout divs are created with class 'active' to have them folded open by default
+    // when js is enabled (in this case) this class is removed so the callouts are folded closed until clicked on
+    // new divs are distinguished from old ones by rasa="1"/rasa="0" resp.
+    let callout_folded = container.querySelectorAll(".callout-folded");
+    callout_folded.forEach(div => {
+        let rasa = div.getAttribute('rasa')
+        if (rasa){
+            div.setAttribute('rasa', 0)
+            div.classList.remove('active')
+        }
+    });
+
+    // requires_js can be set on elements that need to be hidden unless js is enabled
+    // this block will remove the requires_js class from all elements
+    signal_js_enabled(container)
 
     // set graph svg and button to have unique id across tabs
     let graph_div = container.querySelectorAll(".graph_div");
@@ -335,6 +355,15 @@ function get_graph_data(){
 }
 function get_html_url_prefix(){
     return '{html_url_prefix}'  // this value is replaced by the actual url prefix when compiled
+}
+
+function signal_js_enabled(container){
+    let divs = container.querySelectorAll(".requires_js");
+    console.log('ex')
+    divs.forEach(div => {
+        console.log(div)
+        div.classList.remove('requires_js')
+    });
 }
 
 // Helper Functions 

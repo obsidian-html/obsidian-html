@@ -45,10 +45,11 @@ class CallOutBlockProcessor(BlockProcessor):
                 div = etree.SubElement(parent, 'div')
 
                 # add classes to callout div
-                classlist = f'callout callout-{data["call-out-class"]}'
+                classlist = f'callout callout-{data["call-out-class"]} active' # class active will be removed on page load if js is enabled
                 if data['folded']:
                     classlist += ' ' + 'callout-folded'
                 div.set('class', classlist)
+                div.set('rasa', '1')
 
                 # add the titlebar subdiv
                 title = etree.SubElement(div, 'div')
