@@ -1,4 +1,4 @@
-@layer defaults, plugins, layout, themes, user;
+@layer defaults, plugins, layout, themes, overwrites, user;
 
 @layer defaults {
     /* ----------------------------------------     General    ------------------------------------------------- */
@@ -303,9 +303,9 @@
     /* ----------------------------------------    One-offs   ---------------------------------------- */
 
     .icon-tray {
-        width:12rem; 
         height:1.6rem; 
         margin-top: -0.1rem;
+        display:flex
     }
 
     /* Theme selector */
@@ -361,7 +361,7 @@
         height: calc(1.6rem - 6px);
         border: 3px solid #f0f0f0;
         margin-right: 0.2rem;
-        float: right;
+        flex: 1
         cursor: pointer;
     }
 
@@ -371,15 +371,6 @@
         font-weight: bold;
     }
 
-    #left_pane ul a,
-    #right_pane ul a {
-        color: var(--color-accent);
-    }
-    #left_pane ul a:hover,
-    #right_pane ul a:hover {
-        color: var(--muted-link-color);
-        text-decoration: none;
-    }
     h3 {
         font-size: 13pt;
         font-weight: 500;
@@ -405,7 +396,7 @@
         .navbar {
             margin: auto
         }
-        #navbar {
+        .navbar {
             padding-top: 1rem;
             width: unset;
             margin-top: 0rem;
@@ -417,6 +408,10 @@
             margin-left: unset;
             background-color: unset;
             color: unset;
+        }
+        .icon-tray {
+            position: initial;
+            margin:auto;
         }
     }
 
@@ -485,10 +480,6 @@
         height: 100vh;
     }
 
-    .dir-button {
-        color: rgb(var(--normal-text-color));
-    }
-
     .note-footer {
         display: flex;
     }
@@ -497,5 +488,96 @@
     }
     .note-footer .tags {
         flex:1;
+    }
+
+
+    .left_pane ul a,
+    .right_pane ul a {
+        color: var(--color-accent);
+    }
+    .left_pane ul a:hover,
+    .right_pane ul a:hover {
+        color: var(--muted-link-color);
+        text-decoration: none;
+    }
+
+    .dir-container {
+        padding-left:1rem;
+        display: none;
+        padding-left: 1.5rem;
+    }
+    .dir-container.active {
+        display: block 
+    }
+
+    .dir-button {
+        background-color: transparent;
+        border: none;
+        font-size: 11pt;
+        display: block;
+        cursor: pointer;
+        margin-bottom: 0.2rem;
+        font-family: 'Roboto-Regular';
+        color: var(--dir-tree-color);
+        font-weight: bold;
+    }
+    .dir-list {
+        margin-top: 0.2rem;
+        padding-left: 0.2rem;
+        margin-bottom: 0.2rem;
+    }
+    .dir-list li {
+        list-style-type: none;
+        font-size: 11pt;
+    }
+
+    .dir-list li a:visited,
+    .dir-list li a:link,
+    .dir-list li a:hover {
+        color: var(--color-accent);
+        text-decoration: none;
+    }
+    .dir-list li a:hover {
+        color: var(--muted-link-color);
+    }
+    .dir-list li a.active:visited,
+    .dir-list li a.active:link,
+    .dir-list li a.active:hover {
+        color: var(--code-hightlight-color);
+        font-weight: bold;
+    }
+    
+
+    
+
+}
+
+@layer overwrites {
+    /* -------------------------------  Make site work when js is disabled ----------------------------- */
+    /* 
+        .requires_js will be removed when js is loaded 
+    */
+    .requires_js {
+        display: none
+    }
+    .dir-container.requires_js {
+        display: block
+    }
+    .navbar.requires_js {
+        margin-bottom: 0px;
+        margin-top: 0px;
+        margin-left: 1rem !important;
+        margin-right: 1rem;
+        flex-direction: row;
+        display: flex
+    }
+    .requires_js .icon-tray {
+        margin: unset;
+    }
+    .requires_js .navbar-link {
+        width: unset;
+    }
+    .requires_js.navbar-button {
+        display: none
     }
 }

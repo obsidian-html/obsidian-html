@@ -90,24 +90,50 @@ class CreateIndexFromDirStructure():
                 _recurse(folder)
         _recurse(self.tree)
 
-    def BuildIndex(self):
-        def _recurse(tree, tab_level):
+    def in_tree(self, path, subpath):
+        path_parts = [x for x in path.split('/') if x]
+        subpath_parts = [x for x in subpath.split('/') if x]
+
+        if len(subpath_parts) > len(path_parts):
+            return False
+
+        for i, part in enumerate(subpath_parts):
+            if part != path_parts[i]:
+                return False
+        
+        return True
+
+    def get_dir(self, path):
+        return '/'+'/'.join([x for x in path.split('/') if x][:-1])
+
+    def BuildIndex(self, current_page='/'):
+        def _recurse(tree, tab_level, path, current_page):
+            current_dir = self.get_dir(current_page)
             html = ''
+
+            dir_active = ''
+            if self.in_tree(current_dir, path):
+                dir_active = 'active'
+
             if tab_level >= 0:
                 #print('\t'*tab_level, tree['name'])
                 html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
-                html += '\t'*tab_level + f'<div id="folder-container-{self.uid}" class="dir-container">\n'
+                html += '\t'*tab_level + f'<div id="folder-container-{self.uid}" class="dir-container requires_js {dir_active}" path="{path}">\n'
             tab_level += 1
             self.uid += 1
 
             for folder in tree['folders']:
-                html += _recurse(folder, tab_level)
+                html += _recurse(folder, tab_level, '/'.join( (path, folder['name']) ), current_page)
 
             html += '\t'*tab_level + '<ul class="dir-list">\n'
             tab_level += 1
 
             for f in tree['files']:
                 rel_path = Path(f['path']).resolve().relative_to(self.root).as_posix()
+
+                file_active = ''
+                if '/'+rel_path == current_page:
+                    file_active = 'active'
                 
                 # get link adjustment code
                 class_list = ''
@@ -117,22 +143,20 @@ class CreateIndexFromDirStructure():
                     if self.pb.gc('toggles/external_blank'):
                         external_blank_html = 'target=\"_blank\" '
                 
-                html += '\t'*tab_level + f'<li><a href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{f["name"]}</a></li>\n'
+                html += '\t'*tab_level + f'<li><a class="{file_active}" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{f["name"]}</a></li>\n'
             
             tab_level -= 1
             html += '\t'*tab_level + '</ul>\n'
             tab_level -= 1
-            html += '\t'*tab_level + '</div>\n'
+            if tab_level >= 0:
+                html += '\t'*tab_level + '</div>\n'
 
             return html
         
         self.uid = 0
-        html = _recurse(self.tree, -1)
+        html = _recurse(self.tree, -1, ''+self.html_url_prefix, current_page)
 
-        if self.pb.gc('toggles/features/graph/enabled'):
-            html += f'\n<script src="{self.html_url_prefix}/obs.html/static/graph.js" type="text/javascript"></script>\n'
-
-        self.html = html
+        return html
 
     def WriteIndex(self):
         output_path = self.root.joinpath(self.rel_output_path).resolve()
@@ -145,7 +169,9 @@ class CreateIndexFromDirStructure():
         
         html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=['single_tab_page-left-aligned'])
 
-        html = html.replace('{pinnedNode}', 'dirtree')
+        html = html.replace('{pinnedNode}', 'dirtree')\
+                   .replace('{left_pane_content}', '')\
+                   .replace('{right_pane_content}', '')
     
         navbar_links = self.pb.gc('navbar_links', cached=True)
         elements = []

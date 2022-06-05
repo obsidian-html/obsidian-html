@@ -17,43 +17,52 @@
 
                 <!-- Onload tweaks -->
                 <script>
+                        console.log('e0')
                         const CURRENT_NODE = '{pinnedNode}';
                         const HTML_URL_PREFIX = '{html_url_prefix}';
                 </script>
         </head>
 
 <body class="theme-obs-light">
-        <div id="antiflash"></div>
+        <div id="antiflash" style="display: none;"></div>
+        <script>
+                console.log('e1')
+                document.getElementById('antiflash').style.display = 'block';
+        </script>
         {search_html}
 
         <div id="page_holder" class="flex_col">
                 <div id="header" class="header">
                         <div id="header_flex" class="flex_row">
                                 <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
-                                <div class="navbar-button" onclick="toggle_menu()">
+                                <div class="navbar-button requires_js" onclick="toggle_menu()">
                                         ≡
                                 </div>
-                                <div id="navbar" class="navbar">
+                                <div id="navbar" class="navbar requires_js">
                                 {{navbar_links}}
                                         <div class="icon-tray">
-                                                {rss_button}
-                                                {tags_page_button}
-                                                {dirtree_button}
-                                                {graph_button}
-                                                {search_button}
                                                 {theme_button}
+                                                {search_button}
+                                                {graph_button}
+                                                {dirtree_button}
+                                                {tags_page_button}
+                                                {rss_button}
                                         </div>
                                 </div>
                         </div>
                         {theme_popup}
                 </div>
                 <div class="flex_row">
-                        <div id="left_pane"></div>
+                        <div id="left_pane" class="left_pane">
+                                {left_pane_content}
+                        </div>
                         <div class="container">
                                 {content}
                                 <!-- end content -->
                         </div>
-                        <div id="right_pane"></div>
+                        <div id="right_pane" class="right_pane">
+                                {right_pane_content}
+                        </div>
                 </div>
         </div>
 

@@ -26,6 +26,8 @@
         --header-bg: #f6f7f8;
         --code-hightlight-color: #9c27ec;
         --homelink-color: #000000;
+
+        --dir-tree-color: var(--color-accent);
     }
     .theme-obs-dark,
     .theme-obs-dark * {
@@ -50,6 +52,8 @@
         --homelink-color: var(--color-accent3);
 
         --graph-bg: #161616;
+
+        --dir-tree-color: var(--color-accent2);
     }
     .theme-obs-dark .callout,
     .theme-obs-dark .callout * {
@@ -82,6 +86,8 @@
         --header-bg: #FFFFFF;
         --code-hightlight-color: #9c27ec;
         --homelink-color: #2d68b1;
+
+        --dir-tree-color: var(--color-accent);
     }
 
     /* icon tray */ 
@@ -115,8 +121,8 @@
     .theme-obs-dark #homelink:visited,
     .theme-obs-dark #homelink:link,
     .theme-obs-dark #homelink:hover {
-        margin-left: 3rem;
-        margin-right: 2.5rem;
+        margin-left: 2rem;
+        margin-right: 3.5rem;
         background-color: unset;
         color: var(--homelink-color);
         width: 14rem;
@@ -204,9 +210,9 @@
         .theme-obs-light .icon-tray {
             width: unset;
         }
-        .theme-light #navbar,
-        .theme-obs-dark #navbar,
-        .theme-obs-light #navbar {
+        .theme-light .navbar,
+        .theme-obs-dark .navbar,
+        .theme-obs-light .navbar {
             margin-left: auto;
         }
         .theme-light .icon-tray {
