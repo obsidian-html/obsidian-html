@@ -111,8 +111,8 @@
         border: 0px;
         border-radius: 10px;
     }
-    #right_pane,
-    #left_pane{
+    .right_pane,
+    .left_pane{
         scrollbar-color: var(--code-hightlight-color) var(--bg-note);
         padding: 1.7rem;
         padding-top: 0.9rem;
@@ -121,27 +121,27 @@
         font-family: 'Roboto-Regular';
         max-width: max-content;
     }
-    #left_pane{
+    .left_pane{
         padding-left: 1.7rem;
         min-width: 15rem;
         width: 15rem;
     }
-    #right_pane{
+    .right_pane{
         padding-right: 3rem;
         padding-left:0rem;
         min-width: max-content;
     }
 
-    #left_pane ul,
-    #right_pane ul {
+    .left_pane ul,
+    .right_pane ul {
         list-style: none;
         padding-left: 1.5rem;
         margin-top: 0.3rem;
         
         font-size: 11pt;    
     }
-    #left_pane li,
-    #right_pane li {
+    .left_pane li,
+    .right_pane li {
         padding-top: 0.3rem;
     }
     .toc {
@@ -547,6 +547,10 @@
         font-weight: bold;
     }
     
+    ul.dir-list {
+        margin-left: 0px;
+        padding-left: 0px;
+    }
 
     
 
