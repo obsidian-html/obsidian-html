@@ -101,62 +101,80 @@
     .callout-tip * {
         --callout-color: 0, 191, 165;
     }
-    .callout-important {
+    .callout-important,
+    .callout-important * {
         --callout-color: 0, 191, 165;
     }
-    .callout-success {
+    .callout-success,
+    .callout-success * {
         --callout-color: 0, 200, 83;
     }
-    .callout-check {
+    .callout-check,
+    .callout-check * {
         --callout-color: 0, 200, 83;
     }
-    .callout-done {
+    .callout-done,
+    .callout-done * {
         --callout-color: 0, 200, 83;
     }
-    .callout-question {
+    .callout-question,
+    .callout-question * {
         --callout-color: 100, 221, 23;
     }
     .callout-help,
     .callout-help * {
         --callout-color: 100, 221, 23;
     }
-    .callout-faq {
+    .callout-faq,
+    .callout-faq * {
         --callout-color: 100, 221, 23;
     }
-    .callout-warning {
+    .callout-warning,
+    .callout-warning * {
         --callout-color: 255, 145, 0;
     }
-    .callout-caution {
+    .callout-caution,
+    .callout-caution * {
         --callout-color: 255, 145, 0;
     }
-    .callout-attention {
+    .callout-attention,
+    .callout-attention * {
         --callout-color: 255, 145, 0;
     }
-    .callout-failure {
+    .callout-failure,
+    .callout-failure * {
         --callout-color: 255, 82, 82;
     }
-    .callout-fail {
+    .callout-fail,
+    .callout-fail * {
         --callout-color: 255, 82, 82;
     }
-    .callout-missing {
+    .callout-missing,
+    .callout-missing * {
         --callout-color: 255, 82, 82;
     }
-    .callout-danger {
+    .callout-danger,
+    .callout-danger * {
         --callout-color: 255, 23, 68;
     }
-    .callout-error {
+    .callout-error,
+    .callout-error * {
         --callout-color: 255, 23, 68;
     }
-    .callout-bug {
+    .callout-bug,
+    .callout-bug * {
         --callout-color: 245, 0, 87; 
     }
-    .callout-example {
+    .callout-example,
+    .callout-example * {
         --callout-color: 124, 77, 255;
     }
-    .callout-quote {
+    .callout-quote,
+    .callout-quote * {
         --callout-color: 158, 158, 158;
     }
-    .callout-cite {
+    .callout-cite,
+    .callout-cite * {
         --callout-color: 158, 158, 158;
     }
 
