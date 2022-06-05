@@ -58,7 +58,6 @@
     .theme-obs-dark .callout,
     .theme-obs-dark .callout * {
         --callout-bg: rgb(22, 22, 22);
-        --callout-color: 68, 138, 255;
         --callout-alpha: 0.1;
      }
 
