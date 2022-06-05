@@ -7,6 +7,9 @@
         height: 100vh;
         display: none;
     }
+    #search-master-div.active {
+        display: block;
+    }
     #search-slab {
         max-width: calc(min(100vw / 2, 60rem));
         margin:5rem;

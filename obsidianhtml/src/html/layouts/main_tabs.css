@@ -242,17 +242,6 @@
         .header {
             padding: 0px;
         }
-        .navbar {
-            margin-top: 1rem;
-            margin-left: -0.7rem;
-            margin-bottom: 1rem;
-            flex-direction: column;
-            display: none;
-        }
-        .navbar-link{
-            width: calc(100vw - 4rem);
-            text-align: center;
-        }
         .navbar-button {
             display: block;
             margin: auto;
