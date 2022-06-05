@@ -324,11 +324,11 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [18] add backlinks to page 
     if pb.gc('toggles/features/backlinks/enabled', cached=True):
-        html_body += '{_obsidian_html_backlinks_pattern_:'+node['id']+'}\n'
+        html_body += '{_obsidian_html_backlinks_pattern_}\n'
 
     # [18] add tags to page 
     if pb.gc('toggles/features/tags_page/styling/show_in_note_footer', cached=True):
-        html_body += '<div class="tags">\n{_obsidian_html_tags_footer_pattern_:'+node['id']+'}\n</div>\n'    
+        html_body += '<div class="tags">\n{_obsidian_html_tags_footer_pattern_}\n</div>\n'    
 
     html_body += '\n</div>' #class="note-footer"
 
@@ -341,6 +341,9 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
                                        .replace('{html_url_prefix}', html_url_prefix)\
                                        .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))
         html_body += f"\n{graph_template}\n"
+
+    # Add node_id to page so that we can fetch this in the second-pass
+    html_body += '{_obsidian_html_node_id_pattern_:'+node['id']+'}\n'
 
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
@@ -443,6 +446,8 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     html = html.replace('{pinnedNode}', 'tagspage')
     html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
+    html = html.replace('{left_pane_content}', '')\
+               .replace('{right_pane_content}', '')
     
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
@@ -689,11 +694,13 @@ def main():
     if pb.gc('toggles/compile_html', cached=True):
         print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(paths["md_entrypoint"])})')
 
+        html_url_prefix = pb.gc("html_url_prefix")
+
         # compile navbarlinks
         navbar_links = pb.gc('navbar_links', cached=True)
         elements = []
         for l in navbar_links:
-            el = f'<a class="navbar-link"href="{pb.gc("html_url_prefix")}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+            el = f'<a class="navbar-link"href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
             elements.append(el)
         pb.navbar_links = elements
         
@@ -717,81 +724,109 @@ def main():
         if pb.gc('toggles/extended_logging', cached=True):
             WriteFileLog(pb.files, paths['log_output_folder'].joinpath('files_mth.md'), include_processed=True)
 
-
-        # [18] Add in backlinks
+        # [??] Create html file tree
         # ------------------------------------------
+        if pb.gc('toggles/features/create_index_from_dir_structure/enabled'):
+            rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
+            op = paths['html_output_folder'].joinpath(rel_output_path)
+
+            print(f'\t> COMPILING INDEX FROM DIR STRUCTURE ({op})')
+            treeobj = CreateIndexFromDirStructure(pb, pb.paths['html_output_folder'])
+            pb.treeobj = treeobj
+            treeobj.html = treeobj.BuildIndex()
+
+            if pb.gc('toggles/features/graph/enabled'):
+                treeobj.html += f'\n<script src="{html_url_prefix}/obs.html/static/graph.js" type="text/javascript"></script>\n'
+            treeobj.WriteIndex()
+            print('\t< COMPILING INDEX FROM DIR STRUCTURE: Done')
+
+        # [??] Second pass
+        # ------------------------------------------
+        # Some code can only be generated when all the notes have already been created.
+        # These steps are done in this block.
+
         # Make lookup so that we can easily find the url of a node
         pb.network_tree.compile_node_lookup()
 
-        if pb.gc('toggles/features/backlinks/enabled') or pb.gc('toggles/features/tags_page/styling/show_in_note_footer'):
-            print('\t> FEATURE: NOTE-FOOTER')
-            for fo in pb.files.values():
-                if not fo.metadata['is_note']:
-                    continue
+        # Get some data outside of the loop
+        dir_repstring = '{left_pane_content}'
+        dir_repstring2 = '{right_pane_content}'
+        if pb.gc('toggles/features/styling/flip_panes', cached=True):
+            dir_repstring = '{right_pane_content}'
+            dir_repstring2 = '{left_pane_content}'
+        
+        print('\t> SECOND PASS HTML')
 
-                # get paths / html prefix
-                dst_abs_path = fo.path['html']['file_absolute_path']
-                dst_rel_path_str = fo.path['html']['file_relative_path'].as_posix()
-                html_url_prefix = get_html_url_prefix(pb, rel_path_str=dst_rel_path_str)
+        for fo in pb.files.values():
+            if not fo.metadata['is_note']:
+                continue
 
-                # get html content
-                try:
-                    with open(dst_abs_path, 'r', encoding="utf-8") as f:
-                        html = f.read()
-                except:
-                    continue
+            # get paths / html prefix
+            dst_abs_path = fo.path['html']['file_absolute_path']
+            dst_rel_path_str = fo.path['html']['file_relative_path'].as_posix()
+            html_url_prefix = get_html_url_prefix(pb, rel_path_str=dst_rel_path_str)
 
-                # Compile backlinks list
-                if pb.gc('toggles/features/backlinks/enabled'):                
-                    # Get node_id
-                    m = re.search(r'(?<=\{_obsidian_html_backlinks_pattern_:)(.*?)(?=\})', html)
-                    if m is None:
-                        continue
-                    node_id = m.group(0)
+            # get html content
+            try:
+                with open(dst_abs_path, 'r', encoding="utf-8") as f:
+                    html = f.read()
+            except:
+                continue
 
-                    backlinks = [x for x in pb.network_tree.tree['links'] if x['target'] == node_id]
-                    snippet = ''
-                    if len(backlinks) > 0:
-                        snippet = "<h2>Backlinks</h2>\n<ul>\n"
-                        for l in backlinks:
-                            if l['target'] == node_id:
-                                url = pb.network_tree.node_lookup[l['source']]['url']
-                                if url[0] != '/':
-                                    url = '/'+url
-                                snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
-                        snippet += '</ul>'
-                        snippet = f'<div class="backlinks">\n{snippet}\n</div>\n'
-                    else:
-                        snippet = f'<div class="backlinks" style="display:none"></div>\n'
+            # Get node_id
+            m = re.search(r'(?<=\{_obsidian_html_node_id_pattern_:)(.*?)(?=\})', html)
+            if m is None:
+                continue
+            node_id = m.group(0)
+            node = pb.network_tree.node_lookup[node_id]
 
-                    # replace placeholder with list & write output
-                    html = re.sub('\{_obsidian_html_backlinks_pattern_:'+re.escape(node_id)+'}', snippet, html)
+            html = re.sub('\{_obsidian_html_node_id_pattern_:'+node_id+'}', '', html)
 
-                # Compile tags list
-                if pb.gc('toggles/features/tags_page/styling/show_in_note_footer'):
-                    # Get node
-                    m = re.search(r'(?<=\{_obsidian_html_tags_footer_pattern_:)(.*?)(?=\})', html)
-                    if m is None:
-                        continue
-                    node_id = m.group(0)
-                    node = pb.network_tree.node_lookup[node_id]
+            # Create Directory contents
+            if pb.gc('toggles/features/styling/add_dir_list', cached=True):
+                if dir_repstring in html:
+                    dir_list = pb.treeobj.BuildIndex(current_page=node['url'])
+                    html = re.sub(dir_repstring, dir_list, html)
+                    html = re.sub(dir_repstring2, '', html)
 
-                    # Replace placeholder
-                    snippet = ''
-                    if 'tags' in node['metadata'] and len(node['metadata']['tags']) > 0:
-                        snippet = "<h2>Tags</h2>\n<ul>\n"
-                        for tag in node['metadata']['tags']:
-                            url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
-                            snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
-                        snippet += '</ul>'
+            # Compile backlinks list
+            if pb.gc('toggles/features/backlinks/enabled', cached=True):
+                backlinks = [x for x in pb.network_tree.tree['links'] if x['target'] == node_id]
+                snippet = ''
+                if len(backlinks) > 0:
+                    snippet = "<h2>Backlinks</h2>\n<ul>\n"
+                    for l in backlinks:
+                        if l['target'] == node_id:
+                            url = pb.network_tree.node_lookup[l['source']]['url']
+                            if url[0] != '/':
+                                url = '/'+url
+                            snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
+                    snippet += '</ul>'
+                    snippet = f'<div class="backlinks">\n{snippet}\n</div>\n'
+                else:
+                    snippet = f'<div class="backlinks" style="display:none"></div>\n'
 
-                    # replace placeholder with list & write output
-                    html = re.sub('\{_obsidian_html_tags_footer_pattern_:'+re.escape(node_id)+'}', snippet, html)
+                # replace placeholder with list & write output
+                html = re.sub('\{_obsidian_html_backlinks_pattern_\}', snippet, html)
 
-                with open(dst_abs_path, 'w', encoding="utf-8") as f:
-                    f.write(html)
+            # Compile tags list
+            if pb.gc('toggles/features/tags_page/styling/show_in_note_footer', cached=True):
+                # Replace placeholder
+                snippet = ''
+                if 'tags' in node['metadata'] and len(node['metadata']['tags']) > 0:
+                    snippet = "<h2>Tags</h2>\n<ul>\n"
+                    for tag in node['metadata']['tags']:
+                        url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
+                        snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
+                    snippet += '</ul>'
+
+                # replace placeholder with list & write output
+                html = re.sub('\{_obsidian_html_tags_footer_pattern_\}', snippet, html)
+
+            with open(dst_abs_path, 'w', encoding="utf-8") as f:
+                f.write(html)
             
-            print('\t< FEATURE: NOTE-FOOTER: Done')
+        print('\t< SECOND PASS HTML: Done')
 
 
         # Create tag page
@@ -836,15 +871,5 @@ def main():
         feed = RssFeed(pb)
         feed.Compile()
         print('< COMPILING RSS FEED: Done')
-
-    if pb.gc('toggles/features/create_index_from_dir_structure/enabled'):
-        rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
-        op = paths['html_output_folder'].joinpath(rel_output_path)
-
-        print(f'> COMPILING INDEX FROM DIR STRUCTURE ({op})')
-        treeobj = CreateIndexFromDirStructure(pb, pb.paths['html_output_folder'])
-        treeobj.BuildIndex()
-        treeobj.WriteIndex()
-        print('< COMPILING INDEX FROM DIR STRUCTURE: Done')
 
 

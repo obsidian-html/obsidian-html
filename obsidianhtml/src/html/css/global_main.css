@@ -371,15 +371,6 @@
         font-weight: bold;
     }
 
-    #left_pane ul a,
-    #right_pane ul a {
-        color: var(--color-accent);
-    }
-    #left_pane ul a:hover,
-    #right_pane ul a:hover {
-        color: var(--muted-link-color);
-        text-decoration: none;
-    }
     h3 {
         font-size: 13pt;
         font-weight: 500;
@@ -489,10 +480,6 @@
         height: 100vh;
     }
 
-    .dir-button {
-        color: rgb(var(--normal-text-color));
-    }
-
     .note-footer {
         display: flex;
     }
@@ -503,19 +490,36 @@
         flex:1;
     }
 
+
+    .left_pane ul a,
+    .right_pane ul a {
+        color: var(--color-accent);
+    }
+    .left_pane ul a:hover,
+    .right_pane ul a:hover {
+        color: var(--muted-link-color);
+        text-decoration: none;
+    }
+
     .dir-container {
         padding-left:1rem;
         display: none;
         padding-left: 1.5rem;
     }
+    .dir-container.active {
+        display: block 
+    }
+
     .dir-button {
         background-color: transparent;
         border: none;
-        font-size: 12pt;
+        font-size: 11pt;
         display: block;
         cursor: pointer;
         margin-bottom: 0.2rem;
         font-family: 'Roboto-Regular';
+        color: var(--dir-tree-color);
+        font-weight: bold;
     }
     .dir-list {
         margin-top: 0.2rem;
@@ -524,7 +528,28 @@
     }
     .dir-list li {
         list-style-type: none;
+        font-size: 11pt;
     }
+
+    .dir-list li a:visited,
+    .dir-list li a:link,
+    .dir-list li a:hover {
+        color: var(--color-accent);
+        text-decoration: none;
+    }
+    .dir-list li a:hover {
+        color: var(--muted-link-color);
+    }
+    .dir-list li a.active:visited,
+    .dir-list li a.active:link,
+    .dir-list li a.active:hover {
+        color: var(--code-hightlight-color);
+        font-weight: bold;
+    }
+    
+
+    
+
 }
 
 @layer overwrites {

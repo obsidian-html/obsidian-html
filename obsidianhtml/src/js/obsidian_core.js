@@ -83,7 +83,7 @@ function load_page() {
     signal_js_enabled(document.body)
 
     if (documentation_mode) {
-        httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, false);
+        //httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, false);
     }
 
     let collection = document.getElementsByClassName("container")
