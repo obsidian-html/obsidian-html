@@ -32,6 +32,7 @@ from .CreateIndexFromDirStructure import CreateIndexFromDirStructure
 from .RssFeed import RssFeed
 
 from .CallOutExtension import CallOutExtension
+from .DataviewExtension import DataviewExtension
 
 # Open source files in the package
 import importlib.resources as pkg_resources
@@ -281,6 +282,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
+    extensions = ['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout', 'pymdownx.arithmatex']
     extension_configs = {
         'codehilite': {
             'linenums': False
@@ -289,7 +291,15 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
             'generic': True
         }
     }
-    html_body = markdown.markdown(md.page, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
+
+    if pb.gc('toggles/features/dataview/enabled'):
+        extension_configs['dataview'] = {
+            'note_path': rel_dst_path,
+            'dataview_export_folder': pb.paths['dataview_export_folder']
+        }
+        extensions.append('dataview')
+    
+    html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
 
     # HTML Tweaks
     # ------------------------------------------------------------------
@@ -530,6 +540,8 @@ def main():
         'md_entrypoint': Path(pb.gc('md_entrypoint_path_str')).resolve(),
         'html_output_folder': Path(pb.gc('html_output_folder_path_str')).resolve()
     }
+    paths['dataview_export_folder'] = paths['obsidian_folder'].joinpath(pb.gc('toggles/features/dataview/folder'))
+
     if pb.gc('toggles/extended_logging', cached=True):
         paths['log_output_folder'] = Path(pb.gc('log_output_folder_path_str')).resolve()
 

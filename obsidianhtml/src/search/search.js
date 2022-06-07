@@ -122,7 +122,7 @@ function GetHtmlFlex(fs_results, search_string, hard_search) {
         <div class="search-result-title-name" onclick="click_list_link(this)">
             <a href="{{url}}">{{title}}</a>
         </div>
-        <div class="search-result-icon" onclick="fold(this.parentElement.parentElement);"> 
+        <div class="search-result-icon" onclick="toggle(this.parentElement.parentElement);"> 
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ChevronDown"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
     </div>

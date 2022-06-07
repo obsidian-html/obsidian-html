@@ -47,7 +47,6 @@ function load_theme() {
         window.localStorage.setItem('theme_name', 'obs-light');
     }
     set_theme(window.localStorage.getItem('theme_name'));
-    console.log('e2')
     document.getElementById('antiflash').style.display = 'none'; 
 }
 
@@ -300,21 +299,15 @@ function toggle_menu(){
     let h2 = document.getElementById('header2')
 
     
-    let res = toggle('navbar', 'flex')
+    let res = toggle_id('navbar')
     if (!res){
         // If the menu is turned off --> also close the theme selector
-        disable('theme-popup');
-
-        if (h2){
-            // Do the same but also for the mirror header (tabs mode only)
-            let pu = document.getElementById('header2').getElementsByClassName('popup')[0];
-            disable_el(pu);
-        }
+        disable_theme_popup()
     }
 
     if (h2){
         // Also toggle the mirror header (tabs mode only)
-        let res = toggle('navbar2', 'flex');
+        let res = toggle_id('navbar2');
     }
 }
 
@@ -359,9 +352,7 @@ function get_html_url_prefix(){
 
 function signal_js_enabled(container){
     let divs = container.querySelectorAll(".requires_js");
-    console.log('ex')
     divs.forEach(div => {
-        console.log(div)
         div.classList.remove('requires_js')
     });
 }
@@ -377,57 +368,33 @@ function vh() {
 }
 function print(...vals){ console.log(...vals)}
 
-function toggle(id, display_value) {
-    el = document.getElementById(id);
-    return toggle_el(el, display_value);
+
+function disable_id(id){
+    disable(document.getElementById(id));
 }
-function toggle_el(el, display_value) {
-    if (el.style.display == 'none') {
-        el.style.display = display_value;
-        return true
-    }
-    else if (el.style.display == display_value) {
-        el.style.display = 'none';
-        return false
-    }
-    else {
-        el.style.display = display_value;
-        return true
+function disable(el){
+    if (el.classList.contains('active')) {
+        el.classList.remove('active')
     }
 }
 
-function disable(id){
-    disable_el(document.getElementById(id));
-}
-function disable_el(el){
-    el.style.display = 'none';
-}
 
-function cl_toggle(id, class_name) {
-    let el = document.getElementById(id);
+// standard
+function cl_toggle(el, class_name) {
     if (el.classList.contains(class_name)) {
         el.classList.remove(class_name)
+        return false
     } else {
         el.classList.add(class_name)
+        return true
     }
 }
 
-function fold_callout(el) {
-    let div = el.parentElement
-    if (div.classList.contains("active")) {
-        div.classList.remove("active")
-    } else {
-        div.classList.add("active")
-    }
+function toggle_id(id){
+    return toggle(document.getElementById(id))
 }
-
-// general option, to replace function above
-function fold(el) {
-    if (el.classList.contains("fold-active")) {
-        el.classList.remove("fold-active")
-    } else {
-        el.classList.add("fold-active")
-    }
+function toggle(el){
+    return cl_toggle(el, 'active') 
 }
 
 

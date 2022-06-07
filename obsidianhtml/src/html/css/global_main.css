@@ -346,7 +346,9 @@
         border-radius: 0.2rem;
         margin-left: 0.3rem;
     }
-
+    #theme-popup.active {
+        display: block;
+    }
 
     /* --------------------------------------- Fixes -------------------------------------------------- */
     .container #homelink{
@@ -388,6 +390,9 @@
         .toc {
             display: block;
         }
+        .navbar {
+            display: flex;
+        }  
     }
 
     @media (max-width: 602px) {
@@ -395,13 +400,20 @@
             padding-bottom: 0.3rem;
         }
         .navbar {
-            margin: auto
-        }
-        .navbar {
             padding-top: 1rem;
             width: unset;
-            margin-top: 0rem;
-            margin-left: auto;
+            margin: auto;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            flex-direction: column;
+            display: none;
+        }
+        .navbar.active {
+            display: flex;
+        }
+        .navbar-link{
+            width: calc(100vw - 4rem);
+            text-align: center;
         }
         .navbar-button {
             margin: auto;

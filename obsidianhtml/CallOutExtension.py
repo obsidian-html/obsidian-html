@@ -13,7 +13,7 @@ class CallOutExtension(Extension):
         md.parser.blockprocessors.register(CallOutBlockProcessor(md.parser), 'CallOutExtension', 175)
 
 class CallOutBlockProcessor(BlockProcessor):
-    RE_FENCE_START = r'^> *\[\!.*?].*?\n' # start line, e.g., `   !!!! `
+    RE_FENCE_START = r'^> *\[\!.*?].*?\n' 
 
     def __init__(self, parser):
         """Initialization."""
@@ -55,7 +55,7 @@ class CallOutBlockProcessor(BlockProcessor):
                 title = etree.SubElement(div, 'div')
                 title.set('class', 'callout-title')
                 if data['folded']:
-                    title.set('onclick', f'fold_callout(this)')
+                    title.set('onclick', f'toggle(this.parentElement)')
 
                 # get the svg for the title bar icon
                 svg_name = data['call-out-class']
