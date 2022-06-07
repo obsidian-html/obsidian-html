@@ -161,6 +161,10 @@ toggles:
         show_icon: True
         show_in_note_footer: True
 
+    dataview:
+      enabled: false
+      folder: 'obs.html/export' # relative to the vault being processed. this folder should always be in the vault
+
     # Include code to build the graph view per page 
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)
