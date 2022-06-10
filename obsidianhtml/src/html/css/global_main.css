@@ -112,25 +112,64 @@
         border: 0px;
         border-radius: 10px;
     }
-    .right_pane,
-    .left_pane{
+
+
+    .right_pane_content,
+    .left_pane_content{
         scrollbar-color: var(--code-hightlight-color) var(--bg-note);
+        overflow-y: scroll;
+        height: calc(100vh - 10rem);
+        display: none;
         padding: 1.7rem;
         padding-top: 0.9rem;
-        overflow-y: scroll;
-        height: calc(90vh - 4rem);
         font-family: 'Roboto-Regular';
         max-width: max-content;
+        padding-bottom: 20rem;
     }
-    .left_pane{
-        padding-left: 1.7rem;
+    .right_pane_content {
+        padding-right: 3rem;
+    }
+    .active .right_pane_content,
+    .active .left_pane_content{
+        display: block;
+    }
+
+    .fold_header {
+        text-align: center;
+        color: var(--homelink-color);
+        background-color: var(--bg-accent3);
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+        color: var(--color-accent);
+        font-weight: 500;
+    }
+    .left_pane_fold_header {
+        border-radius: 1rem 0rem 0rem 0rem;
+    }
+    .right_pane_fold_header {
+        border-radius: 0rem 1rem 0rem 0rem;
+    }
+    .left_pane.active {
         min-width: 15rem;
         width: 15rem;
     }
-    .right_pane{
-        padding-right: 3rem;
-        padding-left:0rem;
+    .right_pane.active {
         min-width: max-content;
+    }
+    .left_pane, 
+    .right_pane {
+        width: 2rem;
+        min-width: 2rem;
+        cursor: pointer;
+    }
+
+    .left_pane_toggle_nav,
+    .right_pane_toggle_nav {
+        display: none;
+        flex: auto;
+        margin: 0.2rem;
+        cursor: pointer;
+        font-size: 10pt;
     }
 
     .left_pane ul,
@@ -387,9 +426,7 @@
     }
 
     @media (max-width: 840px) {
-        .toc {
-            display: block;
-        }
+
         .navbar {
             display: flex;
         }  
@@ -425,6 +462,30 @@
         .icon-tray {
             position: initial;
             margin:auto;
+        }
+
+        .left_pane_fold_header,
+        .right_pane_fold_header {
+            border-radius: 0rem;
+        }
+        .left_pane.active,
+        .right_pane.active {
+            display: block;
+        }
+        .container {
+            padding: 1rem;
+            height: calc(0rem + 100vh);
+        }
+    }
+
+    @media (max-width: 450px) {
+        .left_pane,
+        .right_pane {
+           display: none;
+        }
+        .left_pane_toggle_nav,
+        .right_pane_toggle_nav {
+            display: block;
         }
     }
 

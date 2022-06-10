@@ -44,20 +44,7 @@
         text-transform: capitalize;
     }
 
-    @media (max-width: 1300px) {
-        #left_pane {
-            flex: 0;
-            display: none;
-        }
-    }
-
     @media (max-width: 840px) {
-
-        #right_pane,
-        #left_pane {
-            flex: 0;
-            display: none;
-        }
 
         .container {
             width: calc(100vw - 4rem);

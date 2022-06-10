@@ -380,6 +380,9 @@ function disable(el){
 
 
 // standard
+function cl_toggle_id(id, class_name){
+    return cl_toggle(document.getElementById(id), class_name)
+}
 function cl_toggle(el, class_name) {
     if (el.classList.contains(class_name)) {
         el.classList.remove(class_name)

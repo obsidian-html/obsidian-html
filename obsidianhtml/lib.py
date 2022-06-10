@@ -216,11 +216,11 @@ def ExportStaticFiles(pb):
         html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
         
         # Set pane divs
-        toc_pane_div = "right_pane"
-        content_pane_div = "left_pane"
+        toc_pane_div = "right_pane_content"
+        content_pane_div = "left_pane_content"
         if pb.gc('toggles/features/styling/layout') == 'documentation' and pb.gc('toggles/features/styling/flip_panes'):
             toc_pane_div = "left_pane"
-            content_pane_div = "right_pane"
+            content_pane_div = "right_pane_content"
 
         # Templating
         if file_name[1] in ('master.css', 'main.css', 'global_main.css', 

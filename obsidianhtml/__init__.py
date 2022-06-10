@@ -500,6 +500,9 @@ def main():
                 t.write(html)
             print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
+        if v == '--test':
+            print('test 1.0')
+            exit(0)
 
 
     # Export packaged default config so users can see what is default behavior
