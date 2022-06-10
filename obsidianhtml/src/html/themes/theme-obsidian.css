@@ -148,23 +148,22 @@
         padding-top: 2rem;
         border-top: 3px solid var(--divider-color);
     }
-    .theme-obs-light #left_pane,
-    .theme-obs-light #right_pane,
-    .theme-obs-dark #left_pane,
-    .theme-obs-dark #right_pane {
+    .theme-obs-light .left_pane,
+    .theme-obs-light .right_pane,
+    .theme-obs-dark .left_pane,
+    .theme-obs-dark .right_pane {
         background-color: var(--bg-accent);
         border-top: 3px solid var(--divider-color);
         border-radius: 1rem;
-        height: calc(100vh - 6rem);
     }
-    .theme-obs-light #right_pane,
-    .theme-obs-dark #right_pane {
-        flex: auto;
+    .theme-obs-light .right_pane,
+    .theme-obs-dark .right_pane {
+        flex: 0;
         max-width: unset;
         border-radius: 0rem 1rem;
     }
-    .theme-obs-light #left_pane,
-    .theme-obs-dark #left_pane {
+    .theme-obs-light .left_pane,
+    .theme-obs-dark .left_pane {
         border-radius: 1rem 0rem;
     }
     .theme-obs-light .icon-tray,
@@ -218,34 +217,22 @@
             margin-bottom: 1rem;
         }
 
+        .theme-obs-light .left_pane, 
+        .theme-obs-dark .left_pane, 
+        .theme-light .left_pane, 
+        .left_pane, 
+        .theme-obs-light .right_pane,
+        .theme-obs-dark .right_pane,
+        .theme-light .right_pane,
+        .right_pane {
+            border-radius: 0rem;
+        }
     }
 
-    /* .theme-obs-dark #theme-popup,
-    .theme-obs-light #theme-popup {
-        width: 200px;
-        background-color: var(--divider-color);
-        padding: 1rem;
-        border-radius: 0.2rem;
-        color: rgb(var(--normal-text-color));
-        font-size: 10pt;
-        text-align: center;
-        margin:auto;
-        margin-bottom: 1rem;
-        display: none;
-    } */
+
     .theme-obs-dark #theme-popup {
         background-color: var(--bg-accent);
     }
-
-    /* .theme-obs-dark #theme-popup select,
-    .theme-obs-light #theme-popup select {
-        background-color: var(--bg-accent2);
-        color: var(--color-accent2);
-        border: none;
-        padding: 0.3rem;
-        border-radius: 0.2rem;
-        margin-left: 0.3rem;
-    } */
 
     .theme-button.active {
         background-color: var(--bg-accent2) !important;

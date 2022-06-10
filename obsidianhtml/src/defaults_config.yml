@@ -125,8 +125,8 @@ toggles:
   
   features:
     styling: 
-      layout: documentation               # documentation, tabs, no_tabs, minimal
-      max_note_width: 52rem               # not supported for layout: tabs
+      layout: documentation               # documentation, tabs, minimal
+      max_note_width: 120rem              # not supported for layout: tabs
       add_toc: True                       # add "[TOC]" (Table of Contents) when missing
       toc_pane: True                      # removes table of contents from the note and puts it in the right pane (not supported for layout:tabs)
       flip_panes: False                   # switch right and left pane around. (does nothing unless in documentation layout.)

@@ -33,11 +33,11 @@
                 <div id="header" class="header">
                         <div id="header_flex" class="flex_row">
                                 <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
-                                <div class="navbar-button requires_js" onclick="toggle_menu()">
+                                <div id="menu_toggle_button" class="navbar-button requires_js" onclick="toggle_menu()">
                                         ≡
                                 </div>
                                 <div id="navbar" class="navbar requires_js">
-                                {{navbar_links}}
+                                        {{navbar_links}}
                                         <div class="icon-tray">
                                                 {theme_button}
                                                 {search_button}
@@ -46,25 +46,157 @@
                                                 {tags_page_button}
                                                 {rss_button}
                                         </div>
+                                        <div style="display: flex; flex-direction:column">
+                                                <div id="left_pane_toggle_nav" class="left_pane_toggle_nav left_pane_fold_header fold_header">Toggle Directory Tree Pane</div>
+                                                <div id="right_pane_toggle_nav" class="right_pane_toggle_nav right_pane_fold_header fold_header">Toggle Table of Contents Pane</div>
+                                        </div>
                                 </div>
                         </div>
                         {theme_popup}
                 </div>
                 <div class="flex_row">
-                        <div id="left_pane" class="left_pane">
-                                {left_pane_content}
+                        <div id="left_pane" class="left_pane active">
+                                <div id="left_pane_fold_header" class="left_pane_fold_header fold_header">x</div>
+                                <div id="left_pane_content" class="left_pane_content">
+                                        {left_pane_content}
+                                </div>
                         </div>
                         <div class="container">
                                 {content}
                                 <!-- end content -->
                         </div>
-                        <div id="right_pane" class="right_pane">
-                                {right_pane_content}
+                        <div id="right_pane" class="right_pane active">
+                                <div id="right_pane_fold_header" class="right_pane_fold_header fold_header">x</div>
+                                <div id="right_pane_content" class="right_pane_content">
+                                        {right_pane_content}
+                                </div>
                         </div>
                 </div>
         </div>
 
-{footer_js_inclusions}
+        <script>
+                function handle_toggle_side_bar(e){
+                        console.log(e);
+                        let header;
+                        let pane; 
+                        let target = e.target
+
+                        // switch out the navbar button click for a header click
+                        if (target.id == 'left_pane_toggle_nav'){
+                                target = document.getElementById('left_pane_fold_header')
+                        }
+                        else if (target.id == 'right_pane_toggle_nav'){
+                                target = document.getElementById('right_pane_fold_header')
+                        }
+
+                        // get header and pane
+                        if (target.classList.contains('fold_header')) {
+                                header = target;
+                                pane = target.parentElement;
+                        }
+                        else {
+                                pane = target;
+                                header = target.getElementsByClassName('fold_header')[0];
+                        }
+                        toggle_side_bar(pane, header, true)
+                        e.stopPropagation();
+                }
+                function handle_toggle_side_bar_button(e){
+                        document.getElementById('menu_toggle_button').click()
+                        handle_toggle_side_bar(e);
+                }
+
+                function toggle_side_bar(pane, header, save) {
+                        let active = (pane.classList.contains('active'))
+                        if (active){
+                                disable_side_bar(pane, header, save);
+                        }
+                        else {
+                                enable_side_bar(pane, header, save);
+                        }
+                }
+                function enable_side_bar(pane, header, save){
+                        pane.classList.add('active');
+                        pane.removeEventListener('click', handle_toggle_side_bar);
+                        header.addEventListener('click', handle_toggle_side_bar);
+                        set_correct_header_symbol(header);
+                        if (save){ save_panel_folding_state(header, true) }
+                }
+                function disable_side_bar(pane, header, save){
+                        pane.classList.remove('active');
+                        pane.addEventListener('click', handle_toggle_side_bar);
+                        header.removeEventListener('click', handle_toggle_side_bar);
+                        set_correct_header_symbol(header);
+                        if (save){ save_panel_folding_state(header, false) }
+                }
+                function set_correct_header_symbol(header){
+                        let pane = header.parentElement;
+                        let symbol = [['>', '<'],['<', '>']]
+                        symbol = symbol[Number(header.classList.contains('right_pane_fold_header'))][Number(pane.classList.contains('active'))];
+                        console.log(symbol);
+                        header.innerHTML = symbol
+                        return header;
+                }
+                function panel_folding_get_panel_name(header){
+                        return ['left', 'right'][Number(header.classList.contains('right_pane_fold_header'))]
+                }
+                function save_panel_folding_state(header, active){
+                        localStorage.setItem('pane_folding_state_'+panel_folding_get_panel_name(header), Number(active));
+                }
+                function load_panel_folding_state(panel_name){
+                        val = localStorage.getItem('pane_folding_state_'+panel_name)
+                        if (!val){ return {'exists': false, 'value': null}}
+                        return {'exists': true, 'value': Boolean(Number(val))}
+                }
+                function set_pane_folding_start(left_header, right_header){
+                        // small screen = closed
+                        let right_pane_enabled = true;
+                        let left_pane_enabled = true;
+                        let w = window.visualViewport.width
+                        if (w < 1000){
+                                left_pane_enabled = false
+                        }
+                        if (w < 800){
+                                right_pane_enabled = false
+                        }
+
+                        // get saved values if present
+                        let rval = load_panel_folding_state('right')
+                        if (rval['exists']){
+                                right_pane_enabled = rval['value']
+                        }
+                        let lval = load_panel_folding_state('left')
+                        if (lval['exists']){
+                                left_pane_enabled = lval['value']
+                        }
+
+                        // default = enabled, so we only need to disable
+                        if (!left_pane_enabled){
+                                disable_side_bar(document.getElementById('left_pane'), document.getElementById('left_pane_fold_header'))
+                        }
+                        if (!right_pane_enabled){
+                                disable_side_bar(document.getElementById('right_pane'), document.getElementById('right_pane_fold_header'))
+                        }
+                }
+
+                function init_pane_folding(header){
+                        set_correct_header_symbol(header);
+                        header.addEventListener('click', handle_toggle_side_bar);
+                }
+                
+                
+                set_pane_folding_start()
+                init_pane_folding(document.getElementById('left_pane_fold_header'));
+                init_pane_folding(document.getElementById('right_pane_fold_header'));
+
+                document.getElementById('left_pane_toggle_nav').addEventListener('click', handle_toggle_side_bar_button);
+                document.getElementById('right_pane_toggle_nav').addEventListener('click', handle_toggle_side_bar_button);
+
+        </script>
+
+        {footer_js_inclusions}
+
+
 
 </body>
 </html>
