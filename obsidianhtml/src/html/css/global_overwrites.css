@@ -1,0 +1,30 @@
+/*  ----------------------------------------- OVERWRITES ------------------------------------------------ */
+/* 
+    Make site work when js is disabled
+    .requires_js will be removed when js is loaded 
+*/
+.requires_js {
+    display: none
+}
+.dir-container.requires_js {
+    display: block
+}
+.navbar.requires_js {
+    margin-bottom: 0px;
+    margin-top: 0px;
+    margin-left: 1rem !important;
+    margin-right: 1rem;
+    flex-direction: row;
+    display: flex
+}
+.requires_js .icon-tray {
+    margin: unset;
+}
+.requires_js .navbar-link {
+    width: unset;
+}
+.requires_js.navbar-button {
+    display: none
+}
+
+/*  ----------------------------------------- /OVERWRITES ------------------------------------------------ */
