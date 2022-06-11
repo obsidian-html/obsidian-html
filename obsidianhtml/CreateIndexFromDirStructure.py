@@ -128,8 +128,13 @@ class CreateIndexFromDirStructure():
             html += '\t'*tab_level + '<ul class="dir-list">\n'
             tab_level += 1
 
+            excluded_paths = self.pb.gc('toggles/features/create_index_from_tags/exclude_paths', cached=True)
+
             for f in tree['files']:
                 rel_path = Path(f['path']).resolve().relative_to(self.root).as_posix()
+
+                if rel_path in excluded_paths:
+                    continue
 
                 file_active = ''
                 if '/'+rel_path == current_page:

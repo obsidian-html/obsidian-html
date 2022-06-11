@@ -192,6 +192,8 @@ toggles:
         value_prefix: ''        # in case of multiple values under key_path, match on this prefix, and then remove prefix
         reverse: false          # false/true reverses output
         none_on_bottom: true    # will put notes at the bottom that do not have the sort key, otherwise at the top
+      exclude_paths:            # don't included these paths in the dir list
+       - ".gitignore"
 
     rss:
       enabled: False
