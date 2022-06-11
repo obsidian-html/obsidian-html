@@ -1,6 +1,4 @@
-/* Flowchart variables */
-/* Sequence Diagram variables */
-/* Gantt chart variables */
+/*  ----------------------------------------- MERMAID ------------------------------------------------ */
 div.mermaid svg
 {
     display: block;
@@ -342,3 +340,4 @@ div.mermaidTooltip
     border-radius: 2px;
     background: #ffffde;
 }
+/*  ----------------------------------------- /MERMAID ------------------------------------------------ */

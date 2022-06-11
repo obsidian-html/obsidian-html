@@ -156,8 +156,7 @@ def ExportStaticFiles(pb):
     ]
 
     css_files_list = [
-        ['html/css/global_main.css', 'global_main.css'], 
-        [f'html/layouts/{pb.gc("_css_file")}', 'main.css']
+        ['html/css/global_main.css', 'global_main.css']
     ]
 
     if pb.config.feature_is_enabled('graph', cached=True):
@@ -196,7 +195,11 @@ def ExportStaticFiles(pb):
         copy_file_list.append(['js/obsidian_tabs_footer.js', 'obsidian_tabs_footer.js'])
 
     # create master.css file
-    css_files_list.append( ['html/themes/theme-obsidian.css', 'theme-obsidian.css'])
+    css_files_list += [
+        [f'html/layouts/{pb.gc("_css_file")}', 'main.css'],
+        ['html/themes/theme-obsidian.css', 'theme-obsidian.css'],
+        ['html/css/global_overwrites.css', 'global_overwrites.css']
+    ]
     css = ''
     for filepath, _ in css_files_list:
         css += '\n\n' + OpenIncludedFile(filepath)
