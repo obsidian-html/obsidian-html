@@ -79,6 +79,8 @@ class MarkdownLink:
             self.isExternal = True
         if ':\\' in self.url:
             self.isExternal = True
+        if self.url.startswith('mailto:'):
+            self.isExternal = True
 
     def ParseType(self):
         if self.url.startswith('#'):
@@ -93,6 +95,23 @@ class MarkdownLink:
 
     def GetFileObject(self):
         self.fo = None
-        self.name = self.url.split('/')[-1]
-        if self.name in self.pb.files.keys():
-            self.fo = self.pb.files[self.name]
+        #self.name = self.url.split('/')[-1]
+        url = self.url
+        if url in self.pb.files.keys():
+            self.fo = self.pb.files[url]
+            return 
+
+        url = url.replace(self.pb.gc('md_source_host_url'), '', 1)
+        if url in self.pb.files.keys():
+            self.fo = self.pb.files[url]
+            return 
+
+        if url[0] != '/':
+            return
+        
+        url = url.replace('/', '', 1)
+        print('--------------', url)
+        if url in self.pb.files.keys():
+            self.url = url
+            self.fo = self.pb.files[url]
+            return 

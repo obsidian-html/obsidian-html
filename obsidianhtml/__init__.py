@@ -209,21 +209,25 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [4] Handle local image links (copy them over to output)
     # ------------------------------------------------------------------
-    for link in re.findall(r'\!\[.*\]\((.*?)\)', md.page):
+    for link in re.findall(r'\!\[.*?\]\((.*?)\)', md.page):
+        
         l = urllib.parse.unquote(link)
         if '://' in l:
             continue
 
         file_name = l.split('/')[-1]
 
+        if l[0] == '/':
+            l = l.replace('/', '', 1)
+
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
-        if file_name not in files.keys():
+        if l not in files.keys():
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Image {l} treated as external and not imported in html")
             continue
         
-        lo = files[file_name]
+        lo = files[l]
 
         # Copy src to dst
         lo.copy_file('mth')
@@ -260,6 +264,10 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [?] Documentation styling: Table of Contents
     # ------------------------------------------------------------------
+    if pb.gc('toggles/features/styling/toc_pane', cached=True) or pb.gc('toggles/features/styling/add_toc', cached=True):
+        # convert the common [[_TOC_]] into [TOC]
+        md.page = md.page.replace('[[_TOC_]]', '[TOC]')
+
     if pb.gc('toggles/features/styling/add_toc', cached=True):
         if '[TOC]' not in md.page:
             # if h1 is present, place toc after the first h1, else put it at the top of the page.
@@ -620,6 +628,7 @@ def main():
     if pb.gc('toggles/verbose_printout'):
         print('> CREATING FILE TREE')
     pb.files = {}
+    duplicates_found = False
     for path in input_dir.rglob('*'):
         if path.is_dir():
             continue
@@ -641,7 +650,10 @@ def main():
 
         # Check if filename is duplicate
         if path.name in pb.files.keys() and pb.gc('toggles/allow_duplicate_filenames_in_root', cached=True) == False:
-            raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
+            #raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
+            print(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
+            duplicates_found = True
+            continue
 
         # Create object to help with handling all the info on the file
         fo = OH_File(pb)
@@ -655,14 +667,20 @@ def main():
             if pb.gc('toggles/compile_html', cached=True):
                 # compile markdown --> html (based on the given note path)
                 fo.init_markdown_path()
-                fo.compile_metadata(fo.path['markdown']['file_absolute_path'], cached=True)
+                fo.compile_metadata(fo.path['markdown']['file_absolute_path'].as_posix(), cached=True)
+
+            # Add to tree
+            pb.add_file(fo.path['note']['file_relative_path'], fo)
         else:
             # compile markdown --> html (based on the found markdown path)
             fo.init_markdown_path(path)
             fo.compile_metadata(fo.path['markdown']['file_absolute_path'], cached=True)
 
-        # Add to tree
-        pb.files[path.name] = fo
+            # Add to tree
+            pb.add_file(fo.path['markdown']['file_relative_path'].as_posix(), fo)
+
+    if duplicates_found:
+        raise DuplicateFileNameInRoot(f"Files with the name exist in the root folder.")
 
     if pb.gc('toggles/verbose_printout', cached=True):
         print('< CREATING FILE TREE: Done')
