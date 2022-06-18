@@ -18,7 +18,7 @@ import platform
 import gzip
 
 from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
-from .FileFinder import GetNodeId
+from .FileFinder import GetNodeId, FindFile
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
@@ -214,19 +214,16 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         if '://' in l:
             continue
 
-        file_name = l.split('/')[-1]
-
         if l[0] == '/':
             l = l.replace('/', '', 1)
 
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
-        if l not in files.keys():
+        rel_path_str, lo = FindFile(pb.files, l, pb)
+        if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Image {l} treated as external and not imported in html")
             continue
-        
-        lo = files[l]
 
         # Copy src to dst
         lo.copy_file('mth')
@@ -242,16 +239,12 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         l = urllib.parse.unquote(link)
         if '://' in l:
             continue
-        file_name = l.split('/')[-1]
 
-        # Only handle local video files (images located in the root folder)
-        # Doublecheck, who knows what some weird '../../folder/..' does...
-        if file_name not in files.keys():
+        rel_path_str, lo = FindFile(pb.files, l, pb)
+        if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
             continue
-        
-        lo = files[file_name]
 
         # Copy src to dst
         lo.copy_file('mth')

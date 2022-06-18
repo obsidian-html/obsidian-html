@@ -97,11 +97,6 @@ class MarkdownLink:
     def GetFileObject(self):
         #self.name = self.url.split('/')[-1]
         url = self.url
-        # remove leading ../ or ./
-        if url[0:2] == './':
-            url = url[2:]
-        if url[0:3] == '../':
-            url = url[3:]
         res = GetObsidianFilePath(url, self.pb.files, self.pb)
         if res['fo']:
             self.fo = res['fo']

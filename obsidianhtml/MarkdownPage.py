@@ -171,10 +171,12 @@ class MarkdownPage:
 
         # -- [4] Handle local image/video/audio links (copy them over to output)
         for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", self.page):
-            clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
+            #clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
+            clean_link = urllib.parse.unquote(link).split('|')[0]
 
-            # Only handle local image files (images located in the root folder)
-            if clean_link_name not in self.file_tree.keys():
+            # Find file
+            rel_path_str, lo = FindFile(self.pb.files, clean_link, self.pb)
+            if rel_path_str == False:
                 if self.pb.gc('toggles/verbose_printout', cached=True):
                     print(f"\t\tImage/file with obsidian link of '{clean_link_name}' (original {link}) will not be copied over in this step.")
                     if '://' in link:
@@ -184,7 +186,6 @@ class MarkdownPage:
                 continue
 
             # Get shorthand info
-            lo = self.file_tree[clean_link_name]
             suffix = lo.path['note']['suffix']
             relative_path = lo.path['markdown']['file_relative_path']
 
@@ -327,7 +328,6 @@ class MarkdownPage:
             self.links.append(file_object)
 
             if include_depth > 3:
-                print('a', origin)
                 link_path = file_object.get_link('markdown', origin=origin)
                 self.page = self.page.replace(l, f"[{link}]({link_path}).")
                 continue

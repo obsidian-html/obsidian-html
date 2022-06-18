@@ -105,7 +105,7 @@ class ModeTemplate(unittest.TestCase):
     def obsidian_type_links_should_work(self, path, link_text='Markdownlink'):
         self.scribe('obsidian-type link should work')
         soup = html_get(path)
-        self.assertPageFound(soup)
+        self.assertPageFound(soup, msg=f'expected page "{path}" was not found.')
 
         # Return note linked by markdown link
         a = soup.body.find('a', text=link_text)
@@ -116,14 +116,14 @@ class ModeTemplate(unittest.TestCase):
     def markdown_type_links_should_work(self, path):
         self.scribe('markdown-type link should work')
         soup = html_get(path)
-        self.assertPageFound(soup)
+        self.assertPageFound(soup, msg=f'expected page "{path}" was not found.')
 
     def links_should_work(self, path, link_type_tested="unknown", link_text='Markdownlink', mode=None):
         self.scribe(f'links of type {link_type_tested} should work')
         
         # Get origin page
         soup = html_get(path)
-        self.assertPageFound(soup)
+        self.assertPageFound(soup, msg=f'expected page "{path}" was not found.')
 
         # Get url from the a href with the link text
         a = soup.body.find('a', text=link_text)
@@ -133,7 +133,7 @@ class ModeTemplate(unittest.TestCase):
         soup = html_get(a['href'])
 
         if mode is None:
-            self.assertPageFound(soup)
+            self.assertPageFound(soup, msg=f'expected page "{a["href"]}" was not found.')
         elif mode == 'ShouldNotExist':
             self.assertPageNotFound(soup, msg=f"Page found when note should not have been included. URL: {a['href']}")
 

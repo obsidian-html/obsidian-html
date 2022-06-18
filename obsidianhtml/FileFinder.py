@@ -3,6 +3,18 @@ def FindFile(files, link, pb):
     if '://' not in link and (len(link.split('.')) == 1 or link.split('.')[-1] not in (pb.gc('included_file_suffixes', cached=True) + ['html', 'md'])):
         link += '.md'
 
+    # remove leading ../ or ./
+    if link[0:2] == './':
+        link = link[2:]
+    if link[0:3] == '../':
+        link = link[3:]
+
+    # remove leading html_url_prefix
+    html_url_prefix = pb.gc('html_url_prefix')[1:]
+    if html_url_prefix != '':
+        if link.startswith(html_url_prefix):
+            link = link.replace(html_url_prefix+'/', '', 1)
+
     # return immediately if exact link is found in the array
     if link in files.keys():
         return (link, files[link])
@@ -51,6 +63,5 @@ def GetNodeId(files, link):
 
         matches = GetMatches(files, node_id)
         if len(matches) == 1:
-            print(node_id)
             return node_id
     raise Exception(f'No unique node id found for {link}') 
