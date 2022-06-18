@@ -30,6 +30,9 @@ class PicknickBasket:
     def sc(self, path, value):
         return self.config.set_config(path, value)
 
+    def add_file(self, rel_path, obj):
+        #print(rel_path)
+        self.files[rel_path] = obj
 
 
         

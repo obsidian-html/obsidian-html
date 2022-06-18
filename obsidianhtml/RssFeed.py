@@ -218,25 +218,25 @@ class RssFeed():
             
             # get publish date
             publish_date = self.select_value(metadata, soup, path, self.publish_date_selectors)
-            if not publish_date:
+            if not publish_date or publish_date == '':
                 print(f"RSS Feed: warning: no publish_date found for note {path}")
-
-            if self.iso_formatted:
-                publish_date = datetime.fromisoformat(publish_date)
             else:
-                fs = pb.gc('toggles/features/rss/items/publish_date/format_string')
-                if fs:
-                    try:
-                        publish_date = datetime.strptime(publish_date, fs)
-                    except ValueError:
-                        raise Exception(f"Don't know how to parse date string. Found date '{publish_date}' does not match format_string '{fs}'.")
+                if self.iso_formatted:
+                    publish_date = datetime.fromisoformat(publish_date)
                 else:
-                    raise Exception("Don't know how to parse date string. Iso_formatted is false and format_string is empty.")
+                    fs = pb.gc('toggles/features/rss/items/publish_date/format_string')
+                    if fs:
+                        try:
+                            publish_date = datetime.strptime(publish_date, fs)
+                        except ValueError:
+                            raise Exception(f"Don't know how to parse date string. Found date '{publish_date}' does not match format_string '{fs}'.")
+                    else:
+                        raise Exception("Don't know how to parse date string. Iso_formatted is false and format_string is empty.")
 
-            publish_date_str = ConvertDateToRssFormat(publish_date)
+                publish_date_str = ConvertDateToRssFormat(publish_date)
 
-            if publish_date > most_recent_publish_date:
-                most_recent_publish_date = publish_date
+                if publish_date > most_recent_publish_date:
+                    most_recent_publish_date = publish_date
 
             # link
             link = self.host + path.relative_to(self.html_folder).as_posix()

@@ -4,12 +4,13 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 import shutil               # used to remove a non-empty directory, copy files
-from .lib import DuplicateFileNameInRoot
+from .lib import DuplicateFileNameInRoot, GetObsidianFilePath
 
 class MarkdownLink:
     """Helper class to abstract away a lot of recurring path-testing logic."""
     url = ''
     name = ''
+    fo = None
     
     isValid = True
     isExternal = False
@@ -79,6 +80,8 @@ class MarkdownLink:
             self.isExternal = True
         if ':\\' in self.url:
             self.isExternal = True
+        if self.url.startswith('mailto:'):
+            self.isExternal = True
 
     def ParseType(self):
         if self.url.startswith('#'):
@@ -92,7 +95,9 @@ class MarkdownLink:
             self.suffix = '.md'
 
     def GetFileObject(self):
-        self.fo = None
-        self.name = self.url.split('/')[-1]
-        if self.name in self.pb.files.keys():
-            self.fo = self.pb.files[self.name]
+        #self.name = self.url.split('/')[-1]
+        url = self.url
+        res = GetObsidianFilePath(url, self.pb.files, self.pb)
+        if res['fo']:
+            self.fo = res['fo']
+        return

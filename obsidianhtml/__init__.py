@@ -18,6 +18,7 @@ import platform
 import gzip
 
 from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
+from .FileFinder import GetNodeId, FindFile
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
@@ -75,17 +76,13 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
 
     # Recurse for every link in the current page
     # ------------------------------------------------------------------
-    for l in md.links:
-        link = GetObsidianFilePath(l, files)
-        link_name = link[0]
-        lo = link[1]
-
+    for lo in md.links:
         if lo == False or lo.processed_ntm == True:
             if pb.gc('toggles/verbose_printout', cached=True):
                 if lo == False:
-                    print('\t'*log_level, f"Skipping converting {l}, link not internal or not valid.")
+                    print('\t'*log_level, f"(ntm) Skipping converting {lo.link}, link not internal or not valid.")
                 else:
-                    print('\t'*log_level, f"Skipping converting {l}, already processed.")
+                    print('\t'*log_level, f"(ntm) Skipping converting {lo.link}, already processed.")
             continue
 
         # Mark the file as processed so that it will not be processed again at a later stage
@@ -132,9 +129,11 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     node['metadata'] = md.metadata.copy()
     
     # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-    node['id'] = rel_dst_path.name.replace('.html', '')
+    node['id'] = GetNodeId(pb.files, fo.path['markdown']['file_relative_path'].as_posix())
     if 'graph_name' in md.metadata.keys():
-        node['id'] = md.metadata['graph_name']
+        node['name'] = md.metadata['graph_name']
+    else:
+        node['name'] = node['id']
 
     # Url is used so you can open the note/node by clicking on it
     node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()
@@ -163,7 +162,6 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     if pb.gc('toggles/features/search/enabled', cached=True):
         pb.search.AddPage(url=node['url'], title=node['id'], text=md.page)
 
-
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
     # ------------------------------------------------------------------
@@ -174,6 +172,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # This is any string in between '](' and  ')'
     proper_links = re.findall(r'(?<=\]\().+?(?=\))', md.page)
     for l in proper_links:
+
         # Init link
         link = MarkdownLink(pb, l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = pb.gc('toggles/relative_path_md', cached=True))
 
@@ -209,21 +208,22 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [4] Handle local image links (copy them over to output)
     # ------------------------------------------------------------------
-    for link in re.findall(r'\!\[.*\]\((.*?)\)', md.page):
+    for link in re.findall(r'\!\[.*?\]\((.*?)\)', md.page):
+        
         l = urllib.parse.unquote(link)
         if '://' in l:
             continue
 
-        file_name = l.split('/')[-1]
+        if l[0] == '/':
+            l = l.replace('/', '', 1)
 
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
-        if file_name not in files.keys():
+        rel_path_str, lo = FindFile(pb.files, l, pb)
+        if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Image {l} treated as external and not imported in html")
             continue
-        
-        lo = files[file_name]
 
         # Copy src to dst
         lo.copy_file('mth')
@@ -239,16 +239,12 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         l = urllib.parse.unquote(link)
         if '://' in l:
             continue
-        file_name = l.split('/')[-1]
 
-        # Only handle local video files (images located in the root folder)
-        # Doublecheck, who knows what some weird '../../folder/..' does...
-        if file_name not in files.keys():
+        rel_path_str, lo = FindFile(pb.files, l, pb)
+        if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
             continue
-        
-        lo = files[file_name]
 
         # Copy src to dst
         lo.copy_file('mth')
@@ -260,6 +256,10 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [?] Documentation styling: Table of Contents
     # ------------------------------------------------------------------
+    if pb.gc('toggles/features/styling/toc_pane', cached=True) or pb.gc('toggles/features/styling/add_toc', cached=True):
+        # convert the common [[_TOC_]] into [TOC]
+        md.page = md.page.replace('[[_TOC_]]', '[TOC]')
+
     if pb.gc('toggles/features/styling/add_toc', cached=True):
         if '[TOC]' not in md.page:
             # if h1 is present, place toc after the first h1, else put it at the top of the page.
@@ -274,7 +274,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
             if found_h1:
                 md.page = output
             else: 
-                md.page = '[TOC]\n' + md.page
+                md.page = '\n[TOC]\n\n' + md.page
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
@@ -620,6 +620,7 @@ def main():
     if pb.gc('toggles/verbose_printout'):
         print('> CREATING FILE TREE')
     pb.files = {}
+    duplicates_found = False
     for path in input_dir.rglob('*'):
         if path.is_dir():
             continue
@@ -641,7 +642,10 @@ def main():
 
         # Check if filename is duplicate
         if path.name in pb.files.keys() and pb.gc('toggles/allow_duplicate_filenames_in_root', cached=True) == False:
-            raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
+            #raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
+            print(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
+            duplicates_found = True
+            continue
 
         # Create object to help with handling all the info on the file
         fo = OH_File(pb)
@@ -655,14 +659,20 @@ def main():
             if pb.gc('toggles/compile_html', cached=True):
                 # compile markdown --> html (based on the given note path)
                 fo.init_markdown_path()
-                fo.compile_metadata(fo.path['markdown']['file_absolute_path'], cached=True)
+                fo.compile_metadata(fo.path['markdown']['file_absolute_path'].as_posix(), cached=True)
+
+            # Add to tree
+            pb.add_file(fo.path['note']['file_relative_path'].as_posix(), fo)
         else:
             # compile markdown --> html (based on the found markdown path)
             fo.init_markdown_path(path)
             fo.compile_metadata(fo.path['markdown']['file_absolute_path'], cached=True)
 
-        # Add to tree
-        pb.files[path.name] = fo
+            # Add to tree
+            pb.add_file(fo.path['markdown']['file_relative_path'].as_posix(), fo)
+
+    if duplicates_found:
+        raise DuplicateFileNameInRoot(f"Files with the name exist in the root folder.")
 
     if pb.gc('toggles/verbose_printout', cached=True):
         print('< CREATING FILE TREE: Done')
@@ -683,6 +693,11 @@ def main():
         # ---------------------------------------------------------
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
         print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(paths["obsidian_entrypoint"])})')
+
+        # for k, v in pb.files.items():
+        #     print(k, type(v))
+
+        # exit()
         ep = pb.files[paths['obsidian_entrypoint'].name]
         recurseObisidianToMarkdown(ep, pb)
 
@@ -721,6 +736,7 @@ def main():
         
         # Start conversion from the entrypoint
         ep = pb.files[paths['md_entrypoint'].name]
+        print(paths['md_entrypoint'].name)
         ConvertMarkdownPageToHtmlPage(ep, pb)
         
         # Keep going until all other files are processed
