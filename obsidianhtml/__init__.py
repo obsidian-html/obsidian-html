@@ -18,6 +18,7 @@ import platform
 import gzip
 
 from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
+from .FileFinder import GetNodeId
 
 from .MarkdownPage import MarkdownPage
 from .MarkdownLink import MarkdownLink
@@ -128,9 +129,11 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     node['metadata'] = md.metadata.copy()
     
     # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-    node['id'] = rel_dst_path.name.replace('.html', '')
+    node['id'] = GetNodeId(pb.files, fo.path['markdown']['file_relative_path'].as_posix())
     if 'graph_name' in md.metadata.keys():
-        node['id'] = md.metadata['graph_name']
+        node['name'] = md.metadata['graph_name']
+    else:
+        node['name'] = node['id']
 
     # Url is used so you can open the note/node by clicking on it
     node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()

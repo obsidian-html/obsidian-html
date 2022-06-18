@@ -1,6 +1,5 @@
 # will return (False, False) if not found, (str:url, fo:file_object) when found
 def FindFile(files, link, pb):
-
     if '://' not in link and (len(link.split('.')) == 1 or link.split('.')[-1] not in (pb.gc('included_file_suffixes', cached=True) + ['html', 'md'])):
         link += '.md'
 
@@ -8,6 +7,22 @@ def FindFile(files, link, pb):
     if link in files.keys():
         return (link, files[link])
 
+    # find all links that match the tail part
+    matches = GetMatches(files, link)
+    
+    if len(matches) == 0:
+        #print(link, '--> not_created.md')
+        return (False, False)
+
+    if len(matches) == 1:
+        return (matches[0], files[matches[0]])
+
+    # multiple matches found, sort on number of parts that matched
+    # e.g. 'folder/home' will rank higher than 'home'
+    matches = sorted(matches, key=lambda x: len(x.split('/')),reverse=True)
+    return (matches[0], files[matches[0]])
+
+def GetMatches(files, link):
     # find all links that match the tail part
     url_parts = link.split('/')
     matches = []
@@ -23,16 +38,19 @@ def FindFile(files, link, pb):
                 break
         if match:
             matches.append(rel_path)
-    
-    if len(matches) == 0:
-        #print(link, '--> not_created.md')
-        return (False, False)
-
-    if len(matches) == 1:
-        return (matches[0], files[matches[0]])
-
-    # multiple matches found, sort on number of parts that matched
-    # e.g. 'folder/home' will rank higher than 'home'
-    matches = sorted(matches, key=lambda x: len(x.split('/')),reverse=True)
-    return (matches[0], files[matches[0]])
+    return matches
         
+def GetNodeId(files, link):
+    node_id = ''
+    parts = link.split('/')
+    for i in range(1, len(parts)+1):
+        if node_id == '':
+            node_id = parts[-i]
+        else:
+            node_id = f'{parts[-i]}/{node_id}'
+
+        matches = GetMatches(files, node_id)
+        if len(matches) == 1:
+            print(node_id)
+            return node_id
+    raise Exception(f'No unique node id found for {link}') 
