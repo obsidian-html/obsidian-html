@@ -75,17 +75,13 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
 
     # Recurse for every link in the current page
     # ------------------------------------------------------------------
-    for l in md.links:
-        link = GetObsidianFilePath(l, files)
-        link_name = link[0]
-        lo = link[1]
-
+    for lo in md.links:
         if lo == False or lo.processed_ntm == True:
             if pb.gc('toggles/verbose_printout', cached=True):
                 if lo == False:
-                    print('\t'*log_level, f"Skipping converting {l}, link not internal or not valid.")
+                    print('\t'*log_level, f"(ntm) Skipping converting {lo.link}, link not internal or not valid.")
                 else:
-                    print('\t'*log_level, f"Skipping converting {l}, already processed.")
+                    print('\t'*log_level, f"(ntm) Skipping converting {lo.link}, already processed.")
             continue
 
         # Mark the file as processed so that it will not be processed again at a later stage
@@ -163,7 +159,6 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     if pb.gc('toggles/features/search/enabled', cached=True):
         pb.search.AddPage(url=node['url'], title=node['id'], text=md.page)
 
-
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
     # ------------------------------------------------------------------
@@ -174,6 +169,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # This is any string in between '](' and  ')'
     proper_links = re.findall(r'(?<=\]\().+?(?=\))', md.page)
     for l in proper_links:
+
         # Init link
         link = MarkdownLink(pb, l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = pb.gc('toggles/relative_path_md', cached=True))
 
@@ -282,7 +278,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
             if found_h1:
                 md.page = output
             else: 
-                md.page = '[TOC]\n' + md.page
+                md.page = '\n[TOC]\n\n' + md.page
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
@@ -670,7 +666,7 @@ def main():
                 fo.compile_metadata(fo.path['markdown']['file_absolute_path'].as_posix(), cached=True)
 
             # Add to tree
-            pb.add_file(fo.path['note']['file_relative_path'], fo)
+            pb.add_file(fo.path['note']['file_relative_path'].as_posix(), fo)
         else:
             # compile markdown --> html (based on the found markdown path)
             fo.init_markdown_path(path)
@@ -701,6 +697,11 @@ def main():
         # ---------------------------------------------------------
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
         print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(paths["obsidian_entrypoint"])})')
+
+        # for k, v in pb.files.items():
+        #     print(k, type(v))
+
+        # exit()
         ep = pb.files[paths['obsidian_entrypoint'].name]
         recurseObisidianToMarkdown(ep, pb)
 
@@ -739,6 +740,7 @@ def main():
         
         # Start conversion from the entrypoint
         ep = pb.files[paths['md_entrypoint'].name]
+        print(paths['md_entrypoint'].name)
         ConvertMarkdownPageToHtmlPage(ep, pb)
         
         # Keep going until all other files are processed

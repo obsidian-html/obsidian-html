@@ -16,6 +16,7 @@ import importlib.util
 from . import src 
 
 from .PathFinder import get_html_url_prefix
+from .FileFinder import FindFile
  
 class DuplicateFileNameInRoot(Exception):
     pass
@@ -68,24 +69,32 @@ def simpleHash(text:str):
         hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     return str(hash)
 
-def GetObsidianFilePath(link, file_tree):
-    # Remove possible alias suffix, folder prefix, and add '.md' to get a valid lookup key
+def GetObsidianFilePath(link, file_tree, pb):
     # a link can look like this: folder/note#chapter|alias
-    # then filename=note, header=chapter
-    parts = link.split('|')[0].split('/')[-1].split('#')
-    filename = parts[0]
-    header = ''
+    # then link=folder/note, alias=alias, header=chapter
+    # the link will be converted to a path that is relative to the root dir.
+    output = {}
+    output['rtr_path_str'] = ''     # rtr=relative to root
+    output['fo'] = False            # file object of type OH_File
+    output['header'] = ''           # the last part in 'link#header'
+    output['alias'] = ''            # the last part in 'link#header'
+
+    # split folder/note#chapter|alias into ('folder/note#chapter', 'alias')
+    parts = link.split('|')
+    link = parts[0]
     if len(parts) > 1:
-        header = parts[1]
+        output['alias'] = parts[1]
 
-    if filename[-3:] != '.md':
-        filename += '.md'
-        
-    # Return tuple
-    if filename not in file_tree.keys():
-        return (filename, False, '')
+    # split folder/note#chapter into ('folder/note', 'chapter')
+    parts = link.split('#')
+    link = parts[0]
+    if len(parts) > 1:
+        output['header'] = parts[1]
 
-    return (filename, file_tree[filename], header)
+    # Find file. Values will be False when file is not found.
+    output['rtr_path_str'], output['fo'] = FindFile(file_tree, link, pb)
+
+    return output
 
 def ConvertTitleToMarkdownId(title):
     # remove whitespace and lowercase

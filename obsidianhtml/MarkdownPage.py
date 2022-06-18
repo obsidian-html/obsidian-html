@@ -6,6 +6,7 @@ import urllib.parse         # convert link characters like %
 import warnings
 from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, ConvertTitleToMarkdownId, MalformedTags, OpenIncludedFile
 from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
+from .FileFinder import FindFile
 
 class MarkdownPage:
     page = None             # Pure markdown code read from src file
@@ -210,30 +211,23 @@ class MarkdownPage:
         proper_links = re.findall("(?<=[^\[]\]\().+?(?=\))", self.page)
         for l in proper_links:
             # Get the filename
-            file_name = urllib.parse.unquote(l)
+            link = urllib.parse.unquote(l)
+
+            res = GetObsidianFilePath(link, self.file_tree, self.pb)
+            rel_path_str = res['rtr_path_str']
+            lo = res['fo']
+            if lo == False:
+                continue
 
             # Determine if file is markdown
-            isMd = False
-            if file_name[-3:] == '.md':
+            if Path(rel_path_str).suffix == '.md':
                 isMd = True
-            if Path(file_name).suffix == '':
-                isMd = True
-                file_name += '.md'
     
             if isMd:
                 # Add to list to recurse to the link later
-                self.links.append(file_name)
-
-            # Don't continue processing for external links 
-            if '://' in file_name:
-                continue
-
-            # Don't continue processing for non local files
-            if file_name.split('/')[-1] not in self.file_tree.keys():
-                continue
+                self.links.append(lo)
 
             # Get file info
-            lo = self.file_tree[file_name.split('/')[-1]]
             file_link = lo.get_link('markdown', origin=origin)
 
             # Update link
@@ -244,7 +238,6 @@ class MarkdownPage:
             if isMd == False:
                 # Copy file over to new location
                 lo.copy_file('ntm')
-
 
         # -- [6] Replace Obsidian links with proper markdown
         # This is any string in between [[ and ]], e.g. [[My Note]]
@@ -272,29 +265,24 @@ class MarkdownPage:
             if hashpart != '' and filename == '':
                 is_anchor = True
 
-            isMd = False
-            if filename[-3:] != '.md':
-                # Always assume that Obsidian filenames are links
-                # This is the default behavior. Use proper markdown to link to files
-                filename += '.md'
-
             if is_anchor == False:
-                self.links.append(filename)
+                # find link in filetree
+                res = GetObsidianFilePath(l, self.file_tree, self.pb)
+                rel_path_str = res['rtr_path_str']
+                fo = res['fo']
 
-                # Links can be made in Obsidian without creating the note.
-                # When we link to a nonexistant note, link to the not_created.md placeholder instead.
-                if filename not in self.file_tree.keys():
+                if rel_path_str == False:
                     link = '/not_created.md'
                 else:
-                    link = self.file_tree[filename].get_link('markdown', origin=origin)
+                    link = fo.get_link('markdown', origin=origin)
+                    self.links.append(fo)
 
                 newlink = urllib.parse.quote(link)
 
                 if hashpart != '':
                     hashpart = hashpart.replace(' ', '-').lower()
                     newlink += f'#{hashpart}'
-
-            elif is_anchor:
+            else:
                 newlink = '#' + ConvertTitleToMarkdownId(hashpart)
                 alias = hashpart
 
@@ -327,13 +315,16 @@ class MarkdownPage:
         # -- [10] Add code inclusions
         for l in re.findall(r'^(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')
-            file_name, file_object, header = GetObsidianFilePath(link, self.file_tree)
+            
+            result = GetObsidianFilePath(link, self.file_tree, self.pb)
+            file_object = result['fo']
+            header =  result['header']
 
             if file_object == False:
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Could not find page {link}.")
                 continue
             
-            self.links.append(file_name)
+            self.links.append(file_object)
 
             if include_depth > 3:
                 print('a', origin)
