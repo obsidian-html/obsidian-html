@@ -71,7 +71,7 @@ blockquote p {
 .container {
     background-color: var(--bg-note);
     padding: 2rem;
-    scrollbar-color: rgba(var(--code-hightlight-color), 1.0) #0000;
+    scrollbar-color: rgba(var(--code-hightlight-color), 0.4) #0000;
     scroll-margin-top: 2rem;
     max-width: __max_note_width__;
     flex: auto;
