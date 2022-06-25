@@ -23,7 +23,7 @@ def FindFile(files, link, pb):
     matches = GetMatches(files, link)
     
     if len(matches) == 0:
-        print(link, '--> not_created.md')
+        #print(link, '--> not_created.md')
         return (False, False)
 
     if len(matches) == 1:
