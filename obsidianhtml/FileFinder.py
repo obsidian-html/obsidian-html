@@ -6,7 +6,7 @@ def FindFile(files, link, pb):
     # remove leading ../ or ./
     if link[0:2] == './':
         link = link[2:]
-    if link[0:3] == '../':
+    while link[0:3] == '../':
         link = link[3:]
 
     # remove leading html_url_prefix

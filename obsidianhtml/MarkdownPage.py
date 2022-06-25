@@ -178,7 +178,7 @@ class MarkdownPage:
             rel_path_str, lo = FindFile(self.pb.files, clean_link, self.pb)
             if rel_path_str == False:
                 if self.pb.gc('toggles/verbose_printout', cached=True):
-                    print(f"\t\tImage/file with obsidian link of '{clean_link_name}' (original {link}) will not be copied over in this step.")
+                    print(f"\t\tImage/file with obsidian link of '{clean_link}' (original {link}) will not be copied over in this step.")
                     if '://' in link:
                         print("\t\t\t<continued> The link seems to be external (contains ://)")
                     else:
