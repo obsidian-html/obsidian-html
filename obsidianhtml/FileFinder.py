@@ -6,7 +6,7 @@ def FindFile(files, link, pb):
     # remove leading ../ or ./
     if link[0:2] == './':
         link = link[2:]
-    if link[0:3] == '../':
+    while link[0:3] == '../':
         link = link[3:]
 
     # remove leading html_url_prefix
@@ -23,7 +23,7 @@ def FindFile(files, link, pb):
     matches = GetMatches(files, link)
     
     if len(matches) == 0:
-        #print(link, '--> not_created.md')
+        print(link, '--> not_created.md')
         return (False, False)
 
     if len(matches) == 1:
