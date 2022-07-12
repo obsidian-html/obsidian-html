@@ -63,5 +63,7 @@ def GetNodeId(files, link):
 
         matches = GetMatches(files, node_id)
         if len(matches) == 1:
+            if node_id[-3:] == ".md":
+                node_id = node_id[:-3]
             return node_id
     raise Exception(f'No unique node id found for {link}') 
