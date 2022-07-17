@@ -8,6 +8,21 @@ from pathlib import Path
 DataviewRegexBegin = re.compile(r"^\ *\`\`\`\ *dataview")
 DataviewRegexEnd = re.compile(r"^\ *\`\`\`")
 
+class DataviewExtension(Extension):
+    def __init__(self, **kwargs):
+        self.config = {
+            'note_path' : ['not set', 'Path to the note relative to the vault'],
+            'dataview_export_folder' : ['not set', 'Absolute path to the dataview export folder']
+        }
+        super(DataviewExtension, self).__init__(**kwargs)
+
+    """ Add source code hilighting to markdown codeblocks. """
+    def extendMarkdown(self, md):
+        md.preprocessors.register(DataviewPreprocessor(self, md), 'dataview', 35)
+        md.registerExtension(self)
+
+def makeExtension(**kwargs): 
+    return DataviewExtension(**kwargs)
 
 class DataviewPreprocessor(Preprocessor):
     def __init__(self, extension, md=None):
@@ -77,18 +92,3 @@ class DataviewPreprocessor(Preprocessor):
         return dataview_tables
     
 
-class DataviewExtension(Extension):
-    def __init__(self, **kwargs):
-        self.config = {
-            'note_path' : ['not set', 'Path to the note relative to the vault'],
-            'dataview_export_folder' : ['not set', 'Absolute path to the dataview export folder']
-        }
-        super(DataviewExtension, self).__init__(**kwargs)
-
-    """ Add source code hilighting to markdown codeblocks. """
-    def extendMarkdown(self, md, md_globals):
-        md.preprocessors.register(DataviewPreprocessor(self, md), 'dataview', 35)
-        md.registerExtension(self)
-
-def makeExtension(**kwargs): 
-    return DataviewExtension(**kwargs)
