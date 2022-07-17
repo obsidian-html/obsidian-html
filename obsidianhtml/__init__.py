@@ -282,7 +282,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
-    extensions = ['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout', 'pymdownx.arithmatex']
+    extensions = ['extra', 'codehilite', 'toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
     extension_configs = {
         'codehilite': {
             'linenums': False
@@ -447,7 +447,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
             'generic': True
         }
     }    
-    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'obsidianhtml_md_mermaid_fork', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
+    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'mermaid', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
 
     di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
 
@@ -501,7 +501,7 @@ def main():
             print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
         if v == '--test':
-            print('test 1.0')
+            print('test 3.0.2 b')
             exit(0)
 
 
