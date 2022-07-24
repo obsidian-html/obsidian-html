@@ -335,9 +335,22 @@ class TestMisc(ModeTemplate):
     testcase_custom_config_values = [
         ('toggles/verbose_printout', True),
         ('toggles/process_all', True),
-        ('toggles/features/backlinks/enabled', False),
         ('html_template_path_str', 'ci/configs/custom_html_template.html'),
         ('copy_vault_to_tempdir', True),
+        # disable all non essential features
+        ('toggles/features/theme_picker/enabled', False),
+        ('toggles/features/code_highlight/enabled', False),
+        ('toggles/features/mermaid_diagrams/enabled', False),
+        ('toggles/features/callouts/enabled', False),
+        ('toggles/features/math_latex/enabled', False),
+        ('toggles/features/backlinks/enabled', False),
+        ('toggles/features/search/enabled', False),
+        ('toggles/features/tags_page/enabled', False),
+        ('toggles/features/dataview/enabled', False),
+        ('toggles/features/graph/enabled', False),
+        ('toggles/features/create_index_from_tags/enabled', False),
+        ('toggles/features/rss/enabled', False),
+        ('toggles/features/create_index_from_dir_structure/enabled', False),
     ]
 
     def test_special_characters_should_be_preserved(self):
