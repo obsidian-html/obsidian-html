@@ -501,7 +501,7 @@ def main():
             print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
         if v == '--test':
-            print('test 3.0.2 e')
+            print('test 3.0.3 a')
             exit(0)
 
 

@@ -77,6 +77,9 @@ blockquote p {
     flex: auto;
     font-size: 11pt;
 }
+.container_filler {
+    background-color: var(--bg-note);
+}
 
 .container:after {
     content: "\a\a\a\a\a\a\a\a\a";
@@ -127,11 +130,17 @@ blockquote p {
     padding-right: 1rem;
     max-width: unset;
 }
+.container_filler {
+    flex: 1;
+}
 
 .active .right_pane_content,
 .active .left_pane_content {
     display: block;
 }
+
+
+
 
 .fold_header {
     text-align: center;
@@ -168,9 +177,12 @@ blockquote p {
 }
 
 .right_pane {
-    flex: auto;
     display: inline-flex;
     flex-direction: column;
+}
+
+.active.right_pane {
+    flex: auto;
 }
 
 .left_pane_toggle_nav,
@@ -528,6 +540,7 @@ h3+p {
 }
 
 @media (max-width: 450px) {
+
     .left_pane,
     .right_pane {
         display: none;
