@@ -39,6 +39,7 @@ function load_theme() {
     let theme_div = document.getElementById('theme');
     if (!theme_div){
         // if the theme selection div is not present, assume that the template does not support theming
+        document.getElementById('antiflash').style.display = 'none'; 
         return false
     }
 
