@@ -131,8 +131,9 @@
 }
 
 .theme-obs-dark .container,
-.theme-obs-light .container {
-    padding-top: 2rem;
+.theme-obs-light .container, 
+.theme-obs-dark .container_filler,
+.theme-obs-light .container_filler {
     border-top: 3px solid var(--divider-color);
 }
 

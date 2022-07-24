@@ -9,11 +9,12 @@ body {
 .container {
     flex-grow: 1;
     flex: auto;
-    flex:10;
+    flex: 100;
     overflow-y: scroll;
     height: calc(100vh - 5rem);
     padding-top: 0.5rem;
 }
+
 
 .external-link::after {
     background: transparent url({html_url_prefix}/obs.html/static/external.svg) 0 0 no-repeat;
@@ -47,7 +48,7 @@ span.tag {
 @media (max-width: 840px) {
 
     .container {
-        width: calc(100vw - 4rem);
+        width: calc(100vw - 6rem);
     }
     .container:after {
         content: "\a\a\a\a\a";
@@ -78,6 +79,12 @@ span.tag {
     .header {
         margin-bottom: 0rem;
         margin-top: 1.5rem
+    }
+}
+
+@media (max-width: 450px) {
+    .container {
+        width: unset;
     }
 }
 /*  ----------------------------------------- /LAYOUT: Documentation ------------------------------------------------ */

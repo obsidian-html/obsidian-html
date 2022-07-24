@@ -39,6 +39,7 @@ function load_theme() {
     let theme_div = document.getElementById('theme');
     if (!theme_div){
         // if the theme selection div is not present, assume that the template does not support theming
+        disable_antiflash();
         return false
     }
 
@@ -47,7 +48,13 @@ function load_theme() {
         window.localStorage.setItem('theme_name', 'obs-light');
     }
     set_theme(window.localStorage.getItem('theme_name'));
-    document.getElementById('antiflash').style.display = 'none'; 
+    disable_antiflash();
+}
+
+function disable_antiflash() {
+    if (document.getElementById('antiflash')){
+        document.getElementById('antiflash').style.display = 'none'; 
+    }
 }
 
 function set_theme(theme_name){
@@ -93,13 +100,13 @@ function load_page() {
     if (tab_mode) {
         SetLinks(0);
     }
-    else {
+    else if (typeof DO_NOT_OVERWRITE_LINK_BEHAVIOR == 'undefined' || !DO_NOT_OVERWRITE_LINK_BEHAVIOR) {
         var links = document.getElementsByTagName('a');
         for (let i = 0; i < links.length; i++) {
             let l = links[i];
             if (l.getAttribute("href").includes('#')) {
-                l.onclick = function () {
 
+                l.onclick = function () {
                     let current_url = document.URL
                     current_url = decodeURI(current_url.replace(window.location.protocol + '//', '').replace(window.location.host, ''))
                     let link = this.getAttribute("href")
@@ -111,6 +118,8 @@ function load_page() {
                         return false;
                     }
 
+                    console.log(link, document.getElementsByClassName("container")[0]);
+
                     let levelcont = document.getElementsByClassName("container")[0];
                     var el = levelcont.querySelectorAll(link)[0];
                     if (el) {
@@ -120,6 +129,7 @@ function load_page() {
                 };
                 continue
             }
+
         }
     }
 

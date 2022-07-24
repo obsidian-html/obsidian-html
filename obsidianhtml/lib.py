@@ -402,18 +402,12 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         template = template.replace('{theme_popup}', code)
     else:
         template = template.replace('{theme_button}', '')
-        template = template.replace('{theme_popup}', code)
-
+        template = template.replace('{theme_popup}', '')
 
     if pb.config.ShowIcon('create_index_from_dir_structure'):
-        # output path
         output_path = html_url_prefix + '/' + pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path', cached=True)
-
-        # compile template
         code = OpenIncludedFile('index_from_dir_structure/button_template.html')
         code = code.replace('{dirtree_index_path}', output_path)
-
-        # add to main template
         template = template.replace('{dirtree_button}', code)
     else:
         template = template.replace('{dirtree_button}', '')
