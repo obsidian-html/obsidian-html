@@ -731,7 +731,7 @@ def main():
             # external links
             if 'type' in l.keys():
                 if l['type'] == 'external':
-                    el = f'<a class="navbar-link" href="{l["link"]}" title="{l["name"]}">{l["name"]} aaaaa</a>'
+                    el = f'<a class="navbar-link" href="{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
                 else:
                     raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
 
