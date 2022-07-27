@@ -701,6 +701,16 @@ li {
     color: rgba(var(--code-hightlight-color), 1.0);
     font-weight: bold;
 }
+.dir-button.folder_note.active {
+    color: rgba(var(--code-hightlight-color), 1.0);
+    font-weight: bold;
+}
+.fn_pf {
+    display: inline list-item;
+    list-style: disclosure-closed;
+    margin-left: -0.8rem;
+    color: var(--marker-color);
+}
 
 ul.dir-list {
     margin-left: 0px;

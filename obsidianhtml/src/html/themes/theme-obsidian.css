@@ -25,6 +25,7 @@
     --code-hightlight-color: 200, 119, 255;
     --homelink-color: #000000;
     --dir-tree-color: var(--color-accent);
+    --marker-color: var(--divider-color);
 }
 
 .theme-obs-dark,
@@ -44,6 +45,7 @@
     --homelink-color: var(--color-accent3);
     --graph-bg: #161616;
     --dir-tree-color: var(--color-accent2);
+    --marker-color: var(--bg-accent3);
 }
 
 .theme-obs-dark .callout,
@@ -70,6 +72,7 @@
     --code-hightlight-color: 200, 119, 255;
     --homelink-color: #2d68b1;
     --dir-tree-color: var(--color-accent);
+    --marker-color: var(--divider-color);
 }
 
 
@@ -186,6 +189,8 @@
 .theme-obs-dark .navbar-link .theme-obs-light .navbar-link {
     width: unset;
 }
+
+
 
 @media (max-width: 602px) {
     .theme-obs-light .header {

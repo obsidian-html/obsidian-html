@@ -3,3 +3,8 @@ function toggle_dir(dir_button_id){
     cont = document.getElementById('folder-container-'+id)
     return toggle(cont)
 }
+
+function open_folder_note(url){
+    window.location.href = url;
+    return false;
+}

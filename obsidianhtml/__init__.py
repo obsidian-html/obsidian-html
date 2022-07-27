@@ -735,7 +735,6 @@ def main():
                 else:
                     raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
 
-            print(el)
             elements.append(el)
 
         pb.navbar_links = elements

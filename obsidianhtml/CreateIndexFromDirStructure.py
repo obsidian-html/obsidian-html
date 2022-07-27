@@ -1,6 +1,7 @@
 from pathlib import Path
 import yaml
 from .lib import PopulateTemplate, OpenIncludedFile
+from functools import cache
 
 class CreateIndexFromDirStructure():
     def __init__(self, pb, path):
@@ -59,7 +60,6 @@ class CreateIndexFromDirStructure():
             if _continue:
                 continue
 
-
             # for dir: create a subtree
             if path.is_dir():
                 new_branch = self.build_tree_recurse(self.get_tree(path))
@@ -106,19 +106,94 @@ class CreateIndexFromDirStructure():
     def get_dir(self, path):
         return '/'+'/'.join([x for x in path.split('/') if x][:-1])
 
+    @cache
+    def check_has_folder_note(self, folder_abs_path_str):
+        settings = self.pb.gc('toggles/features/folder_notes', cached=True)
+        if settings['enabled'] == False:
+            return (False, '')
+
+        folder_abs_path = Path(folder_abs_path_str)
+        note_folder_abs_path = folder_abs_path
+        if settings['placement'] == 'outside folder':
+            note_folder_abs_path = folder_abs_path.parent
+
+        name = folder_abs_path.stem + '.html'
+        if settings['naming'] == 'index':
+            name = 'index.html'
+
+        abs_path = note_folder_abs_path.joinpath(name)
+        return (abs_path.exists(), abs_path)
+
+    def check_is_folder_note(self, note_abs_path):
+        settings = self.pb.gc('toggles/features/folder_notes', cached=True)
+        if settings['enabled'] == False:
+            return False
+
+        note_stem = note_abs_path.stem
+        if settings['naming'] == 'index' and note_stem != 'index':
+            return False
+
+        elif settings['naming'] == 'folder name':
+            # find folder
+            if settings['placement'] == 'inside folder':
+                if note_stem != note_abs_path.parent.stem:
+                    return False
+                else:
+                    return True
+            elif settings['placement'] == 'outside folder':
+                folder_path = note_abs_path.parent.joinpath(note_stem).resolve()
+                return folder_path.exists()
+
+            else:
+                raise Exception(f"placement setting for folder_notes feature is {settings['naming']} which is invalid")
+
+        else:
+            raise Exception(f"Naming setting for folder_notes feature is {settings['naming']} which is invalid")
+ 
+        raise Exception("Unexpected escape from elif fence in check_is_folder_note()")
+        
+
+    def convert_abs_path_to_url(self, abs_path):
+        rel_path = abs_path.relative_to(self.root)
+        return f"{self.html_url_prefix}/{rel_path}"
+
     def BuildIndex(self, current_page='/'):
         def _recurse(tree, tab_level, path, current_page):
             current_dir = self.get_dir(current_page)
+            current_abs_path = self.root.joinpath(current_page[1:]).resolve()
+
             html = ''
 
-            dir_active = ''
-            if self.in_tree(current_dir, path):
-                dir_active = 'active'
-
             if tab_level >= 0:
-                #print('\t'*tab_level, tree['name'])
-                html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
+                # -- [#288] folder notes 
+                # test if the folder being processed in this loop has an existing folder note
+                has_folder_note, note_abs_path = self.check_has_folder_note(tree['path'])
+
+                # if the folder is the parent of the current_page it needs to be opened when loading the page
+                # a folder note folder needs slightly different design
+                dir_active = ''
+                folder_note_active = ''
+                fnpf = ''
+
+                # folder is the parent of the current note
+                if self.in_tree(current_dir, path):
+                    dir_active = 'active'
+
+                # folder is the parent of the current note and is a folder-note folder
+                if has_folder_note and current_abs_path.as_posix() == note_abs_path.as_posix():
+                    dir_active = 'active'
+                    folder_note_active = 'active'
+
+                # folder is a folder-note folder
+                if has_folder_note: 
+                    fnpf = '<div class="fn_pf"></div>'
+                    url = self.convert_abs_path_to_url(note_abs_path)
+                    html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button folder_note {folder_note_active}" onclick="open_folder_note(\'{url}\')">{fnpf}{tree["name"]}</button>\n'
+                else:
+                    html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
+
                 html += '\t'*tab_level + f'<div id="folder-container-{self.uid}" class="dir-container requires_js {dir_active}" path="{path}">\n'
+
             tab_level += 1
             self.uid += 1
 
@@ -131,6 +206,9 @@ class CreateIndexFromDirStructure():
             excluded_paths = self.pb.gc('toggles/features/create_index_from_tags/exclude_paths', cached=True)
 
             for f in tree['files']:
+                if self.check_is_folder_note(Path(f['path'])):
+                    continue
+
                 rel_path = Path(f['path']).resolve().relative_to(self.root).as_posix()
 
                 if rel_path in excluded_paths:
