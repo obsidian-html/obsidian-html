@@ -5,7 +5,7 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, ConvertTitleToMarkdownId, MalformedTags, OpenIncludedFile
-from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
+from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock
 from .FileFinder import FindFile
 
 class MarkdownPage:
@@ -342,11 +342,21 @@ class MarkdownPage:
             included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth)
 
             # Get subsection of code if header is present
-            if header != '':
-                header_id = ConvertTitleToMarkdownId(header)
+            if header != '': 
+                # Prepare document
                 included_page.StripCodeSections()
-                header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
-                included_page.page = PrintHeaderTree(header_dict[header_id])
+
+                # option: Referencing block
+                if header[0] == '^':
+                    included_page.page = GetReferencedBlock(header, included_page.page, included_page.rel_src_path.as_posix())
+
+                # option: Referencing header
+                else:
+                    header_id = ConvertTitleToMarkdownId(header)
+                    header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
+                    included_page.page = PrintHeaderTree(header_dict[header_id])
+                    
+                # Wrap up
                 included_page.RestoreCodeSections()
             
             self.page = self.page.replace(l, included_page.page + '\n')

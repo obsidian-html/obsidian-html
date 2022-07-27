@@ -89,4 +89,20 @@ def ConvertMarkdownToHeaderTree(code):
                     current_element = new_element
     return header_dict, root_element
 
+def GetReferencedBlock(reference, contents, rel_path_str):
+    chunk = ''
+    last_line = ''
+    for line in contents.split('\n'):
+        if line.strip() == '':
+            if reference == last_line.strip().split(' ')[-1]:
+                return ' '.join(chunk.split(' ')[:-1])
+            chunk = ''
+            last_line = ''
+        else:
+            chunk += line
+            last_line = line
 
+    if reference == last_line.strip().split(' ')[-1]:
+        return ' '.join(chunk.split(' ')[:-1])
+
+    return f"Unable to find section #{reference} in {rel_path_str}"
