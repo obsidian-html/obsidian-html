@@ -364,12 +364,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [?] Documentation styling: Navbar
     # ------------------------------------------------------------------
-    navbar_links = pb.gc('navbar_links', cached=True)
-    elements = []
-    for l in navbar_links:
-        el = f'<a class="navbar-link" href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
-        elements.append(el)
-    html = html.replace('{{navbar_links}}', '\n'.join(elements))  
+    html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links))  
 
     # Save file
     # ------------------------------------------------------------------
@@ -730,8 +725,19 @@ def main():
         navbar_links = pb.gc('navbar_links', cached=True)
         elements = []
         for l in navbar_links:
-            el = f'<a class="navbar-link"href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+            # default
+            el = f'<a class="navbar-link" href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+
+            # external links
+            if 'type' in l.keys():
+                if l['type'] == 'external':
+                    el = f'<a class="navbar-link" href="{l["link"]}" title="{l["name"]}">{l["name"]} aaaaa</a>'
+                else:
+                    raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
+
+            print(el)
             elements.append(el)
+
         pb.navbar_links = elements
         
         # Start conversion from the entrypoint

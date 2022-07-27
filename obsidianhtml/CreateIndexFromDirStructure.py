@@ -176,14 +176,8 @@ class CreateIndexFromDirStructure():
 
         html = html.replace('{pinnedNode}', 'dirtree')\
                    .replace('{left_pane_content}', '')\
-                   .replace('{right_pane_content}', '')
-    
-        navbar_links = self.pb.gc('navbar_links', cached=True)
-        elements = []
-        for l in navbar_links:
-            el = f'<a class="navbar-link"href="{self.html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
-            elements.append(el)
-        html = html.replace('{{navbar_links}}', '\n'.join(elements)) 
+                   .replace('{right_pane_content}', '')\
+                   .replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
 
 
         with open(output_path, 'w', encoding='utf-8') as f:
