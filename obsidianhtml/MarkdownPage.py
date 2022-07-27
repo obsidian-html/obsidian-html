@@ -117,7 +117,7 @@ class MarkdownPage:
         audio_template = OpenIncludedFile('html/templates/audio_template.html')
         return audio_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
 
-    def ConvertObsidianPageToMarkdownPage(self, origin:'OH_file'=None, include_depth=0, includer_page_depth=None):
+    def ConvertObsidianPageToMarkdownPage(self, origin:'OH_file'=None, include_depth=0, includer_page_depth=None, remove_block_references=True):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
 
         # -- Set origin (calling page), this will always be self.fo unless origin is passed in
@@ -339,7 +339,7 @@ class MarkdownPage:
             
             # Get code
             included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
-            included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth)
+            included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth, remove_block_references=False)
 
             # Get subsection of code if header is present
             if header != '': 
@@ -360,6 +360,11 @@ class MarkdownPage:
                 included_page.RestoreCodeSections()
             
             self.page = self.page.replace(l, included_page.page + '\n')
+
+
+        # -- [#296] Remove block references 
+        if remove_block_references:
+            self.page  = re.sub(r'(?<=\s)(\^\S*?)(?=$|\n)', '', self.page)
 
         # -- [1] Restore codeblocks/-lines
         self.RestoreCodeSections()
