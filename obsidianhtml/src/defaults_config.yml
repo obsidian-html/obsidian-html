@@ -170,6 +170,11 @@ toggles:
       enabled: false
       folder: 'obs.html/export' # relative to the vault being processed. this folder should always be in the vault
 
+    folder_notes:
+      enabled: False
+      placement: 'outside folder'   # 'inside folder' , 'outside folder' 
+      naming: 'folder name'           # 'folder name', 'index'
+
     # Include code to build the graph view per page 
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)
