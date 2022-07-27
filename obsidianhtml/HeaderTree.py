@@ -1,4 +1,4 @@
-import re
+import regex as re
 import yaml
 from .lib import ConvertTitleToMarkdownId
 
@@ -90,19 +90,36 @@ def ConvertMarkdownToHeaderTree(code):
     return header_dict, root_element
 
 def GetReferencedBlock(reference, contents, rel_path_str):
-    chunk = ''
+    chunks = []
+    current_chunk = ''
     last_line = ''
     for line in contents.split('\n'):
         if line.strip() == '':
-            if reference == last_line.strip().split(' ')[-1]:
-                return ' '.join(chunk.split(' ')[:-1])
-            chunk = ''
+            # return chunk if reference is found
+            if reference == last_line.strip().split(' ')[-1]:                                       # reference always has to be seperated by at least 1 space and end with a newline and be on the last line of a paragraph
+                clean_chunk = re.sub(r'(?<=\s|^)(\^\S*?)(?=$|\n)', '', current_chunk.strip())       # we want to get a non-empty chunk, the reference itself does not count as "non-empty", so remove this
+                if clean_chunk == '':
+                    clean_chunk = re.sub(r'(?<=\s|^)(\^\S*?)(?=$|\n)', '', chunks[-1].strip())      # current chunk is empty, get last non-empty one and remove the reference from the end
+                return clean_chunk
+
+            # add current_chunk to chunk list as long as it is not empty
+            if current_chunk.strip() != '':                                     
+                chunks.append(current_chunk)
+
+            # start a new chunk
+            current_chunk = ''
             last_line = ''
         else:
-            chunk += line
+            # add on to current chunk
+            current_chunk += line
             last_line = line
 
+    # When the referenced block ends on the last line, this block will be reached
     if reference == last_line.strip().split(' ')[-1]:
-        return ' '.join(chunk.split(' ')[:-1])
+        clean_chunk = re.sub(r'(?<=\s|^)(\^\S*?)(?=$|\n)', '', current_chunk.strip())
+        if clean_chunk == '':
+            clean_chunk = re.sub(r'(?<=\s|^)(\^\S*?)(?=$|\n)', '', chunks[-1].strip())
+        return clean_chunk
 
+    # No reference found
     return f"Unable to find section #{reference} in {rel_path_str}"
