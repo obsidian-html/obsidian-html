@@ -5,7 +5,7 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, ConvertTitleToMarkdownId, MalformedTags, OpenIncludedFile
-from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock
+from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock, FindHeaderTreeKey
 from .FileFinder import FindFile
 
 class MarkdownPage:
@@ -354,7 +354,8 @@ class MarkdownPage:
                 else:
                     header_id = ConvertTitleToMarkdownId(header)
                     header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
-                    included_page.page = PrintHeaderTree(header_dict[header_id])
+                    header_dict_key = FindHeaderTreeKey(header_dict.keys(), header_id)
+                    included_page.page = PrintHeaderTree(header_dict[header_dict_key])
                     
                 # Wrap up
                 included_page.RestoreCodeSections()

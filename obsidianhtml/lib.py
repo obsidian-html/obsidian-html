@@ -100,13 +100,14 @@ def ConvertTitleToMarkdownId(title):
     # remove whitespace and lowercase
     idstr = title.lower().strip()
 
+    # remove special characters "hi-hello-'bye!'" --> "hi-hello-bye"
+    idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -_')])
+
     # convert "hi hello - 'bye!'" --> "hi-hello---'bye!'" --> "hi-hello-'bye!'"
     idstr = idstr.replace(' ', '-')
     while '--' in idstr:
         idstr = idstr.replace('--', '-')
 
-    # remove special characters "hi-hello-'bye!'" --> "hi-hello-bye"
-    idstr = "".join([ch for ch in idstr if ch in (ascii_letters + digits + ' -_')])
     return idstr
 
 
