@@ -107,19 +107,25 @@ function load_page() {
             if (l.getAttribute("href").includes('#')) {
 
                 l.onclick = function () {
+                    // remove current url from the link
                     let current_url = document.URL
+                    console.log(current_url);
                     current_url = decodeURI(current_url.replace(window.location.protocol + '//', '').replace(window.location.host, ''))
+                    current_url = current_url.split('#')[0];
+
                     let link = this.getAttribute("href")
                     link = link.replace(current_url, '')
 
+                    // if we are left with something like: '#blabla' then we have an anchor link
+                    // otherwise, we just go to the page:
                     if (link[0] != '#') {
                         link = this.getAttribute("href").replace('#', '#!')
                         window.location.href = link;
                         return false;
                     }
 
-                    console.log(link, document.getElementsByClassName("container")[0]);
-
+                    // we scroll to the anchor
+                    // we do this manually because scrolling divs suck
                     let levelcont = document.getElementsByClassName("container")[0];
                     var el = levelcont.querySelectorAll(link)[0];
                     if (el) {
@@ -285,11 +291,11 @@ function SetHeaders(container) {
         els[i].innerHTML = '<a id="' + anchor_id + '" class="anchor" href="' + href + '"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>\n' + els[i].innerHTML
 
         // body onload is not called when staying within the page
-        // we need to call the LoadPage() function manually
+        // we need to call the load_page() function manually
         let href_el = document.getElementById(anchor_id);
         href_el.onclick = function () {
             window.location.replace(this.href);
-            LoadPage(0);
+            load_page(0);
         }
 
         // Show/hide link icon

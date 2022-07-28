@@ -30,6 +30,46 @@ def PrintHeaderTree(root_element):
             page.append(element)
     return '\n'.join(page)
 
+def FindHeaderTreeKey(key_list, key):
+    # this code will find a key in the key list that is the same as the provided key
+    # with the option for one or more '-' at any location in the provided key relative to
+    # the keys in the keylist 
+
+    if key in key_list:
+        return key
+
+    # first try to match keys without -
+    naive_matches = []
+    skey = key.replace('-', '')
+    for k in key_list:
+        if k.replace('-', '') == skey:
+            naive_matches.append(k)
+
+    if len(naive_matches) == 1:
+        return naive_matches[0]
+    if len(naive_matches) == 0:
+        raise Exception(f"Header {key} not found in list of {key_list}")
+
+    # more than one match found
+    # wifi-2-4-vs-5-0   wifi-24-vs-50  
+    c = 0
+    for k in naive_matches:
+        for char in k:
+            if char == key[c]:
+                c += 1
+                if c == len(key):
+                    return k
+            elif key[c] == '-':
+                c += 1
+                if char == key[c]:
+                    c += 1
+                    if c == len(key):
+                        return k
+            else: 
+                continue
+    raise Exception(f"Header {key} not found in list of {key_list}")
+
+
 def ConvertMarkdownToHeaderTree(code):
     lines = code.split('\n')
     current_element = _newElement()
