@@ -353,7 +353,6 @@ function load_script_on_demand(path, callback, callback_args){
     elScript.addEventListener('load', (event) => {
         callback(...callback_args);
     });
-    //elScript.onload = callback;
 
     // add script tag to the end of body
     document.getElementsByTagName("body")[0].appendChild( elScript );
