@@ -23,90 +23,93 @@
         </head>
 
 <body class="theme-obs-light">
-        <div id="antiflash"></div>
-        {search_html}
+    <div id="antiflash" style="display: none;"></div>
+    <script>
+            document.getElementById('antiflash').style.display = 'block';
+    </script>
+    {search_html}
 
-        <div id="page_holder" class="flex_col">
-                <div id="header" class="header">
-                        <div id="header_flex" class="flex_row">
-                                <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
-                                <div class="navbar-button" onclick="toggle_menu()">
-                                        ≡
+    <div id="page_holder" class="flex_col">
+            <div id="header" class="header">
+                    <div id="header_flex" class="flex_row">
+                            <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
+                            <div class="navbar-button" onclick="toggle_menu()">
+                                    ≡
+                            </div>
+                            <div id="navbar" class="navbar">
+                                {{navbar_links}}
+                                <div class="icon-tray">
+                                    {theme_button}
+                                    {search_button}
+                                    {graph_button}
+                                    {dirtree_button}
+                                    {tags_page_button}
+                                    {rss_button}
                                 </div>
-                                <div id="navbar" class="navbar">
-                                    {{navbar_links}}
-                                    <div class="icon-tray">
-                                        {theme_button}
-                                        {search_button}
-                                        {graph_button}
-                                        {dirtree_button}
-                                        {tags_page_button}
-                                        {rss_button}
-                                    </div>
-                                </div>
-                        </div>
-                        {theme_popup}
-                </div>
-                
-                <div class="graph_full_page">
-                    <div class="graph-button-row" style="display:flex;">
-                        <button class="graph_button graph_show_button" id="Bgraph_full_page" level="" note_temp_id="graph_full_page" style="visibility: hidden; margin:0px">
-                            Show Graph
-                        </button>
-                        <button class="graph_button graph_type_button" id="Cgraph_full_page" style="flex:1; margin:0px; margin-right:0.2rem;" onclick="window.ObsHtmlGraph.switch_graph_type(this);">
-                            2D
-                        </button>
+                            </div>
                     </div>
-                        <div id="Agraph_full_page" class="graph_div_full"></div>
-
+                    {theme_popup}
+            </div>
+            
+            <div class="graph_full_page">
+                <div class="graph-button-row" style="display:flex;">
+                    <button class="graph_button graph_show_button" id="Bgraph_full_page" level="" note_temp_id="graph_full_page" style="visibility: hidden; margin:0px">
+                        Show Graph
+                    </button>
+                    <button class="graph_button graph_type_button" id="Cgraph_full_page" style="flex:1; margin:0px; margin-right:0.2rem;" onclick="window.ObsHtmlGraph.switch_graph_type(this);">
+                        2D
+                    </button>
                 </div>
-                           
-                
+                    <div id="Agraph_full_page" class="graph_div_full"></div>
 
-        </div>
-        
-        <script type="module">
-            document.addEventListener('DOMContentLoaded', load_fullpage_graph);
+            </div>
+                        
+            
 
-            function load_fullpage_graph(){
+    </div>
+    
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', load_fullpage_graph);
 
-                // set graph_type button correctly
-                let type_d = window.localStorage.getItem('graph_type_d');
-                if (!type_d){
-                    window.localStorage.setItem('graph_type_d', '2D');
-                    type_d = '2D';
-                }
-                document.getElementById('Cgraph_full_page').innerHTML = type_d;
-                
-                import('{html_url_prefix}/obs.html/static/graph.js').then((Module) => {
-                    window.ObsHtmlGraph = Module;
-                    window.ObsHtmlGraph.arm_page(document.getElementById('page_holder'))
+        function load_fullpage_graph(){
 
-                    // overwrites
-                    window.ObsHtmlGraph.default_actions['open_link'] = function (args){
-                        console.log('hi openlink')
-                        return window.ObsHtmlGraph.graph_open_link_normal(args)()
-                    }
-                    window.ObsHtmlGraph.default_actions['left_click'] = function (args){
-                        console.log('hi leftclick')
-                        let g = window.ObsHtmlGraph.graphs[args.uid];
-                        return g.actions['select_node'](args);
-                    }
-                    window.ObsHtmlGraph.default_actions['right_click'] = function (args){
-                        console.log('hi rightclick')
-                        let g = window.ObsHtmlGraph.graphs[args.uid];
-                        return g.actions['open_link'](args);
-                    }
-
-                    // Get node id from the page where we clicked on the icon for the fullpage graph
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const pinnedNode = urlParams.get('node');
-
-                    // Immediately run graph instead of waiting for button click
-                    window.ObsHtmlGraph.run(document.getElementById('Bgraph_full_page'), 'graph_full_page', pinnedNode);
-                })
+            // set graph_type button correctly
+            let type_d = window.localStorage.getItem('graph_type_d');
+            if (!type_d){
+                window.localStorage.setItem('graph_type_d', '2D');
+                type_d = '2D';
             }
-        </script>
+            document.getElementById('Cgraph_full_page').innerHTML = type_d;
+            
+            import('{html_url_prefix}/obs.html/static/graph.js').then((Module) => {
+                window.ObsHtmlGraph = Module;
+                window.ObsHtmlGraph.arm_page(document.getElementById('page_holder'))
+
+                // overwrites
+                window.ObsHtmlGraph.default_actions['open_link'] = function (args){
+                    console.log('hi openlink')
+                    return window.ObsHtmlGraph.graph_open_link_normal(args)()
+                }
+                window.ObsHtmlGraph.default_actions['left_click'] = function (args){
+                    console.log('hi leftclick')
+                    let g = window.ObsHtmlGraph.graphs[args.uid];
+                    return g.actions['select_node'](args);
+                }
+                window.ObsHtmlGraph.default_actions['right_click'] = function (args){
+                    console.log('hi rightclick')
+                    let g = window.ObsHtmlGraph.graphs[args.uid];
+                    return g.actions['open_link'](args);
+                }
+
+                // Get node id from the page where we clicked on the icon for the fullpage graph
+                const urlParams = new URLSearchParams(window.location.search);
+                const pinnedNode = urlParams.get('node');
+
+                // Immediately run graph instead of waiting for button click
+                window.ObsHtmlGraph.run(document.getElementById('Bgraph_full_page'), 'graph_full_page', pinnedNode);
+            })
+        }
+    </script>
 
 {footer_js_inclusions}
 
