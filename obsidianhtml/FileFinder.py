@@ -66,4 +66,15 @@ def GetNodeId(files, link):
             if node_id[-3:] == ".md":
                 node_id = node_id[:-3]
             return node_id
+
+    # multiple matches found at the end
+    # get the match that is exact
+    count = 0
+    for match in matches:
+        if match == node_id:
+            count += 1
+
+    if count == 1:
+        return node_id
+
     raise Exception(f'No unique node id found for {link}') 

@@ -104,7 +104,7 @@ toggles:
 
   # This option should be False for Obsidian->Md, but can be True when compile_md == False
   # Setting it to True will cause an error when two files with the same file name are found anywhere in the input folder
-  allow_duplicate_filenames_in_root: False
+  allow_duplicate_filenames_in_root: True
 
   # Sometimes linked images that should be local (based on the path) cannot be found.
   # Toggle this to False to disable warnings if that happens.
