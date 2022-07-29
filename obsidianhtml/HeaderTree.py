@@ -1,6 +1,6 @@
 import regex as re
 import yaml
-from .lib import ConvertTitleToMarkdownId
+from .lib import slugify
 
 # Purpose:
 # Allows us to get a subsection of a markdown file based on header title
@@ -8,8 +8,8 @@ from .lib import ConvertTitleToMarkdownId
 #
 # Usage:
 #   from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
-#   from .lib import ConvertTitleToMarkdownId
-#   header_id = ConvertTitleToMarkdownId("My Header Name")
+#   from .lib import slugify
+#   header_id = slugify("My Header Name")
 #   header_dict, root_element = ConvertMarkdownToHeaderTree(markdown_content_as_string)
 #   print(PrintHeaderTree(header_dict[header_id]))
 
@@ -29,45 +29,6 @@ def PrintHeaderTree(root_element):
         else:
             page.append(element)
     return '\n'.join(page)
-
-def FindHeaderTreeKey(key_list, key):
-    # this code will find a key in the key list that is the same as the provided key
-    # with the option for one or more '-' at any location in the provided key relative to
-    # the keys in the keylist 
-
-    if key in key_list:
-        return key
-
-    # first try to match keys without -
-    naive_matches = []
-    skey = key.replace('-', '')
-    for k in key_list:
-        if k.replace('-', '') == skey:
-            naive_matches.append(k)
-
-    if len(naive_matches) == 1:
-        return naive_matches[0]
-    if len(naive_matches) == 0:
-        raise Exception(f"Header {key} not found in list of {key_list}")
-
-    # more than one match found
-    # wifi-2-4-vs-5-0   wifi-24-vs-50  
-    c = 0
-    for k in naive_matches:
-        for char in k:
-            if char == key[c]:
-                c += 1
-                if c == len(key):
-                    return k
-            elif key[c] == '-':
-                c += 1
-                if char == key[c]:
-                    c += 1
-                    if c == len(key):
-                        return k
-            else: 
-                continue
-    raise Exception(f"Header {key} not found in list of {key_list}")
 
 
 def ConvertMarkdownToHeaderTree(code):
@@ -101,7 +62,7 @@ def ConvertMarkdownToHeaderTree(code):
                     new_element = _newElement()
                     new_element['level'] = level
                     new_element['title'] = line[i+1:len(line)]
-                    md_title = ConvertTitleToMarkdownId(new_element['title'])
+                    md_title = slugify(new_element['title'])
                     
                     if md_title in header_dict.keys():
                         i = 1
@@ -163,3 +124,43 @@ def GetReferencedBlock(reference, contents, rel_path_str):
 
     # No reference found
     return f"Unable to find section #{reference} in {rel_path_str}"
+
+
+# def FindHeaderTreeKey(key_list, key):
+#     # this code will find a key in the key list that is the same as the provided key
+#     # with the option for one or more '-' at any location in the provided key relative to
+#     # the keys in the keylist 
+
+#     if key in key_list:
+#         return key
+
+#     # first try to match keys without -
+#     naive_matches = []
+#     skey = key.replace('-', '')
+#     for k in key_list:
+#         if k.replace('-', '') == skey:
+#             naive_matches.append(k)
+
+#     if len(naive_matches) == 1:
+#         return naive_matches[0]
+#     if len(naive_matches) == 0:
+#         raise Exception(f"Header {key} not found in list of {key_list}")
+
+#     # more than one match found
+#     # wifi-2-4-vs-5-0   wifi-24-vs-50  
+#     c = 0
+#     for k in naive_matches:
+#         for char in k:
+#             if char == key[c]:
+#                 c += 1
+#                 if c == len(key):
+#                     return k
+#             elif key[c] == '-':
+#                 c += 1
+#                 if char == key[c]:
+#                     c += 1
+#                     if c == len(key):
+#                         return k
+#             else: 
+#                 continue
+#     raise Exception(f"Header {key} not found in list of {key_list}")

@@ -4,8 +4,8 @@ from pathlib import Path    #
 import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, ConvertTitleToMarkdownId, MalformedTags, OpenIncludedFile
-from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock, FindHeaderTreeKey
+from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, slugify, MalformedTags, OpenIncludedFile
+from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock
 from .FileFinder import FindFile
 
 class MarkdownPage:
@@ -284,7 +284,7 @@ class MarkdownPage:
                     hashpart = hashpart.replace(' ', '-').lower()
                     newlink += f'#{hashpart}'
             else:
-                newlink = '#' + ConvertTitleToMarkdownId(hashpart)
+                newlink = '#' + slugify(hashpart)
                 alias = hashpart
 
             # Replace Obsidian link with proper markdown link
@@ -352,10 +352,9 @@ class MarkdownPage:
 
                 # option: Referencing header
                 else:
-                    header_id = ConvertTitleToMarkdownId(header)
+                    header_id = slugify(header)
                     header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
-                    header_dict_key = FindHeaderTreeKey(header_dict.keys(), header_id)
-                    included_page.page = PrintHeaderTree(header_dict[header_dict_key])
+                    included_page.page = PrintHeaderTree(header_dict[header_id])
                     
                 # Wrap up
                 included_page.RestoreCodeSections()

@@ -32,9 +32,6 @@ from .CreateIndexFromTags import CreateIndexFromTags
 from .CreateIndexFromDirStructure import CreateIndexFromDirStructure
 from .RssFeed import RssFeed
 
-from .CallOutExtension import CallOutExtension
-from .DataviewExtension import DataviewExtension
-
 # Open source files in the package
 import importlib.resources as pkg_resources
 import importlib.util
@@ -282,7 +279,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
-    extensions = ['extra', 'codehilite', 'toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
+    extensions = ['extra', 'codehilite', 'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
     extension_configs = {
         'codehilite': {
             'linenums': False
@@ -442,7 +439,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
             'generic': True
         }
     }    
-    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'toc', 'mermaid', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
+    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
 
     di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
 
