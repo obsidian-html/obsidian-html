@@ -9,6 +9,7 @@ from string import ascii_letters, digits
 import tempfile             # used to create temporary files/folders
 import time
 from functools import cache
+import unicodedata
 
 # Open source files in the package
 import importlib.resources as pkg_resources
@@ -109,6 +110,15 @@ def ConvertTitleToMarkdownId(title):
         idstr = idstr.replace('--', '-')
 
     return idstr
+
+def slugify(value, separator='-', unicode=False):
+    """ Slugify a string, to make it URL friendly. """
+    if not unicode:
+        # Replace Extended Latin characters with ASCII, i.e. žlutý → zluty
+        value = unicodedata.normalize('NFKD', value)
+        value = value.encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', ' ', value).strip().lower()
+    return re.sub(r'[{}\s]+'.format(separator), separator, value)
 
 
 @cache

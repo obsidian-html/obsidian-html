@@ -3,7 +3,7 @@ from markdown.blockprocessors import BlockProcessor
 import re
 import xml.etree.ElementTree as etree
 
-from .SharedResources import shared_obsidian_svgs
+from ..SharedResources import shared_obsidian_svgs
 
 def makeExtension(**kwargs):  # pragma: no cover
     return CallOutExtension(**kwargs)
