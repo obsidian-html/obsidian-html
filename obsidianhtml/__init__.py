@@ -486,14 +486,14 @@ def main():
 
             export_html_template_target_path = Path(sys.argv[i+1]).resolve()
             export_html_template_target_path.parent.mkdir(parents=True, exist_ok=True)
-            html = OpenIncludedFile(f'html/template_{sys.argv[i+2]}.html')
+            html = OpenIncludedFile(f'html/layouts/template_{sys.argv[i+2]}.html')
 
             with open (export_html_template_target_path, 'w', encoding="utf-8") as t:
                 t.write(html)
             print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
         if v == '--test':
-            print('test 3.0.3 a')
+            print('test 3.1.0 a')
             exit(0)
 
 
