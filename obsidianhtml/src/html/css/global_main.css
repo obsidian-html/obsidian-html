@@ -717,5 +717,16 @@ ul.dir-list {
     padding-left: 0px;
 }
 
+a.inline-tag:visited,
+a.inline-tag:link,
+a.inline-tag:hover {
+    color: var(--color-accent3);
+    text-decoration: underline;
+} 
+
+.inline-tag::before { 
+    content: '#';
+}
+
 
 /*  ----------------------------------------- /GLOBAL ------------------------------------------------ */

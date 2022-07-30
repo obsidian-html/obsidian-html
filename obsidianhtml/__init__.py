@@ -859,6 +859,12 @@ def main():
                     for tag in node['metadata']['tags']:
                         url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
                         snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
+
+                        if pb.gc('toggles/preserve_inline_tags', cached=True):
+                            placeholder = re.escape("<code>{_obsidian_pattern_tag_" + tag + "}</code>")
+                            inline_tag = f'<a class="inline-tag" href="{url}">{tag}</a>'
+                            html = re.sub(placeholder, inline_tag, html)
+                            
                     snippet += '</ul>'
 
                 # replace placeholder with list & write output

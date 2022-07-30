@@ -308,6 +308,9 @@ class MarkdownPage:
             tag = l.replace('.', '').replace('#', '')
             new_md_str = f"**{tag}**"
 
+            if self.pb.gc('toggles/preserve_inline_tags', cached=True):
+                new_md_str = "`{_obsidian_pattern_tag_" + tag + "}`"
+
             self.add_tag(tag)
 
             safe_str = re.escape(l)
