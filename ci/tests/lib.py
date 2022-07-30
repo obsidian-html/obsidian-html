@@ -29,7 +29,8 @@ def get_paths():
     return paths
 
 
-def convert_vault():
+def convert_vault(USE_PIP_INSTALL):
+
     # Get paths
     paths = get_paths()
     config_file_path = paths['temp_cfg']    # set by customize_default_config
@@ -39,7 +40,10 @@ def convert_vault():
 
     # Convert files
     print(f"OBSIDIAN-HTML: converting ci/test_vault ({config_file_path.as_posix()})")
-    subprocess.call(['python', '-m', 'obsidianhtml', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
+    if USE_PIP_INSTALL:
+        subprocess.call(['obsidianhtml', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
+    else:
+        subprocess.call(['python', '-m', 'obsidianhtml', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
 
 def cleanup_temp_dir():
     #time.sleep(30)
