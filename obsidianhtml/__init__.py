@@ -290,12 +290,20 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     }
 
     if pb.gc('toggles/features/dataview/enabled'):
+        extensions.append('dataview')
         extension_configs['dataview'] = {
             'note_path': rel_dst_path,
             'dataview_export_folder': pb.paths['dataview_export_folder']
         }
-        extensions.append('dataview')
-    
+        
+    if pb.gc('toggles/features/eraser/enabled'):
+        extensions.append('eraser')
+        extension_configs['eraser'] = {
+            'opening_sequence': pb.gc('toggles/features/eraser/opening_sequence'),   #r'(^%% Zoottelkeeper: )',
+            'closing_sequence': pb.gc('toggles/features/eraser/closing_sequence'),   #r'(^.+ +%% *$)'
+            'verbose': (pb.gc('toggles/verbose_printout', cached=True) or pb.gc('toggles/features/eraser/verbose', cached=True))
+        }
+
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
 
     # HTML Tweaks
@@ -440,6 +448,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
             'generic': True
         }
     }    
+
     html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
 
     di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
