@@ -346,7 +346,8 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
                                        .replace('{pinnedNode}', node['id'])\
                                        .replace('{pinnedNodeGraph}', str(node['nid']))\
                                        .replace('{html_url_prefix}', html_url_prefix)\
-                                       .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))
+                                       .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
+                                       .replace('{graph_classes}', '')
         html_body += f"\n{graph_template}\n"
 
     # Add node_id to page so that we can fetch this in the second-pass
@@ -775,9 +776,6 @@ def main():
             treeobj = CreateIndexFromDirStructure(pb, pb.paths['html_output_folder'])
             pb.treeobj = treeobj
             treeobj.html = treeobj.BuildIndex()
-
-            if pb.gc('toggles/features/graph/enabled'):
-                treeobj.html += f'\n<script src="{html_url_prefix}/obs.html/static/graph.js" type="text/javascript"></script>\n'
             treeobj.WriteIndex()
             print('\t< COMPILING INDEX FROM DIR STRUCTURE: Done')
 
@@ -859,6 +857,12 @@ def main():
                     for tag in node['metadata']['tags']:
                         url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
                         snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
+
+                        if pb.gc('toggles/preserve_inline_tags', cached=True):
+                            placeholder = re.escape("<code>{_obsidian_pattern_tag_" + tag + "}</code>")
+                            inline_tag = f'<a class="inline-tag" href="{url}">{tag}</a>'
+                            html = re.sub(placeholder, inline_tag, html)
+
                     snippet += '</ul>'
 
                 # replace placeholder with list & write output

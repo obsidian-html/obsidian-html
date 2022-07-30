@@ -128,6 +128,9 @@ toggles:
 
   # Whether external http anchor links should have a target of "_blank"
   external_blank: False  
+
+  # Will preserve inline tags. This will give polluted markdown output
+  preserve_inline_tags: True
   
   features:
     styling: 
