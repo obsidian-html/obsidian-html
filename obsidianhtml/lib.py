@@ -448,6 +448,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         .replace('{node_id}', node_id)\
         .replace('{title}', title)\
         .replace('{dynamic_includes}', dynamic_inclusions)\
+        .replace('{dynamic_footer_includes}', pb.dynamic_footer_inclusions)\
         .replace('{footer_js_inclusions}', footer_js_inclusions)\
         .replace('{html_url_prefix}', html_url_prefix)\
         .replace('{container_wrapper_class_list}', ' '.join(container_wrapper_class_list))\
