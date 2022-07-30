@@ -346,7 +346,8 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
                                        .replace('{pinnedNode}', node['id'])\
                                        .replace('{pinnedNodeGraph}', str(node['nid']))\
                                        .replace('{html_url_prefix}', html_url_prefix)\
-                                       .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))
+                                       .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
+                                       .replace('{graph_classes}', '')
         html_body += f"\n{graph_template}\n"
 
     # Add node_id to page so that we can fetch this in the second-pass

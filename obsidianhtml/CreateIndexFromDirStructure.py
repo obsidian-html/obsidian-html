@@ -255,7 +255,8 @@ class CreateIndexFromDirStructure():
                                         .replace('{pinnedNode}', 'dirtree')\
                                         .replace('{pinnedNodeGraph}', 'dirtree')\
                                         .replace('{html_url_prefix}', self.html_url_prefix)\
-                                        .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))
+                                        .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
+                                        .replace('{graph_classes}', 'hidden')
             self.html += f"\n{graph_template}\n"
         
         html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=['single_tab_page-left-aligned'])
