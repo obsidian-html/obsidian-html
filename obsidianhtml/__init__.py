@@ -573,6 +573,14 @@ def main():
         None
     pb.dynamic_inclusions = dynamic_inclusions
 
+    # This is a set of javascript/css files to be loaded into the footer based on config choices.
+    dynamic_footer_inclusions = ""
+    try:
+        dynamic_footer_inclusions += '\n'.join(pb.gc('html_custom_footer_inclusions')) +'\n'
+    except:
+        None
+    pb.dynamic_footer_inclusions = dynamic_footer_inclusions
+
 
     # Remove potential previous output
     # ---------------------------------------------------------

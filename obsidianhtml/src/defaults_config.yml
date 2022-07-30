@@ -79,6 +79,7 @@ html_template_path_str: ''
 
 # Provide an array of custom inclusions (css, javascript, etc) that you would like to be included in the resultant html
 html_custom_inclusions: []
+html_custom_footer_inclusions: []
 
 navbar_links: []
 
