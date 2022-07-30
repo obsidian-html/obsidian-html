@@ -775,9 +775,6 @@ def main():
             treeobj = CreateIndexFromDirStructure(pb, pb.paths['html_output_folder'])
             pb.treeobj = treeobj
             treeobj.html = treeobj.BuildIndex()
-
-            if pb.gc('toggles/features/graph/enabled'):
-                treeobj.html += f'\n<script src="{html_url_prefix}/obs.html/static/graph.js" type="text/javascript"></script>\n'
             treeobj.WriteIndex()
             print('\t< COMPILING INDEX FROM DIR STRUCTURE: Done')
 
@@ -864,7 +861,7 @@ def main():
                             placeholder = re.escape("<code>{_obsidian_pattern_tag_" + tag + "}</code>")
                             inline_tag = f'<a class="inline-tag" href="{url}">{tag}</a>'
                             html = re.sub(placeholder, inline_tag, html)
-                            
+
                     snippet += '</ul>'
 
                 # replace placeholder with list & write output
