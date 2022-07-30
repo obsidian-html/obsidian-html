@@ -171,13 +171,21 @@ toggles:
         show_in_note_footer: True
 
     dataview:
-      enabled: false
+      enabled: False
       folder: 'obs.html/export' # relative to the vault being processed. this folder should always be in the vault
 
     folder_notes:
       enabled: False
       placement: 'outside folder'   # 'inside folder' , 'outside folder' 
       naming: 'folder name'           # 'folder name', 'index'
+
+    eraser:
+      enabled: False
+      verbose: False
+      opening_sequence: |-
+        (^%% Zoottelkeeper: )
+      closing_sequence: |-
+        (^.+ +%% *$)
 
     # Include code to build the graph view per page 
     graph:
