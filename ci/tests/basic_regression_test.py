@@ -18,12 +18,14 @@ from functools import partial
 
 # unittest
 import unittest
-
+ 
 # Helper functions
 # --------------------------------
 # add /obsidian-html/ci to path
 sys.path.insert(1, str(Path(os.path.realpath(__file__)).parent.parent))
 from tests.lib import *
+
+USE_PIP_INSTALL = (os.getenv('OBS_HTML_USE_PIP_INSTALL') == 'true')
 
 
 def GetRssSoup(file_path):
@@ -58,7 +60,7 @@ class ModeTemplate(unittest.TestCase):
     def setUpClass(cls):
         paths = get_paths()
         cls.testcase_config = customize_default_config(cls.testcase_custom_config_values)
-        convert_vault()
+        convert_vault(USE_PIP_INSTALL)
 
     @classmethod
     def tearDownClass(cls):
@@ -389,6 +391,9 @@ if __name__ == '__main__':
             run_cleanup = True
         if v == 'v':
             verbose = True
+
+    if USE_PIP_INSTALL:
+        subprocess.call(['pip', 'install', '.', '--upgrade'])
 
     # get paths
     paths = get_paths()
