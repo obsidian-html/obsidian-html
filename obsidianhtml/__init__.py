@@ -927,4 +927,39 @@ def main():
         feed.Compile()
         print('< COMPILING RSS FEED: Done')
 
+    if pb.gc('file_exports'):
+        file_exports = pb.gc('file_exports')
+        if not isinstance(file_exports, list):
+            raise Exception(f'Config value type of file_exports should be list, instead of {type(file_exports).__name__}.')
+
+        print('> EXPORTING USER FILES')
+
+        for ufile in file_exports:
+
+            src =  pb.paths['obsidian_folder'].joinpath(ufile['src']).resolve()
+            dst = pb.paths['html_output_folder'].joinpath(ufile['dst']).resolve()
+            if not src.exists():
+                raise Exception(f'File {src.as_posix()} not found')
+
+            if 'encoding' not in ufile:
+                encoding = 'utf-8'
+            else:
+                encoding = ufile['encoding']
+
+            print(f"\tWriting {src.as_posix()} to {dst.as_posix()} ({encoding})")
+
+            if encoding == 'binary':
+                with open(src, 'rb') as f:
+                    contents = f.read()  
+                with open (dst, 'wb') as f:
+                    f.write(contents)
+            else:
+                with open(src, 'r', encoding=encoding) as f:
+                    contents = f.read()
+                with open(dst, 'w', encoding=encoding) as f:
+                    f.write(contents)
+
+        print('< EXPORTING USER FILES: Done')
+
+
 
