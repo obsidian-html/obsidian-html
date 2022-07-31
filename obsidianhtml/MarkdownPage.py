@@ -221,9 +221,7 @@ class MarkdownPage:
                 continue
 
             # Determine if file is markdown
-            if Path(rel_path_str).suffix == '.md':
-                isMd = True
-    
+            isMd = (Path(rel_path_str).suffix == '.md')
             if isMd:
                 # Add to list to recurse to the link later
                 self.links.append(lo)
