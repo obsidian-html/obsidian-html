@@ -301,6 +301,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         extension_configs['eraser'] = {
             'opening_sequence': pb.gc('toggles/features/eraser/opening_sequence'),   #r'(^%% Zoottelkeeper: )',
             'closing_sequence': pb.gc('toggles/features/eraser/closing_sequence'),   #r'(^.+ +%% *$)'
+            'homogenous': pb.gc('toggles/features/eraser/homogenous', cached=True), 
             'verbose': (pb.gc('toggles/verbose_printout', cached=True) or pb.gc('toggles/features/eraser/verbose', cached=True))
         }
 

@@ -182,6 +182,7 @@ toggles:
     eraser:
       enabled: False
       verbose: False
+      homogenous: False           # Whether the opening sequence will also function as closing sequence
       opening_sequence: |-
         (^%% Zoottelkeeper: )
       closing_sequence: |-
