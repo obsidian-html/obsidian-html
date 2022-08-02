@@ -1,0 +1,63 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Deploy obsidianhtml output directly to gh-pages branch
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: [ "master" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Publish:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Installing latest python, pip, obsidianhtml
+        run: |
+          python -V
+          python -m pip install --upgrade pip
+          # git clone https://github.com/obsidian-html/obsidian-html.git
+          # cd obsidian-html
+          # python -m pip install .
+          # python -m pip install . --upgrade
+          # cd ..
+          pip install obsidianhtml
+          pip install obsidianhtml --upgrade
+
+      - name: Cloning your repo containing obsidian vault and config.yaml - with 'master branch'
+        run: |
+          # config.yaml must have right relative path to obsidian_folder_path_str: and obsidian_entrypoint_path_str:
+          git clone https://github.com/<your username>/<your repository>.git
+          cd <your repository>
+          python -m obsidianhtml -i config.yaml
+          
+      - name: Rename - rename html to docs
+        run: |
+          ls
+          cd output
+          ls
+          mv html docs
+          
+      - name: Push to GitHub Pages branch
+        # You may pin to the exact commit or the version.
+        # uses: ftnext/action-push-ghpages@621f3b2f1d34079b4da6051daedb3e200af0dd38
+        uses: ftnext/action-push-ghpages@v1.0.0
+        with:
+          # Path to the directory where the static assets are located.
+          build_dir: /home/runner/work/<your repository>/<your repository>/output
+          # Create github token in repo/settings/secrets/actions with name GithubToken
+          github_token: ${{ secrets.GithubToken }}
