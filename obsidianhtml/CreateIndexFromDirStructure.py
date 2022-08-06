@@ -152,7 +152,6 @@ class CreateIndexFromDirStructure():
  
         raise Exception("Unexpected escape from elif fence in check_is_folder_note()")
         
-
     def convert_abs_path_to_url(self, abs_path):
         rel_path = abs_path.relative_to(self.root)
         return f"{self.html_url_prefix}/{rel_path}"

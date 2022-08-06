@@ -1,6 +1,7 @@
 from .NetworkTree import NetworkTree
 from .ConfigManager import CheckConfigRecurse, MergeDictRecurse, Config
 from .Search import SearchHead
+from .CreateIndexFromDirStructure import CreateIndexFromDirStructure
 
 
 class PicknickBasket:
@@ -12,12 +13,13 @@ class PicknickBasket:
     html_template = None
     dynamic_inclusions = None
     gzip_hash = ''
+    treeobj = None
 
     def __init__(self):
         self.tagtree = {'notes': [], 'subtags': {}}
         self.network_tree = NetworkTree(self.verbose)
         self.search = SearchHead()
-    
+
     def loadConfig(self, input_yml_path_str=False):
         self.config = Config(self, input_yml_path_str)
         self.config.LoadIncludedFiles()
@@ -34,9 +36,9 @@ class PicknickBasket:
         #print(rel_path)
         self.files[rel_path] = obj
 
-
-        
-
+    def EnsureTreeObj(self):
+        if self.treeobj is None:
+            self.treeobj = CreateIndexFromDirStructure(self, self.paths['html_output_folder'])
 
 
 

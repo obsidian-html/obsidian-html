@@ -53,6 +53,18 @@ class Config:
         # Set main css file
         self.config['_css_file'] = f'main_{layout}.css'
 
+        # Check capabilities needed
+        self.capabilities_needed = {}
+        self.load_capabilities_needed()
+
+    def load_capabilities_needed(self):
+        gc = self.get_config
+
+        self.capabilities_needed['directory_tree'] = False 
+        if gc('toggles/features/styling/add_dir_list') or self.gc('toggles/features/create_index_from_dir_structure/enabled'):
+            self.capabilities_needed['directory_tree'] = True
+
+
     def verbose(self):
         return self.config['toggles']['verbose_printout']
 
@@ -74,7 +86,7 @@ class Config:
         return self.get_config(path)
 
     def get_config(self, path:str):
-        keys = [x for x in path.split('/') if x != '']
+        keys = [x for x in path.strip().split('/') if x != '']
 
         value = self.config
         path = []

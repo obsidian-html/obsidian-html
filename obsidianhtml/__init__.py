@@ -783,10 +783,9 @@ def main():
             op = paths['html_output_folder'].joinpath(rel_output_path)
 
             print(f'\t> COMPILING INDEX FROM DIR STRUCTURE ({op})')
-            treeobj = CreateIndexFromDirStructure(pb, pb.paths['html_output_folder'])
-            pb.treeobj = treeobj
-            treeobj.html = treeobj.BuildIndex()
-            treeobj.WriteIndex()
+            pb.EnsureTreeObj()
+            pb.treeobj.html = pb.treeobj.BuildIndex()
+            pb.treeobj.WriteIndex()
             print('\t< COMPILING INDEX FROM DIR STRUCTURE: Done')
 
         # [??] Second pass
@@ -834,6 +833,7 @@ def main():
             # Create Directory contents
             if pb.gc('toggles/features/styling/add_dir_list', cached=True):
                 if dir_repstring in html:
+                    pb.EnsureTreeObj()
                     dir_list = pb.treeobj.BuildIndex(current_page=node['url'])
                     html = re.sub(dir_repstring, dir_list, html)
                     html = re.sub(dir_repstring2, '', html)
