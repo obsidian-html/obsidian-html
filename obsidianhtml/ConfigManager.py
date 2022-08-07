@@ -61,7 +61,7 @@ class Config:
         gc = self.get_config
 
         self.capabilities_needed['directory_tree'] = False 
-        if gc('toggles/features/styling/add_dir_list') or self.gc('toggles/features/create_index_from_dir_structure/enabled'):
+        if gc('toggles/features/styling/add_dir_list') or gc('toggles/features/create_index_from_dir_structure/enabled'):
             self.capabilities_needed['directory_tree'] = True
 
 
