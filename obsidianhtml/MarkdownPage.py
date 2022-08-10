@@ -252,7 +252,7 @@ class MarkdownPage:
             filename = parts[0].split('/')[-1]
 
             # Set alias i.e. [alias](link)
-            alias = filename
+            alias = parts[0]
             if len(parts) > 1:
                 alias = parts[1]
 

@@ -78,7 +78,7 @@ def GetObsidianFilePath(link, file_tree, pb):
     output['rtr_path_str'] = ''     # rtr=relative to root
     output['fo'] = False            # file object of type OH_File
     output['header'] = ''           # the last part in 'link#header'
-    output['alias'] = ''            # the last part in 'link#header'
+    output['alias'] = ''            
 
     # split folder/note#chapter|alias into ('folder/note#chapter', 'alias')
     parts = link.split('|')
