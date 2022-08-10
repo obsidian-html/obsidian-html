@@ -6,5 +6,12 @@
       ],
       "key": "T"
     }
-  ]
+  ],
+  "app:reload": [
+    {
+      "modifiers": [],
+      "key": "F1"
+    }
+  ],
+  "app:open-help": []
 }

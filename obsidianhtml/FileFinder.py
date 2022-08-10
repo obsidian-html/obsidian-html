@@ -31,7 +31,7 @@ def FindFile(files, link, pb):
 
     # multiple matches found, sort on number of parts that matched
     # e.g. 'folder/home' will rank higher than 'home'
-    matches = sorted(matches, key=lambda x: len(x.split('/')),reverse=True)
+    matches = sorted(matches, key=lambda x: len(x.split('/')))
     return (matches[0], files[matches[0]])
 
 def GetMatches(files, link):
@@ -75,6 +75,8 @@ def GetNodeId(files, link):
             count += 1
 
     if count == 1:
+        if node_id[-3:] == ".md":
+            node_id = node_id[:-3]
         return node_id
 
     raise Exception(f'No unique node id found for {link}') 
