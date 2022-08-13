@@ -893,6 +893,7 @@ def main():
             with open(op, 'w', encoding="utf-8") as f:
                 f.write(html)
 
+        if pb.config.capabilities_needed['graph_data']:
             # add crosslinks to graph data
             pb.network_tree.AddCrosslinks()
 
@@ -901,9 +902,11 @@ def main():
             with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
                 f.write(pb.network_tree.OutputJson())
 
-        if pb.gc('toggles/features/search/enabled', cached=True):
+        if pb.config.capabilities_needed['search_data']:
+            
             # Compress search json and write to static folder
             gzip_path = pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json.gzip')
+            gzip_path.parent.mkdir(parents=True, exist_ok=True)
             gzip_content = pb.search.OutputJson()
             pb.gzip_hash = simpleHash(gzip_content)
 
