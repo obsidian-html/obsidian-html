@@ -64,9 +64,11 @@ class Config:
         if gc('toggles/features/styling/add_dir_list') or gc('toggles/features/create_index_from_dir_structure/enabled'):
             self.capabilities_needed['directory_tree'] = True
 
+        self.capabilities_needed['search_data'] = False
         if gc('toggles/features/search/enabled') or gc('toggles/features/graph/enabled'):
             self.capabilities_needed['search_data'] = True
 
+        self.capabilities_needed['graph_data'] = False
         if gc('toggles/features/rss/enabled') or gc('toggles/features/graph/enabled'):
             self.capabilities_needed['graph_data'] = True
 

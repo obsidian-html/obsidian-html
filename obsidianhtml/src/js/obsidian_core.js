@@ -84,6 +84,14 @@ function set_theme(theme_name){
     body.classList.add(theme_class);
 }
 
+function getParentContainer(el){
+    parent = el.parentElement;
+    while (!parent.classList.contains('container')){
+        parent = parent.parentElement;
+    }
+    return parent
+}
+
 function load_page() {
     // let page know that js is enabled
     signal_js_enabled(document.body)
@@ -127,9 +135,15 @@ function load_page() {
                     // we scroll to the anchor
                     // we do this manually because scrolling divs suck
                     let levelcont = document.getElementsByClassName("container")[0];
-                    var el = levelcont.querySelectorAll(link)[0];
+                    var el = levelcont.querySelectorAll(link.replaceAll(':', '\\:'))[0];
+
                     if (el) {
-                        el.parentElement.scrollTop = el.offsetTop - rem(6);
+                        getParentContainer(el).scrollTop = el.offsetTop - rem(6);
+
+                        el.classList.add('fade-it');
+                        setTimeout(function() {
+                            el.classList.remove('fade-it');
+                         }, 2000);
                     }
                     return false;
                 };

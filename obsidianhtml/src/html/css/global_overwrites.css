@@ -32,4 +32,8 @@
     display: none
 }
 
+.formatting_strikethrough {
+    text-decoration:line-through
+}
+
 /*  ----------------------------------------- /OVERWRITES ------------------------------------------------ */
