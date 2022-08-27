@@ -332,6 +332,10 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     html_body += '\n<div class="note-footer">\n'
 
+    # [??] breadcrumbs
+    if pb.gc('toggles/features/breadcrumbs/enabled', cached=True):
+        html_body = '{_obsidian_html_breadcrumbs_pattern_}\n' + html_body
+
     # [18] add backlinks to page 
     if pb.gc('toggles/features/backlinks/enabled', cached=True):
         html_body += '{_obsidian_html_backlinks_pattern_}\n'
@@ -875,6 +879,55 @@ def main():
 
                 # replace placeholder with list & write output
                 html = re.sub('\{_obsidian_html_tags_footer_pattern_\}', snippet, html)
+
+
+            # add breadcrumbs
+            if pb.gc('toggles/features/breadcrumbs/enabled', cached=True):
+
+                if node['url'] == '/index.html':
+                    snippet = ''
+                else:
+                    html_url_prefix = pb.gc("html_url_prefix", cached=True)
+                    parts = [f'<a href="{html_url_prefix}/" style="color: rgb(var(--normal-text-color));">Home</a>']
+
+                    previous_url = ''
+                    subpaths = node['url'].replace('.html', '').split('/')[1:]
+                    if html_url_prefix:
+                        subpaths = subpaths[1:]
+
+                    for i, subpath in enumerate(subpaths):
+                        if i == len(subpaths) - 1:
+                            if node["url"] != previous_url:
+                                parts.append(f'<a href="{node["url"]}" ___COLOR___ >{subpath}</a>')
+                            continue
+                        else:
+                            if subpath in pb.network_tree.node_lookup:
+                                url = pb.network_tree.node_lookup[subpath]['url']
+                                if url != previous_url:
+                                    parts.append(f'<a href="{url}" ___COLOR___>{subpath}</a>')
+                                previous_url = url
+                                continue
+                            else:
+                                parts.append(f'<span style="color: #666;">{subpath}</span>')
+                                previous_url = ''
+                                continue
+
+                    parts[-1] = parts[-1].replace('___COLOR___', '')
+                    for i, link in enumerate(parts):
+                        parts[i] = link.replace('___COLOR___', 'style="color: var(--normal-text-color);"')
+                            
+
+                    snippet = ' / '.join(parts)
+                    snippet = f'''
+                    <div style="width:100%; text-align: right;display: block;margin: 0.5rem;">
+                        <div style="flex:1;display: none;"></div>
+                        <div class="breadcrumbs" style="flex:1 ;padding: 0.5rem; width: fit-content;display: inline;border-radius: 0.2rem;">
+                            {snippet}
+                        </div>
+                    </div>'''
+
+                html = re.sub('\{_obsidian_html_breadcrumbs_pattern_\}', snippet, html)
+
 
             with open(dst_abs_path, 'w', encoding="utf-8") as f:
                 f.write(html)
