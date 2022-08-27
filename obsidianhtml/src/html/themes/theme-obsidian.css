@@ -238,6 +238,10 @@
     background-color: var(--bg-accent);
 }
 
+.theme-obs-dark .tag-path {
+    color: var(--bg-accent2);
+}
+
 .theme-button.active {
     background-color: var(--bg-accent2) !important;
     border: 3px solid #f0f0f0;
@@ -258,6 +262,7 @@ blockquote {
     border: 0px;
     border-radius: 0.21rem;
 }
+
 
 
 /*  ----------------------------------------- /THEME ------------------------------------------------ */

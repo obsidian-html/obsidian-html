@@ -705,6 +705,12 @@ li {
     color: rgba(var(--code-hightlight-color), 1.0);
     font-weight: bold;
 }
+ul.dir-list {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+
 .fn_pf {
     display: inline list-item;
     list-style: disclosure-closed;
@@ -712,10 +718,6 @@ li {
     color: var(--marker-color);
 }
 
-ul.dir-list {
-    margin-left: 0px;
-    padding-left: 0px;
-}
 
 a.inline-tag:visited,
 a.inline-tag:link,
@@ -768,5 +770,33 @@ a.inline-tag:hover {
     animation: yellow-fade 1s ease-in-out 0s;
 }
 
+
+.tag-path {
+    color: var(--divider-color);
+    font-weight: normal;
+}
+
+.tag-list {
+    margin-top: 0.2rem;
+    padding-left: 0.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.tag-list li {
+    list-style-type: none;
+    font-size: 11pt;
+}
+.tag-list li a.active:visited,
+.tag-list li a.active:link,
+.tag-list li a.active:hover {
+    font-weight: bold;
+}
+.dir-button.folder_note.active {
+    font-weight: bold;
+}
+ul.tag-list {
+    margin-left: 0px;
+    padding-left: 0px;
+}
 
 /*  ----------------------------------------- /GLOBAL ------------------------------------------------ */

@@ -401,6 +401,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Get relevant paths
     # ---------------------------------------------------------
     tags_folder = pb.paths['html_output_folder'].joinpath('obs.html/tags/')
+    
     tag_dst_path = tags_folder.joinpath(f'{tagpath}index.html').resolve()
     tag_dst_path_posix = tag_dst_path.as_posix()
     rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
@@ -434,6 +435,8 @@ def recurseTagList(tagtree, tagpath, pb, level):
             note_name = note_url.split('/')[-1].replace(".html", "")
             md += f'- [{note_name}]({html_url_prefix}/{note_url})\n'
 
+    md += f'\n> [View all tags]({html_url_prefix}/obs.html/tags/index.html)'
+
     # Compile html
     extension_configs = {
         'codehilite': {
@@ -449,7 +452,6 @@ def recurseTagList(tagtree, tagpath, pb, level):
     di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
 
     html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html_body, dynamic_includes=di, container_wrapper_class_list=['single_tab_page-left-aligned'])
-
 
     html = html.replace('{pinnedNode}', 'tagspage')
     html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
@@ -880,6 +882,60 @@ def main():
 
         # Create tag page
         recurseTagList(pb.tagtree, '', pb, level=0)
+
+
+
+        # Test: foldable tag list
+        def rec_tag_tree_foldable(tag_tree, name, id, path=''):
+            subid = 0
+
+            notes = ''
+            if tag_tree['notes']:
+                notes += '<div class="tags-notes" style="font-weight:normal;"><ul class="tag-list">'
+                for note in tag_tree['notes']:
+                    note_name = note.split('/')[-1].replace(".html", "")
+                    ahref = f'<a href="{pb.gc("html_url_prefix")}/{note}">{note_name}</a>'
+                    notes += f'<li>{ahref}</li>'
+                notes += '</ul></div>'
+
+            subtags = ''
+            for key in tag_tree['subtags'].keys():
+                subtags += rec_tag_tree_foldable(tag_tree['subtags'][key], key, str(id)+str(subid), '/'.join(list(filter(None, [path, name]))))
+                subid += 1
+
+            header = ''
+            contents = f'{subtags}{notes}'
+            if name:
+                if path:
+                    path += '/'
+                header = f'<button class="dir-button" onclick="toggle_id(\'{id}\')"><span class="tag-path">{path} </span>{name.capitalize()}</button>'
+                contents = f'<div class="dir-container" id="{id}" style="font-weight:normal;">{contents}</div>'
+
+            html = f'<div class="subtags">{header}{contents}</div>'
+            return html
+
+        # set output path
+        tags_folder = pb.paths['html_output_folder'].joinpath('obs.html/tags/')
+        tag_dst_path = tags_folder.joinpath('index.html')
+        tag_dst_path_posix = tag_dst_path.as_posix()
+        tag_dst_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # set html_url_prefix
+        if pb.gc('toggles/relative_path_html', cached=True):
+            html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_dst_path_as_posix))
+
+        # compile html
+        html = rec_tag_tree_foldable(pb.tagtree, '', 'tags-')
+        html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html, container_wrapper_class_list=['single_tab_page-left-aligned'])
+        html = html.replace('{pinnedNode}', 'tagspage')
+        html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
+        html = html.replace('{left_pane_content}', '')\
+                .replace('{right_pane_content}', '')
+
+        # write to destination
+        with open(tag_dst_path_posix, 'w', encoding="utf-8") as f:
+            f.write(html) 
+
 
         # Create graph fullpage
         if pb.gc('toggles/features/graph/enabled', cached=True):
