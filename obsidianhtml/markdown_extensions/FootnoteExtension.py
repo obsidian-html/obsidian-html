@@ -140,6 +140,29 @@ class FootnoteExtension(Extension):
         res = finder(root)
         return res
 
+    def StripCodeSections(self, block):
+        """(Temporarily) Remove codeblocks/-lines so that they are not altered in all the conversions. Placeholders are inserted."""
+
+        self.codeblocks = re.findall("^```([\s\S]*?)```[\s]*?$", block, re.MULTILINE)
+        for i, match in enumerate(self.codeblocks):
+            block = block.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
+            
+        self.codelines = re.findall("`(.*?)`", block)
+        for i, match in enumerate(self.codelines):
+            block = block.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
+
+        return block
+
+    def RestoreCodeSections(self, block):
+        """Undo the action of StripCodeSections."""
+        for i, value in enumerate(self.codeblocks):
+            block = block.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```\n")
+        for i, value in enumerate(self.codelines):
+            block = block.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")  
+
+        return block
+
+
     def getId(self):
         self.inc += 1
         return self.inc
@@ -224,6 +247,7 @@ class FootnoteExtension(Extension):
             # List block handlers have special logic to deal with li.
             # When we are done parsing, we will copy everything over to li.
             self.parser.parseChunk(surrogate_parent, fn['text'])
+
             for el in list(surrogate_parent):
                 li.append(el)
                 surrogate_parent.remove(el)
@@ -263,6 +287,7 @@ class FootnoteBlockProcessor(BlockProcessor):
     def run(self, parent, blocks):
         """ Find, set, and remove footnote definitions. """
         block = blocks.pop(0)
+        block = self.footnotes.StripCodeSections(block)
 
         # add inline references to lookup
         # we use the inline usages because these are ordered as the id's should be
@@ -308,6 +333,7 @@ class FootnoteBlockProcessor(BlockProcessor):
             footnote = "\n\n".join(fn_blocks)
 
             self.footnotes.setFootnote(name, footnote.rstrip())
+            block = self.footnotes.RestoreCodeSections(block)
 
             if block[:m.start()].strip():
                 # Add any content before match back to blocks as separate block
@@ -326,6 +352,7 @@ class FootnoteBlockProcessor(BlockProcessor):
             self.footnotes.setFootnote(text, text) # todo: name can conflict in this case
 
         # No (non-inline) footnote match. Restore block.
+        block = self.footnotes.RestoreCodeSections(block)
         blocks.insert(0, block)
         return False
 
