@@ -190,6 +190,9 @@ toggles:
     eraser:
       enabled: True
 
+    breadcrumbs:
+      enabled: False
+
     # Include code to build the graph view per page 
     graph:
       enabled: True           # Include code to build the graph view per page (default: True)
