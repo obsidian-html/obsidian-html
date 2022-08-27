@@ -899,7 +899,9 @@ def main():
                 notes += '</ul></div>'
 
             subtags = ''
-            for key in tag_tree['subtags'].keys():
+            subtags_keys = list(tag_tree['subtags'].keys())
+            subtags_keys.sort()
+            for key in subtags_keys:
                 subtags += rec_tag_tree_foldable(tag_tree['subtags'][key], key, str(id)+str(subid), '/'.join(list(filter(None, [path, name]))))
                 subid += 1
 
