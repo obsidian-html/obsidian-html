@@ -257,6 +257,7 @@ class TestDefaultModeMdOnly(TestDefaultMode):
         ('obsidian_folder_path_str', 'DUMMY'), 
         ('obsidian_entrypoint_path_str', 'DUMMY'), 
     ]  
+    tear_down = True
 
     @classmethod
     def setUpClass(cls):
