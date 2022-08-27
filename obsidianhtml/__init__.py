@@ -892,6 +892,7 @@ def main():
             notes = ''
             if tag_tree['notes']:
                 notes += '<div class="tags-notes" style="font-weight:normal;"><ul class="tag-list">'
+                tag_tree['notes'].sort()
                 for note in tag_tree['notes']:
                     note_name = note.split('/')[-1].replace(".html", "")
                     ahref = f'<a href="{pb.gc("html_url_prefix")}/{note}">{note_name}</a>'
@@ -899,7 +900,9 @@ def main():
                 notes += '</ul></div>'
 
             subtags = ''
-            for key in tag_tree['subtags'].keys():
+            subtags_keys = list(tag_tree['subtags'].keys())
+            subtags_keys.sort()
+            for key in subtags_keys:
                 subtags += rec_tag_tree_foldable(tag_tree['subtags'][key], key, str(id)+str(subid), '/'.join(list(filter(None, [path, name]))))
                 subid += 1
 
