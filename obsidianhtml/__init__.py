@@ -279,7 +279,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
-    extensions = ['extra', 'codehilite', 'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
+    extensions = ['abbr', 'attr_list', 'def_list', 'fenced_code', 'md_in_html', 'tables', 'obs_footnote', 'obs_formatting', 'codehilite', 'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
     extension_configs = {
         'codehilite': {
             'linenums': False

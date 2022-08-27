@@ -729,4 +729,44 @@ a.inline-tag:hover {
 }
 
 
+
+@-webkit-keyframes yellow-fade {
+    from {
+        background: rgb(210, 255, 11);
+        color: black;
+    }
+    to {
+        background: unset;
+        color: unset;
+    }
+}
+@-moz-keyframes yellow-fade {
+    from {
+        background: rgb(210, 255, 11);
+        color: black;
+    }
+    to {
+        background: unset;
+        color: unset;
+    }
+}
+@keyframes yellow-fade {
+    from {
+        background: rgb(210, 255, 11);
+        color: black;
+    }
+    to {
+        background: unset;
+        color: unset;
+    }
+}
+
+.fade-it {
+    -webkit-animation: yellow-fade 1s ease-in-out 0s;
+    -moz-animation: yellow-fade 1s ease-in-out 0s;
+    -o-animation: yellow-fade 1s ease-in-out 0s;
+    animation: yellow-fade 1s ease-in-out 0s;
+}
+
+
 /*  ----------------------------------------- /GLOBAL ------------------------------------------------ */
