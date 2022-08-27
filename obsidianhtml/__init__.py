@@ -548,13 +548,14 @@ def main():
         paths['log_output_folder'] = Path(pb.gc('log_output_folder_path_str')).resolve()
 
     # Deduce relative paths
+
     paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
 
 
     # Copy vault to tempdir, so any bugs will not affect the user's vault
     # ---------------------------------------------------------
-    if pb.gc('copy_vault_to_tempdir'):
+    if pb.gc('copy_vault_to_tempdir') and pb.gc('toggles/compile_md'):
         # Copy over vault to tempdir
         tmpdir = CreateTemporaryCopy(source_folder_path=paths['obsidian_folder'], pb=pb)
 
@@ -603,8 +604,9 @@ def main():
     # Create folder tree
     # ---------------------------------------------------------
     print('> CREATING OUTPUT FOLDERS')
-    paths['md_folder'].mkdir(parents=True, exist_ok=True)
-    paths['md_folder'] = paths['md_folder'].resolve()
+
+    if pb.gc('toggles/compile_md', cached=True):
+        paths['md_folder'].mkdir(parents=True, exist_ok=True)
 
     paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
     paths['html_output_folder'] = paths['html_output_folder'].resolve()
