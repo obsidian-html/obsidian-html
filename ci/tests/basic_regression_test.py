@@ -6,6 +6,7 @@ import sys
 import yaml
 import subprocess
 import time
+import shutil
 
 # web stuff
 from bs4 import BeautifulSoup
@@ -55,17 +56,20 @@ class ModeTemplate(unittest.TestCase):
     testcase_name = "Template"
     testcase_config = None                  # contains the config dict
     testcase_custom_config_values = []      # can contain overrides for the default config
+    tear_down = True
 
     @classmethod
     def setUpClass(cls):
-        paths = get_paths()
+        print(f'\n\n--------------------- {cls.testcase_name} -----------------------------', flush=True)
         cls.testcase_config = customize_default_config(cls.testcase_custom_config_values)
         convert_vault(USE_PIP_INSTALL)
 
     @classmethod
     def tearDownClass(cls):
-        print('', flush=True)
-        cleanup_temp_dir()
+        print('tear_down', cls.tear_down)
+        if cls.tear_down:
+            print('', flush=True)
+            cleanup_temp_dir()
 
     def setUp(self):
         print('', flush=True)
@@ -99,7 +103,7 @@ class ModeTemplate(unittest.TestCase):
 
         # Return note linked by obsidian link
         link_text = 'Note link'
-        a = res['soup'].body.find('a', text=link_text)
+        a = res['soup'].body.find('a', string=link_text)
         self.assertIsNotNone(a, msg=f"Note link with text '{link_text}' is not found in index.html")
         return a['href']
 
@@ -110,7 +114,7 @@ class ModeTemplate(unittest.TestCase):
         self.assertPageFound(soup, msg=f'expected page "{path}" was not found.')
 
         # Return note linked by markdown link
-        a = soup.body.find('a', text=link_text)
+        a = soup.body.find('a', string=link_text)
         self.assertIsNotNone(a, msg=f"Markdown link with text '{link_text}' is not found in index.html")
         return a['href']
 
@@ -128,7 +132,7 @@ class ModeTemplate(unittest.TestCase):
         self.assertPageFound(soup, msg=f'expected page "{path}" was not found.')
 
         # Get url from the a href with the link text
-        a = soup.body.find('a', text=link_text)
+        a = soup.body.find('a', string=link_text)
         self.assertIsNotNone(a, msg=f"Link of type {link_type_tested} with text '{link_text}' is not found on {path}")
 
         # Test link
@@ -149,6 +153,7 @@ class TestDefaultMode(ModeTemplate):
     testcase_custom_config_values = [
         ('toggles/features/rss/enabled', True)
     ]  
+    tear_down = False
 
     def test_A__test_self(self):
         "Tests working of the test structure"
@@ -202,7 +207,7 @@ class TestDefaultMode(ModeTemplate):
         self.assertIsNotNone(soup.find('a', attrs={'id':'dirtree_link'}))
 
         self.scribe("folder button should be present")
-        button = soup.find('button', text='dirtree')
+        button = soup.find('button', string='dirtree')
         self.assertIsNotNone(button)
 
         self.scribe("folder container should be present")
@@ -242,6 +247,27 @@ class TestDefaultMode(ModeTemplate):
         self.assertEqual(len(video_urls), 2, msg="only two videolinks should have been found")
         self.assertEqual(video_urls[1], video_urls[0], msg="both video links should have the same url")
         
+
+class TestDefaultModeMdOnly(TestDefaultMode):
+    """Same as test default mode, but use md directly"""
+    testcase_name = "MdOnly"
+    testcase_custom_config_values = [
+        ('toggles/features/rss/enabled', True), 
+        ('toggles/compile_md', False), 
+        ('obsidian_folder_path_str', 'DUMMY'), 
+        ('obsidian_entrypoint_path_str', 'DUMMY'), 
+    ]  
+
+    @classmethod
+    def setUpClass(cls):
+        print(f'\n\n--------------------- {cls.testcase_name} <custom> -----------------------------', flush=True)
+
+        print(f"removing {paths['html_output_folder']}")
+        shutil.rmtree(paths['html_output_folder'])
+
+        cls.testcase_config = customize_default_config(cls.testcase_custom_config_values)
+        convert_vault(USE_PIP_INSTALL)
+
 
 class TestHtmlPrefixMode(ModeTemplate):
     """Configure a HTML prefix"""
@@ -292,15 +318,15 @@ class TestCreateIndexFromTagsMode(ModeTemplate):
         self.assertPageFound(res['soup'], msg=f'expected page "{res["url"]}" was not found.')
 
         # Test content of index.html
-        header_text = res['soup'].body.find('div', attrs={'class':'container'}).find('h1').text
+        header_text = res['soup'].body.find('div', attrs={'class':'container'}).find('h1').string
         self.assertEqual(header_text, 'Obsidian-Html/Notes', msg=f"H1 expected in index.html with innerHtml of 'Obsidian-Html/Notes'; was '{header_text}' instead.")
 
-        header_text = res['soup'].body.find('div', attrs={'class':'container'}).find('h2').text
+        header_text = res['soup'].body.find('div', attrs={'class':'container'}).find('h2').string
         self.assertEqual(header_text, 'type/index1', msg=f"H2 expected in index.html with innerHtml of 'type/index1'; was '{header_text}' instead.")        
 
         # Return note linked by obsidian link
         link_text = 'create_index_from_tags'
-        a = res['soup'].body.find('a', text=link_text)
+        a = res['soup'].body.find('a', string=link_text)
         self.assertIsNotNone(a, msg=f"Note link with text '{link_text}' is not found in index.html")
         return a['href']
 

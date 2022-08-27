@@ -28,7 +28,6 @@ def get_paths():
      
     return paths
 
-
 def convert_vault(USE_PIP_INSTALL):
 
     # Get paths
@@ -46,7 +45,6 @@ def convert_vault(USE_PIP_INSTALL):
         subprocess.call(['python', '-m', 'obsidianhtml', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
 
 def cleanup_temp_dir():
-    #time.sleep(30)
     paths = get_paths()
     os.chdir(paths['root'])
     print(f"CLEANING TEMP DIR: {paths['temp_dir']}")
