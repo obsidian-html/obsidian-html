@@ -892,6 +892,7 @@ def main():
             notes = ''
             if tag_tree['notes']:
                 notes += '<div class="tags-notes" style="font-weight:normal;"><ul class="tag-list">'
+                tag_tree['notes'].sort()
                 for note in tag_tree['notes']:
                     note_name = note.split('/')[-1].replace(".html", "")
                     ahref = f'<a href="{pb.gc("html_url_prefix")}/{note}">{note_name}</a>'
