@@ -44,6 +44,22 @@ class MarkdownPage:
         with open(self.src_path, encoding="utf-8") as f:
             self.metadata, self.page = frontmatter.parse(f.read())
 
+        self.SanitizeFrontmatter()
+
+    def SanitizeFrontmatter(self):
+        # imitate obsidian shenannigans
+        if 'tags' in self.metadata.keys():
+            tags = self.metadata['tags']
+            if isinstance(tags, str):
+                if ' ' in tags.strip() or ',' in tags:
+                    self.metadata['tags'] = [x.rstrip(',') for x in tags.replace(',', ' ').split(' ') if x != '']
+                elif tags.strip() == '':
+                    self.metadata['tags'] = []
+                else:
+                    self.metadata['tags'] = [tags, ]
+            elif tags is None:
+                self.metadata['tags'] = []
+
     def StripCodeSections(self):
         """(Temporarily) Remove codeblocks/-lines so that they are not altered in all the conversions. Placeholders are inserted."""
         self.codeblocks = re.findall("^```([\s\S]*?)```[\s]*?$", self.page, re.MULTILINE)
