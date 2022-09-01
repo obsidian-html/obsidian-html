@@ -31,13 +31,14 @@ from .PicknickBasket import PicknickBasket
 from .CreateIndexFromTags import CreateIndexFromTags
 from .CreateIndexFromDirStructure import CreateIndexFromDirStructure
 from .RssFeed import RssFeed
+from .ErrorHandling import extra_info
 
 # Open source files in the package
 import importlib.resources as pkg_resources
 import importlib.util
 from . import src
 
-
+@extra_info()
 def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
     '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
 
@@ -89,8 +90,11 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
         if pb.gc('toggles/verbose_printout', cached=True):
             print('\t'*log_level, f"found link {lo.path['note']['file_absolute_path']} (through parent {fo.path['note']['file_absolute_path']})")
 
+        pb.init_state(action='n2m', loop_type='note', current_fo=lo, subroutine='recurseObisidianToMarkdown')
         recurseObisidianToMarkdown(lo, pb, log_level=log_level)
+        pb.reset_state()
 
+@extra_info()
 def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level=1):
     '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
     
@@ -397,7 +401,9 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         if pb.gc('toggles/verbose_printout', cached=True):
             print('\t'*(log_level+1), f"html: initiating conversion for {lo.fullpath('markdown')} (parent {fo.fullpath('markdown')})")
 
+        pb.init_state(action='m2h', loop_type='note', current_fo=lo, subroutine='ConvertMarkdownPageToHtmlPage')
         ConvertMarkdownPageToHtmlPage(lo, pb, backlinkNode, log_level=log_level)
+        pb.reset_state()
 
 def recurseTagList(tagtree, tagpath, pb, level):
     '''This function creates the folder `tags` in the html_output_folder, and a filestructure in that so you can navigate the tags.'''
@@ -712,8 +718,9 @@ def main():
 
         # exit()
         ep = pb.files[paths['obsidian_entrypoint'].name]
+        pb.init_state(action='n2m', loop_type='note', current_fo=ep, subroutine='recurseObisidianToMarkdown')
         recurseObisidianToMarkdown(ep, pb)
-
+        pb.reset_state()
 
         # Keep going until all other files are processed
         if pb.gc('toggles/process_all', cached=True):
@@ -725,7 +732,9 @@ def main():
                 i += 1
                 if pb.gc('toggles/verbose_printout', cached=True) == True:
                     print(f'\t\t{i}/{l} - ' + str(fo.path['note']['file_absolute_path']))
+                pb.init_state(action='n2m_process_all', loop_type='note', current_fo=fo, subroutine='recurseObisidianToMarkdown')
                 recurseObisidianToMarkdown(fo, pb, log_level=2)
+                pb.reset_state()
             print('\t< FEATURE: PROCESS ALL: Done')
 
     if pb.gc('toggles/extended_logging', cached=True):
@@ -760,8 +769,11 @@ def main():
         # Start conversion from the entrypoint
         ep = pb.files[paths['md_entrypoint'].name]
         print(paths['md_entrypoint'].name)
+
+        pb.init_state(action='m2h', loop_type='note', current_fo=ep, subroutine='ConvertMarkdownPageToHtmlPage')
         ConvertMarkdownPageToHtmlPage(ep, pb)
-        
+        pb.reset_state()
+
         # Keep going until all other files are processed
         if pb.gc('toggles/process_all') == True:
             print('\t> FEATURE: PROCESS ALL')
@@ -772,7 +784,10 @@ def main():
                 if pb.gc('toggles/verbose_printout', cached=True) == True:
                     print(f'\t\t{i}/{l} - ' + str(fo.path['markdown']['file_absolute_path']))
 
+                pb.init_state(action='m2h_process_all', loop_type='note', current_fo=fo, subroutine='ConvertMarkdownPageToHtmlPage')
                 ConvertMarkdownPageToHtmlPage(fo, pb, log_level=2)
+                pb.reset_state()
+
             print('\t< FEATURE: PROCESS ALL: Done')
 
         if pb.gc('toggles/extended_logging', cached=True):
