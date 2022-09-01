@@ -60,7 +60,7 @@ def extra_info():
                             pb = kwargs[kwarg]
 
                 # Print original error and traceback
-                print("".join(traceback.TracebackException.from_exception(ex).format()))
+                traceback.print_exception(type(ex), ex, ex.__traceback__)
 
                 # pb is present: provide additional information
                 if pb is not None:
