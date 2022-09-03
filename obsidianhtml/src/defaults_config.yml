@@ -189,12 +189,12 @@ toggles:
 
     dataview:
       enabled: False
-      folder: 'obs.html/export' # relative to the vault being processed. this folder should always be in the vault
+      folder: 'obs.html/export'       # relative to the vault being processed. this folder should always be in the vault
 
     folder_notes:
       enabled: False
-      placement: 'outside folder'   # 'inside folder' , 'outside folder' 
-      naming: 'folder name'           # 'folder name', 'index'
+      placement: 'outside folder'     # 'inside folder' , 'outside folder' 
+      naming: 'folder name'           # 'folder name', 'index', 'aurkibidea', 'etc'
 
     eraser:
       enabled: True
@@ -204,7 +204,7 @@ toggles:
 
     # Include code to build the graph view per page 
     graph:
-      enabled: True           # Include code to build the graph view per page (default: True)
+      enabled: True                   # Include code to build the graph view per page (default: True)
       templates:
         - id: 3d
           name: 3d
