@@ -283,7 +283,7 @@ def ExportStaticFiles(pb):
 
     with open (dst_path, 'w', encoding="utf-8") as f:
         html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes='')
-        html = html.replace('{html_url_prefix}', html_url_prefix)
+        html = html.replace('{html_url_prefix}', html_url_prefix).replace('{left_pane_content}', '').replace('{right_pane_content}', '')
         f.write(html)
 
     c = OpenIncludedFileBinary('html/favicon.ico')
