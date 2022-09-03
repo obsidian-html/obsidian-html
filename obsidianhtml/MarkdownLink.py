@@ -40,6 +40,8 @@ class MarkdownLink:
         # Self.url will be the "link" part.
         self.SplitQuery()
 
+        self.name = self.url.split('/')[-1]
+
         # Url cannot be ''
         # If more tests are needed, they can be added here.
         self.TestisValid()
