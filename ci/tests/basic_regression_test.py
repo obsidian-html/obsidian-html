@@ -275,7 +275,8 @@ class TestHtmlPrefixMode(ModeTemplate):
     testcase_name = "HtmlPrefix"
     testcase_custom_config_values = [
         ('html_url_prefix', '/a'),
-        ('html_output_folder_path_str', 'tmp/html/a/')
+        ('html_output_folder_path_str', 'tmp/html/a/'), 
+        ('copy_vault_to_tempdir_method', 'shutil')
     ]
 
     def test_A__test_self(self):
@@ -365,7 +366,7 @@ class TestMisc(ModeTemplate):
         ('toggles/verbose_printout', True),
         ('toggles/process_all', True),
         ('html_template_path_str', 'ci/configs/custom_html_template.html'),
-        ('copy_vault_to_tempdir', True),
+        ('copy_vault_to_tempdir', False),
         # disable all non essential features
         ('toggles/features/theme_picker/enabled', False),
         ('toggles/features/code_highlight/enabled', False),
