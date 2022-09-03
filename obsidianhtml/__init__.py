@@ -114,6 +114,8 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     else:
         html_url_prefix = pb.gc('html_url_prefix')
 
+    page_depth = len(rel_dst_path.as_posix().split('/')) - 1
+
     # Load contents
     # ------------------------------------------------------------------
     # Create an object that handles a lot of the logic of parsing the page paths, content, etc
@@ -138,6 +140,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # Url is used so you can open the note/node by clicking on it
     node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()
+    node['rtr_url'] = rel_dst_path.as_posix()
     pb.network_tree.AddNode(node)
 
     # Backlinks are set so when recursing, the links (edges) can be determined
@@ -364,12 +367,14 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # Add node_id to page so that we can fetch this in the second-pass
     html_body += '{_obsidian_html_node_id_pattern_:'+node['id']+'}\n'
 
+
     # [16] Wrap body html in valid html structure from template
     # ------------------------------------------------------------------
     html = PopulateTemplate(pb, node['id'], pb.dynamic_inclusions, pb.html_template, content=html_body)
 
     html = html.replace('{pinnedNode}', node['id'])\
-               .replace('{html_url_prefix}', html_url_prefix)
+               .replace('{html_url_prefix}', html_url_prefix)\
+               .replace('{page_depth}', str(page_depth))\
 
     # [?] Documentation styling: Navbar
     # ------------------------------------------------------------------
@@ -829,6 +834,7 @@ def main():
             dst_abs_path = fo.path['html']['file_absolute_path']
             dst_rel_path_str = fo.path['html']['file_relative_path'].as_posix()
             html_url_prefix = get_html_url_prefix(pb, rel_path_str=dst_rel_path_str)
+            page_depth = len(dst_rel_path_str.split('/')) - 1
 
             # get html content
             try:
@@ -863,7 +869,9 @@ def main():
                     for l in backlinks:
                         if l['target'] == node_id:
                             url = pb.network_tree.node_lookup[l['source']]['url']
-                            if url[0] != '/':
+                            if pb.gc('toggles/relative_path_html', cached=True):
+                                url = ('../' * page_depth) + pb.network_tree.node_lookup[l['source']]['rtr_url']
+                            if url[0] not in ['.', '/']:
                                 url = '/'+url
                             snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
                     snippet += '</ul>'
@@ -991,6 +999,8 @@ def main():
         tag_dst_path = tags_folder.joinpath('index.html')
         tag_dst_path_posix = tag_dst_path.as_posix()
         tag_dst_path.parent.mkdir(parents=True, exist_ok=True)
+
+        rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
 
         # set html_url_prefix
         if pb.gc('toggles/relative_path_html', cached=True):

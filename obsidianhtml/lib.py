@@ -252,6 +252,7 @@ def ExportStaticFiles(pb):
                             'search.js', 'search.css'):
             c = c.replace('{html_url_prefix}', html_url_prefix)\
                  .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
+                 .replace('{relative_paths}', str(int(pb.gc('toggles/relative_path_html'))))\
                  .replace('{documentation_mode}',str(int(pb.gc('toggles/features/styling/layout')=='documentation')))\
                  .replace('{toc_pane}',str(int(pb.gc('toggles/features/styling/toc_pane'))))\
                  .replace('{mermaid_enabled}',str(int(pb.gc('toggles/features/mermaid_diagrams/enabled'))))\

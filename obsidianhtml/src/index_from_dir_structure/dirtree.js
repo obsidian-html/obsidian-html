@@ -4,7 +4,8 @@ function toggle_dir(dir_button_id){
     return toggle(cont)
 }
 
-function open_folder_note(url){
+function open_folder_note(el){
+    url = el.getAttribute('href')
     window.location.href = url;
     return false;
 }
