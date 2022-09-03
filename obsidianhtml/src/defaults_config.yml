@@ -49,8 +49,13 @@ exclude_subfolders:
 # The tempdir is automatically removed on exit of the program.
 copy_vault_to_tempdir: True
 
-# Alpha feature: set this value to `walk` to use a method that might fix '[Errno 21] Is a directory' errors on MacOS
+# Alpha feature: 
+#  - Set this value to `unix` when on macos or linux to use systemcall `cp -fr src/. dst` instead of shutil copytree.
+#    This might fix the [Errno 21] Is a directory errors, and might speed up copying times. Will be set to default on unix systems when it is properly tested.
 copy_vault_to_tempdir_method: default
+
+# Enable to print the files being copied
+copy_vault_to_tempdir_follow_copy: false
 
 # ObsidianHtml needs to be able to discern between included notes and included files, because included files 
 # need to be treated differently. This is a configurable setting because we might've missed certain suffixes

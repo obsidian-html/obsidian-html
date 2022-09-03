@@ -714,7 +714,6 @@ def main():
 
         # for k, v in pb.files.items():
         #     print(k, type(v))
-
         # exit()
 
         ep = pb.files[paths['rel_obsidian_entrypoint'].as_posix()]
