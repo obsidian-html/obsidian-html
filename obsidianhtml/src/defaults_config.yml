@@ -49,9 +49,10 @@ exclude_subfolders:
 # The tempdir is automatically removed on exit of the program.
 copy_vault_to_tempdir: True
 
-# Alpha feature: 
-#  - Set this value to `unix` when on macos or linux to use systemcall `cp -fr src/. dst` instead of shutil copytree.
-#    This might fix the [Errno 21] Is a directory errors, and might speed up copying times. Will be set to default on unix systems when it is properly tested.
+# Determines the function to use to copy your vault over to the tempdir.
+# `default` will try to use rsync if it is installed, and otherwise use `shutil`
+# `rsync` will do the same, but give a warning when it falls back to shutil
+# `shutil` will just use shutil to copy. Use this when rsync is installed but is giving problems.
 copy_vault_to_tempdir_method: default
 
 # Enable to print the files being copied

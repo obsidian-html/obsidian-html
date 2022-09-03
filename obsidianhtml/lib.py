@@ -10,6 +10,7 @@ import tempfile             # used to create temporary files/folders
 import time
 from functools import cache
 import unicodedata
+from subprocess import Popen, PIPE
 
 # Open source files in the package
 import importlib.resources as pkg_resources
@@ -462,6 +463,14 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         # Between the md.StripCodeSections() and md.RestoreCodeSections() statements, otherwise codeblocks can be altered.
         
 
+def is_installed(command):
+    try:
+        p = Popen([command], stdout=PIPE, stderr=PIPE)
+        output, error = p.communicate()
+    except FileNotFoundError as ex:
+        return False
+    return True
+
 class Error(EnvironmentError):
     pass
 
@@ -474,25 +483,41 @@ def CreateTemporaryCopy(source_folder_path, pb):
     if pb.gc('toggles/verbose_printout'):
         print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')
 
-    # Use system call to copy files if available.
-    if pb.gc('copy_vault_to_tempdir_method') == 'unix':
-        # Copy vault to temp dir
-        copy_tree_unix(source_folder_path.as_posix(), tmpdir.name, ignore=pb.gc('exclude_subfolders'), verbose=pb.gc('copy_vault_to_tempdir_follow_copy'))
-        print("< COPYING VAULT: Done")
-        return tmpdir
+    # Decide which method to use
+    copy_method = pb.gc('copy_vault_to_tempdir_method')
 
-    # Compile ignore list
-    ignore_list = pb.gc('exclude_subfolders')
-    if isinstance(ignore_list, list):
-        ignore_list = [pb.paths['obsidian_folder'].joinpath(Path(x)) for x in ignore_list]
-        print('Paths that will be ignored:', [x.as_posix() for x in ignore_list])
+    if copy_method == 'default':
+        if is_installed('rsync'):
+            copy_method = 'rsync'
+        else:
+            copy_method = 'shutil'
 
-    if pb.gc('copy_vault_to_tempdir_method') == 'walk':
-        # Copy vault to temp dir
-        copytree2(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
+    if pb.gc('copy_vault_to_tempdir_method') == 'rsync':
+        if is_installed('rsync'):
+            copy_method = 'rsync'
+        else:
+            print('WARNING: copy_vault_to_tempdir_method was set to rsync, but rsync is not present on the system. Defaulting to shutil copy method.')
+            copy_method = 'shutil'
+
+    # Call copytree function (rsync)
+    if copy_method == 'rsync':
+        copy_tree_rsync(source_folder_path.as_posix(), tmpdir.name, ignore=pb.gc('exclude_subfolders'), verbose=pb.gc('copy_vault_to_tempdir_follow_copy'))
+
+    # Fetch invalid settings
+    elif copy_method not in ['shutil', 'shutil_walk']:
+        raise Exception(f"Copy method of {copy_method} not known.")
     else:
-        # Copy vault to temp dir
-        copytree(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
+        # Compile ignore list
+        ignore_list = pb.gc('exclude_subfolders')
+        if isinstance(ignore_list, list):
+            ignore_list = [pb.paths['obsidian_folder'].joinpath(Path(x)) for x in ignore_list]
+            print('Paths that will be ignored:', [x.as_posix() for x in ignore_list])
+
+        # Call copytree function (shutil_walk or shutil)
+        if pb.gc('copy_vault_to_tempdir_method') == 'shutil_walk':
+            copytree_shutil_walk(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
+        else:
+            copytree_shutil(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
 
     print("< COPYING VAULT: Done")
     return tmpdir
@@ -510,7 +535,7 @@ def should_ignore(ignore, path):
     return False
 
 
-def copytree(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
+def copytree_shutil(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
              ignore_dangling_symlinks=False, pb=None):
 
     follow_copy = pb.gc('copy_vault_to_tempdir_follow_copy')
@@ -545,7 +570,7 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
                     # otherwise let the copy occurs. copy2 will raise an error
                     copy_function(srcname, dstname)
             elif os.path.isdir(srcname):
-                copytree(srcname, dstname, symlinks, ignore, copy_function, pb=pb)
+                copytree_shutil(srcname, dstname, symlinks, ignore, copy_function, pb=pb)
             else:
                 # Will raise a SpecialFileError for unsupported file types
                 copy_function(srcname, dstname)
@@ -567,7 +592,7 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
     if errors:
         raise Error(errors)
 
-def copytree2(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
+def copytree_shutil_walk(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
              ignore_dangling_symlinks=False, pb=None):
 
     follow_copy = pb.gc('copy_vault_to_tempdir_follow_copy')
@@ -634,13 +659,7 @@ def copytree2(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
         raise Error(errors)
 
 
-def copy_tree_unix(src_dir, dst_dir, ignore, verbose=False):
-    # r = os.system( 'cp -fr %s %s' % (src_dir, dst_dir) )
-    # if r != 0:
-    #     print('An error occurred!')
-
-    from subprocess import Popen, PIPE
-
+def copy_tree_rsync(src_dir, dst_dir, ignore, verbose=False):
     # Get relative ignore paths
     exclude_list = []
     for path in ignore:
