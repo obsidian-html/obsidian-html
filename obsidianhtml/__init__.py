@@ -510,7 +510,7 @@ def main():
             print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
         if v == '--test':
-            print('test 3.2.0 shutil test')
+            print('test 3.2.0 c')
             exit(0)
 
 
@@ -717,7 +717,7 @@ def main():
 
         # exit()
 
-        ep = pb.files[pb.paths['obsidian_entrypoint'].name]
+        ep = pb.files[paths['rel_obsidian_entrypoint'].as_posix()]
         pb.init_state(action='n2m', loop_type='note', current_fo=ep, subroutine='recurseObisidianToMarkdown')
         recurseObisidianToMarkdown(ep, pb)
         pb.reset_state()
