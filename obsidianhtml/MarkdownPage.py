@@ -157,6 +157,9 @@ class MarkdownPage:
         # They will be restored at the end
         self.StripCodeSections() 
 
+        # -- [??] Replace \| with |
+        self.page = re.sub(r'\\\|', '|', self.page, flags=re.MULTILINE)
+
         # -- [2] Add newline between paragraph and lists
         buffer = ''
         prev_is_list_line = False

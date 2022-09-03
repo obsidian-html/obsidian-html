@@ -118,9 +118,9 @@ class CreateIndexFromDirStructure():
             note_folder_abs_path = folder_abs_path.parent
 
         name = folder_abs_path.stem + '.html'
-        if settings['naming'] == 'index':
-            name = 'index.html'
-
+        if settings['naming'] != 'folder name':
+            name = f"{settings['naming']}.html"
+            
         abs_path = note_folder_abs_path.joinpath(name)
         return (abs_path.exists(), abs_path)
 
@@ -129,9 +129,13 @@ class CreateIndexFromDirStructure():
         if settings['enabled'] == False:
             return False
 
-        note_stem = note_abs_path.stem
-        if settings['naming'] == 'index' and note_stem != 'index':
+        # Homepage cannot be folder note
+        if note_abs_path.relative_to(self.pb.paths['html_output_folder']).as_posix() == 'index.html':
             return False
+
+        note_stem = note_abs_path.stem
+        if settings['naming'] != 'folder name':
+            return (note_stem == settings['naming'])
 
         elif settings['naming'] == 'folder name':
             # find folder
@@ -143,12 +147,6 @@ class CreateIndexFromDirStructure():
             elif settings['placement'] == 'outside folder':
                 folder_path = note_abs_path.parent.joinpath(note_stem).resolve()
                 return folder_path.exists()
-
-            else:
-                raise Exception(f"placement setting for folder_notes feature is {settings['naming']} which is invalid")
-
-        else:
-            raise Exception(f"Naming setting for folder_notes feature is {settings['naming']} which is invalid")
  
         raise Exception("Unexpected escape from elif fence in check_is_folder_note()")
         
