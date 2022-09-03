@@ -116,6 +116,7 @@ toggles:
 
   # Can be overwritten ad-hoc by using "obsidianhtml -i config.yml -v" (the -v option)
   verbose_printout: False
+  debug_filetree_keys: False
 
   # Write extra information to log_output_folder_path_str
   extended_logging: False
