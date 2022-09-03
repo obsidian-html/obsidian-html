@@ -462,6 +462,9 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         # Between the md.StripCodeSections() and md.RestoreCodeSections() statements, otherwise codeblocks can be altered.
         
 
+class Error(EnvironmentError):
+    pass
+
 def CreateTemporaryCopy(source_folder_path, pb):
     # Create temp dir
     tmpdir = tempfile.TemporaryDirectory()
@@ -469,18 +472,25 @@ def CreateTemporaryCopy(source_folder_path, pb):
     print(f"> COPYING VAULT {source_folder_path} TO {tmpdir.name}")
 
     if pb.gc('toggles/verbose_printout'):
-        print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
-    
-    # Copy vault to temp dir
-    copytree(source_folder_path, tmpdir.name)
-    #copy_tree(source_folder_path, tmpdir.name, preserve_times=1)
+        print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')   
+
+    if pb.gc('copy_vault_to_tempdir_method') == 'walk':
+        # Compile ignore list
+        ignore_list = pb.gc('exclude_subfolders')
+        if isinstance(ignore_list, list):
+            ignore_list = [pb.paths['obsidian_folder'].joinpath(Path(x)) for x in ignore_list]
+            print('Paths that will be ignored:', [x.as_posix() for x in ignore_list])
+
+        # Copy vault to temp dir
+        copytree2(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
+    else:
+        # Copy vault to temp dir
+        copytree(source_folder_path, tmpdir.name)
+
     print("< COPYING VAULT: Done")
 
     return tmpdir
 
-
-class Error(EnvironmentError):
-    pass
 
 def copytree(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
              ignore_dangling_symlinks=False):
@@ -533,31 +543,9 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
         raise Error(errors)
 
 
-def CreateTemporaryCopy2(source_folder_path, pb):
-    # Create temp dir
-    tmpdir = tempfile.TemporaryDirectory()
-
-    print(f"> COPYING VAULT {source_folder_path} TO {tmpdir.name}")
-
-    if pb.gc('toggles/verbose_printout'):
-        print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
-    
-    # Compile ignore list
-    ignore_list = pb.gc('exclude_subfolders')
-    if isinstance(ignore_list, list):
-        print(pb.paths['obsidian_folder'], ignore_list)
-        ignore_list = [Path(x).joinpath(pb.paths['obsidian_folder']) for x in ignore_list]
-
-    # Copy vault to temp dir
-    copytree2(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
-    print("< COPYING VAULT: Done")
-
-    return tmpdir
-
 def copytree2(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
              ignore_dangling_symlinks=False, pb=None):
 
-    ignore = ['/home/dorus/git/obsidian-html.github.io/__src/vault/.obsidian']
     def should_ignore(ignore, path):
         if ignore is None:
             return False
