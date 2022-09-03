@@ -13,7 +13,7 @@ class CreateIndexFromDirStructure():
         self.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
         
         if pb.gc('toggles/relative_path_html'):
-            self.html_url_prefix = pb.sc(path='html_url_prefix', value='..')
+            self.html_url_prefix = pb.sc(path='html_url_prefix', value='')
         else:
             self.html_url_prefix = pb.gc("html_url_prefix")
 
@@ -185,7 +185,7 @@ class CreateIndexFromDirStructure():
                 if has_folder_note: 
                     fnpf = '<div class="fn_pf"></div>'
                     url = self.convert_abs_path_to_url(note_abs_path)
-                    html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button folder_note {folder_note_active}" onclick="open_folder_note(\'{url}\')">{fnpf}{tree["name"]}</button>\n'
+                    html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button folder_note {folder_note_active}" href="{url}" onclick="open_folder_note(this)">{fnpf}{tree["name"]}</button>\n'
                 else:
                     html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
 
