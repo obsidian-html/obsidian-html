@@ -510,7 +510,7 @@ def main():
             print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
         if v == '--test':
-            print('test 3.1.0 a')
+            print('test 3.2.0 c')
             exit(0)
 
 
@@ -558,10 +558,13 @@ def main():
         paths['log_output_folder'] = Path(pb.gc('log_output_folder_path_str')).resolve()
 
     # Deduce relative paths
-
     paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
 
+    
+    # Add paths to pb
+    # ---------------------------------------------------------
+    pb.paths = paths
 
     # Copy vault to tempdir, so any bugs will not affect the user's vault
     # ---------------------------------------------------------
@@ -570,15 +573,11 @@ def main():
         tmpdir = CreateTemporaryCopy(source_folder_path=paths['obsidian_folder'], pb=pb)
 
         # update paths
-        paths['original_obsidian_folder'] = paths['obsidian_folder']        # use only for lookups!
-        paths['obsidian_folder'] = Path(tmpdir.name).resolve()
-        paths['obsidian_entrypoint'] = paths['obsidian_folder'].joinpath(paths['rel_obsidian_entrypoint'])
+        pb.paths['original_obsidian_folder'] = pb.paths['obsidian_folder']        # use only for lookups!
+        pb.paths['obsidian_folder'] = Path(tmpdir.name).resolve()
+        pb.paths['obsidian_entrypoint'] = pb.paths['obsidian_folder'].joinpath(pb.paths['rel_obsidian_entrypoint'])
     else:
-        paths['original_obsidian_folder'] = paths['obsidian_folder']        # use only for lookups!
-
-    # Add paths to pb
-    # ---------------------------------------------------------
-    pb.paths = paths
+        pb.paths['original_obsidian_folder'] = pb.paths['obsidian_folder']        # use only for lookups!
 
 
     # Compile dynamic inclusion list
@@ -605,32 +604,32 @@ def main():
     if pb.gc('toggles/no_clean', cached=True) == False:
         print('> CLEARING OUTPUT FOLDERS')
         if pb.gc('toggles/compile_md', cached=True):
-            if paths['md_folder'].exists():
-                shutil.rmtree(paths['md_folder'])
+            if pb.paths['md_folder'].exists():
+                shutil.rmtree(pb.paths['md_folder'])
 
-        if paths['html_output_folder'].exists():
-            shutil.rmtree(paths['html_output_folder'])    
+        if pb.paths['html_output_folder'].exists():
+            shutil.rmtree(pb.paths['html_output_folder'])    
 
     # Create folder tree
     # ---------------------------------------------------------
     print('> CREATING OUTPUT FOLDERS')
 
     if pb.gc('toggles/compile_md', cached=True):
-        paths['md_folder'].mkdir(parents=True, exist_ok=True)
+        pb.paths['md_folder'].mkdir(parents=True, exist_ok=True)
 
-    paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
-    paths['html_output_folder'] = paths['html_output_folder'].resolve()
+    pb.paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
+    pb.paths['html_output_folder'] = pb.paths['html_output_folder'].resolve()
     
     if pb.gc('toggles/extended_logging', cached=True):
-        paths['log_output_folder'].mkdir(parents=True, exist_ok=True)
-        paths['log_output_folder'] = paths['log_output_folder'].resolve()
+        pb.paths['log_output_folder'].mkdir(parents=True, exist_ok=True)
+        pb.paths['log_output_folder'] = pb.paths['log_output_folder'].resolve()
 
     # Load files
     # ---------------------------------------------------------
-    input_dir = paths['obsidian_folder']
+    input_dir = pb.paths['obsidian_folder']
     path_type = 'note'
     if not pb.gc('toggles/compile_md'):
-        input_dir = paths['md_folder']
+        input_dir = pb.paths['md_folder']
         path_type = 'markdown'
 
     # Load all filenames in the root folder.
@@ -697,7 +696,7 @@ def main():
         print('< CREATING FILE TREE: Done')
 
     if pb.gc('toggles/extended_logging', cached=True):
-        WriteFileLog(pb.files, paths['log_output_folder'].joinpath('files.md'), include_processed=False)
+        WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files.md'), include_processed=False)
 
     # Convert Obsidian to markdown
     # ---------------------------------------------------------
@@ -711,13 +710,14 @@ def main():
         # Start conversion with entrypoint.
         # ---------------------------------------------------------
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
-        print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(paths["obsidian_entrypoint"])})')
+        print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(pb.paths["obsidian_entrypoint"])})')
 
         # for k, v in pb.files.items():
         #     print(k, type(v))
 
         # exit()
-        ep = pb.files[paths['obsidian_entrypoint'].name]
+
+        ep = pb.files[paths['rel_obsidian_entrypoint'].as_posix()]
         pb.init_state(action='n2m', loop_type='note', current_fo=ep, subroutine='recurseObisidianToMarkdown')
         recurseObisidianToMarkdown(ep, pb)
         pb.reset_state()
@@ -738,13 +738,13 @@ def main():
             print('\t< FEATURE: PROCESS ALL: Done')
 
     if pb.gc('toggles/extended_logging', cached=True):
-        WriteFileLog(pb.files, paths['log_output_folder'].joinpath('files_ntm.md'), include_processed=True)
+        WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files_ntm.md'), include_processed=True)
 
 
     # Convert Markdown to Html
     # ------------------------------------------
     if pb.gc('toggles/compile_html', cached=True):
-        print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(paths["md_entrypoint"])})')
+        print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(pb.paths["md_entrypoint"])})')
 
         html_url_prefix = pb.gc("html_url_prefix")
 
@@ -767,8 +767,8 @@ def main():
         pb.navbar_links = elements
         
         # Start conversion from the entrypoint
-        ep = pb.files[paths['md_entrypoint'].name]
-        print(paths['md_entrypoint'].name)
+        ep = pb.files[pb.paths['md_entrypoint'].name]
+        print(pb.paths['md_entrypoint'].name)
 
         pb.init_state(action='m2h', loop_type='note', current_fo=ep, subroutine='ConvertMarkdownPageToHtmlPage')
         ConvertMarkdownPageToHtmlPage(ep, pb)
@@ -791,13 +791,13 @@ def main():
             print('\t< FEATURE: PROCESS ALL: Done')
 
         if pb.gc('toggles/extended_logging', cached=True):
-            WriteFileLog(pb.files, paths['log_output_folder'].joinpath('files_mth.md'), include_processed=True)
+            WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files_mth.md'), include_processed=True)
 
         # [??] Create html file tree
         # ------------------------------------------
         if pb.gc('toggles/features/create_index_from_dir_structure/enabled'):
             rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
-            op = paths['html_output_folder'].joinpath(rel_output_path)
+            op = pb.paths['html_output_folder'].joinpath(rel_output_path)
 
             print(f'\t> COMPILING INDEX FROM DIR STRUCTURE ({op})')
             pb.EnsureTreeObj()
@@ -1016,7 +1016,7 @@ def main():
             html = PopulateTemplate(pb, 'null', pb.dynamic_inclusions, pb.graph_full_page_template, content='')
             html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
 
-            op = paths['html_output_folder'].joinpath('obs.html/graph/index.html')
+            op = pb.paths['html_output_folder'].joinpath('obs.html/graph/index.html')
             op.parent.mkdir(parents=True, exist_ok=True)
 
             with open(op, 'w', encoding="utf-8") as f:

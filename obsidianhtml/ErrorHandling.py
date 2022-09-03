@@ -32,7 +32,12 @@ def compile_error_addendum(pb):
 
     # Specifics
     if state['loop_type'] == 'note':
-        message.append(f"Current note being processed: {state['current_fo'].path['note']['file_absolute_path'] }")
+        current_note_path = state['current_fo'].path['note']['file_absolute_path']
+        original_obsidian_folder = pb.paths['original_obsidian_folder']
+        current_obsidian_folder = pb.paths['obsidian_folder']
+        original_path = original_obsidian_folder.joinpath(current_note_path.relative_to(current_obsidian_folder))
+
+        message.append(f"Current note being processed: {current_note_path} ({original_path})")
     return message
 
 def extra_info(): 

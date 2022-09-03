@@ -461,6 +461,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         # Adding value replacement in content should be done in ConvertMarkdownPageToHtmlPage, 
         # Between the md.StripCodeSections() and md.RestoreCodeSections() statements, otherwise codeblocks can be altered.
         
+
 def CreateTemporaryCopy(source_folder_path, pb):
     # Create temp dir
     tmpdir = tempfile.TemporaryDirectory()
@@ -528,5 +529,102 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
             pass
         else:
             errors.extend((src, dst, str(why), 'copystat error'))
+    if errors:
+        raise Error(errors)
+
+
+def CreateTemporaryCopy2(source_folder_path, pb):
+    # Create temp dir
+    tmpdir = tempfile.TemporaryDirectory()
+
+    print(f"> COPYING VAULT {source_folder_path} TO {tmpdir.name}")
+
+    if pb.gc('toggles/verbose_printout'):
+        print('\tWill overwrite paths: obsidian_folder, obsidian_entrypoint')    
+    
+    # Compile ignore list
+    ignore_list = pb.gc('exclude_subfolders')
+    if isinstance(ignore_list, list):
+        print(pb.paths['obsidian_folder'], ignore_list)
+        ignore_list = [Path(x).joinpath(pb.paths['obsidian_folder']) for x in ignore_list]
+
+    # Copy vault to temp dir
+    copytree2(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
+    print("< COPYING VAULT: Done")
+
+    return tmpdir
+
+def copytree2(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
+             ignore_dangling_symlinks=False, pb=None):
+
+    ignore = ['/home/dorus/git/obsidian-html.github.io/__src/vault/.obsidian']
+    def should_ignore(ignore, path):
+        if ignore is None:
+            return False
+
+        for ignore_path in [Path(x).resolve() for x in ignore]:
+            if ignore_path.as_posix() == path.as_posix():
+                return True
+            if ignore_path.is_dir() and path.is_relative_to(ignore_path):
+                return True
+
+        return False
+
+    errors = []
+
+    for root, dirs, files in os.walk(src, topdown=True):
+        for name in files:
+            # Set paths
+            file_src_path = Path(os.path.join(root, name)).resolve()
+            file_dst_path = Path(dst).resolve().joinpath(file_src_path.relative_to(pb.paths['obsidian_folder']))
+            file_dst_folder_path = file_dst_path.parent
+
+            # Ignore if file is excluded or in an excluded folder (see exclude_subfolders)
+            if should_ignore(ignore, file_src_path):
+                continue
+        
+            # Get strings of path objects
+            file_src_path_str = file_src_path.as_posix()
+            file_dst_path_str = file_dst_path.as_posix()
+            file_dst_folder_path_str = file_dst_folder_path.as_posix()
+
+            # Create folder if it does not exist
+            os.makedirs(file_dst_folder_path_str, exist_ok=True)
+ 
+            # Copy file over
+            try:
+                if file_src_path.is_symlink(): 
+                    linkto = file_src_path.readlink()
+                    if symlinks:
+                        os.symlink(linkto, file_dst_path_str)
+                    else:
+                        # ignore dangling symlink if the flag is on
+                        if not os.path.exists(linkto) and ignore_dangling_symlinks:
+                            continue
+                        # otherwise let the copy occurs. copy2 will raise an error
+                        copy_function(file_src_path_str, file_dst_folder_path_str)
+                else:
+                    # Will raise a SpecialFileError for unsupported file types
+                    copy_function(file_src_path_str, file_dst_folder_path_str)
+
+            # catch the Error from the recursive copytree so that we can
+            # continue with other files
+            except Error as err:
+                print(err)
+                errors.extend(err.args[0])
+            except EnvironmentError as why:
+                errors.append((file_src_path_str, file_dst_path_str, str(why), 'copyfile error'))
+    
+    # Set correct permissions on target folder
+    try:
+        shutil.copystat(src, dst)
+    except OSError as why:
+        if WindowsError is not None and isinstance(why, WindowsError):
+            # Copying file access times may fail on Windows
+            pass
+        else:
+            errors.extend((file_src_path_str, file_dst_path_str, str(why), 'copystat error'))
+
+    # Fail if any errors were found
     if errors:
         raise Error(errors)
