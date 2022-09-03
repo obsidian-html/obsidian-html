@@ -510,7 +510,7 @@ def main():
             print(f"Exported html template to {str(export_html_template_target_path)}")
             exit(0)
         if v == '--test':
-            print('test 3.2.0 c')
+            print('test 3.2.0 d')
             exit(0)
 
 
@@ -712,9 +712,9 @@ def main():
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
         print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(pb.paths["obsidian_entrypoint"])})')
 
-        # for k, v in pb.files.items():
-        #     print(k, type(v))
-        # exit()
+        if pb.gc('toggles/debug_filetree_keys'):
+            for k, v in pb.files.items():
+                print(k)
 
         ep = pb.files[paths['rel_obsidian_entrypoint'].as_posix()]
         pb.init_state(action='n2m', loop_type='note', current_fo=ep, subroutine='recurseObisidianToMarkdown')
