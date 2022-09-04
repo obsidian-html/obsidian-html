@@ -202,9 +202,9 @@ def ExportStaticFiles(pb):
         css_files_list.append(['search/search.css', 'search.css'])
         copy_file_list.append(['imported/flexsearch.v0.7.2.bundle.js', 'flexsearch.bundle.js'])
 
-    if pb.config.feature_is_enabled('math_latex', cached=True):
-        copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
-        copy_file_list.append(['imported/mathjax.v3.es5.tex-chtml.js', 'tex-chtml.js'])
+    # if pb.config.feature_is_enabled('math_latex', cached=True):
+    #     copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
+    #     copy_file_list.append(['imported/mathjax.v3.es5.tex-chtml.js', 'tex-chtml.js'])
 
     if pb.config.feature_is_enabled('callouts', cached=True):
         css_files_list.append(['html/css/callouts.css', 'callouts.css'])
@@ -359,7 +359,8 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
 
     if pb.config.feature_is_enabled('math_latex', cached=True):
         dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/tex-chtml.js"></script>' + "\n"
-        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js"></script>' + "\n"
+        #dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js"></script>' + "\n"
+        dynamic_inclusions += OpenIncludedFile('latex/load_mathjax_header_template.html') + "\n"
         #dynamic_inclusions += '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + "\n"
 
     if pb.config.feature_is_enabled('search', cached=True):
