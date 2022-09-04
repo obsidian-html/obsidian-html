@@ -251,6 +251,7 @@ def ExportStaticFiles(pb):
                             'obsidian_core.js', 
                             'search.js', 'search.css'):
             c = c.replace('{html_url_prefix}', html_url_prefix)\
+                 .replace('{configured_html_url_prefix}', pb.configured_html_prefix)\
                  .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
                  .replace('{relative_paths}', str(int(pb.gc('toggles/relative_path_html'))))\
                  .replace('{documentation_mode}',str(int(pb.gc('toggles/features/styling/layout')=='documentation')))\
@@ -454,6 +455,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         .replace('{dynamic_footer_includes}', pb.dynamic_footer_inclusions)\
         .replace('{footer_js_inclusions}', footer_js_inclusions)\
         .replace('{html_url_prefix}', html_url_prefix)\
+        .replace('{configured_html_url_prefix}', pb.configured_html_prefix)\
         .replace('{container_wrapper_class_list}', ' '.join(container_wrapper_class_list))\
         .replace('{no_tabs}', str(int(pb.gc('toggles/no_tabs', cached=True))))\
         .replace('{pinnedNode}', node_id)\

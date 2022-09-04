@@ -44,6 +44,7 @@ class PicknickBasket:
     def loadConfig(self, input_yml_path_str=False):
         self.config = Config(self, input_yml_path_str)
         self.config.LoadIncludedFiles()
+        self.configured_html_prefix = self.gc('html_url_prefix')
 
     def gc(self, path:str, cached=False):
         if cached:
