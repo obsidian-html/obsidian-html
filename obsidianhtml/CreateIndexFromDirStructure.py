@@ -10,12 +10,13 @@ class CreateIndexFromDirStructure():
 
         self.exclude_subfolders = pb.gc('toggles/features/create_index_from_dir_structure/exclude_subfolders')
         self.exclude_files = pb.gc('toggles/features/create_index_from_dir_structure/exclude_files')
-        self.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
+        #self.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
         
-        if pb.gc('toggles/relative_path_html'):
-            self.html_url_prefix = pb.sc(path='html_url_prefix', value='')
-        else:
-            self.html_url_prefix = pb.gc("html_url_prefix")
+        # if pb.gc('toggles/relative_path_html'):
+        #     self.html_url_prefix = pb.sc(path='html_url_prefix', value='')
+        # else:
+        #     self.html_url_prefix = pb.gc("html_url_prefix")
+        #self.html_url_prefix = pb.gc("html_url_prefix")
 
         self.verbose = pb.gc('toggles/verbose_printout')
 
@@ -241,6 +242,8 @@ class CreateIndexFromDirStructure():
     def WriteIndex(self):
         output_path = self.root.joinpath(self.rel_output_path).resolve()
 
+        page_depth = len(self.rel_output_path.split('/')) - 1
+
         # make parent folders if necessary
         output_path.parent.mkdir(exist_ok=True)
 
@@ -254,6 +257,7 @@ class CreateIndexFromDirStructure():
                                         .replace('{html_url_prefix}', self.html_url_prefix)\
                                         .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
                                         .replace('{graph_classes}', 'hidden')
+                                        
             self.html += f"\n{graph_template}\n"
         
         html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=['single_tab_page-left-aligned'])
@@ -261,7 +265,9 @@ class CreateIndexFromDirStructure():
         html = html.replace('{pinnedNode}', 'dirtree')\
                    .replace('{left_pane_content}', '')\
                    .replace('{right_pane_content}', '')\
-                   .replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
+                   .replace('{{navbar_links}}', '\n'.join(pb.navbar_links))\
+                   .replace('{dirtree_main_path}', self.rel_output_path)\
+                   .replace('{page_depth}', str(page_depth))
 
 
         with open(output_path, 'w', encoding='utf-8') as f:

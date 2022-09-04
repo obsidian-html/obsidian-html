@@ -7,6 +7,7 @@ var mermaid_enabled = {mermaid_enabled};
 var toc_pane_div = "{toc_pane_div}";
 var content_pane_div = "{content_pane_div}";
 var html_url_prefix = "{html_url_prefix}";
+var configured_html_url_prefix = "{configured_html_url_prefix}";
 var RELATIVE_PATHS = {relative_paths};
 var documentation_mode = {documentation_mode};
 var tab_mode = !no_tab_mode;
@@ -25,20 +26,53 @@ function set_rel_paths(){
     // update directory navigation links
     list = document.getElementById('left_pane_content').getElementsByTagName('a')
     for (let el of list) {
-        el.href = ('../'.repeat(PAGE_DEPTH)) + el.href.replace('file:///', '');
+        let href = el.getAttribute('href');
+        console.log(href);
+
+        if (href){
+            if (PAGE_DEPTH == 0){
+                el.setAttribute('href', ('.' + href));
+            }
+            else {
+                href = href.substring(1)
+                el.setAttribute('href', ('../'.repeat(PAGE_DEPTH)) + href);
+            }
+        }
+        console.log(href);
+        // let prefix1 = window.location.protocol + '//' + window.location.host + '/'
+        // let prefix2 = 'file:///';
+        // el.href = ('../'.repeat(PAGE_DEPTH)) + el.href.replace(prefix1, '').replace(prefix2, '');
     }
     // update directory navigation buttons
     list = document.getElementById('left_pane_content').getElementsByTagName('button')
     for (let el of list) {
         let href = el.getAttribute('href');
+        console.log(href);
+
         if (href){
-            el.setAttribute('href', ('../'.repeat(PAGE_DEPTH)) + href.substring(1));
+            if (PAGE_DEPTH == 0){
+                el.setAttribute('href', ('.' + href));
+            }
+            else {
+                href = href.substring(1)
+                el.setAttribute('href', ('../'.repeat(PAGE_DEPTH)) + href);
+            }
         }
+        console.log(href);
     }
     // update navbar links
     list = document.getElementsByClassName('navbar-link')
     for (let el of list) {
-        el.href = ('../'.repeat(PAGE_DEPTH)) + el.href.replace('file:///', '');
+        let href = el.getAttribute('href');
+        if (href){
+            if (href.startsWith(configured_html_url_prefix + '/')){
+                href = href.replace(configured_html_url_prefix + '/', '');
+            } 
+            else {
+                href = href.substring(1)
+            }
+            el.setAttribute('href', ('../'.repeat(PAGE_DEPTH)) + href);
+        }
     }
 }
 

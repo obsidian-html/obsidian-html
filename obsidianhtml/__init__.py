@@ -804,9 +804,26 @@ def main():
             op = pb.paths['html_output_folder'].joinpath(rel_output_path)
 
             print(f'\t> COMPILING INDEX FROM DIR STRUCTURE ({op})')
+            # Create dirtree to be viewed on its own
+            if pb.gc('toggles/relative_path_html', cached=True):
+                html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')))
+                print(html_url_prefix)
             pb.EnsureTreeObj()
+            pb.treeobj.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
+            pb.treeobj.html_url_prefix = pb.gc('html_url_prefix')
             pb.treeobj.html = pb.treeobj.BuildIndex()
             pb.treeobj.WriteIndex()
+            
+            # Create dirtree to be included in every page
+            if pb.gc('toggles/relative_path_html', cached=True):
+                html_url_prefix = pb.sc(path='html_url_prefix', value='')
+            pb.EnsureTreeObj()
+            pb.treeobj.rel_output_path = 'obs.html/dirtree.html'
+            pb.treeobj.html_url_prefix = pb.gc('html_url_prefix')
+            pb.treeobj.html = pb.treeobj.BuildIndex()
+            pb.treeobj.WriteIndex()
+
+
             print('\t< COMPILING INDEX FROM DIR STRUCTURE: Done')
 
         # [??] Second pass
@@ -1023,7 +1040,8 @@ def main():
         if pb.gc('toggles/features/graph/enabled', cached=True):
             # compile graph
             html = PopulateTemplate(pb, 'null', pb.dynamic_inclusions, pb.graph_full_page_template, content='')
-            html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
+            html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links))\
+                        .replace('{page_depth}', '2')
 
             op = pb.paths['html_output_folder'].joinpath('obs.html/graph/index.html')
             op.parent.mkdir(parents=True, exist_ok=True)
