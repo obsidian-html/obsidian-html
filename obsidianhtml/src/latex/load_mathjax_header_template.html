@@ -3,14 +3,16 @@
     loader: {
       load: [
         '[tex]/action',
-        'output/chtml'
+        'output/chtml',
+        '[tex]/centernot'
       ]
     },
     tex: {
       inlineMath: [ ["\\(","\\)"] ],
-            displayMath: [ ["\\[","\\]"] ],
-            processEscapes: true,
-            processEnvironments: true
+      displayMath: [ ["\\[","\\]"] ],
+      processEscapes: true,
+      processEnvironments: true,
+      packages: {'[+]': ['centernot']}
     }
   };
 </script>
