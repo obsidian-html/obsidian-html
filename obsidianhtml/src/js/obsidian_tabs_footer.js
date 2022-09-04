@@ -117,6 +117,13 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
     SetContainer(levelcont);
     LoadTableOfContents(levelcont);
 
+    // Rerender Mathjax
+    if (typeof MathJax !== 'undefined'){
+        if (typeof MathJax.typeset === 'function'){
+            MathJax.typeset();
+        }
+    }
+
     // Continue path opening (if started with path opening)
     if (callbackpath) {
         OpenPath(level + 1, callbackpath);
