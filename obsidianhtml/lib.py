@@ -358,7 +358,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         #dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
 
     if pb.config.feature_is_enabled('math_latex', cached=True):
-        dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/tex-chtml.js"></script>' + "\n"
+        #dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/tex-chtml.js"></script>' + "\n"
         #dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js"></script>' + "\n"
         dynamic_inclusions += OpenIncludedFile('latex/load_mathjax_header_template.html') + "\n"
         #dynamic_inclusions += '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + "\n"
