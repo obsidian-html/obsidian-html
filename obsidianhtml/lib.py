@@ -250,6 +250,11 @@ def ExportStaticFiles(pb):
         if file_name[1] in ('master.css', 'main.css', 'global_main.css', 
                             'obsidian_core.js', 
                             'search.js', 'search.css'):
+
+            url_mode = 'absolute'
+            if pb.gc('toggles/relative_path_html'):
+                url_mode = 'relative'
+
             c = c.replace('{html_url_prefix}', html_url_prefix)\
                  .replace('{configured_html_url_prefix}', pb.configured_html_prefix)\
                  .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
@@ -259,7 +264,9 @@ def ExportStaticFiles(pb):
                  .replace('{mermaid_enabled}',str(int(pb.gc('toggles/features/mermaid_diagrams/enabled'))))\
                  .replace('{toc_pane_div}', toc_pane_div)\
                  .replace('{content_pane_div}', content_pane_div)\
-                 .replace('{gzip_hash}', pb.gzip_hash)
+                 .replace('{gzip_hash}', pb.gzip_hash)\
+                 .replace('{url_mode}', url_mode)\
+
             c = c.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))\
                  .replace('__loading_bg_color__', pb.gc('toggles/features/styling/loading_bg_color', cached=True))\
                  .replace('__max_note_width__', pb.gc('toggles/features/styling/max_note_width', cached=True))\
@@ -309,13 +316,20 @@ def ExportStaticFiles(pb):
                 f.write(grapher["contents"])
             
             # add to dynamic imports in grapher.js
-            dynamic_imports += f"import * as grapher_{grapher['id']} from '{html_url_prefix}/obs.html/static/graphers/{grapher['id']}.js';\n"
+            dynamic_imports += f"import * as grapher_{grapher['id']} from './graphers/{grapher['id']}.js';\n"
 
             # add to grapher list
             grapher_list.append("{'id': '" + grapher['id'] + "', 'name': '" + grapher['name'] + "', 'module': grapher_" + grapher['id'] + "}")
             grapher_hash.append("'" + grapher['id'] + "': " + grapher_list[-1])
         
         dynamic_imports += '\n'
+        dynamic_imports += f"const CONFIGURED_HTML_URL_PREFIX = '{pb.configured_html_prefix}';\n"
+        if pb.gc('toggles/relative_path_html'):
+            dynamic_imports += 'const URL_MODE = "relative";\n'
+        else:
+            dynamic_imports += 'const URL_MODE = "absolute";\n'
+        dynamic_imports += '\n'
+
         grapher_list = 'var graphers = [\n\t' + ',\n\t'.join(grapher_list) + '\n]\n'
         grapher_hash = 'var graphers_hash = {\n\t' + ',\n\t'.join(grapher_hash) + '\n}\n'
 

@@ -284,7 +284,7 @@ function graph_open_link(args){
 
 // fn
 function graph_open_link_tabs(args){
-    let url = args.node.url;
+    let url = get_node_url_adaptive(args.node);
 
     return function() {
         let level = parseInt(args.graph_container.parentElement.parentElement.level);
@@ -295,13 +295,34 @@ function graph_open_link_tabs(args){
 
 // fn
 function graph_open_link_normal(args){
-    let url = args.node.url;
-
     return function(){
-        window.location.href = url;
+        window.location.href = get_node_url_adaptive(args.node);
         return false;
     }
 }
+
+function get_node_url_adaptive(node){
+    // build url: relative path
+    if (URL_MODE == 'relative'){
+        let url = node.rtr_url;
+        let page_depth = window.location.pathname.split('/').length - CONFIGURED_HTML_URL_PREFIX.split('/').length - 1;
+        if (page_depth > 0){
+            return '../'.repeat(page_depth) + url;
+        }
+        else {
+            return './' + url;
+        }
+    }
+
+    // build url: absolute path
+    if (URL_MODE == 'absolute'){
+        return node.url;
+    }
+
+    // fallthrough
+    throw 'OBS.HTML: URL_MODE should be either "absolute" or "relative"! Grapher failed to get node url.';
+}
+
 // (action)
 function graph_select_node(args){
     graphs[args.uid].current_node_id = args.node.id;

@@ -6,10 +6,11 @@ class SearchHead:
     def __init__(self):
         self.data = []
 
-    def AddPage(self, url, title, text):
+    def AddPage(self, url, rtr_url, title, text):
         p = {
             'title': title,
             'url': url,
+            'rtr_url': rtr_url,
             'keywords': GetKeywords(text),
             'md': SanatizeText(text)
         }
