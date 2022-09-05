@@ -176,6 +176,8 @@ toggles:
       enabled: True
     backlinks:                  # Show backlinks at the bottom of each note
       enabled: True
+    embedded_note_titles:
+      enabled: True
 
     search:
       enabled: True

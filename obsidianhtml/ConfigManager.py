@@ -1,7 +1,8 @@
 from . import printHelpAndExit
 from .lib import OpenIncludedFile
 
-from pathlib import Path
+from pathlib import Path 
+import json
 
 import inspect
 import yaml
@@ -56,6 +57,9 @@ class Config:
         # Check capabilities needed
         self.capabilities_needed = {}
         self.load_capabilities_needed()
+
+        # Plugins
+        self.plugin_settings = {}
 
     def load_capabilities_needed(self):
         gc = self.get_config
@@ -169,6 +173,16 @@ class Config:
                         raise Exception(f"Could not open user provided grapher file with path {temp_path}")
             
                 self.pb.graphers.append(grapher)
+
+
+    def LoadEmbeddedNoteConfig(self, data_json_path):
+        self.plugin_settings['embedded_note_titles'] = {}
+        if data_json_path.exists():
+            with open(data_json_path, 'r', encoding='utf-8') as f:
+                self.plugin_settings['embedded_note_titles'] = json.loads(f.read())
+            return True
+        return False
+
 
 
 def MergeDictRecurse(base_dict, update_dict, path=''):
