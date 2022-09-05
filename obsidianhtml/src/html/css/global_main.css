@@ -317,6 +317,9 @@ th {
 h1+table {
     margin-top: 0rem;
 }
+embeddedtitle+table {
+    margin-top: 0rem;
+}
 
 h2+table {
     margin-top: 0rem;
@@ -555,7 +558,8 @@ h1,
 h2,
 h3,
 h4,
-h5 {
+h5,
+embeddedtitle {
     scroll-margin-top: 8rem;
 }
 
@@ -569,7 +573,8 @@ h5 {
     overflow-anchor: none;
 }
 
-h1 {
+h1,
+embeddedtitle {
     font-size: 17pt;
     line-height: 34px;
     margin-top: 0px;
@@ -591,7 +596,8 @@ h2 {
     margin-top: 2rem;
 }
 
-h1+h2 {
+h1+h2,
+embeddedtitle+h2 {
     margin-top: 1rem;
 }
 

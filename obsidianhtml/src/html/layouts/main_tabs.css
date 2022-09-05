@@ -95,10 +95,11 @@
         padding: 1rem;
         padding-left: 2rem;
     }
-    h1, h2, h3, h4, h5 {
+    h1, h2, h3, h4, h5, embeddedtitle {
         scroll-margin-top: 4rem;
     }
-    h1 {
+    h1,
+    embeddedtitle {
         font-size: 28px;
         line-height: 34px;
         margin-top: 0px;
@@ -119,7 +120,8 @@
         padding-bottom: 0.2rem;
         margin-top: 2rem;
     }
-    h1 + h2 {
+    h1 + h2,
+    embeddedtitle + h2 {
         margin-top: 1rem;
     }
     h2 + p {

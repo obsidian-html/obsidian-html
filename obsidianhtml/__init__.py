@@ -20,7 +20,7 @@ import gzip
 from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
 from .FileFinder import GetNodeId, FindFile
 
-from .MarkdownPage import MarkdownPage
+from .MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
 from .MarkdownLink import MarkdownLink
 from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, CreateStaticFilesFolders, \
@@ -309,6 +309,33 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
 
     # HTML Tweaks
+    # [??] Embedded note titles integration
+    # ------------------------------------------------------------------
+    if pb.config.capabilities_needed['embedded_note_titles']:
+        title = node['name']
+
+        # overwrite node name (titleMetadataField)
+        if 'titleMetadataField' in pb.config.plugin_settings['embedded_note_titles'].keys():
+            title_key = pb.config.plugin_settings['embedded_note_titles']['titleMetadataField']
+            if title_key in node['metadata'].keys():
+                title = node['metadata'][title_key]
+
+        # hide if h1 is present
+        hide = False
+        if 'hideOnH1' in pb.config.plugin_settings['embedded_note_titles'].keys() and pb.config.plugin_settings['embedded_note_titles']['hideOnH1']:
+            header_dict, root_element = ConvertMarkdownToHeaderTree(md.page)
+            if len(root_element['content']) > 0 and root_element['content'][0] != '' and root_element['content'][0]['level'] == 1:
+                hide = True
+
+        # hideOnMetadataField
+        if 'hideOnMetadataField' in pb.config.plugin_settings['embedded_note_titles'].keys() and pb.config.plugin_settings['embedded_note_titles']['hideOnMetadataField']:
+            if 'embedded-title' in node['metadata'].keys() and node['metadata']['embedded-title'] == False:
+                hide = True 
+
+        # add embedded title
+        if not hide:
+            html_body = f"<embeddedtitle>{title.capitalize()}</embeddedtitle>\n" + html_body 
+
     # ------------------------------------------------------------------
     # [14] Tag external/anchor links with a class so they can be decorated differently
     for l in re.findall(r'(?<=\<a href=")([^"]*)', html_body):
@@ -584,7 +611,6 @@ def main():
     else:
         pb.paths['original_obsidian_folder'] = pb.paths['obsidian_folder']        # use only for lookups!
 
-
     # Compile dynamic inclusion list
     # ---------------------------------------------------------
     # This is a set of javascript/css files to be loaded into the header based on config choices.
@@ -702,6 +728,7 @@ def main():
 
     if pb.gc('toggles/extended_logging', cached=True):
         WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files.md'), include_processed=False)
+        
 
     # Convert Obsidian to markdown
     # ---------------------------------------------------------
@@ -769,6 +796,37 @@ def main():
             elements.append(el)
 
         pb.navbar_links = elements
+
+        # [??] Embedded note titles integration
+        # ------------------------------------------------------------------
+        if pb.gc('toggles/features/embedded_note_titles/enabled', cached=True):
+            if pb.gc('toggles/verbose_printout', cached=True):
+                print('\t'*(1), f"html: embedded note titles are enabled in config")
+
+            # Enable/disable capability based on whether the plugin is installed
+            embed_plugin_folder_path = pb.paths['original_obsidian_folder'].joinpath('.obsidian/plugins/obsidian-embedded-note-titles').resolve()
+            pb.config.capabilities_needed['embedded_note_titles'] = embed_plugin_folder_path.exists()
+            if pb.gc('toggles/verbose_printout', cached=True):
+                if pb.config.capabilities_needed['embedded_note_titles']:
+                    print('\t'*(1), f"html: embedded note title plugin found, enabling embedded_note_titles capability.")
+                else:
+                    print('\t'*(1), f"html: embedded note title plugin not found, disabling embedded_note_titles capability.")
+
+            # Load config
+            if pb.config.capabilities_needed['embedded_note_titles']:
+                data_path = embed_plugin_folder_path.joinpath('data.json').resolve()
+                result = pb.config.LoadEmbeddedNoteConfig(data_path)
+
+                if pb.gc('toggles/verbose_printout', cached=True):
+                    if result:
+                        print('\t'*(1), f"html: embedded note titles settings loaded.", pb.config.plugin_settings['embedded_note_titles'])
+                    else:
+                        print('\t'*(1), f"html: embedded note titles settings were not found, using defaults.")
+        else:
+            pb.config.capabilities_needed['embedded_note_titles'] = False
+            if pb.gc('toggles/verbose_printout', cached=True):
+                print('\t'*(1), f"html: embedded note titles are disabled in config")
+
         
         # Start conversion from the entrypoint
         ep = pb.files[pb.paths['md_entrypoint'].name]
