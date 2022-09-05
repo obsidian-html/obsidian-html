@@ -324,7 +324,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         hide = False
         if 'hideOnH1' in pb.config.plugin_settings['embedded_note_titles'].keys() and pb.config.plugin_settings['embedded_note_titles']['hideOnH1']:
             header_dict, root_element = ConvertMarkdownToHeaderTree(md.page)
-            if len(root_element['content']) > 0 and root_element['content'][0] != '' and root_element['content'][0]['level'] == 1:
+            if len(root_element['content']) > 0 and isinstance(root_element['content'][0], dict) and root_element['content'][0]['level'] == 1:
                 hide = True
 
         # hideOnMetadataField
