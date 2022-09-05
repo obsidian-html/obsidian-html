@@ -157,6 +157,9 @@ class MarkdownPage:
         # They will be restored at the end
         self.StripCodeSections() 
 
+        # -- [??] Insert extra newline between two centered mathjax blocks
+        self.page = re.sub(r'\$\$\ *\n\$\$', '$$ \n\n$$', self.page, flags=re.MULTILINE)
+
         # -- [??] Replace \| with |
         self.page = re.sub(r'\\\|', '|', self.page, flags=re.MULTILINE)
 
