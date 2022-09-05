@@ -673,6 +673,7 @@ li {
     font-family: 'Roboto-Regular';
     color: var(--dir-tree-color);
     font-weight: bold;
+    text-align: left;
 }
 
 .dir-button:first-child {
