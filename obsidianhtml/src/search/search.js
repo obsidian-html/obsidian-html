@@ -2,6 +2,7 @@
 // -----------------------------------------------------------------------------------------------
 
 var SEARCH_DATA = '';                   // search.json contents
+var URL_MODE = '{url_mode}';
 var fuse;                               // fuzzy search object
 var index;
 
@@ -16,7 +17,7 @@ function LoadSearchData(){
 
     if (gzip_hash != search_hash || !search_data){
         // refresh data
-        GzipUnzipLocalFile('{html_url_prefix}/obs.html/data/search.json.gzip').then(data => {
+        GzipUnzipLocalFile('../obs.html/data/search.json.gzip').then(data => {
             SEARCH_DATA = JSON.parse(data);
             window.localStorage.setItem('search_data', data);
             window.localStorage.setItem('search_hash', gzip_hash);
@@ -40,12 +41,11 @@ function InitFlexSearch(){
 
     let i = 0;
     SEARCH_DATA.forEach(doc => {
-
         index.add({
             id: i,
             content: doc.keywords,
             title: doc.title,
-            url: doc.url
+            url: get_node_url_adaptive(doc)
         });
 
         i++;
@@ -55,6 +55,27 @@ function InitFlexSearch(){
 
 // Functions
 // -----------------------------------------------------------------------------------------------
+function get_node_url_adaptive(node){
+    // build url: relative path
+    if (URL_MODE == 'relative'){
+        let url = node.rtr_url;
+        let page_depth = window.location.pathname.split('/').length - CONFIGURED_HTML_URL_PREFIX.split('/').length - 1;
+        if (page_depth > 0){
+            return '../'.repeat(page_depth) + url;
+        }
+        else {
+            return './' + url;
+        }
+    }
+
+    // build url: absolute path
+    if (URL_MODE == 'absolute'){
+        return node.url;
+    }
+
+    // fallthrough
+    throw 'OBS.HTML: URL_MODE should be either "absolute" or "relative"! Search failed to get node url.';
+}
 
 function run_search(search_string_id, hard_search_id) {
     let search_string_div = document.getElementById(search_string_id);

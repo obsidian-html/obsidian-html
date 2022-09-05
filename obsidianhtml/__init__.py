@@ -164,7 +164,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # Add page to search file
     # ------------------------------------------------------------------
     if pb.gc('toggles/features/search/enabled', cached=True):
-        pb.search.AddPage(url=node['url'], title=node['id'], text=md.page)
+        pb.search.AddPage(url=node['url'], rtr_url=node['rtr_url'], title=node['id'], text=md.page)
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
@@ -1126,6 +1126,10 @@ def main():
 
             with gzip.open(gzip_path, 'wb', compresslevel=5) as f:
                 f.write(gzip_content.encode('utf-8'))
+
+            # search_path = pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json')
+            # with open(search_path, 'w', encoding='utf-8') as f:
+            #     f.write(gzip_content)
             
         # Add Extra stuff to the output directories
         ExportStaticFiles(pb)
