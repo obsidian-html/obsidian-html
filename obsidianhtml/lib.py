@@ -1,15 +1,18 @@
 import os                   #
 import re                   # regex string finding/replacing
-from pathlib import Path    # 
+import yaml
 import frontmatter          # remove yaml frontmatter from md files
-import urllib.parse         # convert link characters like %
 import warnings
 import shutil               # used to remove a non-empty directory, copy files
-from string import ascii_letters, digits
 import tempfile             # used to create temporary files/folders
 import time
-from functools import cache
 import unicodedata
+
+import urllib.parse         # convert link characters like %
+
+from pathlib import Path    # 
+from string import ascii_letters, digits
+from functools import cache
 from subprocess import Popen, PIPE
 
 # Open source files in the package
@@ -25,8 +28,8 @@ class DuplicateFileNameInRoot(Exception):
 class MalformedTags(Exception):
     pass
 
-def printHelpAndExit(exitCode:int):
-    print('[Obsidian-html]')
+def print_help_and_exit(exitCode:int):
+    print('\n[Obsidian-html]')
     print('- Add -i </path/to/input.yml> to provide config')
     print('- Add -v for verbose output')
     print('- Add -h to get helptext')
@@ -710,3 +713,7 @@ def copy_tree_rsync(src_dir, dst_dir, ignore, verbose=False):
         print("Copy failed %d %s %s" % (p.returncode, output.decode('ascii').replace('\\n', '\n'), error))
     else:
         print("Copy succeeded %d %s %s" % (p.returncode, output.decode('ascii').replace('\\n', '\n'), error))
+
+class YamlIndentDumper(yaml.Dumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super(YamlIndentDumper, self).increase_indent(flow, False)
