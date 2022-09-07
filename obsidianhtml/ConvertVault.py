@@ -22,6 +22,7 @@ from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
 from .RssFeed import RssFeed
 from .ErrorHandling import extra_info
 from .PicknickBasket import PicknickBasket
+from .CreateIndexFromTags import CreateIndexFromTags
 
 
 def ConvertVault(config_yaml_location=''):
