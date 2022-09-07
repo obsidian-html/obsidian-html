@@ -1,0 +1,19 @@
+Usage: obsidianhtml export <command> [arguments...] [command options] [global options]
+
+Global options:
+	--help, -h			Show help
+	-v				Set Verbose mode
+  
+Commands:
+	layout				Export a prepackaged html layout 
+
+		Command options:
+			-o		Output path where to save the template
+			-l		Layout to export, must be one of: documentation, tabs, minimal
+
+	default-config			Print / export default config yaml
+
+		Command options:
+			-o 		Optional. Output path. 
+					When present this command will write the default config to this location. 
+					When absent, the default config will be printed to the terminal.

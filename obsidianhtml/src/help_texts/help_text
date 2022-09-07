@@ -1,0 +1,48 @@
+obsidianhtml version {version}
+Usage: obsidianhtml <command> [arguments...] [command options] [global options]
+
+Commands:
+	run		Convert vault using sensible defaults, and run a local webserver to serve it for 
+			development and testing purposes. (Very opinionated). 
+			The generated config.yml can be used in the convert command.
+
+	convert		Just convert your vault to html and or markdown. 
+			Will use provided config exactly as provided.
+
+	export		Used to export packaged resources
+	version		Print version cleanly
+	help		Show help.
+
+Global options:
+	--help, -h	Show help
+	-v		Set Verbose mode
+  
+Command options:
+	Run
+		-f		Optional when -i is used. Set Obsidian entrypoint note
+		-o		Optional. Set/overwrite Output folder (html will be in a subfolder called 'html' under this, markdown under 'md'.
+		-i		Optional when -f is used. Pass in a config file. Using -f, -o, or --subfolder will overwrite some settings.
+		--subfolder     Optional. Use to create a working config for publishing to e.g. http://mywebsite.com/<subfolder> 
+
+		Examples:
+			obsidianhtml run -f my/vault/entrypoint.md
+			obsidianhtml run -f my/vault/entrypoint.md -i config.yml		# overwrite some of the default settings
+			obsidianhtml run -f my/vault/entrypoint.md --subfolder sites/test	# setup config to publish to https://<website>/sites/test
+    
+	Convert or <no command>
+		-i		Pass in a config file.
+
+		Examples:
+			obsidianhtml convert -i my/config.yml
+			obsidianhtml convert -i my/config.yml -v				# same as above, but with verbose logging
+			obsidianhtml -i my/config.yml -v					# identical to previous example (deprecated, will be removed in version 4.0.0)
+
+	Export
+		Export various packaged resources. Run `obsidianhtml export` for more information and supported arguments and options.
+
+	Version
+		<No args>
+		Cleanly output version string
+
+		Examples:
+			obsidianhtml version
