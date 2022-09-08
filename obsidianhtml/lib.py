@@ -14,6 +14,7 @@ from pathlib import Path    #
 from string import ascii_letters, digits
 from functools import cache
 from subprocess import Popen, PIPE
+from appdirs import AppDirs
 
 # Open source files in the package
 import importlib.resources as pkg_resources
@@ -28,14 +29,18 @@ class DuplicateFileNameInRoot(Exception):
 class MalformedTags(Exception):
     pass
 
-def print_help_and_exit(exitCode:int):
-    print('\n[Obsidian-html]')
-    print('- Add -i </path/to/input.yml> to provide config')
-    print('- Add -v for verbose output')
-    print('- Add -h to get helptext')
-    print('- Add -eht <target/path/file.name> <documentation/tabs/no_tabs> to export the html template.')
-    print('- Add -gc to output all configurable keys and their default values.')
+def print_global_help_and_exit(exitCode:int):
+    print()
+    version = OpenIncludedFile('version')
+    print(OpenIncludedFile('help_texts/help_text').replace('{version}', version))
     exit(exitCode)
+
+def get_obshtml_appdir_folder_path():
+    return Path(AppDirs("obsidianhtml", "obsidianhtml").user_config_dir)
+
+def get_default_appdir_config_yaml_path():
+    appdir_config_folder_path = get_obshtml_appdir_folder_path()
+    return appdir_config_folder_path.joinpath('config.yml')
 
 def WriteFileLog(files, log_file_name, include_processed=False):
     if include_processed:

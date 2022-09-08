@@ -5,8 +5,8 @@ from pathlib import Path
 import tempfile
 from appdirs import AppDirs
 
-from .lib import    print_help_and_exit
-from .lib import    OpenIncludedFile, YamlIndentDumper
+from .lib import    print_global_help_and_exit
+from .lib import    OpenIncludedFile, YamlIndentDumper, get_obshtml_appdir_folder_path, get_default_appdir_config_yaml_path
 from .ConvertVault import ConvertVault
 
 # Defer tools
@@ -27,24 +27,24 @@ def Run():
     # internal vars
     output_folder_path = None
     host_dir_path = None
-    appdir_config_folder_path = Path(AppDirs("obsidianhtml", "obsidianhtml").user_config_dir)
-    config_save_path = appdir_config_folder_path.joinpath('config.yml')
+    appdir_config_folder_path = get_obshtml_appdir_folder_path()
+    config_save_path = get_default_appdir_config_yaml_path()
 
     for i, v in enumerate(sys.argv):
         if v == '-i':
             if len(sys.argv) < (i + 2):
                 print(f'No config path given.\n  Use `obsidianhtml run -i /target/path/to/config.yml` to provide input.')
-                print_help_and_exit(1)
+                print_global_help_and_exit(1)
             config_path_str = sys.argv[i+1]
         elif v == '-f':
             if len(sys.argv) < (i + 2):
                 print(f'No entrypoint path given.\n  Use `obsidianhtml run -f /target/path/to/entrypoint.md` to provide input.')
-                print_help_and_exit(1)
+                print_global_help_and_exit(1)
             entrypoint_path_str = sys.argv[i+1]
         elif v == '-o':
             if len(sys.argv) < (i + 2):
                 print(f'No output folder path given.\n  Use `obsidianhtml run -o /target/path/to/output/folder` to provide input.')
-                print_help_and_exit(1)
+                print_global_help_and_exit(1)
             output_folder_path_str = sys.argv[i+1]
 
         elif v == '--clean':
@@ -52,7 +52,7 @@ def Run():
         elif v == '--subfolder':
             if len(sys.argv) < (i + 2):
                 print(f'No subfolder path given.\n  Use `obsidianhtml run --subfolder test to provide input.')
-                print_help_and_exit(1)
+                print_global_help_and_exit(1)
             subfolder = sys.argv[i+1]
 
     # Load config
@@ -73,7 +73,7 @@ def Run():
         entrypoint_abs_path_posix = entrypoint_path.as_posix()
         if (not entrypoint_path.exists()):
             print(f'Could not find provided config file at {entrypoint_abs_path_posix}, is the path correct?')
-            print_help_and_exit(1)
+            print_global_help_and_exit(1)
         return entrypoint_path, entrypoint_abs_path_posix
 
     entrypoint_path = None
@@ -84,7 +84,7 @@ def Run():
     else:
         if config['obsidian_entrypoint_path_str'] == '<REQUIRED_INPUT>':
             print('ERROR: Entrypoint path not provided, supply either a path directly via -f or via a config file (-i)')
-            print_help_and_exit(1)
+            print_global_help_and_exit(1)
         else:
             entrypoint_path, entrypoint_abs_path_posix = TestEntryPointExists(config['obsidian_entrypoint_path_str'])
             config['obsidian_entrypoint_path_str'] = entrypoint_abs_path_posix
@@ -97,7 +97,7 @@ def Run():
         print_set_var(config, 'obsidian_folder_path_str', reason='deduced', category='info')
     else:
         print(f"ERROR: Obsidian vault not found based on entrypoint {config['obsidian_folder_path_str']}.\n\tDid you provide a note that is in a valid vault? (Tip: `obsidianhtml run` looks for the .obsidian folder)")
-        print_help_and_exit(1)
+        print_global_help_and_exit(1)
 
     # Set/overwrite html_url_prefix
     if subfolder != '':
@@ -232,7 +232,7 @@ def CleanFolder(folder_path, clean_toggle):
             print(f"shutil.rmtree('{folder_path_as_posix}')")
         else:
             print(f'ERROR: Set output folder path ({folder_path_as_posix}) already exists, canceling run.\n\tUse --clean to allow obsidianhtml to remove this directory for you')
-            print_help_and_exit(1)
+            print_global_help_and_exit(1)
     else:
         #folder_path.mkdir(parents=True, exist_ok=True)
         print(f'INFO: Created empty output folder path {folder_path}')

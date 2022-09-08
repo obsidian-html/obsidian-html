@@ -2,7 +2,7 @@ import sys
 import yaml
 from pathlib import Path
 
-from .lib import print_help_and_exit
+from .lib import print_global_help_and_exit
 from .lib import    OpenIncludedFile
 
 from .ConvertVault import ConvertVault
@@ -20,10 +20,7 @@ def main():
 
     # Commands
     # ---------------------------------------------------------
-    if len(sys.argv) < 2:
-        print_global_help_and_exit(1)
-
-    if sys.argv[1][0] == '-':
+    if len(sys.argv) < 2 or sys.argv[1][0] == '-':
         print('DEPRECATION WARNING: You did not pass in a command. Assuming you meant "convert". Starting version 4.0.0 providing a command will become mandatory.')
         command = 'convert'
     else:
@@ -41,9 +38,4 @@ def main():
     else:
         print(f'Command {command} is unknown')
         print_global_help_and_exit(1)
-
-def print_global_help_and_exit(exitCode:int):
-    version = OpenIncludedFile('version')
-    print(OpenIncludedFile('help_texts/help_text').replace('{version}', version))
-    exit(exitCode)
 
