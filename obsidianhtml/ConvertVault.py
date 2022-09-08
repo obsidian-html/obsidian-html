@@ -18,7 +18,7 @@ from .MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
 from .MarkdownLink import MarkdownLink
 from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
                     GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, CreateStaticFilesFolders, \
-                    PopulateTemplate, WriteFileLog, simpleHash
+                    PopulateTemplate, WriteFileLog, simpleHash, get_default_appdir_config_yaml_path
 from .RssFeed import RssFeed
 from .ErrorHandling import extra_info
 from .PicknickBasket import PicknickBasket
@@ -46,10 +46,33 @@ def ConvertVault(config_yaml_location=''):
         for i, v in enumerate(sys.argv):
             if v == '-i':
                 if len(sys.argv) < (i + 2):
-                    print(f'No config path given.\n  Use `obsidianhtml -i /target/path/to/config.yml` to provide input.')
-                    print_help_and_exit(1)
+                    print(f'No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
+                    #print_global_help_and_exit(1)
+                    exit(1)
                 input_yml_path_str = sys.argv[i+1]
                 break
+
+    # Try to find config in default locations
+    if input_yml_path_str == '':
+        # config.yml in same folder
+        if Path('config.yml').exists():
+            input_yml_path_str = Path('config.yml').resolve().as_posix()
+            print(f"No config provided, using config at {input_yml_path_str}. (Default config path)")
+
+        # config.yaml in same folder
+        if Path('config.yaml').exists():
+            input_yml_path_str = Path('config.yaml').resolve().as_posix()
+            print(f"No config provided, using config at {input_yml_path_str}. (Default config path)")
+
+        # config.yml in appdir folder
+        appdir_config = Path(get_default_appdir_config_yaml_path())
+        if appdir_config.exists():
+            input_yml_path_str = appdir_config.as_posix()
+            print(f"No config provided, using config at {input_yml_path_str}. (Default config path)")
+
+    if input_yml_path_str == '':
+        print(f'No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
+        exit(1)
 
     pb.loadConfig(input_yml_path_str)
 

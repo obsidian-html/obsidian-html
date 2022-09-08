@@ -1,4 +1,4 @@
-from . import print_help_and_exit
+from . import print_global_help_and_exit
 from .lib import OpenIncludedFile
 
 from pathlib import Path 
@@ -18,7 +18,7 @@ class Config:
         # Make sure the user passes in a config file
         if input_yml_path_str == False:
             print('ERROR: No config file passed in. Use -i <path/to/config.yml> to pass in a config yaml.')
-            print_help_and_exit(1)
+            print_global_help_and_exit(1)
 
         # Load default yaml first
         default_config = yaml.safe_load(OpenIncludedFile('defaults_config.yml'))
@@ -29,7 +29,7 @@ class Config:
                 input_config =yaml.safe_load(f.read())
         except FileNotFoundError:
             print(f'Could not locate the config file {input_yml_path_str}.\n  Please try passing the exact location of it with the `obsidianhtml -i /your/path/to/{input_yml_path_str}` parameter.')
-            print_help_and_exit(1)
+            print_global_help_and_exit(1)
 
         # Merge configs
         self.config = MergeDictRecurse(default_config, input_config)
