@@ -209,12 +209,12 @@ toggles:
     graph:
       enabled: True                   # Include code to build the graph view per page (default: True)
       templates:
-        - id: 3d
-          name: 3d
-          path: builtin<3d>
         - id: 2d
           name: 2d
           path: builtin<2d>
+        - id: 3d
+          name: 3d
+          path: builtin<3d>
       styling:
         show_icon: True
       coalesce_force: '-30'

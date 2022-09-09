@@ -35,5 +35,6 @@ def ServeDir(port=8888, directory='./'):
     })
 
     # start server
+    print(f'OBSHTML: Started webserver at http://localhost:{port}/ hosting from {Path(directory).resolve().as_posix()} (Ctrl+C to exit)', flush=True)
     httpd = socketserver.TCPServer(("", int(port)), Handler)
     httpd.serve_forever()
