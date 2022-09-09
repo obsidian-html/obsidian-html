@@ -256,7 +256,7 @@ class MarkdownPage:
             file_link = lo.get_link('markdown', origin=origin)
 
             # Update link
-            new_link = ']('+file_link+')'
+            new_link = ']('+urllib.parse.quote(file_link)+')'
             safe_link = re.escape(']('+l+')')
             self.page = re.sub(f"(?<![\[\(])({safe_link})", new_link, self.page)
 
