@@ -197,13 +197,12 @@ def Run():
         cmd += ['--directory', host_dir_path.as_posix(), '--port', '8888']
 
         webserver_process = subprocess.Popen(cmd)
-        
+
         # close server *always* on exit
         stack.callback(partial(webserver_process.terminate))
         stack.callback(partial(print, 'DEFERRED: closed webserver', flush=True))
 
-        time.sleep(0.1)
-        print(f"INFO: WEBSERVER: started on http://localhost:8888 in {host_dir_path}", flush=True)
+        time.sleep(0.5)
         print(f"\nOpen your webbrowser and navigate to http://localhost:8888{html_url_prefix}/ to view your website")
 
         input("\nPress enter to stop hosting website and exit obsidianhtml run.\n\n")
