@@ -8,6 +8,7 @@ from .lib import    OpenIncludedFile
 from .ConvertVault import ConvertVault
 from .Run import Run
 from .Export import RunExport
+from .Serve import ServeDir
 
 
 
@@ -35,7 +36,10 @@ def main():
     elif command == 'version':
         print(OpenIncludedFile('version'))
         exit()
+    elif command == 'serve':
+        ServeDir()
+        exit()
     else:
-        print(f'Command {command} is unknown')
+        print(f'Command "{command}" is unknown')
         print_global_help_and_exit(1)
 

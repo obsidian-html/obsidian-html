@@ -30,7 +30,10 @@ Command options:
 			obsidianhtml run -f my/vault/entrypoint.md --subfolder sites/test	# setup config to publish to https://<website>/sites/test
     
 	Convert or <no command>
-		-i		Pass in a config file.
+		-i		Pass in a config file. 
+				When no config file is passed in, obsidianhtml will look for the file at ./config.yml, and then ./config.yaml.
+				When they don't exist, obsidianhtml will look whether a config.yml file exists in the obsidianhtml appdir.
+				If none are present, obsidianhtml will fail.
 
 		Examples:
 			obsidianhtml convert -i my/config.yml

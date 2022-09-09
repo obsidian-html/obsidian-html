@@ -188,8 +188,16 @@ def Run():
     # ----------------------------
     # defer context for webserver
     with ExitStack() as stack:
-        webserver_process = subprocess.Popen(['python', '-m', 'http.server', '--directory', host_dir_path, '8888'])#, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cmd = []
+        if sys.argv[0].split('/')[-1] == 'obsidianhtml':
+            cmd = ['obsidianhtml', 'serve'] 
+        else:
+            cmd = ['python', '-m', 'obsidianhtml', 'serve']
+        
+        cmd += ['--directory', host_dir_path.as_posix(), '--port', '8888']
 
+        webserver_process = subprocess.Popen(cmd)
+        
         # close server *always* on exit
         stack.callback(partial(webserver_process.terminate))
         stack.callback(partial(print, 'DEFERRED: closed webserver', flush=True))

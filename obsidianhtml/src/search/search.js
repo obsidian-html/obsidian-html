@@ -1,12 +1,13 @@
 // GLOBALS
 // -----------------------------------------------------------------------------------------------
 
-var SEARCH_DATA2 = '';                   // search.json contents
-var SEARCH_DATA = [];                   // search.json contents
+var SEARCH_DATA_SOURCE = '';                   // search.json contents
+var SEARCH_DATA = [];                          // SEARCH_DATA_SOURCE with changes made
 
 var URL_MODE = '{url_mode}';
 var RELATIVE_PATHS = {relative_paths};
 var CONFIGURED_HTML_URL_PREFIX = '{configured_html_url_prefix}';
+
 var fuse;                               // fuzzy search object
 var index;
 
@@ -22,7 +23,7 @@ function LoadSearchData(){
     if (gzip_hash != search_hash || !search_data){
         // refresh data
         GzipUnzipLocalFile(CONFIGURED_HTML_URL_PREFIX + '/obs.html/data/search.json.gzip').then(data => {
-            SEARCH_DATA2 = JSON.parse(data);
+            SEARCH_DATA_SOURCE = JSON.parse(data);
             window.localStorage.setItem('search_data', data);
             window.localStorage.setItem('search_hash', gzip_hash);
 
@@ -31,7 +32,7 @@ function LoadSearchData(){
     }
     else {
         // just load cached data
-        SEARCH_DATA2 = JSON.parse(search_data);
+        SEARCH_DATA_SOURCE = JSON.parse(search_data);
         InitFlexSearch();
     }
 }
@@ -44,7 +45,7 @@ function InitFlexSearch(){
     });
 
     let i = 0;
-    SEARCH_DATA2.forEach(doc => {
+    SEARCH_DATA_SOURCE.forEach(doc => {
         let obj = {
             id: i,
             content: doc.keywords,
