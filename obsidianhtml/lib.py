@@ -104,6 +104,9 @@ def GetObsidianFilePath(link, file_tree, pb):
     # Find file. Values will be False when file is not found.
     output['rtr_path_str'], output['fo'] = FindFile(file_tree, link, pb)
 
+    if output['fo'] == False and link.startswith('/'):
+        output['rtr_path_str'], output['fo'] = FindFile(file_tree, link[1:], pb)
+
     return output
 
 def ConvertTitleToMarkdownId(title):
