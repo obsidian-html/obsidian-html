@@ -1,0 +1,188 @@
+obsidian_folder_path_str: /home/dorus/git/obsidian-html.github.io/__src/vault
+obsidian_entrypoint_path_str: /home/dorus/git/obsidian-html.github.io/__src/vault/ObsidianHtml.md
+log_output_folder_path_str: output/log
+exclude_subfolders:
+  - .obsidian
+  - .trash
+  - .DS_Store
+  - .git
+copy_vault_to_tempdir: true
+copy_vault_to_tempdir_method: default
+copy_vault_to_tempdir_follow_copy: false
+included_file_suffixes:
+  - jpg
+  - jpeg
+  - gif
+  - png
+  - bmp
+  - pdf
+  - mp4
+  - webm
+  - wav
+  - mp3
+video_format_suffixes:
+  - mp4
+  - webm
+audio_format_suffixes:
+  - wav
+  - mp3
+md_source_host_url: ''
+site_name: Obsidian-Html/Notes
+html_url_prefix: /sites/test
+html_template_path_str: ''
+html_custom_inclusions: []
+html_custom_footer_inclusions: []
+navbar_links: []
+file_exports: []
+toggles:
+  compile_md: true
+  compile_html: true
+  process_all: false
+  verbose_printout: false
+  debug_filetree_keys: false
+  extended_logging: false
+  allow_duplicate_filenames_in_root: true
+  warn_on_skipped_image: true
+  no_clean: false
+  relative_path_md: true
+  relative_path_html: false
+  external_blank: false
+  preserve_inline_tags: true
+  features:
+    styling:
+      layout: documentation
+      max_note_width: 120rem
+      add_toc: true
+      toc_pane: true
+      flip_panes: false
+      add_dir_list: true
+      accent_color: 65, 76, 253
+      loading_bg_color: 255, 255, 255
+    theme_picker:
+      enabled: true
+      styling:
+        show_icon: true
+    code_highlight:
+      enabled: true
+    mermaid_diagrams:
+      enabled: true
+    callouts:
+      enabled: true
+    math_latex:
+      enabled: true
+    backlinks:
+      enabled: true
+    embedded_note_titles:
+      enabled: true
+    search:
+      enabled: true
+      styling:
+        show_icon: true
+    tags_page:
+      enabled: true
+      styling:
+        show_icon: true
+        show_in_note_footer: true
+    dataview:
+      enabled: false
+      folder: obs.html/export
+    folder_notes:
+      enabled: false
+      placement: outside folder
+      naming: folder name
+    eraser:
+      enabled: true
+    breadcrumbs:
+      enabled: false
+    graph:
+      enabled: true
+      templates:
+        - id: 3d
+          name: 3d
+          path: builtin<3d>
+        - id: 2d
+          name: 2d
+          path: builtin<2d>
+      styling:
+        show_icon: true
+      coalesce_force: '-30'
+    create_index_from_tags:
+      enabled: false
+      add_links_in_graph_tree: true
+      tags: []
+      sort:
+        method: none
+        key_path: ''
+        value_prefix: ''
+        reverse: false
+        none_on_bottom: true
+      exclude_paths:
+        - .gitignore
+    rss:
+      enabled: false
+      host_root: https://localhost:8000/
+      styling:
+        show_icon: true
+      channel:
+        title: Notes
+        website_link: <https://your website.com>
+        description: <your description>
+        language_code: en-us
+        managing_editor: n/a
+        web_master: n/a
+      items:
+        selector:
+          match_keys: []
+          exclude_keys: []
+          include_subfolders: []
+          exclude_subfolders:
+            - .git
+            - obs.html
+          exclude_files:
+            - not_created.html
+            - index.html
+        description:
+          selectors:
+            - - yaml
+              - rss:description
+            - - first-paragraphs
+              - 2
+              - <br/><br/>
+            - - first-header
+              - 1
+        title:
+          selectors:
+            - - yaml
+              - rss:title
+            - - first-header
+              - 1
+            - - path
+              - - parent
+                - 1
+              - '/ '
+              - - stem
+        publish_date:
+          selectors:
+            - - yaml
+              - rss:publish_date
+            - - yaml_strip
+              - tags
+              - - date/
+          iso_formatted: true
+          format_string: ''
+    create_index_from_dir_structure:
+      enabled: true
+      rel_output_path: obs.html/dir_index.html
+      styling:
+        show_icon: true
+      exclude_subfolders:
+        - .git
+        - __src
+        - md
+        - obs.html
+      exclude_files:
+        - favicon.ico
+        - not_created.html
+md_folder_path_str: /tmp/obshtml_zxz8uwva/md
+md_entrypoint_path_str: /tmp/obshtml_zxz8uwva/md/index.md
+html_output_folder_path_str: /tmp/obshtml_zxz8uwva/html/sites/test

@@ -57,18 +57,18 @@ def ConvertVault(config_yaml_location=''):
         # config.yml in same folder
         if Path('config.yml').exists():
             input_yml_path_str = Path('config.yml').resolve().as_posix()
-            print(f"No config provided, using config at {input_yml_path_str}. (Default config path)")
-
+            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
+    if input_yml_path_str == '':
         # config.yaml in same folder
         if Path('config.yaml').exists():
             input_yml_path_str = Path('config.yaml').resolve().as_posix()
-            print(f"No config provided, using config at {input_yml_path_str}. (Default config path)")
-
+            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
+    if input_yml_path_str == '':
         # config.yml in appdir folder
         appdir_config = Path(get_default_appdir_config_yaml_path())
         if appdir_config.exists():
             input_yml_path_str = appdir_config.as_posix()
-            print(f"No config provided, using config at {input_yml_path_str}. (Default config path)")
+            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
 
     if input_yml_path_str == '':
         print(f'No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
