@@ -94,7 +94,6 @@ def ConvertVault(config_yaml_location=''):
     # Deduce relative paths
     paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
-
     
     # Add paths to pb
     # ---------------------------------------------------------
@@ -250,7 +249,13 @@ def ConvertVault(config_yaml_location=''):
             for k, v in pb.files.items():
                 print(k)
 
-        ep = pb.files[pb.paths['rel_obsidian_entrypoint'].as_posix()]
+        # Force search to lowercase
+        rel_entry_path_str = pb.paths['rel_obsidian_entrypoint'].as_posix()
+        if pb.gc('toggles/force_filename_to_lowercase', cached=True):
+            rel_entry_path_str = rel_entry_path_str.lower()
+
+        # Start conversion
+        ep = pb.files[rel_entry_path_str]
         pb.init_state(action='n2m', loop_type='note', current_fo=ep, subroutine='recurseObisidianToMarkdown')
         recurseObisidianToMarkdown(ep, pb)
         pb.reset_state()
@@ -329,11 +334,13 @@ def ConvertVault(config_yaml_location=''):
             if pb.gc('toggles/verbose_printout', cached=True):
                 print('\t'*(1), f"html: embedded note titles are disabled in config")
 
-        
-        # Start conversion from the entrypoint
-        ep = pb.files[pb.paths['md_entrypoint'].name]
-        print(pb.paths['md_entrypoint'].name)
+        # Force search to lowercase
+        rel_entry_path_str = paths['rel_md_entrypoint_path'].as_posix()
+        if pb.gc('toggles/force_filename_to_lowercase', cached=True):
+            rel_entry_path_str = rel_entry_path_str.lower()
 
+        # Start conversion from the entrypoint
+        ep = pb.files[rel_entry_path_str]
         pb.init_state(action='m2h', loop_type='md_note', current_fo=ep, subroutine='ConvertMarkdownPageToHtmlPage')
         ConvertMarkdownPageToHtmlPage(ep, pb)
         pb.reset_state()
@@ -816,8 +823,8 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # Get all local markdown links. 
     # ------------------------------------------------------------------
-    # This is any string in between '](' and  ')'
-    proper_links = re.findall(r'(?<=\]\().+?(?=\))', md.page)
+    # This is any string in between '](' and  ')' with no spaces in between the ( and )
+    proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', md.page)
     for l in proper_links:
 
         # Init link
@@ -848,7 +855,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
             new_link = f']({link.fo.get_link("html", origin=fo)}{query_part})'
-            
+
         # Update link
         safe_link = re.escape(']('+l+')')
         md.page = re.sub(safe_link, new_link, md.page)
@@ -858,8 +865,6 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     for link in re.findall(r'\!\[.*?\]\((.*?)\)', md.page):
         
         l = urllib.parse.unquote(link)
-        if '://' in l:
-            continue
 
         if l[0] == '/':
             l = l.replace('/', '', 1)
@@ -922,6 +927,15 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
                 md.page = output
             else: 
                 md.page = '\n[TOC]\n\n' + md.page
+
+    # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
+    # Cannot start with [, (, nor "
+    # match 'http://* ' or 'https://* ' (end match by whitespace)
+    # Note that note->md step also does this, this should be void if doing note-->html, but useful when doing md->html
+    for l in re.findall("(?<![\[\(\"])(https*:\/\/.[^\s]*)", md.page):
+        new_md_link = f"[{l}]({l})"
+        safe_link = re.escape(l)
+        md.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, md.page)
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
