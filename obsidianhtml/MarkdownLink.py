@@ -27,14 +27,12 @@ class MarkdownLink:
     query_delimiter = ''
     query = ''
 
-    def __init__(self, pb, url, page_path, root_path, relative_path_md = True, url_unquote=False):
+    def __init__(self, pb, url, page_path, root_path, url_unquote=False):
         # Set attributes
         self.pb = pb
-        self.relative_path_md = relative_path_md    # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
         self.page_path = page_path
-        self.url = url
-        if url_unquote:
-            self.url = urllib.parse.unquote(self.url)
+
+        self.set_url(url, url_unquote)
 
         # Split the query part of "link#query" into self.query
         # Self.url will be the "link" part.
@@ -54,6 +52,16 @@ class MarkdownLink:
 
         # Fetch file object. If this succeeds it means we can copy it over to the output
         self.GetFileObject()
+
+    def set_url(self, url, url_unquote):
+        for prefix in self.pb.gc('md_source_host_urls'):
+            if url.startswith(prefix):
+                url = url.replace(prefix, '', 1)
+                break
+        
+        self.url = url
+        if url_unquote:
+            self.url = urllib.parse.unquote(self.url)
 
     def SplitQuery(self):
         url = self.url

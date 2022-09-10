@@ -55,7 +55,9 @@ class PicknickBasket:
         return self.config.set_config(path, value)
 
     def add_file(self, rel_path, obj):
-        #print(rel_path)
+        if self.gc('toggles/force_filename_to_lowercase', cached=True):
+            rel_path = rel_path.lower()
+
         self.files[rel_path] = obj
 
     def EnsureTreeObj(self):
