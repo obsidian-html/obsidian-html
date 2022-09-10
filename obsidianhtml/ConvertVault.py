@@ -334,7 +334,7 @@ def ConvertVault(config_yaml_location=''):
         ep = pb.files[pb.paths['md_entrypoint'].name]
         print(pb.paths['md_entrypoint'].name)
 
-        pb.init_state(action='m2h', loop_type='note', current_fo=ep, subroutine='ConvertMarkdownPageToHtmlPage')
+        pb.init_state(action='m2h', loop_type='md_note', current_fo=ep, subroutine='ConvertMarkdownPageToHtmlPage')
         ConvertMarkdownPageToHtmlPage(ep, pb)
         pb.reset_state()
 
@@ -348,7 +348,7 @@ def ConvertVault(config_yaml_location=''):
                 if pb.gc('toggles/verbose_printout', cached=True) == True:
                     print(f'\t\t{i}/{l} - ' + str(fo.path['markdown']['file_absolute_path']))
 
-                pb.init_state(action='m2h_process_all', loop_type='note', current_fo=fo, subroutine='ConvertMarkdownPageToHtmlPage')
+                pb.init_state(action='m2h_process_all', loop_type='md_note', current_fo=fo, subroutine='ConvertMarkdownPageToHtmlPage')
                 ConvertMarkdownPageToHtmlPage(fo, pb, log_level=2)
                 pb.reset_state()
 
@@ -775,7 +775,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     node['metadata'] = md.metadata.copy()
     
     # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-    node['id'] = GetNodeId(pb.files, fo.path['markdown']['file_relative_path'].as_posix())
+    node['id'] = GetNodeId(fo.path['markdown']['file_relative_path'].as_posix(), pb)
     if 'graph_name' in md.metadata.keys():
         node['name'] = md.metadata['graph_name']
     else:
@@ -821,7 +821,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     for l in proper_links:
 
         # Init link
-        link = MarkdownLink(pb, l, page_path, paths['md_folder'], url_unquote=True, relative_path_md = pb.gc('toggles/relative_path_md', cached=True))
+        link = MarkdownLink(pb, l, page_path, paths['md_folder'], url_unquote=True)
 
         # Don't process in the following cases (link empty or // in the link)
         if link.isValid == False or link.isExternal == True: 
@@ -1076,7 +1076,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         if pb.gc('toggles/verbose_printout', cached=True):
             print('\t'*(log_level+1), f"html: initiating conversion for {lo.fullpath('markdown')} (parent {fo.fullpath('markdown')})")
 
-        pb.init_state(action='m2h', loop_type='note', current_fo=lo, subroutine='ConvertMarkdownPageToHtmlPage')
+        pb.init_state(action='m2h', loop_type='md_note', current_fo=lo, subroutine='ConvertMarkdownPageToHtmlPage')
         ConvertMarkdownPageToHtmlPage(lo, pb, backlinkNode, log_level=log_level)
         pb.reset_state()
 

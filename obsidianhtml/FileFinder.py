@@ -15,6 +15,10 @@ def FindFile(files, link, pb):
         if link.startswith(html_url_prefix):
             link = link.replace(html_url_prefix+'/', '', 1)
 
+    # set link to lowercase
+    if pb.gc('toggles/force_filename_to_lowercase', cached=True):
+        link = link.lower()
+
     # return immediately if exact link is found in the array
     if link in files.keys():
         return (link, files[link])
@@ -52,7 +56,13 @@ def GetMatches(files, link):
             matches.append(rel_path)
     return matches
         
-def GetNodeId(files, link):
+def GetNodeId(link, pb):
+    files = pb.files
+    
+    # set link to lowercase
+    if pb.gc('toggles/force_filename_to_lowercase', cached=True):
+        link = link.lower()
+
     node_id = ''
     parts = link.split('/')
     for i in range(1, len(parts)+1):

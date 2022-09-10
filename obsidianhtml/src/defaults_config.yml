@@ -68,7 +68,7 @@ audio_format_suffixes: ['wav', 'mp3']
 # Used to strip the http url hostpart of a link to get a relative link
 # e.g. for value "https://git.com/user/repo/-/wikis/mywiki/" then:
 #   "https://git.com/user/repo/-/wikis/mywiki/folder/markdown.md" --> /folder/markdown.md
-md_source_host_url: ''
+md_source_host_urls: []
 
 ##########################################################################
 #                             HTML OUTPUT                                #
@@ -109,6 +109,9 @@ toggles:
 
   # Opt-in/-out of Md->Html conversion, set to False when only wanting to get proper markdown from Obsidian
   compile_html: True
+
+  # gitlab is case insensitive, this setting should be true when converting a wiki from that source
+  force_filename_to_lowercase: False
 
   # If this is false only the entrypoint and all its links (recursively) are processed
   # if true all the notes will be processed
