@@ -290,7 +290,7 @@ function SetContainer(container) {
     let callout_folded = container.querySelectorAll(".callout-folded");
     callout_folded.forEach(div => {
         let rasa = div.getAttribute('rasa')
-        if (rasa){
+        if (rasa == '1'){
             div.setAttribute('rasa', 0)
             div.classList.remove('active')
         }
