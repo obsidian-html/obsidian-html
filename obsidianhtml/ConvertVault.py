@@ -4,6 +4,7 @@ import markdown             # convert markdown to html
 import frontmatter
 import gzip
 import shutil
+import warnings
 
 import regex as re          # regex string finding/replacing
 
