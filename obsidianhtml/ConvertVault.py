@@ -94,7 +94,6 @@ def ConvertVault(config_yaml_location=''):
     # Deduce relative paths
     paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
-
     
     # Add paths to pb
     # ---------------------------------------------------------
@@ -250,7 +249,13 @@ def ConvertVault(config_yaml_location=''):
             for k, v in pb.files.items():
                 print(k)
 
-        ep = pb.files[pb.paths['rel_obsidian_entrypoint'].as_posix()]
+        # Force search to lowercase
+        rel_entry_path_str = pb.paths['rel_obsidian_entrypoint'].as_posix()
+        if pb.gc('toggles/force_filename_to_lowercase', cached=True):
+            rel_entry_path_str = rel_entry_path_str.lower()
+
+        # Start conversion
+        ep = pb.files[rel_entry_path_str]
         pb.init_state(action='n2m', loop_type='note', current_fo=ep, subroutine='recurseObisidianToMarkdown')
         recurseObisidianToMarkdown(ep, pb)
         pb.reset_state()
@@ -329,11 +334,13 @@ def ConvertVault(config_yaml_location=''):
             if pb.gc('toggles/verbose_printout', cached=True):
                 print('\t'*(1), f"html: embedded note titles are disabled in config")
 
-        
-        # Start conversion from the entrypoint
-        ep = pb.files[pb.paths['md_entrypoint'].name]
-        print(pb.paths['md_entrypoint'].name)
+        # Force search to lowercase
+        rel_entry_path_str = paths['rel_md_entrypoint_path'].as_posix()
+        if pb.gc('toggles/force_filename_to_lowercase', cached=True):
+            rel_entry_path_str = rel_entry_path_str.lower()
 
+        # Start conversion from the entrypoint
+        ep = pb.files[rel_entry_path_str]
         pb.init_state(action='m2h', loop_type='md_note', current_fo=ep, subroutine='ConvertMarkdownPageToHtmlPage')
         ConvertMarkdownPageToHtmlPage(ep, pb)
         pb.reset_state()
@@ -848,7 +855,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
             new_link = f']({link.fo.get_link("html", origin=fo)}{query_part})'
-            
+
         # Update link
         safe_link = re.escape(']('+l+')')
         md.page = re.sub(safe_link, new_link, md.page)
