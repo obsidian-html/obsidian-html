@@ -823,8 +823,8 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # Get all local markdown links. 
     # ------------------------------------------------------------------
-    # This is any string in between '](' and  ')'
-    proper_links = re.findall(r'(?<=\]\().+?(?=\))', md.page)
+    # This is any string in between '](' and  ')' with no spaces in between the ( and )
+    proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', md.page)
     for l in proper_links:
 
         # Init link
@@ -865,8 +865,6 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     for link in re.findall(r'\!\[.*?\]\((.*?)\)', md.page):
         
         l = urllib.parse.unquote(link)
-        if '://' in l:
-            continue
 
         if l[0] == '/':
             l = l.replace('/', '', 1)
@@ -929,6 +927,15 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
                 md.page = output
             else: 
                 md.page = '\n[TOC]\n\n' + md.page
+
+    # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
+    # Cannot start with [, (, nor "
+    # match 'http://* ' or 'https://* ' (end match by whitespace)
+    # Note that note->md step also does this, this should be void if doing note-->html, but useful when doing md->html
+    for l in re.findall("(?<![\[\(\"])(https*:\/\/.[^\s]*)", md.page):
+        new_md_link = f"[{l}]({l})"
+        safe_link = re.escape(l)
+        md.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, md.page)
 
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------

@@ -1,8 +1,5 @@
 # will return (False, False) if not found, (str:url, fo:file_object) when found
 def FindFile(files, link, pb):
-    if '://' not in link and (len(link.split('.')) == 1 or link.split('.')[-1] not in (pb.gc('included_file_suffixes', cached=True) + ['html', 'md'])):
-        link += '.md'
-
     # remove leading ../ or ./
     if link[0:2] == './':
         link = link[2:]
@@ -15,28 +12,41 @@ def FindFile(files, link, pb):
         if link.startswith(html_url_prefix):
             link = link.replace(html_url_prefix+'/', '', 1)
 
+    # return immediately if exact link is external
+    if '://' in link:
+        return (False, False)
+
     # set link to lowercase
     if pb.gc('toggles/force_filename_to_lowercase', cached=True):
         link = link.lower()
 
-    # return immediately if exact link is found in the array
-    if link in files.keys():
-        return (link, files[link])
+    def find(files, link):
+        # return immediately if exact link is found in the array
+        if link in files.keys():
+            return (link, files[link])
 
-    # find all links that match the tail part
-    matches = GetMatches(files, link)
-    
-    if len(matches) == 0:
-        #print(link, '--> not_created.md')
-        return (False, False)
+        # find all links that match the tail part
+        matches = GetMatches(files, link)
+        
+        if len(matches) == 0:
+            #print(link, '--> not_created.md')
+            return (False, False)
 
-    if len(matches) == 1:
+        if len(matches) == 1:
+            return (matches[0], files[matches[0]])
+
+        # multiple matches found, sort on number of parts that matched
+        # e.g. 'folder/home' will rank higher than 'home'
+        matches = sorted(matches, key=lambda x: len(x.split('/')))
         return (matches[0], files[matches[0]])
 
-    # multiple matches found, sort on number of parts that matched
-    # e.g. 'folder/home' will rank higher than 'home'
-    matches = sorted(matches, key=lambda x: len(x.split('/')))
-    return (matches[0], files[matches[0]])
+    # find without md suffix
+    result = find(files, link)
+    if result[0]:
+        return result
+
+    # try again with md suffix
+    return find(files, link + '.md')
 
 def GetMatches(files, link):
     # find all links that match the tail part
@@ -58,7 +68,7 @@ def GetMatches(files, link):
         
 def GetNodeId(link, pb):
     files = pb.files
-    
+
     # set link to lowercase
     if pb.gc('toggles/force_filename_to_lowercase', cached=True):
         link = link.lower()
