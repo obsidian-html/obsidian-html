@@ -46,15 +46,20 @@ class CallOutBlockProcessor(BlockProcessor):
 
                 # add classes to callout div
                 classlist = f'callout callout-{data["call-out-class"]} active' # class active will be removed on page load if js is enabled
-                if data['folded']:
+                rasa = '1' # tells js whether this is a new callout or one that is already loaded. we can set this to '0' to keep js's grubby fingers off our callout
+
+                if data['foldable']:
                     classlist += ' ' + 'callout-folded'
+                if data['foldable'] and not data['folded']:
+                    rasa = '0' # do not remove active class when js is active
+
                 div.set('class', classlist)
-                div.set('rasa', '1')
+                div.set('rasa', rasa)
 
                 # add the titlebar subdiv
                 title = etree.SubElement(div, 'div')
                 title.set('class', 'callout-title')
-                if data['folded']:
+                if data['foldable']:
                     title.set('onclick', f'toggle(this.parentElement)')
 
                 # get the svg for the title bar icon
@@ -73,7 +78,7 @@ class CallOutBlockProcessor(BlockProcessor):
                 title_name.text = data['title'] + '\n'
 
                 # add fold svg 
-                if data['folded']:
+                if data['foldable']:
                     fold = etree.SubElement(title, 'div')
                     fold.set('class', 'callout-title-fold')
                     fold.text = self.svgs['fold']
@@ -107,6 +112,7 @@ class CallOutBlockProcessor(BlockProcessor):
     def parseHeader(self, line):
         # output
         folded = False
+        foldable = False
 
         # first parse line into bracket_content and tail
         start_bracket = False
@@ -132,6 +138,11 @@ class CallOutBlockProcessor(BlockProcessor):
         # read tail to get configuration
         if tail.startswith('-'):
             folded = True
+            foldable = True
+            tail = tail[1:]
+        elif tail.startswith('+'):
+            folded = False
+            foldable = True
             tail = tail[1:]
 
         tail = tail.lstrip()
@@ -140,5 +151,5 @@ class CallOutBlockProcessor(BlockProcessor):
         else:
             title = bracket_content.capitalize()
         
-        return {'call-out-class': bracket_content.lower(), 'title': title, 'folded': folded }
+        return {'call-out-class': bracket_content.lower(), 'title': title, 'foldable': foldable, 'folded': folded }
             
