@@ -25,11 +25,19 @@ def ServeDir(port=8888, directory='./'):
         print(f'Configured directory of {directory} does not exist.')
         exit(1)
 
-    # move to dir to serve from there
-    os.chdir(directory)
+    # We do this trickery so that we can set Handler.directory without having the init method overwrite our setting.
+    # (Handler.init() is called somewhere out of our control)
+    class BetterHandler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            if self.directory is None:
+                self.directory = os.getcwd()
+
+            self.directory = os.fspath(self.directory)
+            super(http.server.SimpleHTTPRequestHandler, self).__init__(*args, **kwargs)
 
     # configure server
-    Handler = http.server.SimpleHTTPRequestHandler
+    Handler = BetterHandler
+    Handler.directory = Path(directory).resolve().as_posix()
     Handler.extensions_map.update({
         ".js": "application/javascript",
     })
