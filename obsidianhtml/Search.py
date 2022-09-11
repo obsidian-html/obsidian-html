@@ -6,13 +6,14 @@ class SearchHead:
     def __init__(self):
         self.data = []
 
-    def AddPage(self, url, rtr_url, title, text):
+    def AddPage(self, url, rtr_url, title, text, metadata):
         p = {
             'title': title,
             'url': url,
             'rtr_url': rtr_url,
             'keywords': GetKeywords(text),
-            'md': SanatizeText(text)
+            'md': SanatizeText(text),
+            'tags': GetTags(metadata)
         }
         self.data.append(p)
 
@@ -63,3 +64,7 @@ def GetKeywords(text):
 
     return s_words
 
+def GetTags(metadata):
+    if 'tags' in metadata.keys():
+        return ' '.join(metadata['tags'])
+    return ''

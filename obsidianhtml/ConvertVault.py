@@ -541,7 +541,16 @@ def ConvertVault(config_yaml_location=''):
 
                 html = re.sub('\{_obsidian_html_breadcrumbs_pattern_\}', snippet, html)
 
+            # add embedded search results
+            if pb.gc('toggles/features/embedded_search/enabled', cached=True):
+                '{_obsidian_html_query:'
+                query_lines = re.findall(r'(?<=<p>{_obsidian_html_query:\ )(.*?)(?=\ }</p>)', html)
+                for q in query_lines:
+                    print(q)
+                    safe_str = re.escape('<p>{_obsidian_html_query: ' + q + ' }</p>')
+                    html = re.sub(safe_str, f'<div class="query">{q}</div>', html)
 
+            # write result
             with open(dst_abs_path, 'w', encoding="utf-8") as f:
                 f.write(html)
             
@@ -821,7 +830,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # Add page to search file
     # ------------------------------------------------------------------
     if pb.gc('toggles/features/search/enabled', cached=True):
-        pb.search.AddPage(url=node['url'], rtr_url=node['rtr_url'], title=node['id'], text=md.page)
+        pb.search.AddPage(url=node['url'], rtr_url=node['rtr_url'], title=node['name'], text=md.page, metadata=md.metadata)
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
@@ -953,7 +962,12 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
-    extensions = ['abbr', 'attr_list', 'def_list', 'fenced_code', 'md_in_html', 'tables', 'obs_footnote', 'obs_formatting', 'codehilite', 'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
+    extensions = [
+        'abbr', 'attr_list', 'def_list', 
+        'fenced_code', 
+        'md_in_html', 'tables', 'obs_footnote', 'obs_formatting', 
+        'codehilite', 
+        'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
     extension_configs = {
         'codehilite': {
             'linenums': False
@@ -972,6 +986,9 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         
     if pb.gc('toggles/features/eraser/enabled'):
         extensions.append('eraser')
+
+    if pb.gc('toggles/features/embedded_search/enabled'):
+        extensions.append('embedded_search')
 
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
 

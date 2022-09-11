@@ -189,6 +189,9 @@ toggles:
       styling:
         show_icon: True
 
+    embedded_search:
+      enabled: False
+
     tags_page:
       enabled: True
       styling:
