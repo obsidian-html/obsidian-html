@@ -35,7 +35,7 @@ function initGraph(args) {
             .maxZoom(10)
             .height(args.height)
             .backgroundColor(g.colors.bg)
-            .nodeLabel('id')
+            .nodeLabel('name')
             .d3Force("charge", d3.forceManyBody().strength(args.coalesce_force))
             .nodeColor((node) => {return g.colors.node_inactive})
             .nodeCanvasObjectMode(() => 'after')
@@ -49,7 +49,7 @@ function initGraph(args) {
                 })
                 // draw text
                 if (isConnected){
-                    const label = node.id;
+                    const label = node.name;
                     const fontSize = 11 / globalScale;
                     ctx.font = `${fontSize}px Sans-Serif`;
                     const textWidth = ctx.measureText(label).width;                
