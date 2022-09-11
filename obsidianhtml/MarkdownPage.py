@@ -235,8 +235,12 @@ class MarkdownPage:
 
         # -- [5] Change file name in proper markdown links to path
         # And while we are busy, change the path to point to the full relative path
-        proper_links = re.findall("(?<=[^\[]\]\().+?(?=\))", self.page)
+        proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', self.page)
         for l in proper_links:
+            # There is currently no way to match links containing parentheses, AND not matching the last ) in a link like ([test](link))
+            if l.endswith(')'):
+                l = l[:-1]
+
             # Get the filename
             link = urllib.parse.unquote(l)
 

@@ -827,6 +827,9 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # This is any string in between '](' and  ')' with no spaces in between the ( and )
     proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', md.page)
     for l in proper_links:
+        # There is currently no way to match links containing parentheses, AND not matching the last ) in a link like ([test](link))
+        if l.endswith(')'):
+            l = l[:-1]
 
         # Init link
         link = MarkdownLink(pb, l, page_path, paths['md_folder'], url_unquote=True)
@@ -838,7 +841,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         # [12] Copy non md files over wholesale, then we're done for that kind of file
         if link.fo is None:
             if link.suffix != '.md' and '/obs.html/dir_index.html' not in link.url:
-                print('\t'*(log_level+1), 'File ' + str(link.url) + ' not located, so not copied.')
+                print('\t'*(log_level+1), 'File ' + str(link.url) + ' not located, so not copied. @ ' + pb.state['current_fo'].path['note']['file_absolute_path'].as_posix())
         elif not link.fo.metadata['is_note'] and not link.fo.metadata['is_includable_file']:
             link.fo.copy_file('mth')
             
