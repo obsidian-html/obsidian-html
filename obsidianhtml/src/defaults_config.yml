@@ -111,8 +111,9 @@ toggles:
   compile_html: True
 
   # gitlab is case insensitive, this setting should be true when converting a wiki from that source
+  # might also be useful if you have markdown links in your vault
   # note that this does not impact the output, Hello.md will be written to Hello.html
-  force_filename_to_lowercase: False
+  force_filename_to_lowercase: True
 
   # If this is false only the entrypoint and all its links (recursively) are processed
   # if true all the notes will be processed

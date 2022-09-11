@@ -1,10 +1,17 @@
 # will return (False, False) if not found, (str:url, fo:file_object) when found
 def FindFile(files, link, pb):
+    olink = link
+    search = False
+    #searchstring = 'Pages/textfile.txt'
+
     # remove leading ../ or ./
     if link[0:2] == './':
         link = link[2:]
     while link[0:3] == '../':
         link = link[3:]
+
+    if search and searchstring in olink:
+        print(1, olink, link, 'hit --------------------------')
 
     # remove leading html_url_prefix
     html_url_prefix = pb.gc('html_url_prefix')[1:]
@@ -16,17 +23,29 @@ def FindFile(files, link, pb):
     if '://' in link:
         return (False, False)
 
+    if search and searchstring in olink:
+        print(2, link)
+
     # set link to lowercase
     if pb.gc('toggles/force_filename_to_lowercase', cached=True):
         link = link.lower()
 
+    if search and searchstring in olink:
+        print(3, link)
+
     def find(files, link):
+        if search and searchstring in olink:
+            print('f', link)
+
         # return immediately if exact link is found in the array
         if link in files.keys():
             return (link, files[link])
 
         # find all links that match the tail part
         matches = GetMatches(files, link)
+
+        if search and searchstring in olink:
+            print('m', matches)
         
         if len(matches) == 0:
             #print(link, '--> not_created.md')
@@ -42,13 +61,33 @@ def FindFile(files, link, pb):
 
     # find without md suffix
     result = find(files, link)
+
+    if search and searchstring in olink:
+        print('r1', link, result)
+
     if result[0]:
         return result
 
     # try again with md suffix
-    return find(files, link + '.md')
+    result = find(files, link + '.md')
+
+    if search and searchstring in olink:
+        print('r2', link, result)
+
+    if result[0]:
+        return result
+
+    if search and searchstring in olink:
+        pass#print('not found', files.keys())
+    return result
+
 
 def GetMatches(files, link):
+    search = False
+    prevtrue = False
+    # if 'Test Pages/textfile.txt' in link:
+    #     search = True
+    
     # find all links that match the tail part
     url_parts = link.split('/')
     matches = []
@@ -61,7 +100,15 @@ def GetMatches(files, link):
         for i in range(1, len(url_parts)+1):
             if url_parts[-i] != parts[-i]:
                 match = False
+
+                if prevtrue:
+                    print('false', f'"{url_parts[-i]}" "{parts[-i]}"')
+                    prevtrue = False
                 break
+            else:
+                if search:
+                    print('true', parts[-i])
+                    prevtrue = True
         if match:
             matches.append(rel_path)
     return matches

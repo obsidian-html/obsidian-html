@@ -235,34 +235,39 @@ class MarkdownPage:
 
         # -- [5] Change file name in proper markdown links to path
         # And while we are busy, change the path to point to the full relative path
-        proper_links = re.findall("(?<=[^\[]\]\().+?(?=\))", self.page)
+        proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', self.page)
         for l in proper_links:
+            # There is currently no way to match links containing parentheses, AND not matching the last ) in a link like ([test](link))
+            if l.endswith(')'):
+                l = l[:-1]
+
             # Get the filename
             link = urllib.parse.unquote(l)
 
-            res = GetObsidianFilePath(link, self.file_tree, self.pb)
-            rel_path_str = res['rtr_path_str']
-            lo = res['fo']
-            if lo == False:
-                continue
+            if not link.startswith('#'):
+                res = GetObsidianFilePath(link, self.file_tree, self.pb)
+                rel_path_str = res['rtr_path_str']
+                lo = res['fo']
+                if lo == False:
+                    continue
 
-            # Determine if file is markdown
-            isMd = (Path(rel_path_str).suffix == '.md')
-            if isMd:
-                # Add to list to recurse to the link later
-                self.links.append(lo)
+                # Determine if file is markdown
+                isMd = (Path(rel_path_str).suffix == '.md')
+                if isMd:
+                    # Add to list to recurse to the link later
+                    self.links.append(lo)
 
-            # Get file info
-            file_link = lo.get_link('markdown', origin=origin)
+                # Get file info
+                file_link = lo.get_link('markdown', origin=origin)
 
-            # Update link
-            new_link = ']('+urllib.parse.quote(file_link)+')'
-            safe_link = re.escape(']('+l+')')
-            self.page = re.sub(f"(?<![\[\(])({safe_link})", new_link, self.page)
+                # Update link
+                new_link = ']('+urllib.parse.quote(file_link)+')'
+                safe_link = re.escape(']('+l+')')
+                self.page = re.sub(f"(?<![\[\(])({safe_link})", new_link, self.page)
 
-            if isMd == False:
-                # Copy file over to new location
-                lo.copy_file('ntm')
+                if isMd == False:
+                    # Copy file over to new location
+                    lo.copy_file('ntm')
 
         # -- [6] Replace Obsidian links with proper markdown
         # This is any string in between [[ and ]], e.g. [[My Note]]
@@ -321,7 +326,7 @@ class MarkdownPage:
         # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
         # Cannot start with [, (, nor "
         # match 'http://* ' or 'https://* ' (end match by whitespace)
-        for l in re.findall("(?<![\[\(\"])(https*:\/\/.[^\s]*)", self.page):
+        for l in re.findall("(?<![\[\(\"])(https*:\/\/.[^\s|]*)", self.page):
             new_md_link = f"[{l}]({l})"
             safe_link = re.escape(l)
             self.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, self.page)
