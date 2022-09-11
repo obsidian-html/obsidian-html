@@ -24,7 +24,7 @@ function initGraph_3d(args) {
         .jsonUrl(args.data)
         .width(args.width)
         .height(args.height)
-        .nodeLabel('id')
+        .nodeLabel('name')
         .linkDirectionalParticles("value")
         .linkDirectionalParticleSpeed(0.010)
         .linkDirectionalParticleWidth(2.0)
