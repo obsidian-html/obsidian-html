@@ -499,23 +499,29 @@ def ConvertVault(config_yaml_location=''):
 
                     previous_url = ''
                     subpaths = node['url'].replace('.html', '').split('/')[1:]
+                    match_subpaths = subpaths
+                    
+                    if pb.gc('toggles/force_filename_to_lowercase', cached=True):
+                        match_subpaths = [ x.lower() for x in subpaths]
+
                     if html_url_prefix:
                         subpaths = subpaths[1:]
+                        match_subpaths = match_subpaths[1:]
 
-                    for i, subpath in enumerate(subpaths):
-                        if i == len(subpaths) - 1:
+                    for i, msubpath in enumerate(match_subpaths):
+                        if i == len(msubpath) - 1:
                             if node["url"] != previous_url:
-                                parts.append(f'<a href="{node["url"]}" ___COLOR___ >{subpath}</a>')
+                                parts.append(f'<a href="{node["url"]}" ___COLOR___ >{subpaths[i]}</a>')
                             continue
                         else:
-                            if subpath in pb.network_tree.node_lookup:
-                                url = pb.network_tree.node_lookup[subpath]['url']
+                            if msubpath in pb.network_tree.node_lookup:
+                                url = pb.network_tree.node_lookup[msubpath]['url']
                                 if url != previous_url:
-                                    parts.append(f'<a href="{url}" ___COLOR___>{subpath}</a>')
+                                    parts.append(f'<a href="{url}" ___COLOR___>{subpaths[i]}</a>')
                                 previous_url = url
                                 continue
                             else:
-                                parts.append(f'<span style="color: #666;">{subpath}</span>')
+                                parts.append(f'<span style="color: #666;">{subpaths[i]}</span>')
                                 previous_url = ''
                                 continue
 
