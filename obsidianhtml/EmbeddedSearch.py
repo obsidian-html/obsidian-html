@@ -34,10 +34,7 @@ def InitWhoosh(index_dir):
 
     return (ix, schema, writer)
 
-def LoadSearchDataIntoWhoosh(writer, search_data_unzipped_path_str):
-    # read in json
-    search_data = GetSearchData(search_data_unzipped_path_str)
-
+def LoadSearchDataIntoWhoosh(writer, search_data):
     # add data to whoosh
     for doc in search_data:
         writer.add_document(**doc)
@@ -62,26 +59,37 @@ def UnzipSearchData(zip_path):
     return searchdata_path
 
 class EmbeddedSearch:
-    def __init__(self, search_data_path):
-        search_data_unzipped_path_str = search_data_path.resolve().as_posix()
+    def __init__(self, json_data=None, search_data_path=None):
         index_dir = '/tmp/obs/index'
+        search_data = None
 
+        if search_data_path is not None:
+            search_data_unzipped_path_str = search_data_path.resolve().as_posix()
+            search_data = GetSearchData(search_data_unzipped_path_str)
+        if json_data is not None:
+            search_data = json.loads(json_data)
+            
         # create setup whoosh search
         self.ix, self.schema, self.writer = InitWhoosh(index_dir)
 
         # load docs
-        search_data = LoadSearchDataIntoWhoosh(self.writer, search_data_unzipped_path_str)
+        LoadSearchDataIntoWhoosh(self.writer, search_data)
 
-    def search(self, phrase):
-        qp = QueryParser("md", schema=self.ix.schema)
-        q = qp.parse(phrase)
+    def parse_user_query(self, phrase):
+        parser = QueryParser("md", schema=self.ix.schema)
+        return parser.parse(phrase)
+
+    def search(self, q):
+        output = []
 
         with self.ix.searcher() as searcher:
             results = searcher.search(q, limit=None)
             print('-'*35, len(results), '-'*35)
 
             for doc in results:
-                print(doc['title'])
+                output.append({'title' : doc['title'], 'rtr_url' : doc['rtr_url']})
+
+            return output
 
 def CliEmbeddedSearch():
     # input
@@ -129,4 +137,8 @@ def CliEmbeddedSearch():
 
     # Search
     print(f"Query: '{query_string}'")
-    esearch.search(query_string)
+    q = esearch.parse_user_query(query_string)
+    print(q)
+    res = esearch.search(q)
+
+    print(res)

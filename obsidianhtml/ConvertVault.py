@@ -24,6 +24,7 @@ from .RssFeed import RssFeed
 from .ErrorHandling import extra_info
 from .PicknickBasket import PicknickBasket
 from .CreateIndexFromTags import CreateIndexFromTags
+from .EmbeddedSearch import EmbeddedSearch
 
 
 def ConvertVault(config_yaml_location=''):
@@ -408,6 +409,10 @@ def ConvertVault(config_yaml_location=''):
         if pb.gc('toggles/features/styling/flip_panes', cached=True):
             dir_repstring = '{right_pane_content}'
             dir_repstring2 = '{left_pane_content}'
+
+        esearch = None
+        if pb.gc('toggles/features/embedded_search/enabled', cached=True):
+            esearch = EmbeddedSearch(json_data=pb.search.OutputJson())
         
         print('\t> SECOND PASS HTML')
 
@@ -544,11 +549,17 @@ def ConvertVault(config_yaml_location=''):
             # add embedded search results
             if pb.gc('toggles/features/embedded_search/enabled', cached=True):
                 '{_obsidian_html_query:'
-                query_lines = re.findall(r'(?<=<p>{_obsidian_html_query:\ )(.*?)(?=\ }</p>)', html)
-                for q in query_lines:
+                query_blocks = re.findall(r'(?<=<p>{_obsidian_html_query:\ )(.*?)(?=\ }</p>)', html)
+                for user_query in query_blocks:
+                    print(user_query)
+                    q = esearch.parse_user_query(user_query)
                     print(q)
-                    safe_str = re.escape('<p>{_obsidian_html_query: ' + q + ' }</p>')
-                    html = re.sub(safe_str, f'<div class="query">{q}</div>', html)
+                    res = esearch.search(q)
+                    output = '<ul>\n\t' + '\n\t'.join([f'<li><a href="/{x["rtr_url"]}">{x["title"]}</a></li>' for x in res]) + '\n</ul>'
+                    print(output)
+
+                    safe_str = re.escape('<p>{_obsidian_html_query: ' + user_query + ' }</p>')
+                    html = re.sub(safe_str, f'<div class="query">{output}</div>', html)
 
             # write result
             with open(dst_abs_path, 'w', encoding="utf-8") as f:
@@ -648,10 +659,6 @@ def ConvertVault(config_yaml_location=''):
 
             with gzip.open(gzip_path, 'wb', compresslevel=5) as f:
                 f.write(gzip_content.encode('utf-8'))
-
-            # search_path = pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json')
-            # with open(search_path, 'w', encoding='utf-8') as f:
-            #     f.write(gzip_content)
             
         # Add Extra stuff to the output directories
         ExportStaticFiles(pb)
