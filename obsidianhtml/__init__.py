@@ -9,6 +9,7 @@ from .ConvertVault import ConvertVault
 from .Run import Run
 from .Export import RunExport
 from .Serve import ServeDir
+from .EmbeddedSearch import CliEmbeddedSearch
 
 
 
@@ -38,6 +39,9 @@ def main():
         exit()
     elif command == 'serve':
         ServeDir()
+        exit()
+    elif command == 'search':
+        CliEmbeddedSearch()
         exit()
     else:
         print(f'Command "{command}" is unknown')

@@ -24,6 +24,7 @@ from .RssFeed import RssFeed
 from .ErrorHandling import extra_info
 from .PicknickBasket import PicknickBasket
 from .CreateIndexFromTags import CreateIndexFromTags
+from .EmbeddedSearch import EmbeddedSearch
 
 
 def ConvertVault(config_yaml_location=''):
@@ -408,6 +409,10 @@ def ConvertVault(config_yaml_location=''):
         if pb.gc('toggles/features/styling/flip_panes', cached=True):
             dir_repstring = '{right_pane_content}'
             dir_repstring2 = '{left_pane_content}'
+
+        esearch = None
+        if pb.gc('toggles/features/embedded_search/enabled', cached=True):
+            esearch = EmbeddedSearch(json_data=pb.search.OutputJson())
         
         print('\t> SECOND PASS HTML')
 
@@ -541,7 +546,22 @@ def ConvertVault(config_yaml_location=''):
 
                 html = re.sub('\{_obsidian_html_breadcrumbs_pattern_\}', snippet, html)
 
+            # add embedded search results
+            if pb.gc('toggles/features/embedded_search/enabled', cached=True):
+                '{_obsidian_html_query:'
+                query_blocks = re.findall(r'(?<=<p>{_obsidian_html_query:\ )(.*?)(?=\ }</p>)', html)
+                for user_query in query_blocks:
+                    print(user_query)
+                    q = esearch.parse_user_query(user_query)
+                    print(q)
+                    res = esearch.search(q)
+                    output = '<ul>\n\t' + '\n\t'.join([f'<li><a href="/{x["rtr_url"]}">{x["title"]}</a></li>' for x in res]) + '\n</ul>'
+                    print(output)
 
+                    safe_str = re.escape('<p>{_obsidian_html_query: ' + user_query + ' }</p>')
+                    html = re.sub(safe_str, f'<div class="query">{output}</div>', html)
+
+            # write result
             with open(dst_abs_path, 'w', encoding="utf-8") as f:
                 f.write(html)
             
@@ -639,10 +659,6 @@ def ConvertVault(config_yaml_location=''):
 
             with gzip.open(gzip_path, 'wb', compresslevel=5) as f:
                 f.write(gzip_content.encode('utf-8'))
-
-            # search_path = pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/search.json')
-            # with open(search_path, 'w', encoding='utf-8') as f:
-            #     f.write(gzip_content)
             
         # Add Extra stuff to the output directories
         ExportStaticFiles(pb)
@@ -821,7 +837,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # Add page to search file
     # ------------------------------------------------------------------
     if pb.gc('toggles/features/search/enabled', cached=True):
-        pb.search.AddPage(url=node['url'], rtr_url=node['rtr_url'], title=node['id'], text=md.page)
+        pb.search.AddPage(url=node['url'], rtr_url=node['rtr_url'], title=node['name'], text=md.page, metadata=md.metadata)
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
@@ -953,7 +969,12 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
 
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
-    extensions = ['abbr', 'attr_list', 'def_list', 'fenced_code', 'md_in_html', 'tables', 'obs_footnote', 'obs_formatting', 'codehilite', 'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
+    extensions = [
+        'abbr', 'attr_list', 'def_list', 
+        'fenced_code', 
+        'md_in_html', 'tables', 'obs_footnote', 'obs_formatting', 
+        'codehilite', 
+        'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
     extension_configs = {
         'codehilite': {
             'linenums': False
@@ -972,6 +993,9 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         
     if pb.gc('toggles/features/eraser/enabled'):
         extensions.append('eraser')
+
+    if pb.gc('toggles/features/embedded_search/enabled'):
+        extensions.append('embedded_search')
 
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
 
