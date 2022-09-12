@@ -17,7 +17,8 @@ from .lib import    print_global_help_and_exit, get_obshtml_appdir_folder_path
 
 def InitWhoosh(index_dir):
     schema = Schema(
-        path=ID(stored=True),
+        ID=ID(stored=True),
+        path=TEXT(stored=True),
         file=TEXT(stored=True),
         #url=STORED,
         #rtr_url=STORED,                             # same as path, can't be removed for now
@@ -70,6 +71,7 @@ def UnzipSearchData(zip_path):
 def ConvertObsidianQueryToWhooshQuery(user_query):
     query = user_query
     query = query.replace('tag:#', 'tags:')
+    query = query.replace(' -', ' ANDNOT ')
     return query
 
     # in_single_quotes = False
