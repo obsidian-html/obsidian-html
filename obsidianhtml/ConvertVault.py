@@ -566,7 +566,7 @@ def ConvertVault(config_yaml_location=''):
                     res = esearch.search(q)
 
                     # compile html output
-                    output = '<ul>\n\t' + '\n\t'.join([f'<li><a href="/{x["rtr_url"]}">{x["title"]}</a></li>' for x in res]) + '\n</ul>'
+                    output = '<ul>\n\t' + '\n\t'.join([f'<li><a href="/{x["path"]}">{x["title"]}</a></li>' for x in res]) + '\n</ul>'
                     print(output)
 
                     # replace query block with html
@@ -849,7 +849,10 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # Add page to search file
     # ------------------------------------------------------------------
     if pb.gc('toggles/features/search/enabled', cached=True):
-        pb.search.AddPage(url=node['url'], rtr_url=node['rtr_url'], title=node['name'], text=md.page, metadata=md.metadata)
+
+        pb.search.AddPage(
+            filename=page_path.stem, content=md.page, metadata=md.metadata, \
+            url=node['url'], rtr_url=node['rtr_url'], title=node['name'] )
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end

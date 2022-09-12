@@ -9,7 +9,7 @@ import shutil
 from pathlib import Path
 
 from whoosh import index
-from whoosh.qparser import QueryParser
+from whoosh.qparser import QueryParser, MultifieldParser, OrGroup
 from whoosh.fields import *
 
 from .lib import    print_global_help_and_exit, get_obshtml_appdir_folder_path
@@ -17,12 +17,14 @@ from .lib import    print_global_help_and_exit, get_obshtml_appdir_folder_path
 
 def InitWhoosh(index_dir):
     schema = Schema(
-        rtr_url=ID(stored=True),
-        url=STORED,
+        path=ID(stored=True),
+        file=TEXT(stored=True),
+        #url=STORED,
+        #rtr_url=STORED,                             # same as path, can't be removed for now
         title=TEXT(stored=True),
-        md=TEXT(stored=True),
-        keywords=KEYWORD(stored=True, scorable=True),
-        tags=KEYWORD(stored=True, scorable=True)
+        content=TEXT(stored=True),
+        #keywords=KEYWORD(stored=True, scorable=True),
+        tags=TEXT(stored=True)
     )
 
     if not os.path.exists(index_dir):
@@ -37,7 +39,14 @@ def InitWhoosh(index_dir):
 def LoadSearchDataIntoWhoosh(writer, search_data):
     # add data to whoosh
     for doc in search_data:
-        writer.add_document(**doc)
+        subset = {
+            'path': doc['path'],
+            'file': doc['file'],
+            'title': doc['title'],
+            'content': doc['content'],
+            'tags': doc['tags']
+        }
+        writer.add_document(**subset)
     writer.commit()
 
     return search_data
@@ -60,44 +69,45 @@ def UnzipSearchData(zip_path):
 
 def ConvertObsidianQueryToWhooshQuery(user_query):
     query = user_query
-    query = query.replace('file:', 'title:')
-
-    in_single_quotes = False
-    in_double_quotes = False
-    par_level = 0
-    chunks = []
-    buffer = ''
-    for char in query:
-        if not (in_single_quotes or in_double_quotes or par_level > 0):
-            # chunkable section
-            if char == ' ' and buffer != '':
-                chunks.append(buffer)
-                buffer = ''
-                continue
-
-        buffer += char
-
-        if char == "'":
-            in_single_quotes = not in_single_quotes
-
-        if char == '"':
-            in_double_quotes = not in_double_quotes
-
-        if char == '(':
-            par_level += 1
-
-        if char == ')':
-            par_level -= 1
-            if par_level < 0:
-                print(f'Error parsing query: {query} (compiled from user query {user_query}.')
-                print(f' Closing ) occurs before opening (. \nError occurred at {" ".join(chunks) + buffer} <')
-                return False
-
-    chunks.append(buffer)
-    buffer = ''
-    query = " OR ".join(chunks)
-    
+    query = query.replace('tag:#', 'tags:')
     return query
+
+    # in_single_quotes = False
+    # in_double_quotes = False
+    # par_level = 0
+    # chunks = []
+    # buffer = ''
+    # for char in query:
+    #     if not (in_single_quotes or in_double_quotes or par_level > 0):
+    #         # chunkable section
+    #         if char == ' ' and buffer != '':
+    #             chunks.append(buffer)
+    #             buffer = ''
+    #             continue
+
+    #     buffer += char
+
+    #     if char == "'":
+    #         in_single_quotes = not in_single_quotes
+
+    #     if char == '"':
+    #         in_double_quotes = not in_double_quotes
+
+    #     if char == '(':
+    #         par_level += 1
+
+    #     if char == ')':
+    #         par_level -= 1
+    #         if par_level < 0:
+    #             print(f'Error parsing query: {query} (compiled from user query {user_query}.')
+    #             print(f' Closing ) occurs before opening (. \nError occurred at {" ".join(chunks) + buffer} <')
+    #             return False
+
+    # chunks.append(buffer)
+    # buffer = ''
+    # query = " OR ".join(chunks)
+
+    # return query
 
 class EmbeddedSearch:
     def __init__(self, json_data=None, search_data_path=None):
@@ -117,7 +127,9 @@ class EmbeddedSearch:
         LoadSearchDataIntoWhoosh(self.writer, search_data)
 
     def parse_user_query(self, phrase):
-        parser = QueryParser("md", schema=self.ix.schema)
+        #parser = QueryParser("content", schema=self.ix.schema, group=OrGroup)
+        fields = ["content", "title", "path", "file", "tags"]
+        parser = MultifieldParser(fields, schema=self.ix.schema, group=OrGroup)
         return parser.parse(phrase)
 
     def search(self, q):
@@ -128,7 +140,13 @@ class EmbeddedSearch:
             print('-'*35, len(results), '-'*35)
 
             for doc in results:
-                output.append({'title' : doc['title'], 'rtr_url' : doc['rtr_url']})
+                output.append({
+                    'title'  : doc['title'], 
+                    'path'   : doc['path'], 
+                    'file'   : doc['file'],
+                    'content': doc['content'],
+                    'tags'   : doc['tags']
+                })
 
             return output
 
