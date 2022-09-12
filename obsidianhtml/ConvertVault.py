@@ -575,11 +575,27 @@ def ConvertVault(config_yaml_location=''):
                     else:
                         output = '<div class="query">'
                         for doc in res:
+                            # setup doc
                             output += f'\n\t<div class="match-document">\n\t\t<div class="match-document-title">\n\t\t\t<a href="/{doc["path"]}">{doc["title"]}</a>\n\t\t</div>\n\t\t<div class="matches">'
-                            for match in doc['matches']:
-                                output += f'\n\t\t\t<div class="match-row">\n\t\t\t\t{match}\n\t\t\t</div>'
-                            output += '\n\t\t</div>\n\t</div>'
+                            
+                            # Add path matches
+                            if doc['matches']['path']:
+                                output += f'\n\t\t\t<div class="match-row">\n\t\t\t\t' + doc['matches']['path'] + '\n\t\t\t</div>'
 
+                            # Add content mathes
+                            for match in doc['matches']['content']:
+                                output += f'\n\t\t\t<div class="match-row">\n\t\t\t\t{match}\n\t\t\t</div>'
+
+                            # Add tags
+                            if len(doc['matches']['tags']) > 0:
+                                output += '\n\t\t\t<div class="tag-box">'
+                                for match, tag in doc['matches']['tags']:
+                                    output += f'\n\t\t\t\t<div class="match-row tag">\n\t\t\t\t\t<a href="/obs.html/tags/{tag}/index.html">{match}</a>\n\t\t\t\t</div>'
+                                output += '\n\t\t\t</div>'
+
+                            # close doc divs
+                            output += '\n\t\t</div>\n\t</div>'
+                        # close query div
                         output += '\n</div>'
 
                     # replace query block with html

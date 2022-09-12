@@ -148,10 +148,49 @@ class EmbeddedSearch:
                     'file'   : doc['file'],
                     'content': doc['content'],
                     'tags'   : doc['tags'],
-                    'matches': doc.highlights("content", top=5).split('...')
+                    'matches': {
+                        'content': [x for x in doc.highlights("content", top=5).split('...') if x != ''],
+                        'tags': SplitTags(doc.highlights("tags", top=10)),
+                        'path': doc.highlights("path")
+                    }
                 })
-                
+
+                output
+
             return output
+
+def SplitTags(tags_string):
+    if tags_string == '':
+        return []
+
+    chunks = []
+    buffer = ''
+    tag_buffer = ''
+    in_tag = False
+    tags_encountered = False
+    for char in tags_string:
+        if char == '<':
+            in_tag = True
+            tags_encountered = True
+
+        if (not in_tag) and char == ' ':
+            if tags_encountered:
+                chunks.append([buffer, tag_buffer])
+            buffer = ''
+            tag_buffer = ''
+            tags_encountered = False
+        else:
+            if (not in_tag):
+                tag_buffer += char
+            buffer += char
+
+        if char == '>':
+            in_tag = False
+
+    if buffer != '' and tags_encountered:
+        chunks.append([buffer, tag_buffer])
+
+    return chunks
 
 def CliEmbeddedSearch():
     # input

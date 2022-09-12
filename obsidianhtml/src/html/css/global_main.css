@@ -755,6 +755,10 @@ a.inline-tag:hover {
     margin: 1rem;
     border-bottom: 1px solid rgba(var(--normal-text-color),0.2);
 }
+.match-document:last-of-type {
+    border-bottom: 0px;
+}
+
 .match-document-title {
     font-weight: bold;
     margin-bottom: 1rem;
@@ -771,11 +775,40 @@ a.inline-tag:hover {
     margin-bottom: 1rem;
 }
 .match-row {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px dotted rgba(var(--normal-text-color),0.3);
 }
-.match {
+.match-row {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dotted rgba(var(--normal-text-color),0.3);
+}
+.match-row:last-of-type {
+    border-bottom: 0px;
+}
+
+.tag-box {
+    display: flex;
+}
+.match-row.tag {
+    flex: auto;
+    background-color: var(--bg-note);
+    padding: 0.5rem;
+    min-width: unset;
+    border-radius: 0.5rem;
+    border: 0px;
+    text-align: center;
+    width: fit-content;
+    max-width: max-content;
+    margin: 0.2rem;
+}
+
+.match-row .match {
     background-color: rgba(255,255,0,0.5);
+}
+.match-row.tag .match {
+    background-color: unset;
 }
 
 
