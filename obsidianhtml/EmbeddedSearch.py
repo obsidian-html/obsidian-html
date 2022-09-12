@@ -58,8 +58,46 @@ def UnzipSearchData(zip_path):
 
     return searchdata_path
 
-def ConvertObsidianQueryToWhooshQuery(query):
-    return query.replace('file:', 'title:')
+def ConvertObsidianQueryToWhooshQuery(user_query):
+    query = user_query
+    query = query.replace('file:', 'title:')
+
+    in_single_quotes = False
+    in_double_quotes = False
+    par_level = 0
+    chunks = []
+    buffer = ''
+    for char in query:
+        if not (in_single_quotes or in_double_quotes or par_level > 0):
+            # chunkable section
+            if char == ' ' and buffer != '':
+                chunks.append(buffer)
+                buffer = ''
+                continue
+
+        buffer += char
+
+        if char == "'":
+            in_single_quotes = not in_single_quotes
+
+        if char == '"':
+            in_double_quotes = not in_double_quotes
+
+        if char == '(':
+            par_level += 1
+
+        if char == ')':
+            par_level -= 1
+            if par_level < 0:
+                print(f'Error parsing query: {query} (compiled from user query {user_query}.')
+                print(f' Closing ) occurs before opening (. \nError occurred at {" ".join(chunks) + buffer} <')
+                return False
+
+    chunks.append(buffer)
+    buffer = ''
+    query = " OR ".join(chunks)
+    
+    return query
 
 class EmbeddedSearch:
     def __init__(self, json_data=None, search_data_path=None):
@@ -86,7 +124,7 @@ class EmbeddedSearch:
         output = []
 
         with self.ix.searcher() as searcher:
-            results = searcher.search(q, limit=None)
+            results = searcher.search(q, limit=20)
             print('-'*35, len(results), '-'*35)
 
             for doc in results:

@@ -551,15 +551,25 @@ def ConvertVault(config_yaml_location=''):
                 '{_obsidian_html_query:'
                 query_blocks = re.findall(r'(?<=<p>{_obsidian_html_query:\ )(.*?)(?=\ }</p>)', html)
                 for user_query in query_blocks:
+                    # found query
                     print(user_query)
-                    user_query = ConvertObsidianQueryToWhooshQuery(user_query)
-                    print(user_query)
-                    q = esearch.parse_user_query(user_query)
+
+                    # obsidian search and whoosh do not match 1:1, make a conversion
+                    query = ConvertObsidianQueryToWhooshQuery(user_query)
+                    print(query)
+
+                    # parse query into standard query object
+                    q = esearch.parse_user_query(query)
                     print(q)
+
+                    # search
                     res = esearch.search(q)
+
+                    # compile html output
                     output = '<ul>\n\t' + '\n\t'.join([f'<li><a href="/{x["rtr_url"]}">{x["title"]}</a></li>' for x in res]) + '\n</ul>'
                     print(output)
 
+                    # replace query block with html
                     safe_str = re.escape('<p>{_obsidian_html_query: ' + user_query + ' }</p>')
                     html = re.sub(safe_str, f'<div class="query">{output}</div>', html)
 

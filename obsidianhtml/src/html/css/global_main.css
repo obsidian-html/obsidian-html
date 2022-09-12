@@ -738,10 +738,12 @@ a.inline-tag:hover {
 }
 
 .query {
-    border-top: 1px solid rgba(var(--normal-text-color),0.3);
-    border-bottom: 1px solid rgba(var(--normal-text-color),0.3);
+    border-top: 2px solid rgba(var(--normal-text-color),0.3);
+    border-bottom: 2px solid rgba(var(--normal-text-color),0.3);
     width: max-content;
     padding-right: 2rem;
+    margin-bottom: 1rem;
+    background-color: rgba(var(--normal-text-color),0.05);
 }
 
 
