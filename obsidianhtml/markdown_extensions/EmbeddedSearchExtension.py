@@ -30,6 +30,7 @@ class EmbeddedSearchPreprocessor(Preprocessor):
         self.extension = extension
 
     def run(self, lines):
+        qualifier = 'standard'
         new_lines = []
         query_lines = []
         m_start = None
@@ -43,6 +44,9 @@ class EmbeddedSearchPreprocessor(Preprocessor):
             if not in_code:
                 m_start = RegexBegin.match(line)
                 if m_start:
+                    print(line)
+                    if 'list' in line:
+                        qualifier = 'list'
                     in_code = True
                 else:
                     new_lines.append(line)
@@ -50,7 +54,8 @@ class EmbeddedSearchPreprocessor(Preprocessor):
                 m_end = RegexEnd.match(line)
                 if m_end:
                     in_code = False
-                    new_lines.append('{_obsidian_html_query: ' + ' '.join(query_lines) + ' }')
+                    new_lines.append('{_obsidian_html_query:' + qualifier + '|-| ' + ' '.join(query_lines) + ' }')
+                    qualifier = 'standard'
                     query_lines = []
                 else:
                     query_lines.append(line)

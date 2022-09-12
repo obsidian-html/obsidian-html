@@ -147,9 +147,10 @@ class EmbeddedSearch:
                     'path'   : doc['path'], 
                     'file'   : doc['file'],
                     'content': doc['content'],
-                    'tags'   : doc['tags']
+                    'tags'   : doc['tags'],
+                    'matches': doc.highlights("content", top=5).split('...')
                 })
-
+                
             return output
 
 def CliEmbeddedSearch():

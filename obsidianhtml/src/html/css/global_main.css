@@ -744,6 +744,38 @@ a.inline-tag:hover {
     padding-right: 2rem;
     margin-bottom: 1rem;
     background-color: rgba(var(--normal-text-color),0.05);
+
+    max-height: 500px;
+    overflow-y: scroll;
+    padding-left: 1rem;
+    scrollbar-width: auto;
+    min-width: 30%;
+}
+.match-document {
+    margin: 1rem;
+    border-bottom: 1px solid rgba(var(--normal-text-color),0.2);
+}
+.match-document-title {
+    font-weight: bold;
+    margin-bottom: 1rem;
+    cursor:pointer;
+}
+.match-document a:visited,
+.match-document a:link,
+.match-document a:hover {
+    color: var(--normal-text-color);
+    text-decoration: none;
+} 
+
+.matches {
+    margin-bottom: 1rem;
+}
+.match-row {
+    margin-bottom: 1rem;
+    border-bottom: 1px dotted rgba(var(--normal-text-color),0.3);
+}
+.match {
+    background-color: rgba(255,255,0,0.5);
 }
 
 
