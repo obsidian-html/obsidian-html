@@ -156,7 +156,7 @@ function GetHtmlFlex(fs_results, search_string, hard_search) {
         let element = template;
         html += element.replace('{{url}}', res.url)
                     .replace('{{title}}', res.title)
-                    .replace('{{content}}', highlight(SEARCH_DATA[res.id].md, search_string, false, 20).join(" "))
+                    .replace('{{content}}', highlight(SEARCH_DATA[res.id].content, search_string, false, 20).join(" "))
     });
     html += '</ul>'
     return html

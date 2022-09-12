@@ -6,13 +6,15 @@ class SearchHead:
     def __init__(self):
         self.data = []
 
-    def AddPage(self, url, rtr_url, title, text, metadata):
+    def AddPage(self, url, rtr_url, filename, title, content, metadata):
         p = {
+            'file': filename,
+            'path': rtr_url,
             'title': title,
             'url': url,
             'rtr_url': rtr_url,
-            'keywords': GetKeywords(text),
-            'md': SanatizeText(text),
+            'keywords': GetKeywords(content),
+            'content': SanatizeText(content),
             'tags': GetTags(metadata)
         }
         self.data.append(p)
