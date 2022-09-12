@@ -548,11 +548,13 @@ def ConvertVault(config_yaml_location=''):
 
             # add embedded search results
             if pb.gc('toggles/features/embedded_search/enabled', cached=True):
-                '{_obsidian_html_query:'
-                query_blocks = re.findall(r'(?<=<p>{_obsidian_html_query:\ )(.*?)(?=\ }</p>)', html)
-                for user_query in query_blocks:
+                query_blocks = re.findall(r'(?<=<p>{_obsidian_html_query:)(.*?)(?=\ }</p>)', html)
+                for listing in query_blocks:
+                    # split listing into qualifier and user_query
+                    qual, user_query = listing.split('|-|')
+
                     # found query
-                    print(user_query)
+                    print(qual, user_query)
 
                     # obsidian search and whoosh do not match 1:1, make a conversion
                     query = ConvertObsidianQueryToWhooshQuery(user_query)
@@ -566,12 +568,23 @@ def ConvertVault(config_yaml_location=''):
                     res = esearch.search(q)
 
                     # compile html output
-                    output = '<ul>\n\t' + '\n\t'.join([f'<li><a href="/{x["path"]}">{x["title"]}</a></li>' for x in res]) + '\n</ul>'
-                    print(output)
+                    output = ''
+                    if qual == 'list':
+                        output = '<div class="query"><ul>\n\t' + '\n\t'.join([f'<li><a href="/{x["path"]}">{x["title"]}</a></li>' for x in res]) + '\n</ul></div>'
+                    
+                    else:
+                        output = '<div class="query">'
+                        for doc in res:
+                            output += f'\n\t<div class="match-document">\n\t\t<div class="match-document-title">\n\t\t\t<a href="/{doc["path"]}">{doc["title"]}</a>\n\t\t</div>\n\t\t<div class="matches">'
+                            for match in doc['matches']:
+                                output += f'\n\t\t\t<div class="match-row">\n\t\t\t\t{match}\n\t\t\t</div>'
+                            output += '\n\t\t</div>\n\t</div>'
+
+                        output += '\n</div>'
 
                     # replace query block with html
-                    safe_str = re.escape('<p>{_obsidian_html_query: ' + user_query + ' }</p>')
-                    html = re.sub(safe_str, f'<div class="query">{output}</div>', html)
+                    safe_str = re.escape('<p>{_obsidian_html_query:' + listing + ' }</p>')
+                    html = re.sub(safe_str, output, html)
 
             # write result
             with open(dst_abs_path, 'w', encoding="utf-8") as f:
