@@ -58,6 +58,9 @@ def UnzipSearchData(zip_path):
 
     return searchdata_path
 
+def ConvertObsidianQueryToWhooshQuery(query):
+    return query.replace('file:', 'title:')
+
 class EmbeddedSearch:
     def __init__(self, json_data=None, search_data_path=None):
         index_dir = '/tmp/obs/index'

@@ -69,7 +69,7 @@ class Config:
             self.capabilities_needed['directory_tree'] = True
 
         self.capabilities_needed['search_data'] = False
-        if gc('toggles/features/search/enabled') or gc('toggles/features/graph/enabled'):
+        if gc('toggles/features/search/enabled') or gc('toggles/features/graph/enabled') or gc('toggles/features/embedded_search/enabled'):
             self.capabilities_needed['search_data'] = True
 
         self.capabilities_needed['graph_data'] = False

@@ -24,7 +24,7 @@ from .RssFeed import RssFeed
 from .ErrorHandling import extra_info
 from .PicknickBasket import PicknickBasket
 from .CreateIndexFromTags import CreateIndexFromTags
-from .EmbeddedSearch import EmbeddedSearch
+from .EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
 
 
 def ConvertVault(config_yaml_location=''):
@@ -551,6 +551,8 @@ def ConvertVault(config_yaml_location=''):
                 '{_obsidian_html_query:'
                 query_blocks = re.findall(r'(?<=<p>{_obsidian_html_query:\ )(.*?)(?=\ }</p>)', html)
                 for user_query in query_blocks:
+                    print(user_query)
+                    user_query = ConvertObsidianQueryToWhooshQuery(user_query)
                     print(user_query)
                     q = esearch.parse_user_query(user_query)
                     print(q)
