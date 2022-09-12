@@ -44,7 +44,6 @@ class EmbeddedSearchPreprocessor(Preprocessor):
             if not in_code:
                 m_start = RegexBegin.match(line)
                 if m_start:
-                    print(line)
                     if 'list' in line:
                         qualifier = 'list'
                     in_code = True
