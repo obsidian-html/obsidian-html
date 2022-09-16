@@ -556,16 +556,8 @@ def ConvertVault(config_yaml_location=''):
                     # found query
                     print(qual, user_query)
 
-                    # obsidian search and whoosh do not match 1:1, make a conversion
-                    query = ConvertObsidianQueryToWhooshQuery(user_query)
-                    print(query)
-
-                    # parse query into standard query object
-                    q = esearch.parse_user_query(query)
-                    print(q)
-
                     # search
-                    res = esearch.search(q)
+                    res = esearch.search(user_query)
 
                     # compile html output
                     output = ''
@@ -591,6 +583,12 @@ def ConvertVault(config_yaml_location=''):
                                 output += '\n\t\t\t<div class="tag-box">'
                                 for match, tag in doc['matches']['tags']:
                                     output += f'\n\t\t\t\t<div class="match-row tag">\n\t\t\t\t\t<a href="/obs.html/tags/{tag}/index.html">{match}</a>\n\t\t\t\t</div>'
+                                output += '\n\t\t\t</div>'
+
+                            if len(doc['matches']['tags_keyword']) > 0:
+                                output += '\n\t\t\t<div class="tag-box">'
+                                for match, tag in doc['matches']['tags_keyword']:
+                                    output += f'\n\t\t\t\t<div class="match-row tag keyword">\n\t\t\t\t\t<a href="/obs.html/tags/{tag}/index.html">{match}</a>\n\t\t\t\t</div>'
                                 output += '\n\t\t\t</div>'
 
                             # close doc divs
