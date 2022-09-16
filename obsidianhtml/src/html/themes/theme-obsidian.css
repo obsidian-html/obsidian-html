@@ -264,5 +264,11 @@ blockquote {
 }
 
 
+.theme-obs-dark .match-row .match {
+    border-bottom: 2px solid rgba(255, 255, 0, 0.5);
+}
+.theme-obs-dark .match-row.keyword .match  {
+    border: 0px;
+}
 
 /*  ----------------------------------------- /THEME ------------------------------------------------ */
