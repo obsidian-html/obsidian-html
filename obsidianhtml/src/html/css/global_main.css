@@ -740,16 +740,19 @@ a.inline-tag:hover {
 .query {
     border-top: 2px solid rgba(var(--normal-text-color),0.3);
     border-bottom: 2px solid rgba(var(--normal-text-color),0.3);
-    width: max-content;
-    padding-right: 2rem;
-    margin-bottom: 1rem;
     background-color: rgba(var(--normal-text-color),0.05);
 
-    max-height: 500px;
     overflow-y: scroll;
-    padding-left: 1rem;
     scrollbar-width: auto;
+
+    padding-right: 2rem;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+
+    width: max-content;
     min-width: 30%;
+    max-width: calc(100% - 3rem);
+    max-height: 500px;
 }
 .match-document {
     margin: 1rem;
@@ -791,6 +794,8 @@ a.inline-tag:hover {
 .tag-box {
     display: flex;
 }
+
+
 .match-row.tag {
     flex: auto;
     background-color: var(--bg-note);
@@ -803,10 +808,21 @@ a.inline-tag:hover {
     max-width: max-content;
     margin: 0.2rem;
 }
+.match-row.keyword {
+    border: 2px solid rgba(255, 255, 0, 0.5);
+}
 
 .match-row .match {
-    background-color: rgba(255,255,0,0.5);
+    border-bottom: 2px solid rgb(255, 255, 0);
+    border-top: 2px solid rgb(255, 255, 0);
 }
+.match-row.keyword {
+    border: 2px solid rgba(255, 255, 0, 0.5);
+}
+.match-row.keyword .match  {
+    border: 0px;
+}
+
 .match-row.tag .match {
     background-color: unset;
 }

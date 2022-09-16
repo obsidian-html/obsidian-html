@@ -17,15 +17,13 @@ from .lib import    print_global_help_and_exit, get_obshtml_appdir_folder_path
 
 def InitWhoosh(index_dir):
     schema = Schema(
-        ID=ID(stored=True),
+        id=ID(stored=True),
         path=TEXT(stored=True),
         file=TEXT(stored=True),
-        #url=STORED,
-        #rtr_url=STORED,                             # same as path, can't be removed for now
         title=TEXT(stored=True),
         content=TEXT(stored=True),
-        #keywords=KEYWORD(stored=True, scorable=True),
-        tags=TEXT(stored=True)
+        tags=TEXT(stored=True),
+        tags_keyword=KEYWORD(stored=True)
     )
 
     if not os.path.exists(index_dir):
@@ -39,13 +37,15 @@ def InitWhoosh(index_dir):
 
 def LoadSearchDataIntoWhoosh(writer, search_data):
     # add data to whoosh
-    for doc in search_data:
+    for i, doc in enumerate(search_data):
         subset = {
+            'id': str(i),
             'path': doc['path'],
             'file': doc['file'],
             'title': doc['title'],
             'content': doc['content'],
-            'tags': doc['tags']
+            'tags': doc['tags'],
+            'tags_keyword': doc['tags']
         }
         writer.add_document(**subset)
     writer.commit()
@@ -70,46 +70,56 @@ def UnzipSearchData(zip_path):
 
 def ConvertObsidianQueryToWhooshQuery(user_query):
     query = user_query
-    query = query.replace('tag:#', 'tags:')
+    query = query.replace('tag:#', 'tags_keyword:')
+    query = query.replace('tag:', 'tags:')
+
     query = query.replace(' -', ' ANDNOT ')
     return query
 
-    # in_single_quotes = False
-    # in_double_quotes = False
-    # par_level = 0
-    # chunks = []
-    # buffer = ''
-    # for char in query:
-    #     if not (in_single_quotes or in_double_quotes or par_level > 0):
-    #         # chunkable section
-    #         if char == ' ' and buffer != '':
-    #             chunks.append(buffer)
-    #             buffer = ''
-    #             continue
 
-    #     buffer += char
+def RemovePhrasesFromQueryNodes(nodes):
+    keyword_fields = ['tags_keyword']
+    def rec(obj):
+        if obj.is_text() and ' ' in obj.r():
+            # node is a phrase
+            if obj.fieldname in keyword_fields:
+                # phrase applies to a keyword field, this isn't allowed, remove it.
+                return None
+        if hasattr(obj, "nodes"):
+            remove_list = []
+            for node in obj.nodes:
+                res = rec(node)
+                if res is None:
+                    remove_list.append(node)
+            for rn in remove_list:
+                obj.nodes.remove(rn)
+        return obj
 
-    #     if char == "'":
-    #         in_single_quotes = not in_single_quotes
+    return rec(nodes)
 
-    #     if char == '"':
-    #         in_double_quotes = not in_double_quotes
+def RemoveKeywordPhrasesFromCleanQuery(qp, clean_query):
+    nodes = qp.process(clean_query)
+    nodes = RemovePhrasesFromQueryNodes(nodes)
+    qo = PostProcessParse(qp, nodes)
+    return qo
 
-    #     if char == '(':
-    #         par_level += 1
+def PostProcessParse(qp, obj, normalize=True, debug=False):
+    # Converts nodes-object to query-object.
+    # The nodes object is the result of qp.process(query), instead of qp.parse(query).
+    # We do the process step to get the nodes, then we remove offenders, and then continue with the parsing in this
+    # function to come at a query object.
+    
+    q = obj.query(qp)
+    if not q:
+        q = query.NullQuery
+    if debug:
+        print_debug(debug, "Pre-normalized query: %r" % q)
 
-    #     if char == ')':
-    #         par_level -= 1
-    #         if par_level < 0:
-    #             print(f'Error parsing query: {query} (compiled from user query {user_query}.')
-    #             print(f' Closing ) occurs before opening (. \nError occurred at {" ".join(chunks) + buffer} <')
-    #             return False
-
-    # chunks.append(buffer)
-    # buffer = ''
-    # query = " OR ".join(chunks)
-
-    # return query
+    if normalize:
+        q = q.normalize()
+        if debug:
+            print_debug(debug, "Normalized query: %r" % q)
+    return q
 
 class EmbeddedSearch:
     def __init__(self, json_data=None, search_data_path=None):
@@ -128,21 +138,31 @@ class EmbeddedSearch:
         # load docs
         LoadSearchDataIntoWhoosh(self.writer, search_data)
 
-    def parse_user_query(self, phrase):
-        #parser = QueryParser("content", schema=self.ix.schema, group=OrGroup)
-        fields = ["content", "title", "path", "file", "tags"]
-        parser = MultifieldParser(fields, schema=self.ix.schema, group=OrGroup)
-        return parser.parse(phrase)
 
-    def search(self, q):
+    def search(self, user_query):
         output = []
 
+        # convert user query to a format that we can use
+        clean_query = ConvertObsidianQueryToWhooshQuery(user_query)
+
+        # create query parser
+        fields = ["content", "title", "path", "file", "tags", "tags_keyword"]
+        qp = MultifieldParser(fields, schema=self.ix.schema, group=OrGroup)
+
+        # parse query into query object
+        qo = RemoveKeywordPhrasesFromCleanQuery(qp, clean_query)
+
+        if qo is None:
+            # parse function expectedly failed, don't return any search results
+            return []
+
         with self.ix.searcher() as searcher:
-            results = searcher.search(q, limit=20)
+            results = searcher.search(qo, limit=20)
             print('-'*35, len(results), '-'*35)
 
             for doc in results:
                 output.append({
+                    'id'     : doc['id'], 
                     'title'  : doc['title'], 
                     'path'   : doc['path'], 
                     'file'   : doc['file'],
@@ -151,15 +171,18 @@ class EmbeddedSearch:
                     'matches': {
                         'content': [x for x in doc.highlights("content", top=5).split('...') if x != ''],
                         'tags': SplitTags(doc.highlights("tags", top=10)),
+                        'tags_keyword': SplitTags(doc.highlights("tags_keyword", top=10)),
                         'path': doc.highlights("path")
                     }
                 })
 
-                output
-
             return output
 
 def SplitTags(tags_string):
+    # has nothing to do with obsidian tags, this means to split the html tags.
+    # we will return the actual tag, which can be used for building a url, and the match html, for showing the result
+    # [(tag, match), ...]
+
     if tags_string == '':
         return []
 
@@ -238,8 +261,5 @@ def CliEmbeddedSearch():
 
     # Search
     print(f"Query: '{query_string}'")
-    q = esearch.parse_user_query(query_string)
-    print(q)
-    res = esearch.search(q)
-
+    res = esearch.search(query_string)
     print(res)
