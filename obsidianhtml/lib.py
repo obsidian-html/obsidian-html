@@ -239,17 +239,31 @@ def ExportStaticFiles(pb):
     for filepath, _ in css_files_list:
         css += '\n\n' + OpenIncludedFile(filepath)
     
-    master = tempfile.NamedTemporaryFile(mode = "w")
-    master.writelines(css)
-    copy_file_list.append([master.name, 'master.css'])
+    copy_file_list.append([{'type': 'contents', 'contents': css}, 'master.css'])
 
     # copy static files over to the static folder
-    for file_name in copy_file_list:
-        # Get file from package
-        c = OpenIncludedFile(file_name[0])
+    for file in copy_file_list:
+        file_record = file[0]
+        file_name = file[1]
+        contents = ''
+
+        # Get file contents
+        if isinstance(file_record, dict):
+            # ... from absolute path
+            if file_record['type'] == 'absolute_path_str':
+                with open(file_record['path'], 'r', encoding='utf-8') as f:
+                    contents = f.read()
+            # ... from file_record itself
+            elif file_record['type'] == 'contents':
+                contents = file_record['contents'] 
+            else:
+                raise Exception('ERROR: file_record type in unknown')
+        else:
+            # ... from package
+            contents = OpenIncludedFile(file_record)
 
         # Define dest path and html_url_prefix
-        dst_path = static_folder.joinpath(file_name[1])
+        dst_path = static_folder.joinpath(file_name)
         html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
         
         # Set pane divs
@@ -260,7 +274,7 @@ def ExportStaticFiles(pb):
             content_pane_div = "right_pane_content"
 
         # Templating
-        if file_name[1] in ('master.css', 'main.css', 'global_main.css', 
+        if file_name in ('master.css', 'main.css', 'global_main.css', 
                             'obsidian_core.js', 
                             'search.js', 'search.css'):
 
@@ -268,7 +282,7 @@ def ExportStaticFiles(pb):
             if pb.gc('toggles/relative_path_html'):
                 url_mode = 'relative'
 
-            c = c.replace('{html_url_prefix}', html_url_prefix)\
+            contents = contents.replace('{html_url_prefix}', html_url_prefix)\
                  .replace('{configured_html_url_prefix}', pb.configured_html_prefix)\
                  .replace('{no_tabs}',str(int(pb.gc('toggles/no_tabs', cached=True))))\
                  .replace('{relative_paths}', str(int(pb.gc('toggles/relative_path_html'))))\
@@ -280,15 +294,13 @@ def ExportStaticFiles(pb):
                  .replace('{gzip_hash}', pb.gzip_hash)\
                  .replace('{url_mode}', url_mode)\
 
-            c = c.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))\
+            contents = contents.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))\
                  .replace('__loading_bg_color__', pb.gc('toggles/features/styling/loading_bg_color', cached=True))\
                  .replace('__max_note_width__', pb.gc('toggles/features/styling/max_note_width', cached=True))\
 
         # Write to dest
         with open (dst_path, 'w', encoding="utf-8") as f:
-            f.write(c)
-
-    master.close()
+            f.write(contents)
 
     # copy binary files to dst (byte copy, static_folder)
     copy_file_list_byte = [
