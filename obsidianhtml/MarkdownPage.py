@@ -347,7 +347,7 @@ class MarkdownPage:
             self.page = re.sub(safe_str, new_md_str, self.page)
             
         # -- [10] Add code inclusions
-        for l in re.findall(r'^(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
+        for l in re.findall(r'(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')
 
             result = GetObsidianFilePath(link, self.file_tree, self.pb)
@@ -396,7 +396,7 @@ class MarkdownPage:
                 # Wrap up
                 included_page.RestoreCodeSections()
             
-            self.page = self.page.replace(l, included_page.page + '\n')
+            self.page = self.page.replace(l, '\n' + included_page.page + '\n')
 
 
         # -- [#296] Remove block references 
