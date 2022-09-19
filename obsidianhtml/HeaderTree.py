@@ -38,9 +38,6 @@ def GetSubHeaderTree(header_tree, header_selector):
         if header_selector.count('#') == 0:
             header_element = header_selector
             new_header_selector = ''
-
-            print('header_element: ', header_element)
-
         else:
             header_element, new_header_selector = header_selector.split('#', 1)
 
