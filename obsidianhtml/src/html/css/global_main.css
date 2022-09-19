@@ -808,16 +808,12 @@ a.inline-tag:hover {
     max-width: max-content;
     margin: 0.2rem;
 }
+
 .match-row.keyword {
     border: 2px solid rgba(255, 255, 0, 0.5);
 }
-
 .match-row .match {
     border-bottom: 2px solid rgb(255, 255, 0);
-    border-top: 2px solid rgb(255, 255, 0);
-}
-.match-row.keyword {
-    border: 2px solid rgba(255, 255, 0, 0.5);
 }
 .match-row.keyword .match  {
     border: 0px;
