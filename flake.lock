@@ -15,22 +15,6 @@
         "type": "github"
       }
     },
-    "md-mermaid-repo": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1645912413,
-        "narHash": "sha256-ZVIG5mD155zH9KEUmPNED91AgyXjdN7zUd+ZPI20zf4=",
-        "owner": "obsidian-html",
-        "repo": "md_mermaid",
-        "rev": "22c4d600da25397205471706abc9011e142d5f53",
-        "type": "github"
-      },
-      "original": {
-        "owner": "obsidian-html",
-        "repo": "md_mermaid",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1663491030,
@@ -50,7 +34,6 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "md-mermaid-repo": "md-mermaid-repo",
         "nixpkgs": "nixpkgs"
       }
     }

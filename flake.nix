@@ -3,10 +3,6 @@
   inputs.flake-utils = {
     url = "github:numtide/flake-utils";
   };
-  inputs.md-mermaid-repo = {
-    url = "github:obsidian-html/md_mermaid";
-    flake = false;
-  };
   inputs.nixpkgs = {
     url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
@@ -15,27 +11,11 @@
     self,
     nixpkgs,
     flake-utils,
-    md-mermaid-repo,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = import nixpkgs {
           inherit system;
-        };
-
-        # temporary until upstream updates the PyPI package
-        mdMermaid = pkgs.python3.pkgs.buildPythonPackage {
-          name = "obsidianhtml-md-mermaid-fork";
-
-          patchPhase = ''
-            sed -i 's/md_mermaid/obsidianhtml-md-mermaid-fork/g' setup.py
-          '';
-
-          propagatedBuildInputs = with pkgs.python3Packages; [
-            markdown
-          ];
-
-          src = md-mermaid-repo;
         };
 
         makeYaml = config: let
@@ -49,12 +29,12 @@
           cat ${./setup.cfg} | ${pkgs.python3Packages.jc}/bin/jc --ini > $out
         ''));
 
-        depNames = pkgs.lib.remove "obsidianhtml-md-mermaid-fork" (pkgs.lib.remove "" (pkgs.lib.splitString "\n"
+        depNames = pkgs.lib.remove "" (pkgs.lib.splitString "\n"
           setup
           .options
-          .install_requires));
+          .install_requires);
 
-        deps = [mdMermaid] ++ pkgs.lib.attrsets.attrVals depNames pkgs.python3Packages;
+        deps = pkgs.lib.attrsets.attrVals depNames pkgs.python3Packages;
       in rec {
         packages.default = pkgs.python3.pkgs.buildPythonApplication rec {
           pname = setup.metadata.name;
@@ -74,7 +54,7 @@
         checks.default = packages.default;
 
         devShells.default = let
-          myPython = pkgs.python3.withPackages (p: [mdMermaid] ++ (pkgs.lib.attrsets.attrVals depNames p));
+          myPython = pkgs.python3.withPackages (p: pkgs.lib.attrsets.attrVals depNames p);
         in
           pkgs.mkShell {
             buildInputs = [
