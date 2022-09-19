@@ -7,6 +7,9 @@
     url = "github:obsidian-html/md_mermaid";
     flake = false;
   };
+  inputs.nixpkgs = {
+    url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  };
 
   outputs = {
     self,
