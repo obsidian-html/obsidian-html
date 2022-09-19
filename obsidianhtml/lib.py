@@ -99,7 +99,7 @@ def GetObsidianFilePath(link, file_tree, pb):
     parts = link.split('#')
     link = parts[0]
     if len(parts) > 1:
-        output['header'] = parts[1]
+        output['header'] = '#'.join(parts[1:])
 
     # Find file. Values will be False when file is not found.
     output['rtr_path_str'], output['fo'] = FindFile(file_tree, link, pb)
