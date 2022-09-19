@@ -239,10 +239,9 @@ def ExportStaticFiles(pb):
     for filepath, _ in css_files_list:
         css += '\n\n' + OpenIncludedFile(filepath)
     
-    dstpth = GetIncludedResourcePath('html').joinpath('css/master.css')
-    with open (dstpth, 'w', encoding="utf-8") as f:
-        f.write(css)
-    copy_file_list.append(['html/css/master.css', 'master.css'])
+    master = tempfile.NamedTemporaryFile(mode = "w")
+    master.writelines(css)
+    copy_file_list.append([master.name, 'master.css'])
 
     # copy static files over to the static folder
     for file_name in copy_file_list:
@@ -288,6 +287,8 @@ def ExportStaticFiles(pb):
         # Write to dest
         with open (dst_path, 'w', encoding="utf-8") as f:
             f.write(c)
+
+    master.close()
 
     # copy binary files to dst (byte copy, static_folder)
     copy_file_list_byte = [
