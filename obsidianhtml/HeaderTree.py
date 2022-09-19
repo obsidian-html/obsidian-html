@@ -30,6 +30,54 @@ def PrintHeaderTree(root_element):
             page.append(element)
     return '\n'.join(page)
 
+def GetSubHeaderTree(header_tree, header_selector): 
+    # header_selector can look like this: section1#h3 (which will be different from section2#h3, for example)
+
+    def recurse_selector(header_tree, header_selector):
+        # get md-title for the next block 
+        if header_selector.count('#') == 0:
+            header_element = header_selector
+            new_header_selector = ''
+
+            print('header_element: ', header_element)
+
+        else:
+            header_element, new_header_selector = header_selector.split('#', 1)
+
+        md_title = slugify(header_element)
+
+        # find tree element that matches md_title
+        result = recurse_tree(header_tree, md_title)
+        if result is None: 
+            print(f'ERROR: header with title {md_title} was not found')
+            exit()
+
+        header_tree = result
+
+        # if no new header selector just return the current header_tree
+        if new_header_selector == '':
+            return header_tree
+        # else we loop again
+        return recurse_selector(header_tree, new_header_selector)
+
+
+    def recurse_tree(header_tree, md_title):
+        # return the tree itself if it has the correct title
+        if header_tree['md-title'] == md_title:
+            return header_tree
+
+        # go through the children to find it
+        for child in header_tree['content']:
+            if isinstance(child, dict) and 'md-title' in child.keys():
+                result = recurse_tree(child, md_title)
+                if result is not None:
+                    return result
+        
+        # none found
+        return None
+
+    return recurse_selector(header_tree, header_selector)
+
 
 def ConvertMarkdownToHeaderTree(code):
     lines = code.split('\n')
@@ -73,7 +121,7 @@ def ConvertMarkdownToHeaderTree(code):
 
                     # Move up in the tree until both levels are equal, or current_element['level'] is higher than level
                     while level < current_element['level']:
-                        current_element = current_element['parent']                
+                        current_element = current_element['parent']
                     if level > current_element['level']:
                         # add to children of current_element
                         current_element['content'].append(new_element)

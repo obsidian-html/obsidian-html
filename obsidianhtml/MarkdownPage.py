@@ -1,11 +1,12 @@
 from __future__ import annotations
 import re                   # regex string finding/replacing
+import yaml
 from pathlib import Path    # 
 import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, slugify, MalformedTags, OpenIncludedFile
-from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock
+from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock, GetSubHeaderTree
 from .FileFinder import FindFile
 
 class MarkdownPage:
@@ -348,7 +349,7 @@ class MarkdownPage:
         # -- [10] Add code inclusions
         for l in re.findall(r'(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')
-            
+
             result = GetObsidianFilePath(link, self.file_tree, self.pb)
             file_object = result['fo']
             header =  result['header']
@@ -384,9 +385,13 @@ class MarkdownPage:
 
                 # option: Referencing header
                 else:
-                    header_id = slugify(header)
                     header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
-                    included_page.page = PrintHeaderTree(header_dict[header_id])
+                    header_tree = GetSubHeaderTree(root_element, header)
+                    included_page.page = PrintHeaderTree(header_tree)
+
+                    # header_id = slugify(header)
+                    # header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
+                    # included_page.page = PrintHeaderTree(header_dict[header_id])
                     
                 # Wrap up
                 included_page.RestoreCodeSections()
