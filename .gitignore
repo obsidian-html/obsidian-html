@@ -11,3 +11,4 @@ tmp/*
 **/geckodriver.log
 /obsidianhtml/src/installer/dist/**
 /obsidianhtml/src/html/css/master.css
+result
