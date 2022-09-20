@@ -112,7 +112,9 @@ class MarkdownPage:
             '3gp': 'video/3gpp',
             'mov': 'video/quicktime',
             'wmv': 'video/x-ms-wmv',
-            'avi': 'video/x-msvideo'
+            'avi': 'video/x-msvideo',
+            'ogv': 'video/ogg',
+            'mkv': 'video/x-matroska'
         }
         try:
             mime_type = mime_type_lut[suffix]
@@ -124,8 +126,12 @@ class MarkdownPage:
     def GetAudioHTML(self, file_name, relative_path_corrected, suffix):
         mime_type_lut = {
             'mp3': 'audio/mpeg',
+            'webm': 'audio/webm',
             'm4a': 'audio/mp4',
-            'wav': 'audio/x-wav'
+            'wav': 'audio/x-wav',
+            'ogg': 'audio/ogg',
+            '3gp': 'video/3gpp',
+            'flac': 'audio/flac'
         }
         try:
             mime_type = mime_type_lut[suffix]
