@@ -61,9 +61,11 @@ copy_vault_to_tempdir_follow_copy: false
 # ObsidianHtml needs to be able to discern between included notes and included files, because included files 
 # need to be treated differently. This is a configurable setting because we might've missed certain suffixes
 # of files that are includable.
-included_file_suffixes: ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'pdf', 'mp4', 'webm', 'wav', 'mp3']
+included_file_suffixes: ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'pdf', 'mp4', 'webm', 'wav', 'mp3', 'pdf']
 video_format_suffixes: ['mp4', 'webm']
 audio_format_suffixes: ['wav', 'mp3']
+# files that should be included via an <embed> tag:
+embeddable_file_suffixes: ['pdf'] 
 
 # Used to strip the http url hostpart of a link to get a relative link
 # e.g. for value "https://git.com/user/repo/-/wikis/mywiki/" then:
