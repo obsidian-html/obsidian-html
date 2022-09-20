@@ -151,7 +151,7 @@ class OH_File:
         self.metadata['is_includable_file'] = False
         self.metadata['is_parsable_note'] = False
 
-        suffix = path.suffix[1:]
+        suffix = path.suffix[1:].lower()
         
         if suffix == 'md':
             self.metadata['is_note'] = True
