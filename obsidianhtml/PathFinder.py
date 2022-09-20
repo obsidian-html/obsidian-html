@@ -147,6 +147,7 @@ class OH_File:
         self.metadata['is_note'] = False
         self.metadata['is_video'] = False
         self.metadata['is_audio'] = False
+        self.metadata['is_embeddable'] = False
         self.metadata['is_includable_file'] = False
         self.metadata['is_parsable_note'] = False
 
@@ -160,6 +161,8 @@ class OH_File:
             self.metadata['is_video'] = True
         if suffix in self.pb.gc('audio_format_suffixes', cached=True):
             self.metadata['is_audio'] = True
+        if suffix in self.pb.gc('embeddable_file_suffixes', cached=True):
+            self.metadata['is_embeddable'] = True
 
         if path.exists() and self.metadata['is_note']:
             self.metadata['is_parsable_note'] = True

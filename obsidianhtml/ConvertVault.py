@@ -974,6 +974,27 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         safe_link = r'<source src="'+re.escape(link)+r'"'
         md.page = re.sub(safe_link, new_link, md.page)
 
+    # [?] Handle local embeddable tag-links (copy them over to output)
+    # ------------------------------------------------------------------
+    for link in re.findall(r'(?<=<embed src=")([^"]*)', md.page):
+        l = urllib.parse.unquote(link)
+        if '://' in l:
+            continue
+
+        rel_path_str, lo = FindFile(pb.files, l, pb)
+        if rel_path_str == False:
+            if pb.gc('toggles/warn_on_skipped_image', cached=True):
+                warnings.warn(f"Media {l} treated as external and not imported in html")
+            continue
+
+        # Copy src to dst
+        lo.copy_file('mth')
+
+        # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
+        new_link = '<embed src="'+urllib.parse.quote(lo.get_link('html', origin=fo))+'"'
+        safe_link = r'<embed src="'+re.escape(link)+r'"'
+        md.page = re.sub(safe_link, new_link, md.page)
+
     # [?] Documentation styling: Table of Contents
     # ------------------------------------------------------------------
     if pb.gc('toggles/features/styling/toc_pane', cached=True) or pb.gc('toggles/features/styling/add_toc', cached=True):

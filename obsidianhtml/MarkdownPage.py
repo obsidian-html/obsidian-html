@@ -134,6 +134,9 @@ class MarkdownPage:
         audio_template = OpenIncludedFile('html/templates/audio_template.html')
         return audio_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
 
+    def GetEmbeddable(self, file_name, relative_path_corrected, suffix):
+        return f'<embed src="{relative_path_corrected}" width="90%" height="700px">'
+
     def ConvertObsidianPageToMarkdownPage(self, origin:'OH_file'=None, include_depth=0, includer_page_depth=None, remove_block_references=True):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
 
@@ -228,9 +231,11 @@ class MarkdownPage:
             # Handle video/audio usecase
             if lo.metadata['is_video']:
                 new_link = self.GetVideoHTML(file_name, relative_path, suffix)
-            if lo.metadata['is_audio']:
+            elif lo.metadata['is_audio']:
                 new_link = self.GetAudioHTML(file_name, relative_path, suffix)
-            
+            elif lo.metadata['is_embeddable']:
+                new_link = self.GetEmbeddable(file_name, relative_path, suffix)
+
             safe_link = re.escape('![]('+link+')')
             self.page = re.sub(safe_link, new_link, self.page)
 
