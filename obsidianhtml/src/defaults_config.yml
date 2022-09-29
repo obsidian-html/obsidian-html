@@ -113,6 +113,10 @@ toggles:
   # Opt-in/-out of Md->Html conversion, set to False when only wanting to get proper markdown from Obsidian
   compile_html: True
 
+  # For compatibility with vaults/notes that have the 'Strict Line Breaks' option enabled
+  # This is off by default in Obsidian; setting it to True will not insert <br> tags into multi-line paragraphs
+  strict_line_breaks: False
+
   # gitlab is case insensitive, this setting should be true when converting a wiki from that source
   # might also be useful if you have markdown links in your vault
   # note that this does not impact the output, Hello.md will be written to Hello.html
