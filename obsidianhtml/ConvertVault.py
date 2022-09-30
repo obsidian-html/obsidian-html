@@ -891,6 +891,8 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # This is any string in between '](' and  ')' with no spaces in between the ( and )
     proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', md.page)
     for l in proper_links:
+        l = urllib.parse.unquote(l)
+        
         # There is currently no way to match links containing parentheses, AND not matching the last ) in a link like ([test](link))
         if l.endswith(')'):
             l = l[:-1]
