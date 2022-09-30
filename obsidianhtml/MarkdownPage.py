@@ -195,7 +195,7 @@ class MarkdownPage:
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
         for link in re.findall("(?<=\!\[\[)(.*?)(?=\])", self.page):
-            new_link = '![]('+link+')'
+            new_link = '![]('+urllib.parse.quote(link)+')'
 
             # Obsidian page inclusions use the same tag...
             # Skip if we don't match image suffixes. Inclusions are handled at the end.
