@@ -891,14 +891,15 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # This is any string in between '](' and  ')' with no spaces in between the ( and )
     proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', md.page)
     for l in proper_links:
+        ol = l
         l = urllib.parse.unquote(l)
-        
+
         # There is currently no way to match links containing parentheses, AND not matching the last ) in a link like ([test](link))
         if l.endswith(')'):
             l = l[:-1]
 
         # Init link
-        link = MarkdownLink(pb, l, page_path, paths['md_folder'], url_unquote=True)
+        link = MarkdownLink(pb, l, page_path, paths['md_folder'])
 
         # Don't process in the following cases (link empty or // in the link)
         if link.isValid == False or link.isExternal == True: 
@@ -927,7 +928,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
             new_link = f']({link.fo.get_link("html", origin=fo)}{query_part})'
 
         # Update link
-        safe_link = re.escape(']('+l+')')
+        safe_link = re.escape(']('+ol+')')
         md.page = re.sub(safe_link, new_link, md.page)
 
     # [4] Handle local image links (copy them over to output)
