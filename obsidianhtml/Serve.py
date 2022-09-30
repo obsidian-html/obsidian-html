@@ -4,6 +4,10 @@ import http.server
 import socketserver
 from pathlib import Path
 
+# Defer tools
+from contextlib import ExitStack
+from functools import partial
+
 def ServeDir(port=8888, directory='./'):
     # Get directory/port from commandline args if provided
     if len(sys.argv) > 2:
@@ -45,4 +49,10 @@ def ServeDir(port=8888, directory='./'):
     # start server
     print(f'OBSHTML: Started webserver at http://localhost:{port}/ hosting from {Path(directory).resolve().as_posix()} (Ctrl+C to exit)', flush=True)
     httpd = socketserver.TCPServer(("", int(port)), Handler)
-    httpd.serve_forever()
+
+    with ExitStack() as stack:
+        stack.callback(partial(httpd.server_close))
+        stack.callback(partial(print, 'DEFERRED: closed webserver', flush=True))
+
+        httpd.serve_forever()
+

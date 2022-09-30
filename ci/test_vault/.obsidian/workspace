@@ -86,17 +86,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "active": "688650e0e2ca6e50",
+  "active": "3fae6aa94f1a59a0",
   "lastOpenFiles": [
-    "rss/rss_index.md",
-    "md/rss/rss_h1.md",
-    "Markdown link.md",
-    "md/index.md",
-    "Note link.md",
-    "note_inclusion/level1/noteB.md",
-    "note_inclusion/noteA.md",
+    "md_links/name (with pars and spaces).png",
+    "md_links/md_links_parentheses.md",
     "video/mp4_inclusion.md",
     "note_inclusion/level1/level2/noteC.md",
-    "excluded/rss_exclude.md"
+    "note_inclusion/noteA.md",
+    "dirtree/dirtree_note.md",
+    "Images.md",
+    "excluded/rss_exclude.md",
+    "rss/rss_h1.md",
+    "rss/rss_index.md"
   ]
 }
