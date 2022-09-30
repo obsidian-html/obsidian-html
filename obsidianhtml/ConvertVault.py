@@ -925,7 +925,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
             query_part = ''
             if link.query != '':
                 query_part = link.query_delimiter + link.query 
-            new_link = f']({link.fo.get_link("html", origin=fo)}{query_part})'
+            new_link = f']({urllib.parse.quote(link.fo.get_link("html", origin=fo))}{query_part})'
 
         # Update link
         safe_link = re.escape(']('+ol+')')
