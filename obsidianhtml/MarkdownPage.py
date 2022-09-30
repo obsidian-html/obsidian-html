@@ -333,7 +333,8 @@ class MarkdownPage:
 
 
         # -- [7] Fix newline issue by adding three spaces before any newline
-        self.page = self.page.replace("\n", "   \n")
+        if not self.pb.config.config['toggles']['strict_line_breaks']:
+            self.page = self.page.replace("\n", "   \n")
 
         # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
         # Cannot start with [, (, nor "
