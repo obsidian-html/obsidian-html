@@ -1,25 +1,22 @@
-from pathlib import Path
 import yaml
-from .lib import PopulateTemplate, OpenIncludedFile, simpleHash
+import glob
+
+from pathlib import Path
 from functools import cache
+
+from .lib import PopulateTemplate, OpenIncludedFile, simpleHash
+
 
 class CreateIndexFromDirStructure():
     def __init__(self, pb, path):
         self.pb = pb
         self.root = path
+        self.verbose = pb.gc('toggles/verbose_printout') or pb.gc('toggles/features/create_index_from_dir_structure/verbose')
 
         self.exclude_subfolders = pb.gc('toggles/features/create_index_from_dir_structure/exclude_subfolders')
         self.exclude_files = pb.gc('toggles/features/create_index_from_dir_structure/exclude_files')
-        #self.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
-        
-        # if pb.gc('toggles/relative_path_html'):
-        #     self.html_url_prefix = pb.sc(path='html_url_prefix', value='')
-        # else:
-        #     self.html_url_prefix = pb.gc("html_url_prefix")
-        #self.html_url_prefix = pb.gc("html_url_prefix")
-
-        self.verbose = pb.gc('toggles/verbose_printout')
-
+        self.build_exclude_list()
+    
         self.tree = self.get_tree(path)
         self.tree = self.build_tree_recurse(self.tree)
         self.sort_tree()
@@ -45,13 +42,38 @@ class CreateIndexFromDirStructure():
             'files':files
         }
 
+    def build_exclude_list(self):
+        # convert possible glob patterns to paths (str)
+
+        exclude_folders = []
+        for line in self.exclude_subfolders:
+            exclude_folders += glob.glob(line, root_dir=self.root, recursive=True)
+        self.exclude_subfolders_str = list(set(exclude_folders))
+
+        exclude_files = []
+        for line in self.exclude_files:
+            exclude_files += glob.glob(line, root_dir=self.root, recursive=True)
+        self.exclude_files_str = list(set(exclude_files))
+
+        if self.verbose:
+            print(f"\t\tRoot used for glob pattern expansion: {self.root}")
+            print("\n\t\tExcluded Folders (configured):")
+            print(yaml.dump(self.exclude_subfolders))
+            print("\n\t\tExcluded Files (configured):")
+            print(yaml.dump(self.exclude_files))
+            print("\n\t\tExcluded Folders (expanded from glob patterns and found):")
+            print(yaml.dump(self.exclude_subfolders_str))
+            print("\n\t\tExcluded Files (expanded from glob patterns and found):")
+            print(yaml.dump(self.exclude_files_str))
+
+
     def build_tree_recurse(self, tree):
         verbose = self.verbose
 
         for path in Path(tree['path']).resolve().glob('*'):
             # Exclude configured subfolders
             _continue = False
-            for folder in self.exclude_subfolders:
+            for folder in self.exclude_subfolders_str:
                 excl_folder_path = self.root.joinpath(folder)
                 if path.resolve().is_relative_to(excl_folder_path):
                     if verbose:
@@ -68,7 +90,7 @@ class CreateIndexFromDirStructure():
                 continue
 
             # exclude files
-            for ef in self.exclude_files:
+            for ef in self.exclude_files_str:
                 excl_file_path = self.root.joinpath(ef)
                 if excl_file_path == path:
                     if verbose:
