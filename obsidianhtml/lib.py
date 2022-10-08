@@ -741,3 +741,10 @@ def copy_tree_rsync(src_dir, dst_dir, ignore, verbose=False):
 class YamlIndentDumper(yaml.Dumper):
     def increase_indent(self, flow=False, indentless=False):
         return super(YamlIndentDumper, self).increase_indent(flow, False)
+
+def pushd(path):
+    cwd = os.getcwd()
+    os.chdir(path)
+    return cwd
+
+    

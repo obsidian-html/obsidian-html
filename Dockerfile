@@ -1,4 +1,4 @@
-FROM python:3.10 as base
+FROM python:3.9.14 as base
 #RUN apt update
 #RUN apt install -y firefox-esr
 #RUN pip install --upgrade pip && pip install lxml selenium markdown obsidianhtml-md-mermaid-fork python-frontmatter pygments regex requests beautifulsoup4 html5lib

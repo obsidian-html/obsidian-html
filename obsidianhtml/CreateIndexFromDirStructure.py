@@ -1,10 +1,11 @@
+import os
 import yaml
 import glob
 
 from pathlib import Path
 from functools import cache
 
-from .lib import PopulateTemplate, OpenIncludedFile, simpleHash
+from .lib import PopulateTemplate, OpenIncludedFile, simpleHash, pushd
 
 
 class CreateIndexFromDirStructure():
@@ -43,18 +44,23 @@ class CreateIndexFromDirStructure():
         }
 
     def build_exclude_list(self):
-        # convert possible glob patterns to paths (str)
+        """ convert possible glob patterns to paths (str) """
 
+        # move to html output dir
+        owd = pushd(self.root)
+
+        # build lists
         exclude_folders = []
         for line in self.exclude_subfolders:
-            exclude_folders += glob.glob(line, root_dir=self.root, recursive=True)
+            exclude_folders += glob.glob(line, recursive=True)
         self.exclude_subfolders_str = list(set(exclude_folders))
 
         exclude_files = []
         for line in self.exclude_files:
-            exclude_files += glob.glob(line, root_dir=self.root, recursive=True)
+            exclude_files += glob.glob(line, recursive=True)
         self.exclude_files_str = list(set(exclude_files))
 
+        # print results
         if self.verbose:
             print(f"\t\tRoot used for glob pattern expansion: {self.root}")
             print("\n\t\tExcluded Folders (configured):")
@@ -66,6 +72,8 @@ class CreateIndexFromDirStructure():
             print("\n\t\tExcluded Files (expanded from glob patterns and found):")
             print(yaml.dump(self.exclude_files_str))
 
+        # move back to OG cwd
+        os.chdir(owd)
 
     def build_tree_recurse(self, tree):
         verbose = self.verbose
