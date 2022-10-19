@@ -203,9 +203,13 @@ def Run():
         stack.callback(partial(print, 'DEFERRED: closed webserver', flush=True))
 
         time.sleep(0.5)
-        print(f"\nOpen your webbrowser and navigate to http://localhost:8888{html_url_prefix}/ to view your website")
-
-        input("\nPress enter to stop hosting website and exit obsidianhtml run.\n\n")
+        try:                                            # we have an endless process so we will get a timeout error
+            outs, errs = webserver_process.communicate(timeout=1)
+        except subprocess.TimeoutExpired: 
+            pass
+        if webserver_process.returncode is None:        # no return code means that the process is still running, any serious error will have caused the process to quit.
+            print(f"\nOpen your webbrowser and navigate to http://localhost:8888{html_url_prefix}/ to view your website")
+            input("Press enter to stop hosting website and exit obsidianhtml run.\n\n")
 
 
 def FindVaultByEntrypoint(entrypoint_path):
