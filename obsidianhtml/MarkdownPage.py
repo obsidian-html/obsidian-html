@@ -207,8 +207,10 @@ class MarkdownPage:
 
         # -- [4] Handle local image/video/audio links (copy them over to output)
         for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", self.page):
+            unq_link = urllib.parse.unquote(link)
+            
             #clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
-            clean_link = urllib.parse.unquote(link).split('|')[0]
+            clean_link = unq_link.split('|')[0]
 
             # Find file
             rel_path_str, lo = FindFile(self.pb.files, clean_link, self.pb)
@@ -241,6 +243,8 @@ class MarkdownPage:
                 new_link = self.GetAudioHTML(file_name, relative_path, suffix)
             elif lo.metadata['is_embeddable']:
                 new_link = self.GetEmbeddable(file_name, relative_path, suffix)
+            elif len(unq_link.split('|')) > 1:
+                new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{unq_link.split("|")[-1]}">'
 
             safe_link = re.escape('![]('+link+')')
             self.page = re.sub(safe_link, new_link, self.page)
