@@ -326,7 +326,8 @@ function SetContainer(container) {
 function SetHeaders(container) {
     let els = container.childNodes;
     for (let i = 0; i < els.length; i++) {
-        if (typeof els[i].tagName === 'undefined' || els[i].tagName[0] != 'H') {
+        // Only apply this code block to h1, h2, etc
+        if (typeof els[i].tagName === 'undefined' || els[i].tagName[0] != 'H' || els[i].tagName == 'HR' ) {
             continue;
         }
 
