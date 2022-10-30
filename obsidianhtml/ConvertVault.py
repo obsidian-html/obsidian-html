@@ -786,9 +786,15 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1, iteration=0):
 
     # Recurse for every link in the current page
     # ------------------------------------------------------------------
+    # Don't follow links if this would exceed max note depth
     iteration += 1
     if pb.gc('max_note_depth') > -1 and iteration > pb.gc('max_note_depth'):
         return
+
+    # Don't follow links when the user tells us not to
+    if 'obs.html.tags' in md.metadata.keys() and 'leaf_note' in md.metadata['obs.html.tags']:
+        return
+
     for lo in md.links:
         if lo == False or lo.processed_ntm == True:
             if pb.gc('toggles/verbose_printout', cached=True):
