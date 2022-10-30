@@ -403,12 +403,11 @@ class MarkdownPage:
                 else:
                     header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
                     header_tree = GetSubHeaderTree(root_element, header)
-                    included_page.page = PrintHeaderTree(header_tree)
+                    if header_tree == False:
+                        included_page.page = f"Obsidianhtml: Error: Unable to find section #{header} in {link.split('#')[0]}"
+                    else:
+                        included_page.page = PrintHeaderTree(header_tree)
 
-                    # header_id = slugify(header)
-                    # header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
-                    # included_page.page = PrintHeaderTree(header_dict[header_id])
-                    
                 # Wrap up
                 included_page.RestoreCodeSections()
             
