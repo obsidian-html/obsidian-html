@@ -44,6 +44,13 @@ exclude_subfolders:
   - ".DS_Store"
   - ".git"
 
+# Number of links a note can be removed from the entrypoint note
+# -1 for no max depth
+# 0 means only the entrypoint note is processed
+# 1 means only direct children are processed (and the entrypoint of course)
+# and so forth. NOTE: DOES NOT APPLY TO INCLUSIONS!
+max_note_depth: -1
+
 # Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data. 
 # Should be fine to turn off if copying the vault takes too long / disk space is too limited.
 # The tempdir is automatically removed on exit of the program.
