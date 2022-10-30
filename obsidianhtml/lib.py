@@ -747,4 +747,12 @@ def pushd(path):
     os.chdir(path)
     return cwd
 
+def fetch_str(command):
+    if isinstance(command, str):
+        command = command.split(' ')
+    p = Popen(command, stdout=PIPE, stderr=PIPE)
+    output, error = p.communicate()
+
+    return output.decode('ascii').replace('\\n', '\n').strip()
+
     

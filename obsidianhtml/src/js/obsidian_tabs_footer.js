@@ -205,7 +205,7 @@ function SetLinks(level) {
                 continue;
             }
             l.onclick = function () {
-                httpGetAsync(encodeURI(this.attributes.href.nodeValue), ReceiveCall, level + 1, false);
+                httpGetAsync(this.attributes.href.nodeValue, ReceiveCall, level + 1, false);
                 return false;
             };
         }

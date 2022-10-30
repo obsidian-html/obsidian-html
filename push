@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# get current version and take only the first part
+root="$(git rev-parse --show-toplevel)"
+version_rel_path="obsidianhtml/src/version"
+version_full_path="$root/$version_rel_path"
+version="$(cat $version_full_path | awk '{print $1}')"
+
+# update version in source file
+date="$(date +"%Y-%m-%d_%H%M_%S")"
+new_version="$(echo $version date:$date)"
+echo "$new_version"
+printf "$new_version" > $version_full_path
+
+# apply changes
+git push
