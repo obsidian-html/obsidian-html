@@ -3,7 +3,7 @@ import yaml
 from pathlib import Path
 
 from .lib import print_global_help_and_exit
-from .lib import    OpenIncludedFile
+from .lib import    OpenIncludedFile, GetIncludedResourcePath, fetch_str
 
 from .ConvertVault import ConvertVault
 from .Run import Run
@@ -35,7 +35,18 @@ def main():
     elif command == 'export':
         RunExport()
     elif command == 'version':
-        print(OpenIncludedFile('version'))
+        short_hash = None
+        try:
+            git_folder_path = GetIncludedResourcePath('').parent.parent.joinpath('.git')
+            if git_folder_path.exists():
+                short_hash = fetch_str('git rev-parse --short HEAD')
+        except:
+            pass
+        version = OpenIncludedFile('version')
+        if short_hash is not None:
+            print(version, f"commit: {short_hash}")
+        else:
+            print(version)
         exit()
     elif command == 'serve':
         ServeDir()
@@ -43,6 +54,7 @@ def main():
     elif command == 'search':
         CliEmbeddedSearch()
         exit()
+
     else:
         print(f'Command "{command}" is unknown')
         print_global_help_and_exit(1)

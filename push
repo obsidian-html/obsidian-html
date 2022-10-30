@@ -7,8 +7,7 @@ version_full_path="$root/$version_rel_path"
 version="$(cat $version_full_path | awk '{print $1}')"
 
 # update version in source file
-hash="$(git rev-parse --short HEAD)"
 date="$(date +"%Y-%m-%d_%H%M_%S")"
-new_version="$(echo $version $hash $date)"
+new_version="$(echo $version date:$date)"
 echo "$new_version"
-echo "$new_version" > $version_full_path
+printf "$new_version" > $version_full_path
