@@ -11,3 +11,6 @@ date="$(date +"%Y-%m-%d_%H%M_%S")"
 new_version="$(echo $version date:$date)"
 echo "$new_version"
 printf "$new_version" > $version_full_path
+
+# apply changes
+git push
