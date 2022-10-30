@@ -751,7 +751,7 @@ def ConvertVault(config_yaml_location=''):
         print(f"\thtml: {pb.paths['html_output_folder']}")
 
 @extra_info()
-def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
+def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1, iteration=0):
     '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
 
     # Unpack so we don't have to type too much.
@@ -786,6 +786,9 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
 
     # Recurse for every link in the current page
     # ------------------------------------------------------------------
+    iteration += 1
+    if pb.gc('max_note_depth') > -1 and iteration > pb.gc('max_note_depth'):
+        return
     for lo in md.links:
         if lo == False or lo.processed_ntm == True:
             if pb.gc('toggles/verbose_printout', cached=True):
@@ -803,7 +806,7 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1):
             print('\t'*log_level, f"found link {lo.path['note']['file_absolute_path']} (through parent {fo.path['note']['file_absolute_path']})")
 
         pb.init_state(action='n2m', loop_type='note', current_fo=lo, subroutine='recurseObisidianToMarkdown')
-        recurseObisidianToMarkdown(lo, pb, log_level=log_level)
+        recurseObisidianToMarkdown(lo, pb, log_level=log_level, iteration=iteration)
         pb.reset_state()
 
 @extra_info()
