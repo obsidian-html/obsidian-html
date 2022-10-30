@@ -1072,6 +1072,8 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     if pb.gc('toggles/features/embedded_search/enabled'):
         extensions.append('embedded_search')
 
+    extensions.append('citation')
+
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
 
     # HTML Tweaks

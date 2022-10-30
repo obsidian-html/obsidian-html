@@ -44,7 +44,7 @@ def main():
             pass
         version = OpenIncludedFile('version')
         if short_hash is not None:
-            print(version, f"commit: {short_hash}")
+            print(version, f"commit:{short_hash}")
         else:
             print(version)
         exit()
