@@ -32,6 +32,7 @@ def PrintHeaderTree(root_element):
 
 def GetSubHeaderTree(header_tree, header_selector): 
     # header_selector can look like this: section1#h3 (which will be different from section2#h3, for example)
+    # if false is returned, something went wrong in the parsing step, the caller can decided whether to bug out or to ignore the link
 
     def recurse_selector(header_tree, header_selector):
         # get md-title for the next block 
@@ -47,13 +48,14 @@ def GetSubHeaderTree(header_tree, header_selector):
         result = recurse_tree(header_tree, md_title)
         if result is None: 
             print(f'ERROR: header with title {md_title} was not found')
-            exit()
+            return False
 
         header_tree = result
 
         # if no new header selector just return the current header_tree
         if new_header_selector == '':
             return header_tree
+
         # else we loop again
         return recurse_selector(header_tree, new_header_selector)
 
