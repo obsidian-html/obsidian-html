@@ -895,4 +895,26 @@ audio {
     background-color: unset;
 }
 
+.ad-cite {
+    background-color: var(--bg-accent);
+    padding: 1rem;
+    padding-left: 1.5rem;
+}
+.admonition-title-icon {
+    display: inline;
+}
+.admonition-title-icon svg {
+    width: 16px;
+}
+.ad-cite-title {
+    padding-bottom: 0.5rem;
+    color: var(--color-accent);
+    font-weight: bold;
+}
+.ad-cite-title-content {
+    display: inline;
+    margin-left: 4px;
+}
+
+
 /*  ----------------------------------------- /GLOBAL ------------------------------------------------ */
