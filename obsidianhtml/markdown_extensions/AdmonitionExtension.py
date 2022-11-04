@@ -1,12 +1,12 @@
 from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
-import re
+import regex as re
 import string
 from pathlib import Path
 
-RegexBegin = re.compile(r"^\ *\`\`\` *ad-cite")
-RegexEnd = re.compile(r"^\ *\`\`\`")
+RegexBegin = re.compile(r"^ *\`\`\` *ad-cite")
+RegexEnd = re.compile(r"^ *\`\`\`")
 
 class AdmonitionExtension(Extension):
     # def __init__(self, **kwargs):
@@ -18,7 +18,7 @@ class AdmonitionExtension(Extension):
 
     """ Add source code hilighting to markdown codeblocks. """
     def extendMarkdown(self, md):
-        md.preprocessors.register(AdmonitionPreprocessor(self, md), 'admonition', 34)
+        md.preprocessors.register(AdmonitionPreprocessor(self, md), 'admonition2', 36)
         md.registerExtension(self)
 
 def makeExtension(**kwargs): 

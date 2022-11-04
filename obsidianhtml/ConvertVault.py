@@ -1073,7 +1073,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         extensions.append('embedded_search')
 
     extensions.append('code_wrapper')
-    extensions.append('admonition')
+    extensions.append('admonition2')
 
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
 
