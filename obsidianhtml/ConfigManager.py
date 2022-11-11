@@ -66,6 +66,8 @@ class Config:
         self.plugin_settings = {}
 
     def check_entrypoint_exists(self):
+        if self.config['toggles']['compile_md'] == False:       # don't check vault if we are compiling directly from markdown to html
+            return
         if not Path(self.config['obsidian_entrypoint_path_str']).exists():
             print(f"Error: entrypoint note {self.config['obsidian_entrypoint_path_str']} does not exist.")
             exit(1)
