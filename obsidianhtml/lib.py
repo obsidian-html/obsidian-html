@@ -755,4 +755,26 @@ def fetch_str(command):
 
     return output.decode('ascii').replace('\\n', '\n').strip()
 
-    
+def FindVaultByEntrypoint(entrypoint_path):
+    vault_found = False
+
+    # Allow both folders and entrypoint notes to be passed in
+    search_folder = Path(entrypoint_path)
+    if not search_folder.is_dir():
+        search_folder = search_folder.parent
+
+    history = search_folder.as_posix()
+    while not vault_found: 
+        try:
+            history += '\n' + search_folder.as_posix()
+            if search_folder.as_posix() == '/':
+                print(history)
+                return False
+            for folder in [ f for f in os.scandir(search_folder) if f.is_dir(follow_symlinks=False) ]:
+                if (folder.name == '.obsidian'):
+                    return search_folder.resolve().as_posix()
+            search_folder = search_folder.parent
+        except Exception as ex:
+            print(ex)
+            return False
+    return False

@@ -1,5 +1,5 @@
 from . import print_global_help_and_exit
-from .lib import OpenIncludedFile
+from .lib import OpenIncludedFile, FindVaultByEntrypoint
 
 from pathlib import Path 
 import json
@@ -54,12 +54,48 @@ class Config:
         # Set main css file
         self.config['_css_file'] = f'main_{layout}.css'
 
+        # Check and set values
+        self.check_entrypoint_exists()
+        self.set_obsidian_folder_path_str()
+
         # Check capabilities needed
         self.capabilities_needed = {}
         self.load_capabilities_needed()
 
         # Plugins
         self.plugin_settings = {}
+
+    def check_entrypoint_exists(self):
+        if not Path(self.config['obsidian_entrypoint_path_str']).exists():
+            print(f"Error: entrypoint note {self.config['obsidian_entrypoint_path_str']} does not exist.")
+            exit(1)
+
+    def set_obsidian_folder_path_str(self):
+        if self.config['toggles']['compile_md'] == False:       # don't check vault if we are compiling directly from markdown to html
+            return
+
+        # Use user provided obsidian_folder_path_str
+        if 'obsidian_folder_path_str' in self.config and self.config['obsidian_folder_path_str'] != '<DEPRECATED>':
+            result = FindVaultByEntrypoint(self.config['obsidian_folder_path_str'])
+            if result:
+                if Path(result) != Path(self.config['obsidian_folder_path_str']).resolve():
+                    print(f"Error: The configured obsidian_folder_path_str is not the vault root. Change its value to {result}" )
+                    exit(1)
+                return
+            else:
+                print(f"ERROR: Obsidianhtml could not find a valid vault. (Tip: obsidianhtml looks for the .obsidian folder)")
+                exit(1)
+            return
+
+        # Determine obsidian_folder_path_str from obsidian_entrypoint_path_str
+        result = FindVaultByEntrypoint(self.config['obsidian_entrypoint_path_str'])
+        if result:
+            self.config['obsidian_folder_path_str'] = result
+            if self.pb.verbose:
+                print(f"Set obsidian_folder_path_str to {result}")
+        else:
+            print(f"ERROR: Obsidian vault not found based on entrypoint {self.config['obsidian_entrypoint_path_str']}.\n\tDid you provide a note that is in a valid vault? (Tip: obsidianhtml looks for the .obsidian folder)")
+            exit(1)
 
     def load_capabilities_needed(self):
         gc = self.get_config
@@ -188,6 +224,12 @@ class Config:
 def MergeDictRecurse(base_dict, update_dict, path=''):
     helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
 
+    def check_leaf(key_path, val):
+        if val == '<REMOVED>':
+            raise Exception(f'\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information.')
+        elif val == '<DEPRECATED>':
+            print(f'DEPRECATION WARNING: The setting {key_path} is deprecated. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information.')
+
     for k, v in update_dict.items():
         key_path = '/'.join(x for x in (path, k) if x !='')
 
@@ -198,8 +240,7 @@ def MergeDictRecurse(base_dict, update_dict, path=''):
         # don't overwrite a dict in the base config with a string, or something else
         # in general, we don't expect types to change
         if type(base_dict[k]) != type(v):
-            if base_dict[k] == '<REMOVED>':
-                raise Exception(f'\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Log/<fillin> for more information.')            
+            check_leaf(key_path, base_dict[k])
             raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
 
         # dict match -> recurse
@@ -211,8 +252,7 @@ def MergeDictRecurse(base_dict, update_dict, path=''):
         if isinstance(update_dict[k], list):
             base_dict[k] = v.copy()
         else:
-            if base_dict[k] == '<REMOVED>':
-                raise Exception(f'\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Log/<fillin> for more information.')
+            check_leaf(key_path, base_dict[k])
             base_dict[k] = v
 
     return base_dict.copy()

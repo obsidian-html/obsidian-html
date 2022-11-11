@@ -6,7 +6,7 @@ import tempfile
 from appdirs import AppDirs
 
 from .lib import    print_global_help_and_exit
-from .lib import    OpenIncludedFile, YamlIndentDumper, get_obshtml_appdir_folder_path, get_default_appdir_config_yaml_path
+from .lib import    FindVaultByEntrypoint, OpenIncludedFile, YamlIndentDumper, get_obshtml_appdir_folder_path, get_default_appdir_config_yaml_path
 from .ConvertVault import ConvertVault
 
 # Defer tools
@@ -91,7 +91,7 @@ def Run():
             print_set_var(config, 'obsidian_entrypoint_path_str', reason='provided by user through config file', category='info')
 
     # find vault folder based on entrypoint
-    result = FindVaultByEntrypoint(Path(config['obsidian_entrypoint_path_str']))
+    result = FindVaultByEntrypoint(config['obsidian_entrypoint_path_str'])
     if result:
         config['obsidian_folder_path_str'] = result
         print_set_var(config, 'obsidian_folder_path_str', reason='deduced', category='info')
@@ -212,27 +212,7 @@ def Run():
             input("Press enter to stop hosting website and exit obsidianhtml run.\n\n")
 
 
-def FindVaultByEntrypoint(entrypoint_path):
-    vault_found = False
-    search_folder = entrypoint_path
-    history = search_folder.as_posix()
-    # max_depth = 4
-    # depth = 0
-    while not vault_found: #and depth < max_depth:
-        #depth += 1
-        try:
-            search_folder = search_folder.parent
-            history += '\n' + search_folder.as_posix()
-            if search_folder.as_posix() == '/':
-                print(history)
-                return False
-            for folder in [ f for f in os.scandir(search_folder) if f.is_dir(follow_symlinks=False) ]:
-                if (folder.name == '.obsidian'):
-                    return search_folder.resolve().as_posix()
-        except Exception as ex:
-            print(ex)
-            return False
-    return False
+
 
 
 def CleanFolder(folder_path, clean_toggle):
