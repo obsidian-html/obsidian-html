@@ -216,7 +216,12 @@ class CreateIndexFromDirStructure():
                 if has_folder_note: 
                     fnpf = '<div class="fn_pf"></div>'
                     url = self.convert_abs_path_to_url(note_abs_path)
-                    html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button folder_note {folder_note_active}" href="{url}" onclick="open_folder_note(this)">{fnpf}{tree["name"]}</button>\n'
+
+                    onclick = 'open_folder_note(this)'
+                    if folder_note_active == 'active':
+                        onclick = 'toggle_dir(this.id)'
+
+                    html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button folder_note {folder_note_active}" href="{url}" onclick="{onclick}">{fnpf}{tree["name"]}</button>\n'
                 else:
                     html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
 

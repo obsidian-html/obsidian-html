@@ -4,7 +4,9 @@
 # The first folder that contains all obsidian files
 # Can be absent when toggles/compile_md == False
 # Use full path or relative path, but don't use ~/
-obsidian_folder_path_str: '<REQUIRED_INPUT>'
+# DEPRECATED: obsidian_entrypoint_path_str can be used by itself, 
+# obsidianhtml will find the vault folder automatically.
+obsidian_folder_path_str: '<DEPRECATED>'
 
 # The note that will be used as the index.html 
 # should be in obsidian_folder_path_str
