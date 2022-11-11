@@ -918,7 +918,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         if link.fo is None:
             if link.suffix != '.md' and '/obs.html/dir_index.html' not in link.url:
                 print('\t'*(log_level+1), 'File ' + str(link.url) + ' not located, so not copied. @ ' + pb.state['current_fo'].path['note']['file_absolute_path'].as_posix())
-        elif not link.fo.metadata['is_note'] and not link.fo.metadata['is_includable_file']:
+        elif not link.fo.metadata['is_note']:
             link.fo.copy_file('mth')
             
         # [13] Link to a custom 404 page when linked to a not-created note
