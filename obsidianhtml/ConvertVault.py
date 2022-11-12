@@ -5,6 +5,7 @@ import frontmatter
 import gzip
 import shutil
 import warnings
+import yaml
 
 import regex as re          # regex string finding/replacing
 
@@ -25,6 +26,7 @@ from .ErrorHandling import extra_info
 from .PicknickBasket import PicknickBasket
 from .CreateIndexFromTags import CreateIndexFromTags
 from .EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
+from .FileTree import FileTree
 
 
 def ConvertVault(config_yaml_location=''):
@@ -94,7 +96,8 @@ def ConvertVault(config_yaml_location=''):
         paths['log_output_folder'] = Path(pb.gc('log_output_folder_path_str')).resolve()
 
     # Deduce relative paths
-    paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
+    if pb.gc('toggles/compile_md', cached=True):
+        paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
     paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
     
     # Add paths to pb
@@ -158,80 +161,11 @@ def ConvertVault(config_yaml_location=''):
         pb.paths['log_output_folder'].mkdir(parents=True, exist_ok=True)
         pb.paths['log_output_folder'] = pb.paths['log_output_folder'].resolve()
 
-    # Load files
-    # ---------------------------------------------------------
-    input_dir = pb.paths['obsidian_folder']
-    path_type = 'note'
-    if not pb.gc('toggles/compile_md'):
-        input_dir = pb.paths['md_folder']
-        path_type = 'markdown'
 
-    # Load all filenames in the root folder.
-    # This data will be used to check which files are local, and to get their full path
-    # It's clear that no two files can be allowed to have the same file name.
-    if pb.gc('toggles/verbose_printout'):
-        print('> CREATING FILE TREE')
-    pb.files = {}
-    duplicates_found = False
-    for path in input_dir.rglob('*'):
-        if path.is_dir():
-            continue
+    ft = FileTree(pb)
+    ft.load_file_tree()
+    #print(yaml.dump([x for x in pb.files.keys()]))
 
-        # Exclude configured subfolders
-        try:
-            _continue = False
-            for folder in pb.gc('exclude_subfolders', cached=True):
-                excl_folder_path = input_dir.joinpath(folder)
-                if path.resolve().is_relative_to(excl_folder_path):
-                    if pb.gc('toggles/verbose_printout', cached=True):
-                        print(f'\tExcluded folder {excl_folder_path}: Excluded file {path.name}.')
-                    _continue = True
-                    break
-            if _continue:
-                continue
-        except:
-            None
-
-        # Check if filename is duplicate
-        if path.name in pb.files.keys() and pb.gc('toggles/allow_duplicate_filenames_in_root', cached=True) == False:
-            #raise DuplicateFileNameInRoot(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
-            print(f"Two or more files with the name \"{path.name}\" exist in the root folder. See {str(path)} and {pb.files[path.name].path[path_type]['file_absolute_path']}.")
-            duplicates_found = True
-            continue
-
-        # Create object to help with handling all the info on the file
-        fo = OH_File(pb)
-
-        # Compile paths
-        if pb.gc('toggles/compile_md', cached=True):
-            # compile note --> markdown
-            fo.init_note_path(path)
-            fo.compile_metadata(fo.path['note']['file_absolute_path'], cached=True)
-
-            if pb.gc('toggles/compile_html', cached=True):
-                # compile markdown --> html (based on the given note path)
-                fo.init_markdown_path()
-                fo.compile_metadata(fo.path['markdown']['file_absolute_path'].as_posix(), cached=True)
-
-            # Add to tree
-            pb.add_file(fo.path['note']['file_relative_path'].as_posix(), fo)
-        else:
-            # compile markdown --> html (based on the found markdown path)
-            fo.init_markdown_path(path)
-            fo.compile_metadata(fo.path['markdown']['file_absolute_path'], cached=True)
-
-            # Add to tree
-            pb.add_file(fo.path['markdown']['file_relative_path'].as_posix(), fo)
-
-    if duplicates_found:
-        raise DuplicateFileNameInRoot(f"Files with the name exist in the root folder.")
-
-    if pb.gc('toggles/verbose_printout', cached=True):
-        print('< CREATING FILE TREE: Done')
-
-    if pb.gc('toggles/extended_logging', cached=True):
-        WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files.md'), include_processed=False)
-        
 
     # Convert Obsidian to markdown
     # ---------------------------------------------------------
@@ -917,7 +851,10 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         # [12] Copy non md files over wholesale, then we're done for that kind of file
         if link.fo is None:
             if link.suffix != '.md' and '/obs.html/dir_index.html' not in link.url:
-                print('\t'*(log_level+1), 'File ' + str(link.url) + ' not located, so not copied. @ ' + pb.state['current_fo'].path['note']['file_absolute_path'].as_posix())
+                path_key = 'note'
+                if not pb.gc('toggles/compile_md', cached=True):
+                    path_key = 'markdown'
+                print('\t'*(log_level+1), 'File ' + str(link.url) + ' not located, so not copied. @ ' + pb.state['current_fo'].path[path_key]['file_absolute_path'].as_posix())
         elif not link.fo.metadata['is_note']:
             link.fo.copy_file('mth')
             

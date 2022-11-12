@@ -7,6 +7,7 @@ import shutil               # used to remove a non-empty directory, copy files
 import tempfile             # used to create temporary files/folders
 import time
 import unicodedata
+import glob
 
 import urllib.parse         # convert link characters like %
 
@@ -546,23 +547,27 @@ def CreateTemporaryCopy(source_folder_path, pb):
 
     # Call copytree function (rsync)
     if copy_method == 'rsync':
-        copy_tree_rsync(source_folder_path.as_posix(), tmpdir.name, ignore=pb.gc('exclude_subfolders'), verbose=pb.gc('copy_vault_to_tempdir_follow_copy'))
+        copy_tree_rsync(source_folder_path.as_posix(), tmpdir.name, exclude=pb.gc('exclude_subfolders'), verbose=pb.gc('copy_vault_to_tempdir_follow_copy'))
 
     # Fetch invalid settings
     elif copy_method not in ['shutil', 'shutil_walk']:
         raise Exception(f"Copy method of {copy_method} not known.")
     else:
         # Compile ignore list
-        ignore_list = pb.gc('exclude_subfolders')
-        if isinstance(ignore_list, list):
-            ignore_list = [pb.paths['obsidian_folder'].joinpath(Path(x)) for x in ignore_list]
-            print('Paths that will be ignored:', [x.as_posix() for x in ignore_list])
+        excluded_paths = []
+        if isinstance(pb.gc('exclude_subfolders', cached=True), list):
+            owd = pushd(source_folder_path)          # move working dir to root dir (needed for glob)
+            for line in pb.gc('exclude_subfolders', cached=True):
+                excluded_paths += glob.glob(line, recursive=True)
+            excluded_paths = [Path(x) for x in excluded_paths]
+            print('Paths that will be ignored:', [x.as_posix() for x in excluded_paths])
+            os.chdir(owd)
 
         # Call copytree function (shutil_walk or shutil)
         if pb.gc('copy_vault_to_tempdir_method') == 'shutil_walk':
-            copytree_shutil_walk(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
+            copytree_shutil_walk(source_folder_path, tmpdir.name, ignore=excluded_paths, pb=pb)
         else:
-            copytree_shutil(source_folder_path, tmpdir.name, ignore=ignore_list, pb=pb)
+            copytree_shutil(source_folder_path, tmpdir.name, ignore=excluded_paths, pb=pb)
 
     print("< COPYING VAULT: Done")
     return tmpdir
@@ -704,15 +709,10 @@ def copytree_shutil_walk(src, dst, symlinks=False, ignore=None, copy_function=sh
         raise Error(errors)
 
 
-def copy_tree_rsync(src_dir, dst_dir, ignore, verbose=False):
+def copy_tree_rsync(src_dir, dst_dir, exclude, verbose=False):
     # Get relative ignore paths
     exclude_list = []
-    for path in ignore:
-        if path[0] != '/':
-            path = '/' + path
-        if path[-1] != '/':
-            path = path + '/'
-
+    for path in exclude:
         exclude_list += ['--exclude', path]
 
     # compile command
