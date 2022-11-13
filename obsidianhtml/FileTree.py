@@ -19,7 +19,7 @@ class FileTree:
             root = pb.paths['md_folder']
 
         included_folders = pb.gc('included_folders')
-        exclude_subfolders = pb.gc('exclude_subfolders')
+        exclude_subfolders = pb.gc('exclude_glob')
         
         if pb.gc('toggles/verbose_printout'):
             print('> CREATING FILE TREE')
@@ -50,7 +50,7 @@ class FileTree:
         owd = pushd(root)          # move working dir to root dir (needed for glob)
 
         exluded_folders = []
-        for line in pb.gc('exclude_subfolders', cached=True):
+        for line in pb.gc('exclude_glob', cached=True):
             if line[0] != '/':
                 line = '**/' + line
             exluded_folders += [root.joinpath(x) for x in glob.glob(line, recursive=True)]

@@ -45,18 +45,22 @@ log_output_folder_path_str: 'output/log'
 # Paths should be relative to the vault root.
 included_folders: []
 
-# Exclude subfolders
+# Exclude glob
 # The paths are relative to obsidian_folder_path_str
 # - Start with slash to target specific folder: /subfolder
 # - Target any folder with name "subfolder": subfolder
 # Glob patterns supported for copy_vault_to_tempdir_method: shutil, shutil_walk, and for rsync for as far as rsync supports it natively
 #   When turning off copy_vault_to_tempdir, glob patterns are fully supported.
 # Rules are case sensitive if your filesystem is.
-exclude_subfolders:
+exclude_glob:
   - "/.obsidian"
   - "/.trash"
   - "/.DS_Store"
   - "/.git"
+
+
+# Deprecated for exclude_glob
+exclude_subfolders: '<DEPRECATED>'
 
 # Number of links a note can be removed from the entrypoint note
 # -1 for no max depth

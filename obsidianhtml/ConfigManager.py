@@ -37,6 +37,9 @@ class Config:
         # Check if required input is missing
         CheckConfigRecurse(self.config)
 
+        # Temporary patches during deprecation
+        self.resolve_deprecations(default_config, input_config)
+
         # Overwrite conf for verbose from command line
         # (If -v is passed in, __init__.py will set self.verbose to true)
         if self.pb.verbose is not None:
@@ -64,6 +67,13 @@ class Config:
 
         # Plugins
         self.plugin_settings = {}
+
+
+    def resolve_deprecations(self, base_dict, update_dict):
+        # if exclude_subfolders is present, copy it to exclude_glob
+        if 'exclude_subfolders' in update_dict.keys() and isinstance(update_dict['exclude_subfolders'], list):
+            self.config['exclude_glob'] = self.config['exclude_subfolders']
+
 
     def check_entrypoint_exists(self):
         if self.config['toggles']['compile_md'] == False:       # don't check vault if we are compiling directly from markdown to html
@@ -231,6 +241,8 @@ def MergeDictRecurse(base_dict, update_dict, path=''):
             raise Exception(f'\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information.')
         elif val == '<DEPRECATED>':
             print(f'DEPRECATION WARNING: The setting {key_path} is deprecated. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information.')
+            return False
+        return True
 
     for k, v in update_dict.items():
         key_path = '/'.join(x for x in (path, k) if x !='')
@@ -242,8 +254,8 @@ def MergeDictRecurse(base_dict, update_dict, path=''):
         # don't overwrite a dict in the base config with a string, or something else
         # in general, we don't expect types to change
         if type(base_dict[k]) != type(v):
-            check_leaf(key_path, base_dict[k])
-            raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
+            if check_leaf(key_path, base_dict[k]):
+                raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
 
         # dict match -> recurse
         if isinstance(base_dict[k], dict) and isinstance(v, dict):
