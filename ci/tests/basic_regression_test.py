@@ -308,11 +308,16 @@ class TestAFiltering2(ModeTemplate):
     testcase_custom_config_values = [
         ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'), 
         ('included_folders', ['filtering']),
-        ('exclude_subfolders', ['/filtering/excl']),
+        ('exclude_subfolders', ['/filtering/excl', '*.pdf']),
     ]
     def test_include_folder(self):
-        self.scribe('Only include the included folder')
+        self.scribe('Exclude folder')
         issues = check_md_output('md/filtering', ['neutral'])
+        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{yaml.dump(issues)}")
+
+    def test_exclude_pdf(self):
+        self.scribe('Exclude text files')
+        issues = check_md_output('md/filtering/neutral', ['neutral.md'])
         self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{yaml.dump(issues)}")
 
 
