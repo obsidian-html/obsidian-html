@@ -320,12 +320,11 @@ class MarkdownPage:
                 if rel_path_str == False:
                     link = '/not_created.md'
                 else:
-                    if fo.metadata['is_note']:
-                        link = fo.get_link('markdown', origin=origin)
-                        self.links.append(fo)
-                    else:
+                    link = fo.get_link('markdown', origin=origin)
+                    if not fo.metadata['is_note']:
                         fo.copy_file('ntm')
-
+                    else:
+                        self.links.append(fo)
                 newlink = urllib.parse.quote(link)
 
                 if hashpart != '':
