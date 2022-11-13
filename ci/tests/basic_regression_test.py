@@ -29,122 +29,6 @@ from tests.lib import *
 USE_PIP_INSTALL = (os.getenv('OBS_HTML_USE_PIP_INSTALL') == 'true')
 
 
-def GetRssSoup(file_path):
-    full_path = Path('tmp/html/').joinpath(file_path).resolve()
-    with open(full_path, 'r', encoding="utf-8") as f:
-        rss = f.read()
-    soup = BeautifulSoup(rss, 'lxml')
-
-    articles = soup.findAll('item')
-    articles_dicts = [{'title':a.find('title').text,'link':a.link.next_sibling.replace('\n','').replace('\t',''),'description':a.find('description').text,'pubdate':a.find('pubdate').text} for a in articles]
-    urls = [d['link'] for d in articles_dicts if 'link' in d]
-    titles = [d['title'] for d in articles_dicts if 'title' in d]
-    descriptions = [d['description'] for d in articles_dicts if 'description' in d]
-    pub_dates = [d['pubdate'] for d in articles_dicts if 'pubdate' in d]
-
-    return {
-        'articles': articles_dicts,
-        'urls': urls,
-        'titles': titles,
-        'descriptions': descriptions,
-        'pub_dates': pub_dates
-    }
-
-# Template
-# -------------------------------
-class ModeTemplate(unittest.TestCase):
-    testcase_name = "Template"
-    testcase_config = None                  # contains the config dict
-    testcase_custom_config_values = []      # can contain overrides for the default config
-    tear_down = True
-
-    @classmethod
-    def setUpClass(cls):
-        print(f'\n\n--------------------- {cls.testcase_name} -----------------------------', flush=True)
-        cls.testcase_config = customize_default_config(cls.testcase_custom_config_values)
-        convert_vault(USE_PIP_INSTALL)
-
-    @classmethod
-    def tearDownClass(cls):
-        print('tear_down', cls.tear_down)
-        if cls.tear_down:
-            print('', flush=True)
-            cleanup_temp_dir()
-
-    def setUp(self):
-        print('', flush=True)
-
-    def scribe(self, msg):
-        print(f'{self.testcase_name}:\t > {msg}', flush=True)
-
-    def assertPageFound(self, soup, msg=None):
-        self.assertFalse('Error code explanation: HTTPStatus.NOT_FOUND - Nothing matches the given URI.' in soup.text, msg=msg)
-
-    def assertPageNotFound(self, soup, msg=None):
-        self.assertTrue('Error code explanation: HTTPStatus.NOT_FOUND - Nothing matches the given URI.' in soup.text, msg=msg)
-
-    def self_check(self):
-        self.scribe('(self check) config dict should have been fetched')
-        config = self.testcase_config
-        self.assertIn('obsidian_folder_path_str', config.keys())
-    
-    # Standard tests
-    # -------------------------------
-    def index_html_should_exist(self, path='index.html'):
-        self.scribe('index.html should exist in the expected path')
-
-        # Get index.html
-        res = html_get(path, output_dict=True)
-        self.assertPageFound(res['soup'], msg=f'expected page "{res["url"]}" was not found.')
-
-        # Test content of index.html
-        header_text = res['soup'].body.find('div', attrs={'class':'container'}).find('h1').text
-        self.assertEqual(header_text, 'entrypoint', msg="H1 expected in index.html with innerHtml of 'entrypoint'.")
-
-        # Return note linked by obsidian link
-        link_text = 'Note link'
-        a = res['soup'].body.find('a', string=link_text)
-        self.assertIsNotNone(a, msg=f"Note link with text '{link_text}' is not found in index.html")
-        return a['href']
-
-    # deprecated for links_should_work()
-    def obsidian_type_links_should_work(self, path, link_text='Markdownlink'):
-        self.scribe('obsidian-type link should work')
-        soup = html_get(path)
-        self.assertPageFound(soup, msg=f'expected page "{path}" was not found.')
-
-        # Return note linked by markdown link
-        a = soup.body.find('a', string=link_text)
-        self.assertIsNotNone(a, msg=f"Markdown link with text '{link_text}' is not found in index.html")
-        return a['href']
-
-    # deprecated for links_should_work()
-    def markdown_type_links_should_work(self, path):
-        self.scribe('markdown-type link should work')
-        soup = html_get(path)
-        self.assertPageFound(soup, msg=f'expected page "{path}" was not found.')
-
-    def links_should_work(self, path, link_type_tested="unknown", link_text='Markdownlink', mode=None):
-        self.scribe(f'links of type {link_type_tested} should work')
-        
-        # Get origin page
-        soup = html_get(path)
-        self.assertPageFound(soup, msg=f'expected page "{path}" was not found.')
-
-        # Get url from the a href with the link text
-        a = soup.body.find('a', string=link_text)
-        self.assertIsNotNone(a, msg=f"Link of type {link_type_tested} with text '{link_text}' is not found on {path}")
-
-        # Test link
-        soup = html_get(a['href'])
-
-        if mode is None:
-            self.assertPageFound(soup, msg=f'expected page "{a["href"]}" was not found.')
-        elif mode == 'ShouldNotExist':
-            self.assertPageNotFound(soup, msg=f"Page found when note should not have been included. URL: {a['href']}")
-
-        return a['href']
-
 # Modes
 # -------------------------------
 class TestDefaultMode(ModeTemplate):
@@ -406,6 +290,30 @@ class TestMisc(ModeTemplate):
 
         content = "See if this div is included"
         self.assertEqual(div.text, content, msg=f"innerhtml of custom div was expected to be \n\t'{content}'\n but was \n\t'{div.text}'")
+
+
+class TestAFiltering1(ModeTemplate):
+    testcase_name = "FilteringTests"
+    testcase_custom_config_values = [
+        ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'), 
+        ('included_folders', ['filtering']),
+    ]
+    def test_include_folder(self):
+        self.scribe('Only include the included folder')
+        issues = check_md_output('md', ['filtering', 'index.md'])
+        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{yaml.dump(issues)}")
+
+class TestAFiltering2(ModeTemplate):
+    testcase_name = "FilteringTests"
+    testcase_custom_config_values = [
+        ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'), 
+        ('included_folders', ['filtering']),
+        ('exclude_subfolders', ['/filtering/excl']),
+    ]
+    def test_include_folder(self):
+        self.scribe('Only include the included folder')
+        issues = check_md_output('md/filtering', ['neutral'])
+        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{yaml.dump(issues)}")
 
 
 if __name__ == '__main__':

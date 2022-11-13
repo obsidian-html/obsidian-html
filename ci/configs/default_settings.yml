@@ -1,7 +1,7 @@
 # The first folder that contains all obsidian files
 # Can be absent when toggles/compile_md == False
 # On linux, use fullpath instead of ~/
-obsidian_folder_path_str: 'ci/test_vault/'
+#obsidian_folder_path_str: 'ci/test_vault/'
 
 # The note that will be used as the index.html 
 # should be in obsidian_folder_path_str

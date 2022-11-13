@@ -28,9 +28,45 @@
                 "currentVersion": "1.0.0"
               }
             }
+          },
+          {
+            "id": "9eb392f390fcf4cc",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "filtering/home.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "dfa41df239e4968c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "filtering/home.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "3e7d0079c8e6d9f2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "filtering/neutral/neutral.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -88,7 +124,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "md_links/md_links_parentheses.md",
+                "file": "filtering/home.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,20 +141,17 @@
     "direction": "horizontal",
     "width": 300
   },
-  "ribbon": {
-    "mostRecentAction": ""
-  },
-  "active": "90bee56bc9939ddb",
+  "active": "dfa41df239e4968c",
   "lastOpenFiles": [
+    "filtering/neutral/neutral.md",
+    "filtering/home.md",
+    "filtering/excl/excluded.md",
     "md_links/name (with pars and spaces).png",
     "md_links/md_links_parentheses.md",
     "video/mp4_inclusion.md",
     "note_inclusion/level1/level2/noteC.md",
     "note_inclusion/noteA.md",
     "dirtree/dirtree_note.md",
-    "Images.md",
-    "excluded/rss_exclude.md",
-    "rss/rss_h1.md",
-    "rss/rss_index.md"
+    "Images.md"
   ]
 }
