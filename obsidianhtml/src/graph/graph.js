@@ -95,15 +95,15 @@ function remove_graph(uid, cont, close){
 //////////////////////////////////////////////////////////////////////////////
 function arm_page(container){
     // fetch or set default graph type values
-    let grapher_name = window.localStorage.getItem('grapher_name');
+    let grapher_name = ls_get('grapher_name');
     if (!grapher_name){
-        window.localStorage.setItem('grapher_name', graphers[0].name);
+        ls_set('grapher_name', graphers[0].name);
         grapher_name = graphers[0].name;
     }
 
-    let grapher_id = window.localStorage.getItem('grapher_id');
+    let grapher_id = ls_get('grapher_id');
     if (!grapher_id){
-        window.localStorage.setItem('grapher_id', graphers[0].id);
+        ls_set('grapher_id', graphers[0].id);
         grapher_id = graphers[0].id;
     }
 
@@ -243,8 +243,8 @@ function _toggle_graph_type_button(button){
 function set_grapher(grapher_listing, uid){
     // update localstorage
     // local storage keeps track of the user's latest choice for grapher, to use this as the next default
-    window.localStorage.setItem('grapher_id', grapher_listing.id);
-    window.localStorage.setItem('grapher_name', grapher_listing.name);
+    ls_set('grapher_id', grapher_listing.id);
+    ls_set('grapher_name', grapher_listing.name);
 
     // update button
     // button updates itself, this is skipped

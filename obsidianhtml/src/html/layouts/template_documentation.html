@@ -143,10 +143,10 @@
                         return ['left', 'right'][Number(header.classList.contains('right_pane_fold_header'))]
                 }
                 function save_panel_folding_state(header, active){
-                        localStorage.setItem('pane_folding_state_'+panel_folding_get_panel_name(header), Number(active));
+                        ls_set('pane_folding_state_'+panel_folding_get_panel_name(header), Number(active));
                 }
                 function load_panel_folding_state(panel_name){
-                        val = localStorage.getItem('pane_folding_state_'+panel_name)
+                        val = ls_get('pane_folding_state_'+panel_name)
                         if (!val){ return {'exists': false, 'value': null}}
                         return {'exists': true, 'value': Boolean(Number(val))}
                 }

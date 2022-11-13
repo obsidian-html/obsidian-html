@@ -76,9 +76,9 @@
         function load_fullpage_graph(){
 
             // set graph_type button correctly
-            let type_d = window.localStorage.getItem('graph_type_d');
+            let type_d = ls_get('graph_type_d');
             if (!type_d){
-                window.localStorage.setItem('graph_type_d', '2D');
+                ls_set('graph_type_d', '2D');
                 type_d = '2D';
             }
             document.getElementById('Cgraph_full_page').innerHTML = type_d;
