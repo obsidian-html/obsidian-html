@@ -284,7 +284,7 @@ def check_md_output(folder, expected_files):
     # test files exist that shouldn't
     for file in actual_files:
         if file not in expected_files:
-            issues.append(f"File {file} exist but it should not.")
+            issues.append(f"File {file} exists but it should not.")
 
     # test files that should exist but don't
     for file in expected_files:

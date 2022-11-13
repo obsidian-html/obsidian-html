@@ -38,4 +38,5 @@ Link to all relevant notes, otherwise they will not be included anyways
 
 - [[excluded]]
 - [[neutral]]
+- [[RossettiGoblinMarket.pdf]]
 - 

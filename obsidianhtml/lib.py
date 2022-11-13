@@ -547,7 +547,7 @@ def CreateTemporaryCopy(source_folder_path, pb):
 
     # Call copytree function (rsync)
     if copy_method == 'rsync':
-        copy_tree_rsync(source_folder_path.as_posix(), tmpdir.name, exclude=pb.gc('exclude_subfolders'), verbose=pb.gc('copy_vault_to_tempdir_follow_copy'))
+        copy_tree_rsync(source_folder_path.as_posix(), tmpdir.name, exclude=pb.gc('exclude_glob'), verbose=pb.gc('copy_vault_to_tempdir_follow_copy'))
 
     # Fetch invalid settings
     elif copy_method not in ['shutil', 'shutil_walk']:
@@ -555,9 +555,9 @@ def CreateTemporaryCopy(source_folder_path, pb):
     else:
         # Compile ignore list
         excluded_paths = []
-        if isinstance(pb.gc('exclude_subfolders', cached=True), list):
+        if isinstance(pb.gc('exclude_glob', cached=True), list):
             owd = pushd(source_folder_path)          # move working dir to root dir (needed for glob)
-            for line in pb.gc('exclude_subfolders', cached=True):
+            for line in pb.gc('exclude_glob', cached=True):
                 excluded_paths += glob.glob(line, recursive=True)
             excluded_paths = [Path(x) for x in excluded_paths]
             print('Paths that will be ignored:', [x.as_posix() for x in excluded_paths])
