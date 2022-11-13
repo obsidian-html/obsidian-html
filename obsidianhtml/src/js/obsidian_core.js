@@ -13,6 +13,9 @@ var documentation_mode = {documentation_mode};
 var tab_mode = !no_tab_mode;
 var gzip_hash = '{gzip_hash}'                       // used to check whether the localStorage data is stale
 
+// global cache
+var fn_cache_ls_available = null;
+
 
 // Onloads
 // ----------------------------------------------------------------------------
@@ -93,11 +96,11 @@ function load_theme() {
         return false
     }
 
-    let theme_name = window.localStorage.getItem('theme_name');
+    let theme_name = ls_get('theme_name');
     if (!theme_name){
-        window.localStorage.setItem('theme_name', 'obs-light');
+        ls_set('theme_name', 'obs-light');
     }
-    set_theme(window.localStorage.getItem('theme_name'));
+    set_theme(ls_get('theme_name'));
     disable_antiflash();
 }
 
@@ -117,7 +120,7 @@ function set_theme(theme_name){
     let body = document.body;
 
     // update localstorage 
-    window.localStorage.setItem('theme_name', theme_name);
+    ls_set('theme_name', theme_name);
 
     // update select element
     theme_div.value = theme_name
@@ -394,6 +397,28 @@ function toggle_menu(){
 
 // Core Functions 
 // ----------------------------------------------------------------------------
+function ls_test_available(){
+    if (fn_cache_ls_available != null){
+        return fn_cache_ls_available
+    }
+    try {
+        window.localStorage.setItem('obsdianhtml_test_val', 'obsdianhtml_test_val');
+        window.localStorage.removeItem('obsdianhtml_test_val');
+        fn_cache_ls_available = true; return true;
+    } catch(e) {
+        fn_cache_ls_available = false; return false;
+    }
+}
+
+function ls_get(key){
+    if(ls_test_available() == false){ return false }
+    return window.localStorage.getItem(key);
+}
+function ls_set(key, value){
+    if(ls_test_available() == false){ return false }
+    return window.localStorage.setItem(key, value);
+}
+
 
 function httpGetAsync(theUrl, callback, level, callbackpath) {
     var xmlHttp = new XMLHttpRequest();
