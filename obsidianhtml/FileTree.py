@@ -49,24 +49,26 @@ class FileTree:
         # Compile folder list to exclude
         owd = pushd(root)          # move working dir to root dir (needed for glob)
 
-        exluded_folders = []
+        excluded_folders = []
         for line in pb.gc('exclude_glob', cached=True):
             if line[0] != '/':
                 line = '**/' + line
-            exluded_folders += [root.joinpath(x) for x in glob.glob(line, recursive=True)]
-        exluded_folders = list(set(exluded_folders))
-
+            else:
+                line = line[1:]
+            excluded_folders += [root.joinpath(x) for x in glob.glob(line, recursive=True)]
+        excluded_folders = list(set(excluded_folders))
+        
         os.chdir(owd)
 
         # Load files into pb.files
         for input_dir in input_folders:
             for path in input_dir.rglob('*'):
-                get_file(path, root, exluded_folders, pb)
+                get_file(path, root, excluded_folders, pb)
 
         # add index.md when converting straight from md to html
         if not pb.gc('toggles/compile_md', cached=True):
             print(root.joinpath('index.md'))
-            get_file(root.joinpath('index.md'), root, exluded_folders, pb)
+            get_file(root.joinpath('index.md'), root, excluded_folders, pb)
 
         # Done
         if pb.gc('toggles/verbose_printout', cached=True):
@@ -76,7 +78,7 @@ class FileTree:
             WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files.md'), include_processed=False)
 
 
-def get_file(path, root, exluded_folders, pb):
+def get_file(path, root, excluded_folders, pb):
 
     if path.is_dir():
         return
@@ -84,7 +86,7 @@ def get_file(path, root, exluded_folders, pb):
     # Exclude configured subfolders
     try:
         _continue = False
-        for folder in exluded_folders:
+        for folder in excluded_folders:
             if path.resolve().is_relative_to(folder):
                 if pb.gc('toggles/verbose_printout', cached=True):
                     print(f'\tExcluded folder {folder}: Excluded file {path.name}.')
