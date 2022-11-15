@@ -28,6 +28,17 @@ from .CreateIndexFromTags import CreateIndexFromTags
 from .EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
 from .FileTree import FileTree
 
+from .markdown_extensions.CallOutExtension import CallOutExtension
+from .markdown_extensions.DataviewExtension import DataviewExtension
+from .markdown_extensions.MermaidExtension import MermaidExtension
+from .markdown_extensions.CustomTocExtension import CustomTocExtension
+from .markdown_extensions.EraserExtension import EraserExtension
+from .markdown_extensions.FootnoteExtension import FootnoteExtension
+from .markdown_extensions.FormattingExtension import FormattingExtension
+from .markdown_extensions.EmbeddedSearchExtension import EmbeddedSearchExtension
+from .markdown_extensions.CodeWrapperExtension import CodeWrapperExtension
+from .markdown_extensions.AdmonitionExtension import AdmonitionExtension
+#from .markdown_extensions.CustomTableExtension import CustomTableExtension
 
 def ConvertVault(config_yaml_location=''):
     # Make "global" object that we can pass to functions
@@ -984,9 +995,9 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     extensions = [
         'abbr', 'attr_list', 'def_list', 
         'fenced_code', 
-        'md_in_html', 'tables', 'obs_footnote', 'obs_formatting', 
+        'md_in_html', FootnoteExtension(), FormattingExtension(), 
         'codehilite', 
-        'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex']
+        CustomTocExtension(), MermaidExtension(), CallOutExtension(), 'pymdownx.arithmatex']
     extension_configs = {
         'codehilite': {
             'linenums': False
@@ -1004,13 +1015,15 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
         }
         
     if pb.gc('toggles/features/eraser/enabled'):
-        extensions.append('eraser')
+        extensions.append(EraserExtension())
 
     if pb.gc('toggles/features/embedded_search/enabled'):
-        extensions.append('embedded_search')
+        extensions.append(EmbeddedSearchExtension())
 
-    extensions.append('code_wrapper')
-    extensions.append('admonition2')
+    extensions.append(CodeWrapperExtension())
+    extensions.append(AdmonitionExtension())
+    #extensions.append('custom_tables')
+
 
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
 
