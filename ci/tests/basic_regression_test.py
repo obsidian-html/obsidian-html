@@ -297,11 +297,12 @@ class TestAFiltering1(ModeTemplate):
     testcase_custom_config_values = [
         ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'), 
         ('included_folders', ['filtering']),
+        ('copy_vault_to_tempdir', False),
     ]
     def test_include_folder(self):
         self.scribe('Only include the included folder')
-        issues = check_md_output('md', ['filtering', 'index.md'])
-        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{yaml.dump(issues)}")
+        issues, actual_files = check_md_output('md', ['filtering', 'index.md'])
+        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{actual_files}\n{yaml.dump(issues)}")
 
 class TestAFiltering2(ModeTemplate):
     testcase_name = "FilteringTests"
@@ -309,16 +310,17 @@ class TestAFiltering2(ModeTemplate):
         ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'), 
         ('included_folders', ['filtering']),
         ('exclude_subfolders', ['/filtering/excl', '*.pdf']),
+        ('copy_vault_to_tempdir', False),
     ]
     def test_include_folder(self):
         self.scribe('Exclude folder')
-        issues = check_md_output('md/filtering', ['neutral'])
-        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{yaml.dump(issues)}")
+        issues, actual_files = check_md_output('md/filtering', ['neutral'])
+        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{actual_files}\n{yaml.dump(issues)}")
 
     def test_exclude_pdf(self):
         self.scribe('Exclude text files')
-        issues = check_md_output('md/filtering/neutral', ['neutral.md'])
-        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{yaml.dump(issues)}")
+        issues, actual_files = check_md_output('md/filtering/neutral', ['neutral.md'])
+        self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{actual_files}\n{yaml.dump(issues)}")
 
 
 if __name__ == '__main__':

@@ -291,4 +291,4 @@ def check_md_output(folder, expected_files):
         if file not in actual_files:
             issues.append(f"File {file} should exist but it does not.")
 
-    return issues
+    return (issues, actual_files)
