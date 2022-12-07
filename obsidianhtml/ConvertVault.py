@@ -994,7 +994,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # ------------------------------------------------------------------
     extensions = [
         'abbr', 'attr_list', 'def_list', 
-        'fenced_code', 
+        'fenced_code', 'tables',
         'md_in_html', FootnoteExtension(), FormattingExtension(), 
         'codehilite', 
         CustomTocExtension(), MermaidExtension(), CallOutExtension(), 'pymdownx.arithmatex']
