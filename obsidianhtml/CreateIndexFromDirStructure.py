@@ -186,6 +186,12 @@ class CreateIndexFromDirStructure():
         return f"{self.html_url_prefix}/{rel_path}"
 
     def BuildIndex(self, current_page='/'):
+        def set_file_name(f, tab_level):
+            if tab_level == 1 and f["name"] == "index":
+                return self.pb.gc('toggles/features/create_index_from_dir_structure/homepage_label', cached=True)
+            else:
+                return f["name"]
+
         def _recurse(tree, tab_level, path, current_page):
             current_dir = self.get_dir(current_page)
             current_abs_path = self.root.joinpath(current_page[1:]).resolve()
@@ -236,13 +242,13 @@ class CreateIndexFromDirStructure():
             html += '\t'*tab_level + '<ul class="dir-list">\n'
             tab_level += 1
 
-            excluded_paths = self.pb.gc('toggles/features/create_index_from_tags/exclude_paths', cached=True)
-
+            excluded_paths = self.pb.gc('toggles/features/create_index_from_dir_structure/exclude_files', cached=True)
             for f in tree['files']:
                 if self.check_is_folder_note(Path(f['path'])):
                     continue
 
                 rel_path = Path(f['path']).resolve().relative_to(self.root).as_posix()
+                name = set_file_name(f, tab_level)
 
                 if rel_path in excluded_paths:
                     continue
@@ -258,8 +264,8 @@ class CreateIndexFromDirStructure():
                     class_list = 'class="external-link"'
                     if self.pb.gc('toggles/external_blank'):
                         external_blank_html = 'target=\"_blank\" '
-                
-                html += '\t'*tab_level + f'<li><a class="{file_active}" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{f["name"]}</a></li>\n'
+
+                html += '\t'*tab_level + f'<li><a class="{file_active}" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
             
             tab_level -= 1
             html += '\t'*tab_level + '</ul>\n'
