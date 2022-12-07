@@ -323,5 +323,7 @@ toggles:
         - "md"
         - "obs.html"
       exclude_files:
+        - ".gitignore"
         - "favicon.ico"
         - "not_created.html"
+      homepage_label: "index"
