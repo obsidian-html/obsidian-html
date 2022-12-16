@@ -805,10 +805,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     
     # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
     node['id'] = GetNodeId(fo.path['markdown']['file_relative_path'].as_posix(), pb)
-    if 'graph_name' in md.metadata.keys():
-        node['name'] = md.metadata['graph_name']
-    else:
-        node['name'] = fo.path['markdown']['file_relative_path'].stem
+    node['name'] = md.GetNodeName()
         
     # Url is used so you can open the note/node by clicking on it
     node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()

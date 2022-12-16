@@ -26,12 +26,14 @@ class NetworkTree:
     def NewLink(self):
         return {'source': '', 'target': '', 'value': 1}        
 
+    def UpdateNode(self, old, new):
+        old['metadata'] = new['metadata'].copy()
+
     def AddNode(self, node_obj):
         if self.verbose:
             print("Received node", node_obj)
         # Skip if already present
         for node in self.tree['nodes']:
-            
             if node['id'] == node_obj['id']:
                 self.UpdateNode(node, node_obj)
                 if self.verbose:
@@ -45,10 +47,6 @@ class NetworkTree:
         self.tree['nodes'].append(node_obj)
         if self.verbose:
             print("Node added")
-
-    def UpdateNode(self, old, new):
-        old['metadata'] = new['metadata'].copy()
-
 
     def AddLink(self, link_obj):
         if self.verbose:
