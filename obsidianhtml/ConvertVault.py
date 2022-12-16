@@ -418,12 +418,18 @@ def ConvertVault(config_yaml_location=''):
                 html = re.sub('\{_obsidian_html_backlinks_pattern_\}', snippet, html)
 
             # Compile tags list
+            def get_tags(node):
+                if 'tags' in node['metadata'] and len(node['metadata']['tags']) > 0:
+                    return node['metadata']['tags']
+                return []
+            tags = get_tags(node)
+
             if pb.gc('toggles/features/tags_page/styling/show_in_note_footer', cached=True):
                 # Replace placeholder
                 snippet = ''
-                if 'tags' in node['metadata'] and len(node['metadata']['tags']) > 0:
+                if tags:
                     snippet = "<h2>Tags</h2>\n<ul>\n"
-                    for tag in node['metadata']['tags']:
+                    for tag in tags:
                         url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
                         snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
 

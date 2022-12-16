@@ -30,9 +30,10 @@ class MarkdownPage:
         self.pb = pb
         self.fo = fo
         self.file_tree = file_tree
+
+        self.src_path = fo.path[input_type]['file_absolute_path']
         
         # remove?
-        self.src_path = fo.path[input_type]['file_absolute_path']
         self.src_folder_path = fo.path[input_type]['folder_path']
         self.rel_src_path = fo.path[input_type]['file_relative_path']
         self.input_type = input_type
@@ -46,6 +47,7 @@ class MarkdownPage:
             self.metadata, self.page = frontmatter.parse(f.read())
 
         self.SanitizeFrontmatter()
+        self.GetInlineTags()
 
     def SanitizeFrontmatter(self):
         # imitate obsidian shenannigans
@@ -60,6 +62,35 @@ class MarkdownPage:
                     self.metadata['tags'] = [tags, ]
             elif tags is None:
                 self.metadata['tags'] = []
+
+    def GetInlineTags(self):
+        # get frontmatter tags
+        if 'tags' not in self.metadata.keys():
+            self.metadata['tags'] = []
+        frontmatter_tags = self.metadata['tags']
+
+        # get inline tags
+        inline_tags = [x[1:].replace('.','') for x in re.findall("(?<!\S)#[^\s#`]+", self.page)]
+
+        # merge, and remove duplicates
+        self.metadata['tags'] = list(set(frontmatter_tags + inline_tags))
+
+    def HasTag(self, ttag):
+        tags = self.metadata['tags']
+        for tag in tags:
+            if ttag == tag:
+                return True
+            parts = tag.split('/')
+            root = parts[0]
+            if ttag == root:
+                return True
+            if len(parts) > 1:
+                for part in parts[1:]:
+                    root = root + '/' + part
+                    if ttag == root:
+                        return True
+        return False
+
 
     def StripCodeSections(self):
         """(Temporarily) Remove codeblocks/-lines so that they are not altered in all the conversions. Placeholders are inserted."""

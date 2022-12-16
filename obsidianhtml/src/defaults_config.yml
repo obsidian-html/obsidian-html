@@ -264,8 +264,10 @@ toggles:
     # !! Enabling this feature will overwrite obsidian_entrypoint_path_str and md_entrypoint_path_str
     create_index_from_tags:
       enabled: False
+      verbose: False
       add_links_in_graph_tree: True
       tags: []
+      match_on_inline_tags: False
       sort:
         method: 'none'          # <key_value, creation_time, modified_time, none>    ! created_time not available on Linux!
         key_path: ''            # empty for top level, use ':' to go down multiple levels

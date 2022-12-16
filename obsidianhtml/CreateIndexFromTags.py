@@ -4,8 +4,13 @@ import frontmatter
 from pathlib import Path 
 import platform
 import datetime
+import regex as re
 
-from .PathFinder import OH_File
+from .PathFinder   import OH_File
+from .MarkdownPage import MarkdownPage
+
+def verbose(pb):
+    return (pb.gc('toggles/verbose_printout', cached=True) or pb.gc('toggles/features/create_index_from_tags/verbose', cached=True))
 
 def CreateIndexFromTags(pb):
     # get settings
@@ -19,7 +24,7 @@ def CreateIndexFromTags(pb):
     sort_reverse    = settings['sort']['reverse']
     none_on_bottom  = settings['sort']['none_on_bottom']
 
-    if pb.gc('toggles/verbose_printout', cached=True):
+    if verbose(pb):
         print('> FEATURE: CREATE INDEX FROM TAGS: Enabled')
 
     # Test input
@@ -38,14 +43,14 @@ def CreateIndexFromTags(pb):
 
     # shorthand 
     include_tags = settings['tags']
-    if pb.gc('toggles/verbose_printout', cached=True):
+    if verbose(pb):
         print('\tLooking for tags: ', include_tags)
 
 
     # overwrite defaults
     index_dst_path = paths['obsidian_folder'].joinpath('__tags_index.md').resolve()
 
-    if pb.gc('toggles/verbose_printout', cached=True):
+    if verbose(pb):
         print('\tWill write the note index to: ', index_dst_path)
         print('\tWill overwrite entrypoints: obsidian_entrypoint, rel_obsidian_entrypoint')
 
@@ -62,106 +67,117 @@ def CreateIndexFromTags(pb):
     for k in files.keys():
         fo = files[k]
 
+        # Don't parse if not parsable
+        if not fo.metadata['is_parsable_note']:
+            if verbose(pb):
+                print(f'\t\tSkipping file, not parsable note: {page_path_str}')
+            continue
+
         # Determine src file path
         page_path = fo.fullpath('note')
         page_path_str = page_path.as_posix()
-        
+        if verbose(pb):
+            print(f'\t\tParsing note {page_path_str}')
+
+
+
+        # make mdpage object 
+        md = MarkdownPage(pb, fo, 'note', files)
+        metadata = md.metadata
+        page = md.page
+
+
+
         # Skip if not valid
         if not fo.is_valid_note('note'):
             continue
 
-        # Try to open file
-        with open(page_path, encoding="utf-8") as f:
-            # Get frontmatter yaml
-            metadata, page = frontmatter.parse(f.read())
+        # get full list of tags to match
+        tags = metadata['tags'] 
 
-            # Bug out if frontdata not present
-            if not isinstance(metadata, dict):
+        # Check for each of the tags if its present
+        # Skip if none matched
+        matched = False
+        for t in include_tags:
+            if md.HasTag(t):
+                if verbose(pb):
+                    print(f'\t\tMatched note {k} on tag {t}')
+                matched = True
+        
+        if matched == False:
+            continue
+
+        # get graphname of the page, we need this later
+        graph_name = k[:-3]
+        if 'graph_name' in metadata.keys():
+            graph_name = metadata['graph_name']
+
+        # determine sorting value
+        sort_value   = None
+        if method not in ('none', 'creation_time', 'modified_time'):
+            if method == 'key_value':
+                # key can be multiple levels deep, like this: level1:level2
+                # get the value of the key
+                key_found = True
+                value = metadata
+                for key in key_path.split(':'):
+                    if key not in value.keys():
+                        key_found = False
+                        break
+                    value = value[key]
+                # only continue if the key is found in the current note, otherwise the 
+                # default sort value of None is kept
+                if key_found:
+                    # for a list find all items that start with the value prefix
+                    # then remove the value_prefix, and check if we have 1 item left
+                    if isinstance(value, list):
+                        items = [x.replace(value_prefix, '', 1) for x in value if x.startswith(value_prefix)]
+                        if len(items) == 1:
+                            sort_value = items[0]
+                            # done
+                    if isinstance(value, str):
+                        sort_value = value.replace(value_prefix, '', 1)
+                    if isinstance(value, bool):
+                        sort_value = str(int(value))
+                    if isinstance(value, int) or isinstance(value, float):
+                        sort_value = str(value)
+                    if isinstance(value, datetime.datetime):
+                        sort_value = value.isoformat()
+            else:
+                raise Exception(f'Sort method {method} not implemented. Check spelling.')
+        
+        # Get sort_value from files dict
+        if method in ('creation_time', 'modified_time'):
+            # created time is not really accessible under Linux, we might add a case for OSX
+            if method == 'creation_time' and platform.system() != 'Windows' and platform.system() != 'Darwin':
+                raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
+            sort_value = fo.metadata[method]
+
+        if verbose(pb):
+            print(f'\t\t\tSort value of note {k} is {sort_value}')
+
+        # Add an entry into index_dict for each tag matched on this page
+        # copy file to temp filetree for checking later
+        _files[k] = files[k]
+
+        # Add entry to our index dict so we can parse this later
+        # do this once for each tag, so each tag listing gets a link to this note
+        for t in include_tags:
+            if not md.HasTag(t):
                 continue
-            if 'tags' not in metadata.keys():
-                continue
-
-            # Check for each of the tags if its present
-            # Skip if none matched
-            matched = False
-            for t in include_tags:
-                if t in metadata['tags']:
-                    if pb.gc('toggles/verbose_printout', cached=True):
-                        print(f'\t\tMatched note {k} on tag {t}')
-                    matched = True
-            
-            if matched == False:
-                continue
-
-            # get graphname of the page, we need this later
-            graph_name = k[:-3]
-            if 'graph_name' in metadata.keys():
-                graph_name = metadata['graph_name']
-
-            # determine sorting value
-            sort_value   = None
-            if method not in ('none', 'creation_time', 'modified_time'):
-                if method == 'key_value':
-                    # key can be multiple levels deep, like this: level1:level2
-                    # get the value of the key
-                    key_found = True
-                    value = metadata
-                    for key in key_path.split(':'):
-                        if key not in value.keys():
-                            key_found = False
-                            break
-                        value = value[key]
-                    # only continue if the key is found in the current note, otherwise the 
-                    # default sort value of None is kept
-                    if key_found:
-                        # for a list find all items that start with the value prefix
-                        # then remove the value_prefix, and check if we have 1 item left
-                        if isinstance(value, list):
-                            items = [x.replace(value_prefix, '', 1) for x in value if x.startswith(value_prefix)]
-                            if len(items) == 1:
-                                sort_value = items[0]
-                                # done
-                        if isinstance(value, str):
-                            sort_value = value.replace(value_prefix, '', 1)
-                        if isinstance(value, bool):
-                            sort_value = str(int(value))
-                        if isinstance(value, int) or isinstance(value, float):
-                            sort_value = str(value)
-                        if isinstance(value, datetime.datetime):
-                            sort_value = value.isoformat()
-                else:
-                    raise Exception(f'Sort method {method} not implemented. Check spelling.')
-            
-            # Get sort_value from files dict
-            if method in ('creation_time', 'modified_time'):
-                # created time is not really accessible under Linux, we might add a case for OSX
-                if method == 'creation_time' and platform.system() != 'Windows' and platform.system() != 'Darwin':
-                    raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
-                sort_value = fo.metadata[method]
-
-            if pb.gc('toggles/verbose_printout', cached=True):
-                print(f'\t\t\tSort value of note {k} is {sort_value}')
-
-            # Add an entry into index_dict for each tag matched on this page
-            for t in include_tags:
-                if t in metadata['tags']:
-                    # copy file to temp filetree for checking later
-                    _files[k] = files[k]
-
-                    # Add entry to our index dict so we can parse this later
-                    index_dict[t].append(
-                        {
-                            'file_key': k, 
-                            'md_rel_path_str': fo.path['markdown']['file_relative_path'].as_posix(),
-                            'graph_name': graph_name,
-                            'sort_value': sort_value
-                        }
-                    )
+            index_dict[t].append(
+                {
+                    'file_key': k, 
+                    'md_rel_path_str': fo.path['markdown']['file_relative_path'].as_posix(),
+                    'graph_name': graph_name,
+                    'sort_value': sort_value
+                }
+            )
 
     if len(_files.keys()) == 0:
         raise Exception(f"No notes found with the given tags.")
 
-    if pb.gc('toggles/verbose_printout', cached=True):
+    if verbose(pb):
         print(f'\tBuilding index.md')
 
     index_md_content = f'# {pb.gc("site_name", cached=True)}\n'
@@ -221,7 +237,7 @@ def CreateIndexFromTags(pb):
     # [17] Build graph node/links
     if pb.gc('toggles/features/create_index_from_tags/add_links_in_graph_tree', cached=True):
 
-        if pb.gc('toggles/verbose_printout', cached=True):
+        if verbose(pb):
             print(f'\tAdding graph links between index.md and the matched notes')
         
         node = pb.network_tree.NewNode()
@@ -241,7 +257,7 @@ def CreateIndexFromTags(pb):
                 link['target'] = node['id']
                 pb.network_tree.AddLink(link)
 
-    if pb.gc('toggles/verbose_printout', cached=True):
+    if verbose(pb):
         print('< FEATURE: CREATE INDEX FROM TAGS: Done')
 
     return pb
