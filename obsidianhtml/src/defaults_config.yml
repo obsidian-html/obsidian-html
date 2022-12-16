@@ -265,6 +265,7 @@ toggles:
     create_index_from_tags:
       enabled: False
       verbose: False
+      homepage_label: "index"
       add_links_in_graph_tree: True
       tags: []
       match_on_inline_tags: False

@@ -91,6 +91,11 @@ class MarkdownPage:
                         return True
         return False
 
+    def GetNodeName(self):
+        if 'graph_name' in self.metadata.keys():
+            return self.metadata['graph_name']
+        else:
+            return self.fo.path['markdown']['file_relative_path'].stem
 
     def StripCodeSections(self):
         """(Temporarily) Remove codeblocks/-lines so that they are not altered in all the conversions. Placeholders are inserted."""

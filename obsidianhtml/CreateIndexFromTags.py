@@ -8,6 +8,7 @@ import regex as re
 
 from .PathFinder   import OH_File
 from .MarkdownPage import MarkdownPage
+from .FileFinder   import GetNodeId
 
 def verbose(pb):
     return (pb.gc('toggles/verbose_printout', cached=True) or pb.gc('toggles/features/create_index_from_tags/verbose', cached=True))
@@ -79,14 +80,12 @@ def CreateIndexFromTags(pb):
         if verbose(pb):
             print(f'\t\tParsing note {page_path_str}')
 
-
-
         # make mdpage object 
         md = MarkdownPage(pb, fo, 'note', files)
         metadata = md.metadata
         page = md.page
-
-
+        node_name = md.GetNodeName()
+        node_id = GetNodeId(fo.path['markdown']['file_relative_path'].as_posix(), pb)
 
         # Skip if not valid
         if not fo.is_valid_note('note'):
@@ -106,11 +105,6 @@ def CreateIndexFromTags(pb):
         
         if matched == False:
             continue
-
-        # get graphname of the page, we need this later
-        graph_name = k[:-3]
-        if 'graph_name' in metadata.keys():
-            graph_name = metadata['graph_name']
 
         # determine sorting value
         sort_value   = None
@@ -165,11 +159,13 @@ def CreateIndexFromTags(pb):
         for t in include_tags:
             if not md.HasTag(t):
                 continue
+
             index_dict[t].append(
                 {
-                    'file_key': k, 
+                    'file_key': k, #depr?
+                    'node_id': node_id,
                     'md_rel_path_str': fo.path['markdown']['file_relative_path'].as_posix(),
-                    'graph_name': graph_name,
+                    'graph_name': node_name,
                     'sort_value': sort_value
                 }
             )
@@ -242,13 +238,15 @@ def CreateIndexFromTags(pb):
         
         node = pb.network_tree.NewNode()
         node['id'] = 'index'
+        node['name'] = pb.gc('toggles/features/create_index_from_tags/homepage_label').capitalize()
         node['url'] = f'{pb.gc("html_url_prefix")}/index.html'
         pb.network_tree.AddNode(node)
         bln = node
         for t in index_dict.keys():
             for n in index_dict[t]:
                 node = pb.network_tree.NewNode()
-                node['id'] = n['graph_name']
+                node['id'] = n['node_id']
+                node['name'] = n['graph_name']
                 node['url'] = f'{pb.gc("html_url_prefix")}/{n["md_rel_path_str"][:-3]}.html'
                 pb.network_tree.AddNode(node)
 
