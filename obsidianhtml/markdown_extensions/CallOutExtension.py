@@ -13,7 +13,7 @@ class CallOutExtension(Extension):
         md.parser.blockprocessors.register(CallOutBlockProcessor(md.parser), 'CallOutExtension', 175)
 
 class CallOutBlockProcessor(BlockProcessor):
-    RE_FENCE_START = r'^> *\[\!.*?].*?\n' 
+    RE_FENCE_START = r'^> *\[\!.*?].*?\n*' 
 
     def __init__(self, parser):
         """Initialization."""
