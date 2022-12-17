@@ -29,10 +29,10 @@
           cat ${./setup.cfg} | ${pkgs.python3Packages.jc}/bin/jc --ini > $out
         ''));
 
-        depNames = pkgs.lib.remove "" (pkgs.lib.splitString "\n"
+        depNames = map (x: builtins.head(pkgs.lib.strings.splitString " " x)) (pkgs.lib.remove "" (pkgs.lib.splitString "\n"
           setup
           .options
-          .install_requires);
+          .install_requires));
 
         deps = pkgs.lib.attrsets.attrVals depNames pkgs.python3Packages;
       in rec {
@@ -100,3 +100,4 @@
       }
     );
 }
+
