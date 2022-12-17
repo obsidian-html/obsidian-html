@@ -199,8 +199,8 @@ def ExportStaticFiles(pb):
         copy_file_list.append(['imported/3d-force-graph.v1.70.10.min.js', '3d-force-graph.js'])
         css_files_list.append(['graph/graph.css', 'graph.css'])
         copy_file_list.append(['graph/graph.svg', 'graph.svg'])
-        copy_file_list.append(['graph/default_grapher_2d.js', 'default_grapher_2d.js'])
-        copy_file_list.append(['graph/default_grapher_3d.js', 'default_grapher_3d.js'])
+        #copy_file_list.append(['graph/default_grapher_2d.js', 'default_grapher_2d.js'])
+        #copy_file_list.append(['graph/default_grapher_3d.js', 'default_grapher_3d.js'])
 
     if pb.config.feature_is_enabled('mermaid_diagrams', cached=True):
         copy_file_list.append(['imported/mermaid.9.0.1.min.js', 'mermaid.9.0.1.min.js'])

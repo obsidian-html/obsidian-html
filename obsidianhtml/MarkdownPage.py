@@ -91,6 +91,15 @@ class MarkdownPage:
                         return True
         return False
 
+    # [425] Add included references as links in graph view
+    def AddInclusionLink(self, relative_md_path):
+        if 'obs.html.data' not in self.metadata:
+            self.metadata['obs.html.data'] = {}
+        if 'inclusion_references' not in self.metadata['obs.html.data']:
+            self.metadata['obs.html.data']['inclusion_references'] = []
+        if relative_md_path not in self.metadata['obs.html.data']['inclusion_references'] :
+            self.metadata['obs.html.data']['inclusion_references'] .append(relative_md_path)
+
     def GetNodeName(self):
         if 'graph_name' in self.metadata.keys():
             return self.metadata['graph_name']
@@ -407,6 +416,10 @@ class MarkdownPage:
             result = GetObsidianFilePath(link, self.file_tree, self.pb)
             file_object = result['fo']
             header =  result['header']
+
+            # [425] Add included references as links in graph view
+            # add link to frontmatter yaml so that we can add it to the graphview
+            self.AddInclusionLink(result['rtr_path_str'])
 
             if file_object == False:
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Could not find page {link}.")

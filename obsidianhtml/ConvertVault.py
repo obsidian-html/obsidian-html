@@ -27,6 +27,7 @@ from .PicknickBasket import PicknickBasket
 from .CreateIndexFromTags import CreateIndexFromTags
 from .EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
 from .FileTree import FileTree
+from .NetworkTree import AddPageToNodeList
 
 from .markdown_extensions.CallOutExtension import CallOutExtension
 from .markdown_extensions.DataviewExtension import DataviewExtension
@@ -767,7 +768,7 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1, iteration=0):
         pb.reset_state()
 
 @extra_info()
-def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level=1):
+def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_level=1):
     '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
     
     # Unpack picknick basket so we don't have to type too much.
@@ -798,28 +799,14 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
     # The nodelist will result in graph.json, which may have uses beyond the graph view
 
     # [17] Add self to nodelist
-    node = pb.network_tree.NewNode()
+    node = AddPageToNodeList(pb, md, backlink_node)
+    backlink_node = node
 
-    # add all metadata to node, so we can access it later when we need to, once compilation of html is complete
-    node['metadata'] = md.metadata.copy()
-    
-    # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-    node['id'] = GetNodeId(fo.path['markdown']['file_relative_path'].as_posix(), pb)
-    node['name'] = md.GetNodeName()
-        
-    # Url is used so you can open the note/node by clicking on it
-    node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()
-    node['rtr_url'] = rel_dst_path.as_posix()
-    pb.network_tree.AddNode(node)
-
-    # Backlinks are set so when recursing, the links (edges) can be determined
-    if backlinkNode is not None:
-        link = pb.network_tree.NewLink()
-        link['source'] = backlinkNode['id']
-        link['target'] = node['id']
-        pb.network_tree.AddLink(link)
-    
-    backlinkNode = node
+    # [425] Add included references as links in graph view
+    if 'obs.html.data' in md.metadata and 'inclusion_references' in md.metadata['obs.html.data']:
+        for incl in md.metadata['obs.html.data']['inclusion_references']:
+            inc_md = MarkdownPage(pb, files[incl], 'markdown', files)
+            AddPageToNodeList(pb, inc_md, backlink_node, link_type="inclusion")
 
     # Skip further processing if processing has happened already for this file
     # ------------------------------------------------------------------
@@ -1156,7 +1143,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlinkNode=None, log_level
             print('\t'*(log_level+1), f"html: initiating conversion for {lo.fullpath('markdown')} (parent {fo.fullpath('markdown')})")
 
         pb.init_state(action='m2h', loop_type='md_note', current_fo=lo, subroutine='ConvertMarkdownPageToHtmlPage')
-        ConvertMarkdownPageToHtmlPage(lo, pb, backlinkNode, log_level=log_level)
+        ConvertMarkdownPageToHtmlPage(lo, pb, backlink_node, log_level=log_level)
         pb.reset_state()
 
 def recurseTagList(tagtree, tagpath, pb, level):
