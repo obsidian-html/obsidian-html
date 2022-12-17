@@ -29,6 +29,7 @@ from .EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
 from .FileTree import FileTree
 from .NetworkTree import AddPageToNodeList
 from .v4 import Actor
+from .HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
 
 from .markdown_extensions.CallOutExtension import CallOutExtension
 from .markdown_extensions.DataviewExtension import DataviewExtension
@@ -57,6 +58,7 @@ def ConvertVault(config_yaml_location=''):
     pb.loadConfig(config_yaml_location)
     pb.set_paths()
     pb.compile_dynamic_inclusions()
+    pb.config.load_embedded_titles_plugin()
 
     # Setup filesystem
     # ---------------------------------------------------------
@@ -135,61 +137,16 @@ def convert_markdown_to_html(pb):
 
     print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(pb.paths["md_entrypoint"])})')
 
-    html_url_prefix = pb.gc("html_url_prefix")
-
-    # compile navbarlinks
-    navbar_links = pb.gc('navbar_links', cached=True)
-    elements = []
-    for l in navbar_links:
-        # default
-        el = f'<a class="navbar-link" href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
-
-        # external links
-        if 'type' in l.keys():
-            if l['type'] == 'external':
-                el = f'<a class="navbar-link" href="{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
-            else:
-                raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
-
-        elements.append(el)
-
-    pb.navbar_links = elements
-
-    # [??] Embedded note titles integration
-    # ------------------------------------------------------------------
-    if pb.gc('toggles/features/embedded_note_titles/enabled', cached=True):
-        if pb.gc('toggles/verbose_printout', cached=True):
-            print('\t'*(1), f"html: embedded note titles are enabled in config")
-
-        # Enable/disable capability based on whether the plugin is installed
-        embed_plugin_folder_path = pb.paths['original_obsidian_folder'].joinpath('.obsidian/plugins/obsidian-embedded-note-titles').resolve()
-        pb.config.capabilities_needed['embedded_note_titles'] = embed_plugin_folder_path.exists()
-        if pb.gc('toggles/verbose_printout', cached=True):
-            if pb.config.capabilities_needed['embedded_note_titles']:
-                print('\t'*(1), f"html: embedded note title plugin found, enabling embedded_note_titles capability.")
-            else:
-                print('\t'*(1), f"html: embedded note title plugin not found, disabling embedded_note_titles capability.")
-
-        # Load config
-        if pb.config.capabilities_needed['embedded_note_titles']:
-            data_path = embed_plugin_folder_path.joinpath('data.json').resolve()
-            result = pb.config.LoadEmbeddedNoteConfig(data_path)
-
-            if pb.gc('toggles/verbose_printout', cached=True):
-                if result:
-                    print('\t'*(1), f"html: embedded note titles settings loaded.", pb.config.plugin_settings['embedded_note_titles'])
-                else:
-                    print('\t'*(1), f"html: embedded note titles settings were not found, using defaults.")
-    else:
-        pb.config.capabilities_needed['embedded_note_titles'] = False
-        if pb.gc('toggles/verbose_printout', cached=True):
-            print('\t'*(1), f"html: embedded note titles are disabled in config")
+    # Prepare reusable blocks
+    compile_navbar_links(pb)
 
     # Force search to lowercase
     rel_entry_path_str = pb.paths['rel_md_entrypoint_path'].as_posix()
     if pb.gc('toggles/force_filename_to_lowercase', cached=True):
         rel_entry_path_str = rel_entry_path_str.lower()
 
+    # Conversion: md -> html
+    # -----------------------------------------------------------
     # Start conversion from the entrypoint
     ep = pb.files[rel_entry_path_str]
     pb.init_state(action='m2h', loop_type='md_note', current_fo=ep, subroutine='ConvertMarkdownPageToHtmlPage')
@@ -215,44 +172,19 @@ def convert_markdown_to_html(pb):
     if pb.gc('toggles/extended_logging', cached=True):
         WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files_mth.md'), include_processed=True)
 
-    # [??] Create html file tree
-    # ------------------------------------------
-    if pb.gc('toggles/features/create_index_from_dir_structure/enabled'):
-        rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
-        op = pb.paths['html_output_folder'].joinpath(rel_output_path)
-
-        print(f'\t> COMPILING INDEX FROM DIR STRUCTURE ({op})')
-        # Create dirtree to be viewed on its own
-        if pb.gc('toggles/relative_path_html', cached=True):
-            html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')))
-            print(html_url_prefix)
-        pb.EnsureTreeObj()
-        pb.treeobj.rel_output_path = pb.gc('toggles/features/create_index_from_dir_structure/rel_output_path')
-        pb.treeobj.html_url_prefix = pb.gc('html_url_prefix')
-        pb.treeobj.html = pb.treeobj.BuildIndex()
-        pb.treeobj.WriteIndex()
-        
-        # Create dirtree to be included in every page
-        if pb.gc('toggles/relative_path_html', cached=True):
-            html_url_prefix = pb.sc(path='html_url_prefix', value='')
-        pb.EnsureTreeObj()
-        pb.treeobj.rel_output_path = 'obs.html/dirtree.html'
-        pb.treeobj.html_url_prefix = pb.gc('html_url_prefix')
-        pb.treeobj.html = pb.treeobj.BuildIndex()
-        pb.treeobj.WriteIndex()
-
-
-        print('\t< COMPILING INDEX FROM DIR STRUCTURE: Done')
 
     # [??] Second pass
     # ------------------------------------------
     # Some code can only be generated when all the notes have already been created.
     # These steps are done in this block.
 
+    # Create reusable blocks
+    create_folder_navigation_view(pb)
+
     # Make lookup so that we can easily find the url of a node
     pb.network_tree.compile_node_lookup()
 
-    # Get some data outside of the loop
+    # Prep some data outside of the loop
     dir_repstring = '{left_pane_content}'
     dir_repstring2 = '{right_pane_content}'
     if pb.gc('toggles/features/styling/flip_panes', cached=True):
@@ -461,65 +393,11 @@ def convert_markdown_to_html(pb):
         
     print('\t< SECOND PASS HTML: Done')
 
-    # Create tag page
+    # Create system pages
+    # -----------------------------------------------------------
+    # Create tag pages
     recurseTagList(pb.tagtree, '', pb, level=0)
-
-    # Test: foldable tag list
-    def rec_tag_tree_foldable(tag_tree, name, id, path=''):
-        subid = 0
-
-        notes = ''
-        if tag_tree['notes']:
-            notes += '<div class="tags-notes" style="font-weight:normal;"><ul class="tag-list">'
-            tag_tree['notes'].sort()
-            for note in tag_tree['notes']:
-                note_name = note.split('/')[-1].replace(".html", "")
-                ahref = f'<a href="{pb.gc("html_url_prefix")}/{note}">{note_name}</a>'
-                notes += f'<li>{ahref}</li>'
-            notes += '</ul></div>'
-
-        subtags = ''
-        subtags_keys = list(tag_tree['subtags'].keys())
-        subtags_keys.sort()
-        for key in subtags_keys:
-            subtags += rec_tag_tree_foldable(tag_tree['subtags'][key], key, str(id)+str(subid), '/'.join(list(filter(None, [path, name]))))
-            subid += 1
-
-        header = ''
-        contents = f'{subtags}{notes}'
-        if name:
-            if path:
-                path += '/'
-            header = f'<button class="dir-button" onclick="toggle_id(\'{id}\')"><span class="tag-path">{path} </span>{name.capitalize()}</button>'
-            contents = f'<div class="dir-container" id="{id}" style="font-weight:normal;">{contents}</div>'
-
-        html = f'<div class="subtags">{header}{contents}</div>'
-        return html
-
-    # set output path
-    tags_folder = pb.paths['html_output_folder'].joinpath('obs.html/tags/')
-    tag_dst_path = tags_folder.joinpath('index.html')
-    tag_dst_path_posix = tag_dst_path.as_posix()
-    tag_dst_path.parent.mkdir(parents=True, exist_ok=True)
-
-    rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
-
-    # set html_url_prefix
-    if pb.gc('toggles/relative_path_html', cached=True):
-        html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_dst_path_as_posix))
-
-    # compile html
-    html = rec_tag_tree_foldable(pb.tagtree, '', 'tags-')
-    html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html, container_wrapper_class_list=['single_tab_page-left-aligned'])
-    html = html.replace('{pinnedNode}', 'tagspage')
-    html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
-    html = html.replace('{left_pane_content}', '')\
-            .replace('{right_pane_content}', '')
-
-    # write to destination
-    with open(tag_dst_path_posix, 'w', encoding="utf-8") as f:
-        f.write(html) 
-
+    create_foldable_tag_lists(pb)
 
     # Create graph fullpage
     if pb.gc('toggles/features/graph/enabled', cached=True):
@@ -1049,73 +927,3 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
         ConvertMarkdownPageToHtmlPage(lo, pb, backlink_node, log_level=log_level)
         pb.reset_state()
 
-def recurseTagList(tagtree, tagpath, pb, level):
-    '''This function creates the folder `tags` in the html_output_folder, and a filestructure in that so you can navigate the tags.'''
-
-    # Get relevant paths
-    # ---------------------------------------------------------
-    tags_folder = pb.paths['html_output_folder'].joinpath('obs.html/tags/')
-    
-    tag_dst_path = tags_folder.joinpath(f'{tagpath}index.html').resolve()
-    tag_dst_path_posix = tag_dst_path.as_posix()
-    rel_dst_path_as_posix = tag_dst_path.relative_to(pb.paths['html_output_folder']).as_posix()
-
-    html_url_prefix = pb.gc('html_url_prefix')
-    if pb.gc('toggles/relative_path_html', cached=True):
-        html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_dst_path_as_posix))
-
-    # Make root dir
-    tags_folder.mkdir(parents=True, exist_ok=True)
-
-    # Compile markdown from tagtree
-    # ---------------------------------------------------------
-    md = ''
-    # Handle subtags
-    if len(tagtree['subtags'].keys()) > 0:
-        if level == 0:
-            md += '# Tags\n'
-        else:
-            md += '# Subtags\n'
-
-        for key in tagtree['subtags'].keys():
-            # Point of recursion
-            rel_key_path_as_posix = recurseTagList(tagtree['subtags'][key], tagpath + key + '/', pb, level+1)
-            md += f'- [{key}]({html_url_prefix}/{rel_key_path_as_posix})' + '\n'
-
-    # Handle notes
-    if len(tagtree['notes']) > 0:
-        md += '\n# Notes\n'
-        for note_url in tagtree['notes']:
-            note_name = note_url.split('/')[-1].replace(".html", "")
-            md += f'- [{note_name}]({html_url_prefix}/{note_url})\n'
-
-    md += f'\n> [View all tags]({html_url_prefix}/obs.html/tags/index.html)'
-
-    # Compile html
-    extension_configs = {
-        'codehilite': {
-            'linenums': False
-        },
-        'pymdownx.arithmatex': {
-            'generic': True
-        }
-    }    
-
-    html_body = markdown.markdown(md, extensions=['extra', 'codehilite', 'obs_toc', 'mermaid', 'callout', 'pymdownx.arithmatex'], extension_configs=extension_configs)
-
-    di = '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/taglist.css" />'
-
-    html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html_body, dynamic_includes=di, container_wrapper_class_list=['single_tab_page-left-aligned'])
-
-    html = html.replace('{pinnedNode}', 'tagspage')
-    html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
-    html = html.replace('{left_pane_content}', '')\
-               .replace('{right_pane_content}', '')
-    
-    # Write file
-    tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
-    with open(tag_dst_path_posix, 'w', encoding="utf-8") as f:
-        f.write(html) 
-
-    # Return link of this page, to be used by caller for building its page
-    return rel_dst_path_as_posix

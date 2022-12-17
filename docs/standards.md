@@ -11,6 +11,10 @@ e.g.:
     from v4 import Types as T
     def bla() -> T.RTRPosX
 
+### 1.4 Functions and methods use verb-noun naming
+So "GetThing", "check_kettle", etc
+"Do" is not allowed as a verb!
+
 ## 2. Type Hinting
 ### 2.1 Type hinting is voluntary
 Adding types can sometimes really help in quickly parsing a function, but are not yet useful enough to put everywhere.
