@@ -803,10 +803,13 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
     backlink_node = node
 
     # [425] Add included references as links in graph view
-    if 'obs.html.data' in md.metadata and 'inclusion_references' in md.metadata['obs.html.data']:
-        for incl in md.metadata['obs.html.data']['inclusion_references']:
-            inc_md = MarkdownPage(pb, files[incl], 'markdown', files)
-            AddPageToNodeList(pb, inc_md, backlink_node, link_type="inclusion")
+    if pb.gc('toggles/features/graph/show_inclusions_in_graph'):
+        if 'obs.html.data' in md.metadata and 'inclusion_references' in md.metadata['obs.html.data']:
+            for incl in md.metadata['obs.html.data']['inclusion_references']:
+                inc_md = MarkdownPage(pb, files[incl], 'markdown', files)
+                AddPageToNodeList(pb, inc_md, backlink_node, link_type="inclusion")
+                inc_md.fo.processed_mth = False
+                md.links.append(inc_md.fo)
 
     # Skip further processing if processing has happened already for this file
     # ------------------------------------------------------------------

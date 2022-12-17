@@ -417,9 +417,6 @@ class MarkdownPage:
             file_object = result['fo']
             header =  result['header']
 
-            # [425] Add included references as links in graph view
-            # add link to frontmatter yaml so that we can add it to the graphview
-            self.AddInclusionLink(result['rtr_path_str'])
 
             if file_object == False:
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Could not find page {link}.")
@@ -464,6 +461,10 @@ class MarkdownPage:
             
             self.page = self.page.replace(l, '\n' + included_page.page + '\n')
 
+            # [425] Add included references as links in graph view
+            # add link to frontmatter yaml so that we can add it to the graphview
+            if self.pb.gc('toggles/features/graph/show_inclusions_in_graph'):
+                self.AddInclusionLink(result['rtr_path_str'])
 
         # -- [#296] Remove block references 
         if remove_block_references:
