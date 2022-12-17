@@ -6,19 +6,19 @@ import gzip
 import shutil
 import warnings
 import yaml
+from time import sleep
 
 import regex as re          # regex string finding/replacing
-
 import urllib.parse         # convert link characters like %
 
-from pathlib import Path    # 
+from pathlib import Path
 
 from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
 from .FileFinder import GetNodeId, FindFile
 
 from .MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
 from .MarkdownLink import MarkdownLink
-from .lib import    DuplicateFileNameInRoot, CreateTemporaryCopy, \
+from .lib import    DuplicateFileNameInRoot, \
                     GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, CreateStaticFilesFolders, \
                     PopulateTemplate, WriteFileLog, simpleHash, get_default_appdir_config_yaml_path
 from .RssFeed import RssFeed
@@ -28,6 +28,8 @@ from .CreateIndexFromTags import CreateIndexFromTags
 from .EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
 from .FileTree import FileTree
 from .NetworkTree import AddPageToNodeList
+from .v4 import Actor
+from .CopyVault import CreateTemporaryCopy
 
 from .markdown_extensions.CallOutExtension import CallOutExtension
 from .markdown_extensions.DataviewExtension import DataviewExtension
@@ -55,129 +57,24 @@ def ConvertVault(config_yaml_location=''):
             break
 
     # Set config
-    if config_yaml_location != '':
-        input_yml_path_str = config_yaml_location
-    else:
-        input_yml_path_str = ''
-        for i, v in enumerate(sys.argv):
-            if v == '-i':
-                if len(sys.argv) < (i + 2):
-                    print(f'No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
-                    #print_global_help_and_exit(1)
-                    exit(1)
-                input_yml_path_str = sys.argv[i+1]
-                break
+    pb.loadConfig(config_yaml_location)
+    pb.set_paths()
+    pb.compile_dynamic_inclusions()
 
-    # Try to find config in default locations
-    if input_yml_path_str == '':
-        # config.yml in same folder
-        if Path('config.yml').exists():
-            input_yml_path_str = Path('config.yml').resolve().as_posix()
-            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
-    if input_yml_path_str == '':
-        # config.yaml in same folder
-        if Path('config.yaml').exists():
-            input_yml_path_str = Path('config.yaml').resolve().as_posix()
-            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
-    if input_yml_path_str == '':
-        # config.yml in appdir folder
-        appdir_config = Path(get_default_appdir_config_yaml_path())
-        if appdir_config.exists():
-            input_yml_path_str = appdir_config.as_posix()
-            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
-
-    if input_yml_path_str == '':
-        print(f'No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
-        exit(1)
-
-    pb.loadConfig(input_yml_path_str)
-
-
-    # Set Paths
-    # ---------------------------------------------------------
-    paths = {
-        'obsidian_folder': Path(pb.gc('obsidian_folder_path_str')).resolve(),
-        'md_folder': Path(pb.gc('md_folder_path_str')).resolve(),
-        'obsidian_entrypoint': Path(pb.gc('obsidian_entrypoint_path_str')).resolve(),
-        'md_entrypoint': Path(pb.gc('md_entrypoint_path_str')).resolve(),
-        'html_output_folder': Path(pb.gc('html_output_folder_path_str')).resolve()
-    }
-    paths['dataview_export_folder'] = paths['obsidian_folder'].joinpath(pb.gc('toggles/features/dataview/folder'))
-
-    if pb.gc('toggles/extended_logging', cached=True):
-        paths['log_output_folder'] = Path(pb.gc('log_output_folder_path_str')).resolve()
-
-    # Deduce relative paths
-    if pb.gc('toggles/compile_md', cached=True):
-        paths['rel_obsidian_entrypoint'] = paths['obsidian_entrypoint'].relative_to(paths['obsidian_folder'])
-    paths['rel_md_entrypoint_path']  = paths['md_entrypoint'].relative_to(paths['md_folder'])
-    
-    # Add paths to pb
-    # ---------------------------------------------------------
-    pb.paths = paths
-
-    # Copy vault to tempdir, so any bugs will not affect the user's vault
+    # Setup filesystem
     # ---------------------------------------------------------
     if pb.gc('copy_vault_to_tempdir') and pb.gc('toggles/compile_md'):
         # Copy over vault to tempdir
         tmpdir = CreateTemporaryCopy(source_folder_path=pb.paths['obsidian_folder'], pb=pb)
+        pb.update_paths(reason='using_tmpdir', tmpdir=tmpdir)
 
-        # update paths
-        pb.paths['original_obsidian_folder'] = pb.paths['obsidian_folder']        # use only for lookups!
-        pb.paths['obsidian_folder'] = Path(tmpdir.name).resolve()
-        pb.paths['obsidian_entrypoint'] = pb.paths['obsidian_folder'].joinpath(pb.paths['rel_obsidian_entrypoint'])
-    else:
-        pb.paths['original_obsidian_folder'] = pb.paths['obsidian_folder']        # use only for lookups!
+    Actor.Optional.remove_previous_obsidianhtml_output(pb)
+    Actor.create_obsidianhtml_output_folders(pb)
 
-    # Compile dynamic inclusion list
+    # Load input files into file tree
     # ---------------------------------------------------------
-    # This is a set of javascript/css files to be loaded into the header based on config choices.
-    dynamic_inclusions = ""
-    try:
-        dynamic_inclusions += '\n'.join(pb.gc('html_custom_inclusions')) +'\n'
-    except:
-        None
-    pb.dynamic_inclusions = dynamic_inclusions
-
-    # This is a set of javascript/css files to be loaded into the footer based on config choices.
-    dynamic_footer_inclusions = ""
-    try:
-        dynamic_footer_inclusions += '\n'.join(pb.gc('html_custom_footer_inclusions')) +'\n'
-    except:
-        None
-    pb.dynamic_footer_inclusions = dynamic_footer_inclusions
-
-
-    # Remove potential previous output
-    # ---------------------------------------------------------
-    if pb.gc('toggles/no_clean', cached=True) == False:
-        print('> CLEARING OUTPUT FOLDERS')
-        if pb.gc('toggles/compile_md', cached=True):
-            if pb.paths['md_folder'].exists():
-                shutil.rmtree(pb.paths['md_folder'])
-
-        if pb.paths['html_output_folder'].exists():
-            shutil.rmtree(pb.paths['html_output_folder'])    
-
-    # Create folder tree
-    # ---------------------------------------------------------
-    print('> CREATING OUTPUT FOLDERS')
-
-    if pb.gc('toggles/compile_md', cached=True):
-        pb.paths['md_folder'].mkdir(parents=True, exist_ok=True)
-
-    pb.paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
-    pb.paths['html_output_folder'] = pb.paths['html_output_folder'].resolve()
-    
-    if pb.gc('toggles/extended_logging', cached=True):
-        pb.paths['log_output_folder'].mkdir(parents=True, exist_ok=True)
-        pb.paths['log_output_folder'] = pb.paths['log_output_folder'].resolve()
-
-
     ft = FileTree(pb)
     ft.load_file_tree()
-    #print(yaml.dump([x for x in pb.files.keys()]))
-
 
     # Convert Obsidian to markdown
     # ---------------------------------------------------------
@@ -283,7 +180,7 @@ def ConvertVault(config_yaml_location=''):
                 print('\t'*(1), f"html: embedded note titles are disabled in config")
 
         # Force search to lowercase
-        rel_entry_path_str = paths['rel_md_entrypoint_path'].as_posix()
+        rel_entry_path_str = pb.paths['rel_md_entrypoint_path'].as_posix()
         if pb.gc('toggles/force_filename_to_lowercase', cached=True):
             rel_entry_path_str = rel_entry_path_str.lower()
 
