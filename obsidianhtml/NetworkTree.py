@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from .FileFinder import GetNodeId
 
 '''
 This class helps us building the graph.json by keeping track of which notes link to other notes.
@@ -63,6 +64,7 @@ class NetworkTree:
         if self.verbose:
             print("Link added")
 
+
     def compile_node_lookup(self):
         for n in self.tree['nodes']:
             self.node_lookup[n['id']] = n
@@ -117,6 +119,33 @@ class NetworkTree:
         node_graph = StringifyDateRecurse(self.node_graph.copy())
         return json.dumps(node_graph)
 
+
+def AddPageToNodeList(pb, md, backlink_node=None, link_type="reference"):
+    node = pb.network_tree.NewNode()
+    rel_dst_path = md.fo.path['html']['file_relative_path']
+
+    # add all metadata to node, so we can access it later when we need to, once compilation of html is complete
+    node['metadata'] = md.metadata.copy()
+    
+    # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
+    node['id'] = GetNodeId(md.fo.path['markdown']['file_relative_path'].as_posix(), pb)
+    node['name'] = md.GetNodeName()
+        
+    # Url is used so you can open the note/node by clicking on it
+    node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()
+    node['rtr_url'] = rel_dst_path.as_posix()
+    pb.network_tree.AddNode(node)
+
+    # Backlinks are set so when recursing, the links (edges) can be determined
+    if backlink_node is not None:
+        link = pb.network_tree.NewLink()
+        link['source'] = backlink_node['id']
+        link['target'] = node['id']
+        link['type']   = link_type
+        pb.network_tree.AddLink(link)
+
+    # return node so that it can be set as the next backlink_node
+    return node
 
 def StringifyDateRecurse(tree):
     ''' We can't convert a date type to json, so we have to manually convert any dates in the tree to isoformatted date strings '''

@@ -23,3 +23,8 @@
   - [16] Wrap body html in valid html structure from template
   - [17] Show a graph view per note
   - [18] Display backlinks to note
+
+
+[425] Add included notes to graph view as a link
+  When including code from another note, during n->m, add the link to the included note to the metadata of the current note, at obs.html.data/inclusion_references
+  During m->h, read out obs.html.data/inclusion_references and add each link to the networktree using link_type="inclusion"

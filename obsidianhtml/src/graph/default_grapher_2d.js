@@ -98,6 +98,13 @@ function initGraph(args) {
                 }
                 return 0
             })
+            // [425] Add included references as links in graph view
+            .linkLineDash(link => {
+                if (link.type == 'inclusion'){
+                    return [1,1]
+                }
+                return false;
+            })
             .onNodeClick(node => {
                 args.node = node;
                 g.actions['left_click'](args)
