@@ -278,7 +278,8 @@ class CreateIndexFromDirStructure():
         self.uid = 0
         html = _recurse(self.tree, -1, ''+self.html_url_prefix, current_page)
 
-        return html
+        return f'<div class="dirtree">{html}</div>'
+        
 
     def WriteIndex(self):
         output_path = self.root.joinpath(self.rel_output_path).resolve()

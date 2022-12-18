@@ -212,9 +212,6 @@ def Run():
             input("Press enter to stop hosting website and exit obsidianhtml run.\n\n")
 
 
-
-
-
 def CleanFolder(folder_path, clean_toggle):
     folder_path_as_posix = folder_path.as_posix()
     if folder_path.exists():

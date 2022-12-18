@@ -1,27 +1,55 @@
-from . import print_global_help_and_exit
-from .lib import OpenIncludedFile, FindVaultByEntrypoint
-
-from pathlib import Path 
+import sys
 import json
-
-import inspect
 import yaml
+import inspect
+
 from functools import cache
+from pathlib import Path 
+
+from . import print_global_help_and_exit
+from .lib import OpenIncludedFile, FindVaultByEntrypoint, get_default_appdir_config_yaml_path
+from .v4 import Types as T
 
 class Config:
     config = None
     pb = None
 
     def __init__(self, pb, input_yml_path_str=False):
+        '''
+        This init function will do three steps:
+        - Merging default config with user config
+        - Check that all required values are filled in, all user provided settings are known in default config
+        - Setting missing values / Checking for illegal configuration
+        '''
         self.pb = pb
 
+        # merge
+        user_config    = self.load_user_config(input_yml_path_str)
+        default_config = yaml.safe_load(OpenIncludedFile('defaults_config.yml'))
+        self.config    = MergeDictRecurse(default_config, user_config)
+
+        # check settings / set missing values / overwriting values
+        self.check_required_values_filled_in(self.config)
+        self.resolve_deprecations(default_config, user_config)              # Temporary patches during deprecation
+        self.overwrite_values()
+        self.check_entrypoint_exists()                                      # A value for the entrypoint is required, as this will become the index
+        self.set_obsidian_folder_path_str()                                 # Determine obsidian folder path based on either the user telling us, or from the entrypoint
+        self.load_capabilities_needed()                                     # Capabilities are "summary toggles" that can tell us at a glance whether we should enable something or not.
+
+        # Plugins
+        self.plugin_settings = {}
+
+    def load_user_config(self, input_yml_path_str=False) -> dict:
+        ''' 
+            Will load the config.yml as provided by the user, and convert it to a python dict, which is returned. 
+            Any error in this process will be terminating. 
+            Auto loading a config yaml based on default locations should be done elsewhere. The determined path can then be filled in in input_yml_path_str.
+        '''
+        
         # Make sure the user passes in a config file
         if input_yml_path_str == False:
             print('ERROR: No config file passed in. Use -i <path/to/config.yml> to pass in a config yaml.')
             print_global_help_and_exit(1)
-
-        # Load default yaml first
-        default_config = yaml.safe_load(OpenIncludedFile('defaults_config.yml'))
 
         # Load input yaml
         try:
@@ -31,16 +59,15 @@ class Config:
             print(f'Could not locate the config file {input_yml_path_str}.\n  Please try passing the exact location of it with the `obsidianhtml -i /your/path/to/{input_yml_path_str}` parameter.')
             print_global_help_and_exit(1)
 
-        # Merge configs
-        self.config = MergeDictRecurse(default_config, input_config)
+        # Return
+        return input_config
 
-        # Check if required input is missing
-        CheckConfigRecurse(self.config)
+    def resolve_deprecations(self, base_dict, update_dict):
+        # if exclude_subfolders is present, copy it to exclude_glob
+        if 'exclude_subfolders' in update_dict.keys() and isinstance(update_dict['exclude_subfolders'], list):
+            self.config['exclude_glob'] = self.config['exclude_subfolders']
 
-        # Temporary patches during deprecation
-        self.resolve_deprecations(default_config, input_config)
-
-        # Overwrite conf for verbose from command line
+    def overwrite_values(self):
         # (If -v is passed in, __init__.py will set self.verbose to true)
         if self.pb.verbose is not None:
             self.config['toggles']['verbose_printout'] = self.pb.verbose
@@ -56,24 +83,6 @@ class Config:
 
         # Set main css file
         self.config['_css_file'] = f'main_{layout}.css'
-
-        # Check and set values
-        self.check_entrypoint_exists()
-        self.set_obsidian_folder_path_str()
-
-        # Check capabilities needed
-        self.capabilities_needed = {}
-        self.load_capabilities_needed()
-
-        # Plugins
-        self.plugin_settings = {}
-
-
-    def resolve_deprecations(self, base_dict, update_dict):
-        # if exclude_subfolders is present, copy it to exclude_glob
-        if 'exclude_subfolders' in update_dict.keys() and isinstance(update_dict['exclude_subfolders'], list):
-            self.config['exclude_glob'] = self.config['exclude_subfolders']
-
 
     def check_entrypoint_exists(self):
         if self.config['toggles']['compile_md'] == False:       # don't check vault if we are compiling directly from markdown to html
@@ -110,6 +119,7 @@ class Config:
             exit(1)
 
     def load_capabilities_needed(self):
+        self.capabilities_needed = {}
         gc = self.get_config
 
         self.capabilities_needed['directory_tree'] = False 
@@ -222,16 +232,66 @@ class Config:
             
                 self.pb.graphers.append(grapher)
 
+    def load_embedded_titles_plugin(self):
+        '''
+            This function integrates the EmbeddedTitles plugin. Since this was written, Obsidian has added integral support for Embedded titles, 
+            this is not handled correctly by this code!
+        '''
+        pb = self.pb
 
-    def LoadEmbeddedNoteConfig(self, data_json_path):
-        self.plugin_settings['embedded_note_titles'] = {}
-        if data_json_path.exists():
-            with open(data_json_path, 'r', encoding='utf-8') as f:
-                self.plugin_settings['embedded_note_titles'] = json.loads(f.read())
-            return True
-        return False
+        # Do nothing if embedded_note_titles are not globally enabled
+        if not pb.gc('toggles/features/embedded_note_titles/enabled', cached=True):
+            pb.config.capabilities_needed['embedded_note_titles'] = False
+            if pb.gc('toggles/verbose_printout', cached=True):
+                print('\t'*(1), f"html: embedded note titles are disabled in config")
+            return
+        else:
+            if pb.gc('toggles/verbose_printout', cached=True):
+                print('\t'*(1), f"html: embedded note titles are enabled in config")
+
+        # Enable/disable capability based on whether the plugin is installed
+        embed_plugin_folder_path = pb.paths['original_obsidian_folder'].joinpath('.obsidian/plugins/obsidian-embedded-note-titles').resolve()
+        pb.config.capabilities_needed['embedded_note_titles'] = embed_plugin_folder_path.exists()
+        if pb.gc('toggles/verbose_printout', cached=True):
+            if pb.config.capabilities_needed['embedded_note_titles']:
+                print('\t'*(1), f"html: embedded note title plugin found, enabling embedded_note_titles capability.")
+            else:
+                print('\t'*(1), f"html: embedded note title plugin not found, disabling embedded_note_titles capability.")
+
+        # Load config
+        if pb.config.capabilities_needed['embedded_note_titles']:
+            # carve out space in plugin settings
+            self.plugin_settings['embedded_note_titles'] = {}
+
+            # test if plugin is installed, and load plugin settings if so.
+            data_path = embed_plugin_folder_path.joinpath('data.json').resolve()
+            data_path_exists = False
+            if data_path.exists():
+                with open(data_path, 'r', encoding='utf-8') as f:
+                    self.plugin_settings['embedded_note_titles'] = json.loads(f.read())
+                result = True
+
+            # verbose logging
+            if pb.gc('toggles/verbose_printout', cached=True):
+                if result:
+                    print('\t'*(1), f"html: embedded note titles settings loaded.", pb.config.plugin_settings['embedded_note_titles'])
+                else:
+                    print('\t'*(1), f"html: embedded note titles settings were not found, using defaults.")
 
 
+    def check_required_values_filled_in(self, config, path='', match_str='<REQUIRED_INPUT>'):
+        def rec(config, path='', match_str='<REQUIRED_INPUT>'):
+            helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
+
+            for k, v in config.items():
+                key_path = '/'.join(x for x in (path, k) if x !='')
+                
+                if isinstance(v, dict):
+                    rec(config[k], path=key_path)
+
+                if v == match_str:
+                    raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')
+        rec(config, path, match_str)
 
 def MergeDictRecurse(base_dict, update_dict, path=''):
     helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
@@ -271,16 +331,45 @@ def MergeDictRecurse(base_dict, update_dict, path=''):
 
     return base_dict.copy()
 
-def CheckConfigRecurse(config, path='', match_str='<REQUIRED_INPUT>'):
-    helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
 
-    for k, v in config.items():
-        key_path = '/'.join(x for x in (path, k) if x !='')
-        
-        if isinstance(v, dict):
-            CheckConfigRecurse(config[k], path=key_path)
+def find_user_config_yaml_path(config_yaml_location) -> T.OSAbsolutePosx:
+    ''' This function finds the correct path to load the user config from. It has these options: user provided path (-i path/config.yml), default location, ... '''
+    input_yml_path_str = ''
 
-        if v == match_str:
-            raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')
+    # Use given value
+    if config_yaml_location != '':
+        input_yml_path_str = config_yaml_location
+    else:
+        input_yml_path_str = ''
+        for i, v in enumerate(sys.argv):
+            if v == '-i':
+                if len(sys.argv) < (i + 2):
+                    print(f'No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
+                    #print_global_help_and_exit(1)
+                    exit(1)
+                input_yml_path_str = sys.argv[i+1]
+                break
 
- 
+    # Try to find config in default locations
+    if input_yml_path_str == '':
+        # config.yml in same folder
+        if Path('config.yml').exists():
+            input_yml_path_str = Path('config.yml').resolve().as_posix()
+            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
+    if input_yml_path_str == '':
+        # config.yaml in same folder
+        if Path('config.yaml').exists():
+            input_yml_path_str = Path('config.yaml').resolve().as_posix()
+            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
+    if input_yml_path_str == '':
+        # config.yml in appdir folder
+        appdir_config = Path(get_default_appdir_config_yaml_path())
+        if appdir_config.exists():
+            input_yml_path_str = appdir_config.as_posix()
+            print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
+
+    if input_yml_path_str == '':
+        print(f'No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
+        exit(1)
+
+    return input_yml_path_str
