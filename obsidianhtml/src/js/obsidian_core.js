@@ -258,7 +258,7 @@ function LoadTableOfContents(container_div)
             if (toc_pane && no_tab_mode) {
                 let tpd = document.getElementById(toc_pane_div);
                 tpd.display = 'block';
-                tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + collection[0].innerHTML;
+                tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + '<div class="toc-contents">' + collection[0].innerHTML + '</div>';
             }
             else {
                 toc.style.display = 'block';

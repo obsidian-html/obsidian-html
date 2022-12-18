@@ -468,9 +468,25 @@ a.navbar-link:hover {
 
 .toc-header {
     color: rgb(var(--normal-text-color));
-    margin-left: 1.5rem;
     font-weight: bold;
 }
+.toc-contents {
+    max-width: 20vw;
+}
+
+.left_pane_content .toc-header {
+    margin-right: 1.5rem;
+}
+.right_pane_content .toc-header {
+    margin-left: 1.5rem;
+}
+.right_pane_content .dirtree {
+    margin-left: 1.5rem;
+}
+.left_pane_content .toc-contents {
+    margin-left: -1.5rem;
+}
+
 
 h3 {
     font-size: 13pt;

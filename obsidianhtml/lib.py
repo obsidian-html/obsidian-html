@@ -271,7 +271,7 @@ def ExportStaticFiles(pb):
         toc_pane_div = "right_pane_content"
         content_pane_div = "left_pane_content"
         if pb.gc('toggles/features/styling/layout') == 'documentation' and pb.gc('toggles/features/styling/flip_panes'):
-            toc_pane_div = "left_pane"
+            toc_pane_div = "left_pane_content"
             content_pane_div = "right_pane_content"
 
         # Templating
