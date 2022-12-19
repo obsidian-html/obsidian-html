@@ -34,6 +34,7 @@ class OH_File:
     path = None                 # hashtable with all relevant file paths
     link = None                 # hashtable with all links
     metadata = None             # information on the note, such as modified_date
+    md = None                   # MarkdownPage object
 
     processed_ntm = False       # whether the note has already been processed in the note --> markdown flow
     processed_mth = False       # whether the note has already been processed in the markdown --> html flow
