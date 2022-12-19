@@ -263,18 +263,21 @@ def convert_markdown_to_html(pb):
         if pb.gc('toggles/features/tags_page/styling/show_in_note_footer', cached=True):
             # Replace placeholder
             snippet = ''
-            if tags:
-                snippet = "<h2>Tags</h2>\n<ul>\n"
-                for tag in tags:
-                    url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
-                    snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
 
-                    if pb.gc('toggles/preserve_inline_tags', cached=True):
-                        placeholder = re.escape("<code>{_obsidian_pattern_tag_" + tag + "}</code>")
-                        inline_tag = f'<a class="inline-tag" href="{url}">{tag}</a>'
-                        html = re.sub(placeholder, inline_tag, html)
+            if 'obs.html.tags' in fo.md.metadata.keys() and 'no_tag_footer' in fo.md.metadata['obs.html.tags']:
+                pass
+            else:
+                if tags:
+                    snippet = "<h2>Tags</h2>\n<ul>\n"
+                    for tag in tags:
+                        url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
+                        snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
 
-                snippet += '</ul>'
+                        if pb.gc('toggles/preserve_inline_tags', cached=True):
+                            placeholder = re.escape("<code>{_obsidian_pattern_tag_" + tag + "}</code>")
+                            inline_tag = f'<a class="inline-tag" href="{url}">{tag}</a>'
+                            html = re.sub(placeholder, inline_tag, html)
+                    snippet += '</ul>'
 
             # replace placeholder with list & write output
             html = re.sub('\{_obsidian_html_tags_footer_pattern_\}', snippet, html)

@@ -29,6 +29,7 @@ class MarkdownPage:
     def __init__(self, pb, fo:'OH_File', input_type, file_tree):
         self.pb = pb
         self.fo = fo
+        self.fo.md = self
         self.file_tree = file_tree
 
         self.src_path = fo.path[input_type]['file_absolute_path']
