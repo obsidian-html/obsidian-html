@@ -12,6 +12,7 @@ class PicknickBasket:
     config = None
     verbose = None
     files = None
+    file_tree = None
     tagtree = None
     paths = None
     html_template = None
@@ -77,7 +78,6 @@ class PicknickBasket:
         # Set paths 
         pb.paths = paths
         
-
     def update_paths(self, reason, **kwargs):
         # If for any reason the paths need to be updated, this is the function to do it through
         if reason == 'using_tmpdir':
@@ -113,12 +113,6 @@ class PicknickBasket:
 
     def sc(self, path, value):
         return self.config.set_config(path, value)
-
-    def add_file(self, rel_path, obj):
-        if self.gc('toggles/force_filename_to_lowercase', cached=True):
-            rel_path = rel_path.lower()
-
-        self.files[rel_path] = obj
 
     def EnsureTreeObj(self):
         if self.treeobj is None:
