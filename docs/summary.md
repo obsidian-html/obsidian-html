@@ -11,7 +11,7 @@
   - [8] Insert markdown links for bare http(s) links (those without the `[name](link)` format).
   - [9] Remove inline tags, like #ThisIsATag
   - [10] Add code inclusions
-- ConvertMarkdownPageToHtmlPage()
+- crawl_markdown_notes_and_convert_to_html()
   - [4] Handle local image links (copy them over to output) 
   - [11] Convert markdown to html
     - [11.1] Rewrite .md links to .html (when the link is to a file in our root folder)

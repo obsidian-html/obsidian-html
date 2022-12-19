@@ -2,6 +2,7 @@
 ## 1. Class, function and method naming
 ### 1.1 Functions and methods use snake_case
 Reason: nice to have standards.
+Exception: VeryImportantHighLevelFunctionsUseCamelCase, e.g. ConvertVault
 
 ### 1.2 Classes use CamelCase
 Reason: Good to delineate between classes and instances (e.g. Config vs config)

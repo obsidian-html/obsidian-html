@@ -114,7 +114,7 @@ def GetMatches(files, link):
     return matches
         
 def GetNodeId(link, pb):
-    files = pb.files
+    files = pb.index.files
 
     # set link to lowercase
     if pb.gc('toggles/force_filename_to_lowercase', cached=True):

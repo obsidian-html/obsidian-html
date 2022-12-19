@@ -37,7 +37,7 @@ The node object has been added to manage the state change from note --> markdown
 
 The node object uses the following objects from the older versions of obsidianhtml:
 
-- fo <OH_File> "file object"
+- fo <FileObject> "file object"
 - md <MarkdownPage 
 
 

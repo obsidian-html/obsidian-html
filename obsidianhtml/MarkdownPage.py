@@ -18,7 +18,6 @@ class MarkdownPage:
 
     src_path  = None        # Path() object of src file
     rel_src_path  = None    # Path() object relative to given markdown root folder (src_folder_path)
-    src_folder_path = None  # Path() object of given obsidian root folder
     dst_folder_path = None  # Path() object of given markdown output folder
     dst_path = None         # Path() object of destination file
 
@@ -26,16 +25,12 @@ class MarkdownPage:
 
     file_tree = None        # Tree of files that are found in the root folder
 
-    def __init__(self, pb, fo:'OH_File', input_type, file_tree):
-        self.pb = pb
+    def __init__(self, fo:'FileObject', input_type):
+        self.pb = fo.pb
         self.fo = fo
-        self.fo.md = self
-        self.file_tree = file_tree
+        self.file_tree = self.pb.index.files
 
         self.src_path = fo.path[input_type]['file_absolute_path']
-        
-        # remove?
-        self.src_folder_path = fo.path[input_type]['folder_path']
         self.rel_src_path = fo.path[input_type]['file_relative_path']
         self.input_type = input_type
 
@@ -259,7 +254,7 @@ class MarkdownPage:
             clean_link = unq_link.split('|')[0]
 
             # Find file
-            rel_path_str, lo = FindFile(self.pb.files, clean_link, self.pb)
+            rel_path_str, lo = FindFile(self.pb.index.files, clean_link, self.pb)
             if rel_path_str == False:
                 if self.pb.gc('toggles/verbose_printout', cached=True):
                     print(f"\t\tImage/file with obsidian link of '{clean_link}' (original {link}) will not be copied over in this step.")
@@ -436,7 +431,8 @@ class MarkdownPage:
                 continue
             
             # Get code
-            included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
+            #included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
+            included_page = file_object.load_markdown_page('note')
             included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth, remove_block_references=False)
 
             # Get subsection of code if header is present

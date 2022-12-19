@@ -20,9 +20,8 @@ from appdirs import AppDirs
 # Open source files in the package
 import importlib.resources as pkg_resources
 import importlib.util
-from . import src 
 
-from .PathFinder import get_html_url_prefix
+from . import src 
 from .FileFinder import FindFile
  
 class DuplicateFileNameInRoot(Exception):
@@ -86,7 +85,7 @@ def GetObsidianFilePath(link, file_tree, pb):
     # the link will be converted to a path that is relative to the root dir.
     output = {}
     output['rtr_path_str'] = ''     # rtr=relative to root
-    output['fo'] = False            # file object of type OH_File
+    output['fo'] = False            # file object of type FileObject
     output['header'] = ''           # the last part in 'link#header'
     output['alias'] = ''            
 
@@ -505,7 +504,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         .replace('{content}', content)
 
     return template
-        # Adding value replacement in content should be done in ConvertMarkdownPageToHtmlPage, 
+        # Adding value replacement in content should be done in crawl_markdown_notes_and_convert_to_html, 
         # Between the md.StripCodeSections() and md.RestoreCodeSections() statements, otherwise codeblocks can be altered.
         
 
@@ -570,3 +569,25 @@ def FindVaultByEntrypoint(entrypoint_path):
             print(ex)
             return False
     return False
+
+def get_rel_html_url_prefix(rel_path):
+    depth = rel_path.count('/')
+    if depth > 0:
+        prefix = ('../'*depth)[:-1]
+    else:
+        prefix = '.'
+    return prefix
+
+def get_html_url_prefix(pb, rel_path_str=None, abs_path_str=None):
+    # check input and convert rel_path_str from abs_path_str if necessary
+    if rel_path_str is None:
+        if abs_path_str is None:
+            raise Exception("pass in either rel_path_str or abs_path_str")
+        rel_path_str = Path(abs_path_str).relative_to(pb.paths['html_output_folder']).as_posix()
+
+    # return html_prefix
+    if pb.gc('toggles/relative_path_html', cached=True):
+        html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_path_str))
+    else:
+        html_url_prefix = pb.gc('html_url_prefix')
+    return html_url_prefix

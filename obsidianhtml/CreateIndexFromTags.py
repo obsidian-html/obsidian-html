@@ -6,7 +6,7 @@ import platform
 import datetime
 import regex as re
 
-from .PathFinder   import OH_File
+from .v4.FileObject   import FileObject
 from .MarkdownPage import MarkdownPage
 from .FileFinder   import GetNodeId
 
@@ -16,7 +16,7 @@ def verbose(pb):
 def CreateIndexFromTags(pb):
     # get settings
     paths = pb.paths
-    files = pb.files
+    files = pb.index.files
     settings = pb.gc('toggles/features/create_index_from_tags')
 
     method          = settings['sort']['method']
@@ -81,7 +81,8 @@ def CreateIndexFromTags(pb):
             print(f'\t\tParsing note {page_path_str}')
 
         # make mdpage object 
-        md = MarkdownPage(pb, fo, 'note', files)
+        md = fo.load_markdown_page('note')
+        
         metadata = md.metadata
         page = md.page
         node_name = md.GetNodeName()
@@ -225,10 +226,10 @@ def CreateIndexFromTags(pb):
     # add file to file tree
     now = datetime.datetime.now().isoformat()
 
-    fo_index_dst_path = OH_File(pb)
+    fo_index_dst_path = FileObject(pb)
     fo_index_dst_path.init_note_path(index_dst_path)
     fo_index_dst_path.init_markdown_path()
-    pb.files['__tags_index.md'] = fo_index_dst_path
+    pb.index.files['__tags_index.md'] = fo_index_dst_path
 
     # [17] Build graph node/links
     if pb.gc('toggles/features/create_index_from_tags/add_links_in_graph_tree', cached=True):
@@ -236,24 +237,24 @@ def CreateIndexFromTags(pb):
         if verbose(pb):
             print(f'\tAdding graph links between index.md and the matched notes')
         
-        node = pb.network_tree.NewNode()
+        node = pb.index.network_tree.NewNode()
         node['id'] = 'index'
         node['name'] = pb.gc('toggles/features/create_index_from_tags/homepage_label').capitalize()
         node['url'] = f'{pb.gc("html_url_prefix")}/index.html'
-        pb.network_tree.AddNode(node)
+        pb.index.network_tree.add_node(node)
         bln = node
         for t in index_dict.keys():
             for n in index_dict[t]:
-                node = pb.network_tree.NewNode()
+                node = pb.index.network_tree.NewNode()
                 node['id'] = n['node_id']
                 node['name'] = n['graph_name']
                 node['url'] = f'{pb.gc("html_url_prefix")}/{n["md_rel_path_str"][:-3]}.html'
-                pb.network_tree.AddNode(node)
+                pb.index.network_tree.add_node(node)
 
-                link = pb.network_tree.NewLink()
+                link = pb.index.network_tree.NewLink()
                 link['source'] = bln['id']
                 link['target'] = node['id']
-                pb.network_tree.AddLink(link)
+                pb.index.network_tree.AddLink(link)
 
     if verbose(pb):
         print('< FEATURE: CREATE INDEX FROM TAGS: Done')
