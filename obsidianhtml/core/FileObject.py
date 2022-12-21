@@ -1,13 +1,16 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import Type
+
 import datetime
 import platform
 import os
 import inspect
 import shutil               # used to remove a non-empty directory, copy files
 
-from ..MarkdownPage import MarkdownPage
+
+from pathlib import Path
+from typing import Type
+
+from ..parser.MarkdownPage import MarkdownPage
 from ..lib import get_rel_html_url_prefix, get_html_url_prefix
 
 '''

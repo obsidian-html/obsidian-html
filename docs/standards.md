@@ -9,7 +9,7 @@ Reason: Good to delineate between classes and instances (e.g. Config vs config)
 
 ### 1.3 Type hinting types use CamelCase and are imported via T
 e.g.:
-    from v4 import Types as T
+    from .core import Types as T
     def bla() -> T.RTRPosX
 
 ### 1.4 Functions and methods use verb-noun naming

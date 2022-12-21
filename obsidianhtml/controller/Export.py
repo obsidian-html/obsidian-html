@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
-from .lib import    OpenIncludedFile
+
+from ..lib import    OpenIncludedFile
 
 def RunExport():
     # Export packaged html template so users can edit it and then use their custom template

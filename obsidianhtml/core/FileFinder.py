@@ -1,3 +1,36 @@
+def GetObsidianFilePath(link, file_tree, pb):
+    # a link can look like this: folder/note#chapter|alias
+    # then link=folder/note, alias=alias, header=chapter
+    # the link will be converted to a path that is relative to the root dir.
+    output = {}
+    output['rtr_path_str'] = ''     # rtr=relative to root
+    output['fo'] = False            # file object of type FileObject
+    output['header'] = ''           # the last part in 'link#header'
+    output['alias'] = ''            
+
+    # split folder/note#chapter|alias into ('folder/note#chapter', 'alias')
+    parts = link.split('|')
+    link = parts[0]
+    if len(parts) > 1:
+        output['alias'] = parts[1]
+
+    # split folder/note#chapter into ('folder/note', 'chapter')
+    parts = link.split('#')
+    link = parts[0]
+    if len(parts) > 1:
+        output['header'] = '#'.join(parts[1:])
+
+    # Find file. Values will be False when file is not found.
+    output['rtr_path_str'], output['fo'] = FindFile(file_tree, link, pb)
+
+    if output['fo'] == False and link.startswith('/'):
+        output['rtr_path_str'], output['fo'] = FindFile(file_tree, link[1:], pb)
+
+    if output['fo'] == False and not link.startswith('/'):
+        output['rtr_path_str'], output['fo'] = FindFile(file_tree, '/'+link, pb)
+
+    return output
+
 # will return (False, False) if not found, (str:url, fo:file_object) when found
 def FindFile(files, link, pb):
     olink = link

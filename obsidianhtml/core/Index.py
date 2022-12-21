@@ -5,9 +5,11 @@ import glob
 import os
 from time import sleep
 
-from ..NetworkTree import NetworkTree
-from ..v4.FileObject import FileObject
 from ..lib import pushd, WriteFileLog
+
+from .NetworkTree import NetworkTree
+from .FileObject import FileObject
+
 
 class Index:
     def __init__(self, pb):

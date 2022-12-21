@@ -5,9 +5,12 @@ from pathlib import Path    #
 import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath, slugify, MalformedTags, OpenIncludedFile
+
+from ..core.FileFinder import GetObsidianFilePath, FindFile
+from ..lib import DuplicateFileNameInRoot, slugify, MalformedTags, OpenIncludedFile
+
 from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock, GetSubHeaderTree
-from .FileFinder import FindFile
+
 
 class MarkdownPage:
     page = None             # Pure markdown code read from src file

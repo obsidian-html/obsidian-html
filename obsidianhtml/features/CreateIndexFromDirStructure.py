@@ -5,7 +5,7 @@ import glob
 from pathlib import Path
 from functools import cache
 
-from .lib import PopulateTemplate, OpenIncludedFile, simpleHash, pushd
+from ..lib import PopulateTemplate, OpenIncludedFile, simpleHash, pushd
 
 
 class CreateIndexFromDirStructure():

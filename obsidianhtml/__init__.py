@@ -5,13 +5,11 @@ from pathlib import Path
 from .lib import print_global_help_and_exit
 from .lib import    OpenIncludedFile, GetIncludedResourcePath, fetch_str
 
-from .ConvertVault import ConvertVault
-from .Run import Run
-from .Export import RunExport
-from .Serve import ServeDir
-from .EmbeddedSearch import CliEmbeddedSearch
-
-
+from .controller.ConvertVault import ConvertVault
+from .controller.Run import Run
+from .controller.Export import RunExport
+from .controller.Serve import ServeDir
+from .features.EmbeddedSearch import CliEmbeddedSearch
 
 
 def main():

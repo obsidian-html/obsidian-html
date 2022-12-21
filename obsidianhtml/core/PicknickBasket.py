@@ -1,10 +1,10 @@
+import inspect
+
 from pathlib import Path
 
 from .ConfigManager import Config, find_user_config_yaml_path
-from .Search import SearchHead
-from .CreateIndexFromDirStructure import CreateIndexFromDirStructure
-import inspect
-
+from ..features.Search import SearchHead
+from ..features.CreateIndexFromDirStructure import CreateIndexFromDirStructure
 
 class PicknickBasket:
     state = None                    # used for debugging info, keeps track of what we are doing at each point in time

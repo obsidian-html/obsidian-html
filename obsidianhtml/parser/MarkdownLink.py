@@ -1,10 +1,14 @@
 import re                   # regex string finding/replacing
-from pathlib import Path    # 
 import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 import shutil               # used to remove a non-empty directory, copy files
-from .lib import DuplicateFileNameInRoot, GetObsidianFilePath
+
+from pathlib import Path
+
+from ..lib import DuplicateFileNameInRoot
+from ..core.FileFinder import GetObsidianFilePath
+
 
 class MarkdownLink:
     """Helper class to abstract away a lot of recurring path-testing logic."""

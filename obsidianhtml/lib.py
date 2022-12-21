@@ -22,7 +22,6 @@ import importlib.resources as pkg_resources
 import importlib.util
 
 from . import src 
-from .FileFinder import FindFile
  
 class DuplicateFileNameInRoot(Exception):
     pass
@@ -79,38 +78,6 @@ def simpleHash(text:str):
         hash = ( hash*281  ^ ord(ch)*997) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     return str(hash)
 
-def GetObsidianFilePath(link, file_tree, pb):
-    # a link can look like this: folder/note#chapter|alias
-    # then link=folder/note, alias=alias, header=chapter
-    # the link will be converted to a path that is relative to the root dir.
-    output = {}
-    output['rtr_path_str'] = ''     # rtr=relative to root
-    output['fo'] = False            # file object of type FileObject
-    output['header'] = ''           # the last part in 'link#header'
-    output['alias'] = ''            
-
-    # split folder/note#chapter|alias into ('folder/note#chapter', 'alias')
-    parts = link.split('|')
-    link = parts[0]
-    if len(parts) > 1:
-        output['alias'] = parts[1]
-
-    # split folder/note#chapter into ('folder/note', 'chapter')
-    parts = link.split('#')
-    link = parts[0]
-    if len(parts) > 1:
-        output['header'] = '#'.join(parts[1:])
-
-    # Find file. Values will be False when file is not found.
-    output['rtr_path_str'], output['fo'] = FindFile(file_tree, link, pb)
-
-    if output['fo'] == False and link.startswith('/'):
-        output['rtr_path_str'], output['fo'] = FindFile(file_tree, link[1:], pb)
-
-    if output['fo'] == False and not link.startswith('/'):
-        output['rtr_path_str'], output['fo'] = FindFile(file_tree, '/'+link, pb)
-
-    return output
 
 def ConvertTitleToMarkdownId(title):
     # remove whitespace and lowercase

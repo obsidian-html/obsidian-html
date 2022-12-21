@@ -13,35 +13,36 @@ import urllib.parse         # convert link characters like %
 
 from pathlib import Path
 
-from .v4.FileObject import FileObject
-from .FileFinder import GetNodeId, FindFile
-
-from .MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
-from .MarkdownLink import MarkdownLink
-from .lib import    DuplicateFileNameInRoot, \
-                    GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, CreateStaticFilesFolders, \
+from ..lib import   DuplicateFileNameInRoot, \
+                    OpenIncludedFile, ExportStaticFiles, CreateStaticFilesFolders, \
                     PopulateTemplate, WriteFileLog, simpleHash, get_default_appdir_config_yaml_path, get_rel_html_url_prefix, get_html_url_prefix
-from .RssFeed import RssFeed
-from .ErrorHandling import extra_info
-from .PicknickBasket import PicknickBasket
-from .CreateIndexFromTags import CreateIndexFromTags
-from .EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
 
-from .v4 import Actor
-from .v4.Index import Index
-from .HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
+from ..core import Actor
+from ..core.ErrorHandling import extra_info
+from ..core.PicknickBasket import PicknickBasket
+from ..core.FileObject import FileObject
+from ..core.Index import Index
+from ..core.FileFinder import GetObsidianFilePath, FindFile, GetNodeId
 
-from .markdown_extensions.CallOutExtension import CallOutExtension
-from .markdown_extensions.DataviewExtension import DataviewExtension
-from .markdown_extensions.MermaidExtension import MermaidExtension
-from .markdown_extensions.CustomTocExtension import CustomTocExtension
-from .markdown_extensions.EraserExtension import EraserExtension
-from .markdown_extensions.FootnoteExtension import FootnoteExtension
-from .markdown_extensions.FormattingExtension import FormattingExtension
-from .markdown_extensions.EmbeddedSearchExtension import EmbeddedSearchExtension
-from .markdown_extensions.CodeWrapperExtension import CodeWrapperExtension
-from .markdown_extensions.AdmonitionExtension import AdmonitionExtension
-#from .markdown_extensions.CustomTableExtension import CustomTableExtension
+from ..parser.MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
+from ..parser.MarkdownLink import MarkdownLink
+
+from ..features.RssFeed import RssFeed
+from ..features.CreateIndexFromTags import CreateIndexFromTags
+from ..features.EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
+
+from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
+
+from ..markdown_extensions.CallOutExtension import CallOutExtension
+from ..markdown_extensions.DataviewExtension import DataviewExtension
+from ..markdown_extensions.MermaidExtension import MermaidExtension
+from ..markdown_extensions.CustomTocExtension import CustomTocExtension
+from ..markdown_extensions.EraserExtension import EraserExtension
+from ..markdown_extensions.FootnoteExtension import FootnoteExtension
+from ..markdown_extensions.FormattingExtension import FormattingExtension
+from ..markdown_extensions.EmbeddedSearchExtension import EmbeddedSearchExtension
+from ..markdown_extensions.CodeWrapperExtension import CodeWrapperExtension
+from ..markdown_extensions.AdmonitionExtension import AdmonitionExtension
 
 def ConvertVault(config_yaml_location=''):
     # Set config

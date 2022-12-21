@@ -5,8 +5,9 @@ from pathlib import Path
 import tempfile
 from appdirs import AppDirs
 
-from .lib import    print_global_help_and_exit
-from .lib import    FindVaultByEntrypoint, OpenIncludedFile, YamlIndentDumper, get_obshtml_appdir_folder_path, get_default_appdir_config_yaml_path
+from ..lib import    print_global_help_and_exit
+from ..lib import    FindVaultByEntrypoint, OpenIncludedFile, YamlIndentDumper, get_obshtml_appdir_folder_path, get_default_appdir_config_yaml_path
+
 from .ConvertVault import ConvertVault
 
 # Defer tools

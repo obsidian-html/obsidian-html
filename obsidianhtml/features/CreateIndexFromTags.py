@@ -6,9 +6,9 @@ import platform
 import datetime
 import regex as re
 
-from .v4.FileObject   import FileObject
-from .MarkdownPage import MarkdownPage
-from .FileFinder   import GetNodeId
+from ..core.FileObject import FileObject
+from ..core.FileFinder import GetNodeId
+from ..parser.MarkdownPage import MarkdownPage
 
 def verbose(pb):
     return (pb.gc('toggles/verbose_printout', cached=True) or pb.gc('toggles/features/create_index_from_tags/verbose', cached=True))
