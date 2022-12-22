@@ -14,9 +14,10 @@ import urllib.parse         # convert link characters like %
 from pathlib import Path
 
 from ..lib import   DuplicateFileNameInRoot, \
-                    OpenIncludedFile, ExportStaticFiles, CreateStaticFilesFolders, \
-                    PopulateTemplate, WriteFileLog, simpleHash, get_default_appdir_config_yaml_path, get_rel_html_url_prefix, get_html_url_prefix
+                    OpenIncludedFile, CreateStaticFilesFolders, \
+                    WriteFileLog, simpleHash, get_default_appdir_config_yaml_path, get_rel_html_url_prefix, get_html_url_prefix
 
+from ..compiler.Templating import PopulateTemplate
 from ..core import Actor
 from ..core.ErrorHandling import extra_info
 from ..core.PicknickBasket import PicknickBasket
@@ -30,8 +31,10 @@ from ..parser.MarkdownLink import MarkdownLink
 from ..features.RssFeed import RssFeed
 from ..features.CreateIndexFromTags import CreateIndexFromTags
 from ..features.EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
+from ..features.SidePane import get_side_pane_html, gc_add_toc_when_missing, get_side_pane_id_by_content_selector
 
 from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
+from ..compiler.Templating import ExportStaticFiles
 
 from ..markdown_extensions.CallOutExtension import CallOutExtension
 from ..markdown_extensions.DataviewExtension import DataviewExtension
@@ -91,8 +94,8 @@ def convert_obsidian_notes_to_markdown(pb):
         # Create index.md based on given tagnames, that will serve as the entrypoint
         # ---------------------------------------------------------
         if pb.gc('toggles/features/create_index_from_tags/enabled'):
-            pb = CreateIndexFromTags(pb)
-
+            CreateIndexFromTags(pb)
+        
         # Start conversion with entrypoint.
         # ---------------------------------------------------------
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
@@ -112,6 +115,13 @@ def convert_obsidian_notes_to_markdown(pb):
         pb.init_state(action='n2m', loop_type='note', current_fo=entrypoint_file_object, subroutine='crawl_obsidian_notes_and_convert_to_markdown')
         crawl_obsidian_notes_and_convert_to_markdown(entrypoint_file_object, pb)
         pb.reset_state()
+
+        # also do the tags page if it is not the index, otherwise this page will never be hit
+        if pb.gc('toggles/features/create_index_from_tags/enabled') and not pb.gc('toggles/features/create_index_from_tags/use_as_homepage'):
+            entrypoint_file_object = pb.index.files[pb.gc('toggles/features/create_index_from_tags/rel_output_path')]
+            pb.init_state(action='n2m', loop_type='note', current_fo=entrypoint_file_object, subroutine='crawl_obsidian_notes_and_convert_to_markdown')
+            crawl_obsidian_notes_and_convert_to_markdown(entrypoint_file_object, pb)
+            pb.reset_state()
 
         # Keep going until all other files are processed
         if pb.gc('toggles/process_all', cached=True):
@@ -153,6 +163,13 @@ def convert_markdown_to_html(pb):
     crawl_markdown_notes_and_convert_to_html(entrypoint_file_object, pb)
     pb.reset_state()
 
+    # also do the tags page if it is not the index, otherwise this page will never be hit
+    if pb.gc('toggles/features/create_index_from_tags/enabled') and not pb.gc('toggles/features/create_index_from_tags/use_as_homepage'):
+        entrypoint_file_object = pb.index.files[pb.gc('toggles/features/create_index_from_tags/rel_output_path')]
+        pb.init_state(action='m2h', loop_type='md_note', current_fo=entrypoint_file_object, subroutine='crawl_markdown_notes_and_convert_to_html')
+        crawl_markdown_notes_and_convert_to_html(entrypoint_file_object, pb, capture_in_jar='tags_page_html')
+        pb.reset_state()
+
     # Keep going until all other files are processed
     if pb.gc('toggles/process_all') == True:
         print('\t> FEATURE: PROCESS ALL')
@@ -185,11 +202,11 @@ def convert_markdown_to_html(pb):
     pb.index.network_tree.compile_node_lookup()
 
     # Prep some data outside of the loop
-    dir_repstring = '{left_pane_content}'
-    dir_repstring2 = '{right_pane_content}'
-    if pb.gc('toggles/features/styling/flip_panes', cached=True):
-        dir_repstring = '{right_pane_content}'
-        dir_repstring2 = '{left_pane_content}'
+    # dir_repstring = '{left_pane_content}'
+    # dir_repstring2 = '{right_pane_content}'
+    # if pb.gc('toggles/features/styling/flip_panes', cached=True):
+    #     dir_repstring = '{right_pane_content}'
+    #     dir_repstring2 = '{left_pane_content}'
 
     esearch = None
     if pb.gc('toggles/features/embedded_search/enabled', cached=True):
@@ -224,12 +241,17 @@ def convert_markdown_to_html(pb):
         html = re.sub('\{_obsidian_html_node_id_pattern_:'+node_id+'}', '', html)
 
         # Create Directory contents
-        if pb.gc('toggles/features/styling/add_dir_list', cached=True):
-            if dir_repstring in html:
-                pb.EnsureTreeObj()
-                dir_list = pb.treeobj.BuildIndex(current_page=node['url'])
-                html = re.sub(dir_repstring, dir_list, html)
-                html = re.sub(dir_repstring2, '', html)
+        # if pb.gc('toggles/features/styling/add_dir_list', cached=True):
+        #     if dir_repstring in html:
+        #         pb.EnsureTreeObj()
+        #         dir_list = pb.treeobj.BuildIndex(current_page=node['url'])
+        #         html = re.sub(dir_repstring, dir_list, html)
+        #         html = re.sub(dir_repstring2, '', html)
+        left_pane = get_side_pane_html(pb, 'left_pane', node)
+        html = html.replace('{left_pane}', left_pane)
+
+        right_pane = get_side_pane_html(pb, 'right_pane', node)
+        html = html.replace('{right_pane}', right_pane)
 
         # Compile backlinks list
         if pb.gc('toggles/features/backlinks/enabled', cached=True):
@@ -549,7 +571,7 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=
         pb.reset_state()
 
 @extra_info()
-def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=None, log_level=1):
+def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=None, log_level=1, capture_in_jar=False):
     '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
     
     # Unpack picknick basket so we don't have to type too much.
@@ -731,11 +753,11 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     # [?] Documentation styling: Table of Contents
     # ------------------------------------------------------------------
-    if pb.gc('toggles/features/styling/toc_pane', cached=True) or pb.gc('toggles/features/styling/add_toc', cached=True):
+    if get_side_pane_id_by_content_selector(pb, 'toc') or gc_add_toc_when_missing(pb):
         # convert the common [[_TOC_]] into [TOC]
         md.page = md.page.replace('[[_TOC_]]', '[TOC]')
 
-    if pb.gc('toggles/features/styling/add_toc', cached=True):
+    if gc_add_toc_when_missing(pb):
         if '[TOC]' not in md.page:
             # if h1 is present, place toc after the first h1, else put it at the top of the page.
             output = ''
@@ -800,6 +822,9 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
 
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
+
+    if (capture_in_jar):
+        pb.jars[capture_in_jar] = html_body
 
     # HTML Tweaks
     # [??] Embedded note titles integration

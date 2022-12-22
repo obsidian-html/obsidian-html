@@ -17,9 +17,11 @@ class PicknickBasket:
     dynamic_inclusions = None
     gzip_hash = ''
     treeobj = None
+    jars = None                     # dict with contents to store for later, see it as a cache
 
     def __init__(self):
         self.tagtree = {'notes': [], 'subtags': {}}
+        self.jars = {}
         # self.network_tree = NetworkTree(self.verbose)
         self.search = SearchHead()
 
@@ -29,6 +31,8 @@ class PicknickBasket:
         # In the beginning not every action will update the state, call self.reset_state to unset the state so that we are not reporting stale information.
         self.state = {}
         self.reset_state()
+
+
 
     def reset_state(self):
         self.state['action'] = 'Unknown'

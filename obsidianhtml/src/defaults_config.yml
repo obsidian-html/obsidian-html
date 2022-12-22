@@ -191,9 +191,9 @@ toggles:
     styling: 
       layout: documentation               # documentation, tabs, minimal
       max_note_width: 120rem              # not supported for layout: tabs
-      add_toc: True                       # add "[TOC]" (Table of Contents) when missing
-      toc_pane: True                      # removes table of contents from the note and puts it in the right pane (not supported for layout:tabs)
-      flip_panes: False                   # switch right and left pane around. (does nothing unless in documentation layout.)
+      add_toc: '<DEPRECATED>'                       # add "[TOC]" (Table of Contents) when missing
+      toc_pane: '<DEPRECATED>'                      # removes table of contents from the note and puts it in the right pane (not supported for layout:tabs)
+      flip_panes: '<DEPRECATED>'                   # switch right and left pane around. (does nothing unless in documentation layout.)
       add_dir_list: True                  # show directory contents in one of the panes (only documentation layout)
       accent_color: '65, 76, 253'
       loading_bg_color: '255, 255, 255'
@@ -260,25 +260,6 @@ toggles:
       coalesce_force: '-30'
       show_inclusions_in_graph: True
 
-    # Create an index.md with links to notes that have one of the given tags.
-    # This index.md will serve as the entrypoint.
-    # !! Enabling this feature will overwrite obsidian_entrypoint_path_str and md_entrypoint_path_str
-    create_index_from_tags:
-      enabled: False
-      verbose: False
-      homepage_label: "index"
-      add_links_in_graph_tree: True
-      tags: []
-      match_on_inline_tags: False
-      sort:
-        method: 'none'          # <key_value, creation_time, modified_time, none>    ! created_time not available on Linux!
-        key_path: ''            # empty for top level, use ':' to go down multiple levels
-        value_prefix: ''        # in case of multiple values under key_path, match on this prefix, and then remove prefix
-        reverse: false          # false/true reverses output
-        none_on_bottom: true    # will put notes at the bottom that do not have the sort key, otherwise at the top
-      exclude_paths:            # don't included these paths in the dir list
-       - ".gitignore"
-
     rss:
       enabled: False
       host_root: 'https://localhost:8000/'
@@ -331,3 +312,36 @@ toggles:
         - "favicon.ico"
         - "not_created.html"
       homepage_label: "index"
+
+    # Create a markdown file with links to notes that have one of the given tags.
+    create_index_from_tags:
+      enabled: False
+      verbose: False
+      rel_output_path: 'obs.html/tag_index.md'
+      homepage_label: "index"
+      use_as_homepage: False
+      add_links_in_graph_tree: True
+      tags: []
+      match_on_inline_tags: False
+      styling:
+        include_folder_in_link: False
+      sort:
+        method: 'none'          # <key_value, creation_time, modified_time, none>    ! created_time not available on Linux!
+        key_path: ''            # empty for top level, use ':' to go down multiple levels
+        value_prefix: ''        # in case of multiple values under key_path, match on this prefix, and then remove prefix
+        reverse: false          # false/true reverses output
+        none_on_bottom: true    # will put notes at the bottom that do not have the sort key, otherwise at the top
+      exclude_paths:            # don't included these paths in the dir list
+       - ".gitignore"
+
+
+    table_of_contents:
+      add_toc_when_missing: True          # add "[TOC]" (Table of Contents) when missing
+
+    side_pane:             # only valid for documentation layout
+      left_pane:
+        enabled: True
+        contents: dir_tree # <toc, tag_tree, dir_tree> relevant features should be enabled and configured see docs
+      right_pane:
+        enabled: True
+        contents: toc      # <toc, tag_tree, dir_tree> relevant features should be enabled and configured see docs
