@@ -1,5 +1,6 @@
 import json
 from datetime import date
+
 from .FileFinder import GetNodeId
 
 '''
@@ -9,35 +10,72 @@ For every note we also save its metadata, so that this information is available 
 '''
 
 class NetworkTree:
-    verbose = None
     tree = None
     nid_inc = 0
 
-    def __init__(self, verbose):
-        self.verbose = verbose
+    def __init__(self, index):
+        # register
+        self.index = index
+        self.pb = index.pb
+
         self.tree = {'nodes': [], 'links': []}
         self.node_lookup = {}
 
         self.node_graph = None
         self.node_graph_lookup = None
 
+    # TYPES
+    # ===============================================================================================
     def NewNode(self):
         return {'id': '', 'nid': None, 'group': 1, 'url': '', 'metadata': {}, 'links': [], 'outward_links':[], 'inward_links':[]}
 
     def NewLink(self):
-        return {'source': '', 'target': '', 'value': 1}        
+        return {'source': '', 'target': '', 'value': 1}
+        
+    # INTERFACE
+    # ===============================================================================================
+    def add_file_object_to_node_list(self, fo, backlink_node=None, link_type="reference"):
+        # shorthand
+        pb = fo.pb
+        md = fo.md
+        rel_dst_path = md.fo.path['html']['file_relative_path']
+        
+        # Get simple dict template
+        node = pb.index.network_tree.NewNode()
+        
+        # add all metadata to node, so we can access it later when we need to, once compilation of html is complete
+        node['metadata'] = md.metadata.copy()
+        
+        # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
+        node['id'] = GetNodeId(md.fo.path['markdown']['file_relative_path'].as_posix(), pb)
+        node['name'] = md.GetNodeName()
+            
+        # Url is used so you can open the note/node by clicking on it
+        node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()
+        node['rtr_url'] = rel_dst_path.as_posix()
+        pb.index.network_tree.add_node(node)
 
-    def UpdateNode(self, old, new):
-        old['metadata'] = new['metadata'].copy()
+        # Backlinks are set so when recursing, the links (edges) can be determined
+        if backlink_node is not None:
+            link = pb.index.network_tree.NewLink()
+            link['source'] = backlink_node['id']
+            link['target'] = node['id']
+            link['type']   = link_type
+            pb.index.network_tree.AddLink(link)
 
-    def AddNode(self, node_obj):
-        if self.verbose:
+        # return node so that it can be set as the next backlink_node
+        return node
+
+
+    def add_node(self, node_obj):
+        ''' Add node to network tree '''
+        if self.pb.verbose:
             print("Received node", node_obj)
         # Skip if already present
         for node in self.tree['nodes']:
             if node['id'] == node_obj['id']:
-                self.UpdateNode(node, node_obj)
-                if self.verbose:
+                node['metadata'] = node_obj['metadata'].copy()
+                if self.pb.verbose:
                     print("Node already present")
                 return
         
@@ -46,25 +84,32 @@ class NetworkTree:
         node_obj['nid'] = self.nid_inc
 
         self.tree['nodes'].append(node_obj)
-        if self.verbose:
+        if self.pb.verbose:
             print("Node added")
 
     def AddLink(self, link_obj):
-        if self.verbose:
+        if self.pb.verbose:
             print("Received link", link_obj)
         # Skip if already present        
         for link in self.tree['links']:
             if link['source'] == link_obj['source'] and link['target'] == link_obj['target']:
-                if self.verbose:
+                if self.pb.verbose:
                     print("Link already present")
                 return
 
         # Add link
         self.tree['links'].append(link_obj) 
-        if self.verbose:
+        if self.pb.verbose:
             print("Link added")
 
 
+    def OutputJson(self):
+        ''' the graph.json '''
+        tree = StringifyDateRecurse(self.tree.copy())
+        return json.dumps(tree)
+
+    # METHODS
+    # ===============================================================================================
     def compile_node_lookup(self):
         for n in self.tree['nodes']:
             self.node_lookup[n['id']] = n
@@ -82,12 +127,6 @@ class NetworkTree:
         # remove duplicates from links
         for node in self.tree['nodes']:
             node['links'] = list(dict.fromkeys(node['links']))
-
-    def OutputJson(self):
-        ''' the graph.json '''
-        tree = StringifyDateRecurse(self.tree.copy())
-        return json.dumps(tree)
-
 
     def CompileNoteGraphDataStructure(self):
         d = {'id': '', 'title': '', 'linkTo': None, 'referencedBy': None}
@@ -120,32 +159,6 @@ class NetworkTree:
         return json.dumps(node_graph)
 
 
-def AddPageToNodeList(pb, md, backlink_node=None, link_type="reference"):
-    node = pb.network_tree.NewNode()
-    rel_dst_path = md.fo.path['html']['file_relative_path']
-
-    # add all metadata to node, so we can access it later when we need to, once compilation of html is complete
-    node['metadata'] = md.metadata.copy()
-    
-    # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-    node['id'] = GetNodeId(md.fo.path['markdown']['file_relative_path'].as_posix(), pb)
-    node['name'] = md.GetNodeName()
-        
-    # Url is used so you can open the note/node by clicking on it
-    node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()
-    node['rtr_url'] = rel_dst_path.as_posix()
-    pb.network_tree.AddNode(node)
-
-    # Backlinks are set so when recursing, the links (edges) can be determined
-    if backlink_node is not None:
-        link = pb.network_tree.NewLink()
-        link['source'] = backlink_node['id']
-        link['target'] = node['id']
-        link['type']   = link_type
-        pb.network_tree.AddLink(link)
-
-    # return node so that it can be set as the next backlink_node
-    return node
 
 def StringifyDateRecurse(tree):
     ''' We can't convert a date type to json, so we have to manually convert any dates in the tree to isoformatted date strings '''

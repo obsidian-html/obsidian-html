@@ -1,5 +1,6 @@
-from functools import wraps
 import traceback
+
+from functools import wraps
 
 def error_addendum(pb):
     return format_error_addendum(compile_error_addendum(pb))

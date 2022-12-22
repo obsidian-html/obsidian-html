@@ -1,6 +1,6 @@
 import regex as re
 import yaml
-from .lib import slugify
+from ..lib import slugify
 
 # Purpose:
 # Allows us to get a subsection of a markdown file based on header title

@@ -1,28 +1,28 @@
-from pathlib import Path
-
-from .NetworkTree import NetworkTree
-from .ConfigManager import Config, find_user_config_yaml_path
-from .Search import SearchHead
-from .CreateIndexFromDirStructure import CreateIndexFromDirStructure
 import inspect
 
+from pathlib import Path
+
+from .ConfigManager import Config, find_user_config_yaml_path
+from ..features.Search import SearchHead
+from ..features.CreateIndexFromDirStructure import CreateIndexFromDirStructure
 
 class PicknickBasket:
-    state = None
-    config = None
+    state = None                    # used for debugging info, keeps track of what we are doing at each point in time
+    config = None                   # dict with all the config values
     verbose = None
-    files = None
-    file_tree = None
+    index = None                    # contains the file tree and the network tree
     tagtree = None
-    paths = None
+    paths = None                    # paths to input and output folders, as configured by user
     html_template = None
     dynamic_inclusions = None
     gzip_hash = ''
     treeobj = None
+    jars = None                     # dict with contents to store for later, see it as a cache
 
     def __init__(self):
         self.tagtree = {'notes': [], 'subtags': {}}
-        self.network_tree = NetworkTree(self.verbose)
+        self.jars = {}
+        # self.network_tree = NetworkTree(self.verbose)
         self.search = SearchHead()
 
         # State should be updated whenever we start a new type of operation.
@@ -31,6 +31,8 @@ class PicknickBasket:
         # In the beginning not every action will update the state, call self.reset_state to unset the state so that we are not reporting stale information.
         self.state = {}
         self.reset_state()
+
+
 
     def reset_state(self):
         self.state['action'] = 'Unknown'

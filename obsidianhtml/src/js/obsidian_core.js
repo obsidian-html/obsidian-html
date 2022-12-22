@@ -2,10 +2,9 @@
 // ----------------------------------------------------------------------------
 // Globals (filled in by backend)
 var no_tab_mode = {no_tabs};
-var toc_pane = {toc_pane};
 var mermaid_enabled = {mermaid_enabled};
 var toc_pane_div = "{toc_pane_div}";
-var content_pane_div = "{content_pane_div}";
+var dir_index_pane_div = "{dir_index_pane_div}";
 var html_url_prefix = "{html_url_prefix}";
 var CONFIGURED_HTML_URL_PREFIX = "{configured_html_url_prefix}";
 var RELATIVE_PATHS = {relative_paths};
@@ -255,7 +254,7 @@ function LoadTableOfContents(container_div)
         let toc = collection[0];
         if (toc.getElementsByTagName('li').length > 1) {
 
-            if (toc_pane && no_tab_mode) {
+            if (toc_pane_div && no_tab_mode) {
                 let tpd = document.getElementById(toc_pane_div);
                 tpd.display = 'block';
                 tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + '<div class="toc-contents">' + collection[0].innerHTML + '</div>';

@@ -4,7 +4,7 @@ function load_dirtree_as_left_pane(xmlHttp, level, theUrl, callbackpath) {
     let filename = ''
     let folder = ''
 
-    let cpd = document.getElementById(content_pane_div)
+    let cpd = document.getElementById(dir_index_pane_div)
     if (!cpd){
         return false
     }

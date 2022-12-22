@@ -13,35 +13,39 @@ import urllib.parse         # convert link characters like %
 
 from pathlib import Path
 
-from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
-from .FileFinder import GetNodeId, FindFile
+from ..lib import   DuplicateFileNameInRoot, \
+                    OpenIncludedFile, CreateStaticFilesFolders, \
+                    WriteFileLog, simpleHash, get_default_appdir_config_yaml_path, get_rel_html_url_prefix, get_html_url_prefix
 
-from .MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
-from .MarkdownLink import MarkdownLink
-from .lib import    DuplicateFileNameInRoot, \
-                    GetObsidianFilePath, OpenIncludedFile, ExportStaticFiles, CreateStaticFilesFolders, \
-                    PopulateTemplate, WriteFileLog, simpleHash, get_default_appdir_config_yaml_path
-from .RssFeed import RssFeed
-from .ErrorHandling import extra_info
-from .PicknickBasket import PicknickBasket
-from .CreateIndexFromTags import CreateIndexFromTags
-from .EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
-from .FileTree import FileTree
-from .NetworkTree import AddPageToNodeList
-from .v4 import Actor
-from .HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
+from ..compiler.Templating import PopulateTemplate
+from ..core import Actor
+from ..core.ErrorHandling import extra_info
+from ..core.PicknickBasket import PicknickBasket
+from ..core.FileObject import FileObject
+from ..core.Index import Index
+from ..core.FileFinder import GetObsidianFilePath, FindFile, GetNodeId
 
-from .markdown_extensions.CallOutExtension import CallOutExtension
-from .markdown_extensions.DataviewExtension import DataviewExtension
-from .markdown_extensions.MermaidExtension import MermaidExtension
-from .markdown_extensions.CustomTocExtension import CustomTocExtension
-from .markdown_extensions.EraserExtension import EraserExtension
-from .markdown_extensions.FootnoteExtension import FootnoteExtension
-from .markdown_extensions.FormattingExtension import FormattingExtension
-from .markdown_extensions.EmbeddedSearchExtension import EmbeddedSearchExtension
-from .markdown_extensions.CodeWrapperExtension import CodeWrapperExtension
-from .markdown_extensions.AdmonitionExtension import AdmonitionExtension
-#from .markdown_extensions.CustomTableExtension import CustomTableExtension
+from ..parser.MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
+from ..parser.MarkdownLink import MarkdownLink
+
+from ..features.RssFeed import RssFeed
+from ..features.CreateIndexFromTags import CreateIndexFromTags
+from ..features.EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
+from ..features.SidePane import get_side_pane_html, gc_add_toc_when_missing, get_side_pane_id_by_content_selector
+
+from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
+from ..compiler.Templating import ExportStaticFiles
+
+from ..markdown_extensions.CallOutExtension import CallOutExtension
+from ..markdown_extensions.DataviewExtension import DataviewExtension
+from ..markdown_extensions.MermaidExtension import MermaidExtension
+from ..markdown_extensions.CustomTocExtension import CustomTocExtension
+from ..markdown_extensions.EraserExtension import EraserExtension
+from ..markdown_extensions.FootnoteExtension import FootnoteExtension
+from ..markdown_extensions.FormattingExtension import FormattingExtension
+from ..markdown_extensions.EmbeddedSearchExtension import EmbeddedSearchExtension
+from ..markdown_extensions.CodeWrapperExtension import CodeWrapperExtension
+from ..markdown_extensions.AdmonitionExtension import AdmonitionExtension
 
 def ConvertVault(config_yaml_location=''):
     # Set config
@@ -68,8 +72,7 @@ def ConvertVault(config_yaml_location=''):
 
     # Load input files into file tree
     # ---------------------------------------------------------
-    ft = FileTree(pb)
-    ft.load_file_tree()
+    index = Index(pb)
 
     # Convert 
     # ---------------------------------------------------------
@@ -91,15 +94,15 @@ def convert_obsidian_notes_to_markdown(pb):
         # Create index.md based on given tagnames, that will serve as the entrypoint
         # ---------------------------------------------------------
         if pb.gc('toggles/features/create_index_from_tags/enabled'):
-            pb = CreateIndexFromTags(pb)
-
+            CreateIndexFromTags(pb)
+        
         # Start conversion with entrypoint.
         # ---------------------------------------------------------
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
         print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(pb.paths["obsidian_entrypoint"])})')
 
         if pb.gc('toggles/debug_filetree_keys'):
-            for k, v in pb.files.items():
+            for k, v in pb.index.files.items():
                 print(k)
 
         # Force search to lowercase
@@ -108,28 +111,35 @@ def convert_obsidian_notes_to_markdown(pb):
             rel_entry_path_str = rel_entry_path_str.lower()
 
         # Start conversion
-        ep = pb.files[rel_entry_path_str]
-        pb.init_state(action='n2m', loop_type='note', current_fo=ep, subroutine='recurseObisidianToMarkdown')
-        recurseObisidianToMarkdown(ep, pb)
+        entrypoint_file_object = pb.index.files[rel_entry_path_str]
+        pb.init_state(action='n2m', loop_type='note', current_fo=entrypoint_file_object, subroutine='crawl_obsidian_notes_and_convert_to_markdown')
+        crawl_obsidian_notes_and_convert_to_markdown(entrypoint_file_object, pb)
         pb.reset_state()
+
+        # also do the tags page if it is not the index, otherwise this page will never be hit
+        if pb.gc('toggles/features/create_index_from_tags/enabled') and not pb.gc('toggles/features/create_index_from_tags/use_as_homepage'):
+            entrypoint_file_object = pb.index.files[pb.gc('toggles/features/create_index_from_tags/rel_output_path')]
+            pb.init_state(action='n2m', loop_type='note', current_fo=entrypoint_file_object, subroutine='crawl_obsidian_notes_and_convert_to_markdown')
+            crawl_obsidian_notes_and_convert_to_markdown(entrypoint_file_object, pb)
+            pb.reset_state()
 
         # Keep going until all other files are processed
         if pb.gc('toggles/process_all', cached=True):
             print('\t> FEATURE: PROCESS ALL')
-            unparsed = [x for x in pb.files.values() if x.processed_ntm == False]
+            unparsed = [x for x in pb.index.files.values() if x.processed_ntm == False]
             i = 0
             l = len(unparsed)
             for fo in unparsed:
                 i += 1
                 if pb.gc('toggles/verbose_printout', cached=True) == True:
                     print(f'\t\t{i}/{l} - ' + str(fo.path['note']['file_absolute_path']))
-                pb.init_state(action='n2m_process_all', loop_type='note', current_fo=fo, subroutine='recurseObisidianToMarkdown')
-                recurseObisidianToMarkdown(fo, pb, log_level=2)
+                pb.init_state(action='n2m_process_all', loop_type='note', current_fo=fo, subroutine='crawl_obsidian_notes_and_convert_to_markdown')
+                crawl_obsidian_notes_and_convert_to_markdown(fo, pb, log_level=2)
                 pb.reset_state()
             print('\t< FEATURE: PROCESS ALL: Done')
 
     if pb.gc('toggles/extended_logging', cached=True):
-        WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files_ntm.md'), include_processed=True)
+        WriteFileLog(pb.index.files, pb.paths['log_output_folder'].joinpath('files_ntm.md'), include_processed=True)
 
 def convert_markdown_to_html(pb):
     if not pb.gc('toggles/compile_html', cached=True):
@@ -148,29 +158,36 @@ def convert_markdown_to_html(pb):
     # Conversion: md -> html
     # -----------------------------------------------------------
     # Start conversion from the entrypoint
-    ep = pb.files[rel_entry_path_str]
-    pb.init_state(action='m2h', loop_type='md_note', current_fo=ep, subroutine='ConvertMarkdownPageToHtmlPage')
-    ConvertMarkdownPageToHtmlPage(ep, pb)
+    entrypoint_file_object = pb.index.files[rel_entry_path_str]
+    pb.init_state(action='m2h', loop_type='md_note', current_fo=entrypoint_file_object, subroutine='crawl_markdown_notes_and_convert_to_html')
+    crawl_markdown_notes_and_convert_to_html(entrypoint_file_object, pb)
     pb.reset_state()
+
+    # also do the tags page if it is not the index, otherwise this page will never be hit
+    if pb.gc('toggles/features/create_index_from_tags/enabled') and not pb.gc('toggles/features/create_index_from_tags/use_as_homepage'):
+        entrypoint_file_object = pb.index.files[pb.gc('toggles/features/create_index_from_tags/rel_output_path')]
+        pb.init_state(action='m2h', loop_type='md_note', current_fo=entrypoint_file_object, subroutine='crawl_markdown_notes_and_convert_to_html')
+        crawl_markdown_notes_and_convert_to_html(entrypoint_file_object, pb, capture_in_jar='tags_page_html')
+        pb.reset_state()
 
     # Keep going until all other files are processed
     if pb.gc('toggles/process_all') == True:
         print('\t> FEATURE: PROCESS ALL')
-        unparsed = [x for x in pb.files.values() if x.processed_mth == False]
+        unparsed = [x for x in pb.index.files.values() if x.processed_mth == False]
         i = 0; l = len(unparsed)
         for fo in unparsed:
             i += 1
             if pb.gc('toggles/verbose_printout', cached=True) == True:
                 print(f'\t\t{i}/{l} - ' + str(fo.path['markdown']['file_absolute_path']))
 
-            pb.init_state(action='m2h_process_all', loop_type='md_note', current_fo=fo, subroutine='ConvertMarkdownPageToHtmlPage')
-            ConvertMarkdownPageToHtmlPage(fo, pb, log_level=2)
+            pb.init_state(action='m2h_process_all', loop_type='md_note', current_fo=fo, subroutine='crawl_markdown_notes_and_convert_to_html')
+            crawl_markdown_notes_and_convert_to_html(fo, pb, log_level=2)
             pb.reset_state()
 
         print('\t< FEATURE: PROCESS ALL: Done')
 
     if pb.gc('toggles/extended_logging', cached=True):
-        WriteFileLog(pb.files, pb.paths['log_output_folder'].joinpath('files_mth.md'), include_processed=True)
+        WriteFileLog(pb.index.files, pb.paths['log_output_folder'].joinpath('files_mth.md'), include_processed=True)
 
 
     # [??] Second pass
@@ -182,14 +199,14 @@ def convert_markdown_to_html(pb):
     create_folder_navigation_view(pb)
 
     # Make lookup so that we can easily find the url of a node
-    pb.network_tree.compile_node_lookup()
+    pb.index.network_tree.compile_node_lookup()
 
     # Prep some data outside of the loop
-    dir_repstring = '{left_pane_content}'
-    dir_repstring2 = '{right_pane_content}'
-    if pb.gc('toggles/features/styling/flip_panes', cached=True):
-        dir_repstring = '{right_pane_content}'
-        dir_repstring2 = '{left_pane_content}'
+    # dir_repstring = '{left_pane_content}'
+    # dir_repstring2 = '{right_pane_content}'
+    # if pb.gc('toggles/features/styling/flip_panes', cached=True):
+    #     dir_repstring = '{right_pane_content}'
+    #     dir_repstring2 = '{left_pane_content}'
 
     esearch = None
     if pb.gc('toggles/features/embedded_search/enabled', cached=True):
@@ -197,7 +214,7 @@ def convert_markdown_to_html(pb):
     
     print('\t> SECOND PASS HTML')
 
-    for fo in pb.files.values():
+    for fo in pb.index.files.values():
         if not fo.metadata['is_note']:
             continue
 
@@ -219,29 +236,34 @@ def convert_markdown_to_html(pb):
         if m is None:
             continue
         node_id = m.group(0)
-        node = pb.network_tree.node_lookup[node_id]
+        node = pb.index.network_tree.node_lookup[node_id]
 
         html = re.sub('\{_obsidian_html_node_id_pattern_:'+node_id+'}', '', html)
 
         # Create Directory contents
-        if pb.gc('toggles/features/styling/add_dir_list', cached=True):
-            if dir_repstring in html:
-                pb.EnsureTreeObj()
-                dir_list = pb.treeobj.BuildIndex(current_page=node['url'])
-                html = re.sub(dir_repstring, dir_list, html)
-                html = re.sub(dir_repstring2, '', html)
+        # if pb.gc('toggles/features/styling/add_dir_list', cached=True):
+        #     if dir_repstring in html:
+        #         pb.EnsureTreeObj()
+        #         dir_list = pb.treeobj.BuildIndex(current_page=node['url'])
+        #         html = re.sub(dir_repstring, dir_list, html)
+        #         html = re.sub(dir_repstring2, '', html)
+        left_pane = get_side_pane_html(pb, 'left_pane', node)
+        html = html.replace('{left_pane}', left_pane)
+
+        right_pane = get_side_pane_html(pb, 'right_pane', node)
+        html = html.replace('{right_pane}', right_pane)
 
         # Compile backlinks list
         if pb.gc('toggles/features/backlinks/enabled', cached=True):
-            backlinks = [x for x in pb.network_tree.tree['links'] if x['target'] == node_id]
+            backlinks = [x for x in pb.index.network_tree.tree['links'] if x['target'] == node_id]
             snippet = ''
             if len(backlinks) > 0:
                 snippet = "<h2>Backlinks</h2>\n<ul>\n"
                 for l in backlinks:
                     if l['target'] == node_id:
-                        url = pb.network_tree.node_lookup[l['source']]['url']
+                        url = pb.index.network_tree.node_lookup[l['source']]['url']
                         if pb.gc('toggles/relative_path_html', cached=True):
-                            url = ('../' * page_depth) + pb.network_tree.node_lookup[l['source']]['rtr_url']
+                            url = ('../' * page_depth) + pb.index.network_tree.node_lookup[l['source']]['rtr_url']
                         if url[0] not in ['.', '/']:
                             url = '/'+url
                         snippet += f'\t<li><a class="backlink" href="{url}">{l["source"]}</a></li>\n'
@@ -309,8 +331,8 @@ def convert_markdown_to_html(pb):
                             parts.append(f'<a href="{node["url"]}" ___COLOR___ >{subpaths[i]}</a>')
                         continue
                     else:
-                        if msubpath in pb.network_tree.node_lookup:
-                            url = pb.network_tree.node_lookup[msubpath]['url']
+                        if msubpath in pb.index.network_tree.node_lookup:
+                            url = pb.index.network_tree.node_lookup[msubpath]['url']
                             if url != previous_url:
                                 parts.append(f'<a href="{url}" ___COLOR___>{subpaths[i]}</a>')
                             previous_url = url
@@ -417,12 +439,12 @@ def convert_markdown_to_html(pb):
 
     if pb.config.capabilities_needed['graph_data']:
         # add crosslinks to graph data
-        pb.network_tree.AddCrosslinks()
+        pb.index.network_tree.AddCrosslinks()
 
         # Write node json to static folder
         CreateStaticFilesFolders(pb.paths['html_output_folder'])
         with open (pb.paths['html_output_folder'].joinpath('obs.html').joinpath('data/graph.json'), 'w', encoding="utf-8") as f:
-            f.write(pb.network_tree.OutputJson())
+            f.write(pb.index.network_tree.OutputJson())
 
     if pb.config.capabilities_needed['search_data']:
         
@@ -484,12 +506,12 @@ def export_user_files(pb):
     print('< EXPORTING USER FILES: Done')
 
 @extra_info()
-def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1, iteration=0):
+def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=1, iteration=0):
     '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
 
     # Unpack so we don't have to type too much.
     paths = pb.paths        # Paths of interest, such as the output and input folders
-    files = pb.files        # Hashtable of all files found in the obsidian vault
+    files = pb.index.files        # Hashtable of all files found in the obsidian vault
 
     # Don't parse if not parsable
     if not fo.metadata['is_parsable_note']:
@@ -498,8 +520,8 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1, iteration=0):
     # Convert note to markdown
     # ------------------------------------------------------------------
     # Create an object that handles a lot of the logic of parsing the page paths, content, etc
-    md = MarkdownPage(pb, fo, 'note', files)
-
+    md = fo.load_markdown_page('note')
+    
     # The bulk of the conversion process happens here
     md.ConvertObsidianPageToMarkdownPage()
 
@@ -528,33 +550,33 @@ def recurseObisidianToMarkdown(fo:'OH_File', pb, log_level=1, iteration=0):
     if 'obs.html.tags' in md.metadata.keys() and 'leaf_note' in md.metadata['obs.html.tags']:
         return
 
-    for lo in md.links:
-        if lo == False or lo.processed_ntm == True:
+    for link_fo in md.links:
+        if link_fo == False or link_fo.processed_ntm == True:
             if pb.gc('toggles/verbose_printout', cached=True):
-                if lo == False:
-                    print('\t'*log_level, f"(ntm) Skipping converting {lo.link}, link not internal or not valid.")
+                if link_fo == False:
+                    print('\t'*log_level, f"(ntm) Skipping converting {link_fo.link}, link not internal or not valid.")
                 else:
-                    print('\t'*log_level, f"(ntm) Skipping converting {lo.link}, already processed.")
+                    print('\t'*log_level, f"(ntm) Skipping converting {link_fo.link}, already processed.")
             continue
 
         # Mark the file as processed so that it will not be processed again at a later stage
-        lo.processed_ntm = True
+        link_fo.processed_ntm = True
 
         # Convert the note that is linked to
         if pb.gc('toggles/verbose_printout', cached=True):
-            print('\t'*log_level, f"found link {lo.path['note']['file_absolute_path']} (through parent {fo.path['note']['file_absolute_path']})")
+            print('\t'*log_level, f"found link {link_fo.path['note']['file_absolute_path']} (through parent {fo.path['note']['file_absolute_path']})")
 
-        pb.init_state(action='n2m', loop_type='note', current_fo=lo, subroutine='recurseObisidianToMarkdown')
-        recurseObisidianToMarkdown(lo, pb, log_level=log_level, iteration=iteration)
+        pb.init_state(action='n2m', loop_type='note', current_fo=link_fo, subroutine='crawl_obsidian_notes_and_convert_to_markdown')
+        crawl_obsidian_notes_and_convert_to_markdown(link_fo, pb, log_level=log_level, iteration=iteration)
         pb.reset_state()
 
 @extra_info()
-def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_level=1):
+def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=None, log_level=1, capture_in_jar=False):
     '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
     
     # Unpack picknick basket so we don't have to type too much.
     paths = pb.paths                    # Paths of interest, such as the output and input folders
-    files = pb.files                    # Hashtable of all files found in the obsidian vault
+    files = pb.index.files                    # Hashtable of all files found in the obsidian vault
 
     # Don't parse if not parsable
     if not fo.metadata['is_parsable_note']:
@@ -573,22 +595,22 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
     # Load contents
     # ------------------------------------------------------------------
     # Create an object that handles a lot of the logic of parsing the page paths, content, etc
-    md = MarkdownPage(pb, fo, 'markdown', files)
+    md = fo.load_markdown_page('markdown')
     
     # Graph view integrations
     # ------------------------------------------------------------------
     # The nodelist will result in graph.json, which may have uses beyond the graph view
 
     # [17] Add self to nodelist
-    node = AddPageToNodeList(pb, md, backlink_node)
+    node = pb.index.network_tree.add_file_object_to_node_list(fo, backlink_node)
     backlink_node = node
 
     # [425] Add included references as links in graph view
     if pb.gc('toggles/features/graph/show_inclusions_in_graph'):
         if 'obs.html.data' in md.metadata and 'inclusion_references' in md.metadata['obs.html.data']:
             for incl in md.metadata['obs.html.data']['inclusion_references']:
-                inc_md = MarkdownPage(pb, files[incl], 'markdown', files)
-                AddPageToNodeList(pb, inc_md, backlink_node, link_type="inclusion")
+                inc_md = files[incl].load_markdown_page('markdown')
+                pb.index.network_tree.add_file_object_to_node_list(files[incl], backlink_node, link_type="inclusion")
                 inc_md.fo.processed_mth = False
                 md.links.append(inc_md.fo)
 
@@ -673,17 +695,17 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
 
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
-        rel_path_str, lo = FindFile(pb.files, l, pb)
+        rel_path_str, link_fo = FindFile(pb.index.files, l, pb)
         if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Image {l} treated as external and not imported in html")
             continue
 
         # Copy src to dst
-        lo.copy_file('mth')
+        link_fo.copy_file('mth')
 
         # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = '![]('+urllib.parse.quote(lo.get_link('html', origin=fo))+')'
+        new_link = '![]('+urllib.parse.quote(link_fo.get_link('html', origin=fo))+')'
         safe_link = r"\!\[.*\]\("+re.escape(link)+r"\)"
         md.page = re.sub(safe_link, new_link, md.page)
 
@@ -694,7 +716,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
         if '://' in l:
             continue
 
-        rel_path_str, lo = FindFile(pb.files, l, pb)
+        rel_path_str, lo = FindFile(pb.index.files, l, pb)
         if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
@@ -715,7 +737,7 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
         if '://' in l:
             continue
 
-        rel_path_str, lo = FindFile(pb.files, l, pb)
+        rel_path_str, lo = FindFile(pb.index.files, l, pb)
         if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
@@ -731,11 +753,11 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
 
     # [?] Documentation styling: Table of Contents
     # ------------------------------------------------------------------
-    if pb.gc('toggles/features/styling/toc_pane', cached=True) or pb.gc('toggles/features/styling/add_toc', cached=True):
+    if get_side_pane_id_by_content_selector(pb, 'toc') or gc_add_toc_when_missing(pb):
         # convert the common [[_TOC_]] into [TOC]
         md.page = md.page.replace('[[_TOC_]]', '[TOC]')
 
-    if pb.gc('toggles/features/styling/add_toc', cached=True):
+    if gc_add_toc_when_missing(pb):
         if '[TOC]' not in md.page:
             # if h1 is present, place toc after the first h1, else put it at the top of the page.
             output = ''
@@ -800,6 +822,9 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
 
 
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
+
+    if (capture_in_jar):
+        pb.jars[capture_in_jar] = html_body
 
     # HTML Tweaks
     # [??] Embedded note titles integration
@@ -918,15 +943,15 @@ def ConvertMarkdownPageToHtmlPage(fo:'OH_File', pb, backlink_node=None, log_leve
 
     # Recurse for every link in the current page
     # ------------------------------------------------------------------
-    for lo in md.links:
-        if not lo.is_valid_note('markdown'):
+    for link_fo in md.links:
+        if not link_fo.is_valid_note('markdown'):
             continue
 
         # Convert the note that is linked to
         if pb.gc('toggles/verbose_printout', cached=True):
-            print('\t'*(log_level+1), f"html: initiating conversion for {lo.fullpath('markdown')} (parent {fo.fullpath('markdown')})")
+            print('\t'*(log_level+1), f"html: initiating conversion for {link_fo.fullpath('markdown')} (parent {fo.fullpath('markdown')})")
 
-        pb.init_state(action='m2h', loop_type='md_note', current_fo=lo, subroutine='ConvertMarkdownPageToHtmlPage')
-        ConvertMarkdownPageToHtmlPage(lo, pb, backlink_node, log_level=log_level)
+        pb.init_state(action='m2h', loop_type='md_note', current_fo=link_fo, subroutine='crawl_markdown_notes_and_convert_to_html')
+        crawl_markdown_notes_and_convert_to_html(link_fo, pb, backlink_node, log_level=log_level)
         pb.reset_state()
 

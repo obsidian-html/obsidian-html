@@ -487,6 +487,19 @@ a.navbar-link:hover {
     margin-left: -1.5rem;
 }
 
+.tags-pane-content {
+    margin: 1rem;
+    max-width: 20vw;
+}
+.tags-pane-content h2 {
+    border: 0px;
+    font-size: medium;
+    padding: 0px;
+    margin: 0px;
+}
+.tags-pane-content ul {
+    padding-left: 0.8rem;
+}
 
 h3 {
     font-size: 13pt;

@@ -1,12 +1,16 @@
-import shutil
-from . import Types as T
-from ..lib import is_installed
-from ..CopyVault import CreateTemporaryCopy
-
 import os
+import shutil
 import tempfile             # used to create temporary files/folders
+
 from subprocess import Popen, PIPE
 from time import sleep
+
+from ..lib import is_installed
+from ..features.CopyVault import CreateTemporaryCopy
+
+from . import Types as T
+
+
 
 class Optional:
     @staticmethod

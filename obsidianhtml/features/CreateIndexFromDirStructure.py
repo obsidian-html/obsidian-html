@@ -5,12 +5,14 @@ import glob
 from pathlib import Path
 from functools import cache
 
-from .lib import PopulateTemplate, OpenIncludedFile, simpleHash, pushd
+from ..lib import OpenIncludedFile, simpleHash, pushd
+from ..compiler.Templating import PopulateTemplate
 
 
 class CreateIndexFromDirStructure():
     def __init__(self, pb, path):
         self.pb = pb
+        self.html_url_prefix = pb.gc('html_url_prefix')
         self.root = path
         self.verbose = pb.gc('toggles/verbose_printout') or pb.gc('toggles/features/create_index_from_dir_structure/verbose')
 

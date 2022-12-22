@@ -6,8 +6,8 @@ import tempfile             # used to create temporary files/folders
 from subprocess import Popen, PIPE
 from pathlib import Path
 
-from .v4 import Types as T
-from .lib import is_installed, pushd, should_ignore
+from ..core import Types as T
+from ..lib import is_installed, pushd, should_ignore
 
 
 def CreateTemporaryCopy(source_folder_path, pb):

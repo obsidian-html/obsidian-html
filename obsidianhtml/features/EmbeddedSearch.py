@@ -12,7 +12,7 @@ from whoosh import index
 from whoosh.qparser import QueryParser, MultifieldParser, OrGroup
 from whoosh.fields import *
 
-from .lib import    print_global_help_and_exit, get_obshtml_appdir_folder_path
+from ..lib import    print_global_help_and_exit, get_obshtml_appdir_folder_path
 
 
 def InitWhoosh(index_dir):

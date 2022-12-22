@@ -1,8 +1,9 @@
 import markdown             # convert markdown to html
 
-from .v4 import Types as T
-from .PathFinder import OH_File, get_rel_html_url_prefix, get_html_url_prefix
-from .lib import    PopulateTemplate
+from ..core                 import Types as T
+from ..core.FileObject      import FileObject
+from ..lib                  import get_rel_html_url_prefix, get_html_url_prefix
+from ..compiler.Templating  import PopulateTemplate
 
 
 def compile_navbar_links(pb) -> T.PBChange:

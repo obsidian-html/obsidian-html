@@ -1,11 +1,17 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import Type
+
 import datetime
 import platform
 import os
 import inspect
 import shutil               # used to remove a non-empty directory, copy files
+
+
+from pathlib import Path
+from typing import Type
+
+from ..parser.MarkdownPage import MarkdownPage
+from ..lib import get_rel_html_url_prefix, get_html_url_prefix
 
 '''
 This object class helps us with keeping track of all the paths.
@@ -29,12 +35,13 @@ For simplicity's sake, we just compile both link types within the same function.
 get the correct link based on the configurations.
 '''
 
-class OH_File:
+class FileObject:
     pb = None                   # contains all config, paths, etc (global pass in config object)
     path = None                 # hashtable with all relevant file paths
     link = None                 # hashtable with all links
     metadata = None             # information on the note, such as modified_date
     md = None                   # MarkdownPage object
+    node = None                 # Node object, filled in, linked to network_tree
 
     processed_ntm = False       # whether the note has already been processed in the note --> markdown flow
     processed_mth = False       # whether the note has already been processed in the markdown --> html flow
@@ -49,6 +56,10 @@ class OH_File:
         # These values are not set under self.compile_metadata()
         # So the default values need to be set here.
         self.metadata['is_entrypoint'] = False
+
+    def load_markdown_page(self, input_type):
+        self.md = MarkdownPage(self, input_type)
+        return self.md
 
     def fullpath(self, output):
         return self.path[output]['file_absolute_path']
@@ -84,8 +95,8 @@ class OH_File:
             self.path['markdown']['file_absolute_path'] = target_folder_path.joinpath('index.md')
             self.path['markdown']['file_relative_path'] = self.path['markdown']['file_absolute_path'].relative_to(target_folder_path)
 
-            # also add self to pb.files under the key 'index.md' so it is findable
-            self.pb.files['index.md'] = self
+            # also add self to pb.index.files under the key 'index.md' so it is findable
+            self.pb.index.files['index.md'] = self
         else:
             self.path['markdown']['file_absolute_path'] = target_folder_path.joinpath(self.path['note']['file_relative_path'])
             self.path['markdown']['file_relative_path'] = self.path['note']['file_relative_path']
@@ -180,7 +191,7 @@ class OH_File:
     def _get_depth(self, rel_path):
         return rel_path.as_posix().count('/')
 
-    def get_link(self, link_type, origin:'OH_File'=None, origin_rel_dst_path_str=None):
+    def get_link(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
         # Get origin_rel_dst_path_str
         if origin_rel_dst_path_str is None:
             if origin is not None:
@@ -240,24 +251,3 @@ class OH_File:
         dst_file_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src_file_path, dst_file_path)
 
-def get_rel_html_url_prefix(rel_path):
-    depth = rel_path.count('/')
-    if depth > 0:
-        prefix = ('../'*depth)[:-1]
-    else:
-        prefix = '.'
-    return prefix
-
-def get_html_url_prefix(pb, rel_path_str=None, abs_path_str=None):
-    # check input and convert rel_path_str from abs_path_str if necessary
-    if rel_path_str is None:
-        if abs_path_str is None:
-            raise Exception("pass in either rel_path_str or abs_path_str")
-        rel_path_str = Path(abs_path_str).relative_to(pb.paths['html_output_folder']).as_posix()
-
-    # return html_prefix
-    if pb.gc('toggles/relative_path_html', cached=True):
-        html_url_prefix = pb.sc(path='html_url_prefix', value=get_rel_html_url_prefix(rel_path_str))
-    else:
-        html_url_prefix = pb.gc('html_url_prefix')
-    return html_url_prefix
