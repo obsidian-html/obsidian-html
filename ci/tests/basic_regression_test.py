@@ -193,6 +193,7 @@ class TestCreateIndexFromTagsMode(ModeTemplate):
     testcase_name = "IndexFromTags"
     testcase_custom_config_values = [
         ('toggles/features/create_index_from_tags/enabled', True),
+        ('toggles/features/create_index_from_tags/use_as_homepage', True),
         ('toggles/features/create_index_from_tags/tags', ['type/index1', 'type/index2'])
     ]  
 
@@ -204,9 +205,6 @@ class TestCreateIndexFromTagsMode(ModeTemplate):
         self.assertPageFound(res['soup'], msg=f'expected page "{res["url"]}" was not found.')
 
         # Test content of index.html
-        header_text = res['soup'].body.find('div', attrs={'class':'container'}).find('h1').string
-        self.assertEqual(header_text, 'Obsidian-Html/Notes', msg=f"H1 expected in index.html with innerHtml of 'Obsidian-Html/Notes'; was '{header_text}' instead.")
-
         header_text = res['soup'].body.find('div', attrs={'class':'container'}).find('h2').string
         self.assertEqual(header_text, 'type/index1', msg=f"H2 expected in index.html with innerHtml of 'type/index1'; was '{header_text}' instead.")        
 
@@ -222,6 +220,7 @@ class TestCreateIndexFromTagsMode(ModeTemplate):
 
     def test_B__index_and_links(self):
         "Tests placement of files and working of links"
+        #time.sleep(100)
         next_url = self.index_html_should_exist(path='index.html')
 
         # Test auto-generated type links
