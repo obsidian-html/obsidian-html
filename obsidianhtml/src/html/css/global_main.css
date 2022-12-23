@@ -4,6 +4,8 @@
     text-rendering: optimizeLegibility;
     --accent-color: __accent_color__;
     --loading-bg-color: __loading_bg_color__;
+    --left-pane-active-width: __left_pane_active_width__;
+    --right-pane-active-width: __right_pane_active_width__;
     --normal-text-color: 51, 51, 51;
     --bg-color: #f2f3f5a6;
     --bg-note: #ffffff;
@@ -33,6 +35,14 @@ body {
 
 .header {
     padding-bottom: 1rem;
+}
+.header.minimal-header {
+    padding-bottom: 0rem;
+}
+
+#left_pane_fold_header,
+#right_pane_fold_header {
+    cursor: pointer;
 }
 
 @font-face {
@@ -162,18 +172,18 @@ blockquote p {
 
 .left_pane.active {
     min-width: 15rem;
-    width: 15rem;
+    width: var(--left-pane-active-width);
 }
 
 .right_pane.active {
     min-width: max-content;
+    width: var(--right-pane-active-width)
 }
 
 .left_pane,
 .right_pane {
     width: 2rem;
     min-width: 2rem;
-    cursor: pointer;
 }
 
 .right_pane {
@@ -252,6 +262,10 @@ blockquote p {
     width: calc(100vw - 21rem);
     margin-bottom: -0.5rem;
 }
+.minimal-header .navbar {
+    flex-direction: row-reverse;
+    width: calc(100vw - 2rem);
+}
 
 .navbar-button {
     display: none;
@@ -269,6 +283,7 @@ blockquote p {
     margin-left: -0.7rem;
     margin-top: 1rem;
 }
+
 
 
 /* ---------------------------------------- Table troubles ---------------------------------------- */
@@ -499,6 +514,10 @@ a.navbar-link:hover {
 }
 .tags-pane-content ul {
     padding-left: 0.8rem;
+}
+
+.side-pane-container {
+    padding: 0.8rem;
 }
 
 h3 {

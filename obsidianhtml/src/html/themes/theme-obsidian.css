@@ -100,6 +100,11 @@
     padding-bottom: 0.3rem;
 }
 
+.theme-obs-light .header.minimal-header,
+.theme-obs-dark .header.minimal-header {
+    padding-top: 0.4rem;
+}
+
 .theme-obs-light #homelink,
 .theme-obs-light #homelink:visited,
 .theme-obs-light #homelink:link,
@@ -182,6 +187,11 @@
     background-color: unset;
     color: unset;
     margin-top: -1rem;
+}
+
+.theme-obs-dark .minimal-header .navbar-button,
+.theme-obs-dark .minimal-header .navbar-button {
+    margin-top: 1rem;
 }
 
 .theme-obs-dark .navbar-link .theme-obs-light .navbar-link {

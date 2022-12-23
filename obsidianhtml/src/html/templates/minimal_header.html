@@ -1,0 +1,22 @@
+<div id="header" class="header minimal-header">
+    <div id="header_flex" class="flex_row">
+        <div id="menu_toggle_button" class="navbar-button requires_js" onclick="toggle_menu()">
+                ≡
+        </div>
+            <div id="navbar" class="navbar requires_js">
+                    <div class="icon-tray">
+                            {theme_button}
+                            {search_button}
+                            {graph_button}
+                            {dirtree_button}
+                            {tags_page_button}
+                            {rss_button}
+                    </div>
+                    <div style="display: flex; flex-direction:column">
+                        <div id="left_pane_toggle_nav" class="left_pane_toggle_nav">{toggle_left_pane_text}</div>
+                        <div id="right_pane_toggle_nav" class="right_pane_toggle_nav">{toggle_right_pane_text}</div>
+                </div>
+            </div>
+    </div>
+    {theme_popup}
+</div>

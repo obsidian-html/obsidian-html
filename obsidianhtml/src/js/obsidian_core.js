@@ -232,6 +232,9 @@ function load_page() {
         SetContainer(FirstContainer);
     }
 
+    // also init side panes if present
+    SetSidePanes();
+
     // Open the path on loading the page
     // This is everything after ?path=
     if (tab_mode) {
@@ -266,6 +269,17 @@ function LoadTableOfContents(container_div)
         }
     }
 
+}
+
+function SetSidePanes() {
+    let lp = document.getElementById('left_pane_content');
+    if (lp){
+        SetContainer(lp)
+    }
+    let rp = document.getElementById('right_pane_content');
+    if (rp){
+        SetContainer(rp)
+    }
 }
 
 function SetContainer(container) {

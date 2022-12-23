@@ -202,11 +202,7 @@ def convert_markdown_to_html(pb):
     pb.index.network_tree.compile_node_lookup()
 
     # Prep some data outside of the loop
-    # dir_repstring = '{left_pane_content}'
-    # dir_repstring2 = '{right_pane_content}'
-    # if pb.gc('toggles/features/styling/flip_panes', cached=True):
-    #     dir_repstring = '{right_pane_content}'
-    #     dir_repstring2 = '{left_pane_content}'
+    pb.index.compile_html_relpath_lookup_table()
 
     esearch = None
     if pb.gc('toggles/features/embedded_search/enabled', cached=True):
@@ -753,11 +749,11 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     # [?] Documentation styling: Table of Contents
     # ------------------------------------------------------------------
-    if get_side_pane_id_by_content_selector(pb, 'toc') or gc_add_toc_when_missing(pb):
+    if get_side_pane_id_by_content_selector(pb, 'toc') or gc_add_toc_when_missing(pb, fo):
         # convert the common [[_TOC_]] into [TOC]
         md.page = md.page.replace('[[_TOC_]]', '[TOC]')
 
-    if gc_add_toc_when_missing(pb):
+    if gc_add_toc_when_missing(pb, fo):
         if '[TOC]' not in md.page:
             # if h1 is present, place toc after the first h1, else put it at the top of the page.
             output = ''
@@ -822,6 +818,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
 
     html_body = markdown.markdown(md.page, extensions=extensions, extension_configs=extension_configs)
+    html_body = f'<div class="content">{html_body}</div>'
 
     if (capture_in_jar):
         pb.jars[capture_in_jar] = html_body

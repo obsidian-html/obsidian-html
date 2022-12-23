@@ -1,5 +1,5 @@
 from ..lib import CreateStaticFilesFolders, OpenIncludedFile, OpenIncludedFileBinary, get_html_url_prefix
-from ..features.SidePane import get_side_pane_id_by_content_selector
+from ..features.SidePane import get_side_pane_id_by_content_selector, get_content_name_by_pane_id
 
 def ExportStaticFiles(pb):
     (obsfolder, static_folder, data_folder, rss_folder) = CreateStaticFilesFolders(pb.paths['html_output_folder'])
@@ -119,6 +119,8 @@ def ExportStaticFiles(pb):
             contents = contents.replace('__accent_color__', pb.gc('toggles/features/styling/accent_color', cached=True))\
                  .replace('__loading_bg_color__', pb.gc('toggles/features/styling/loading_bg_color', cached=True))\
                  .replace('__max_note_width__', pb.gc('toggles/features/styling/max_note_width', cached=True))\
+                 .replace('__left_pane_active_width__', pb.gc('toggles/features/side_pane/left_pane/width', cached=True))\
+                 .replace('__right_pane_active_width__', pb.gc('toggles/features/side_pane/right_pane/width', cached=True))\
 
         # Write to dest
         with open (dst_path, 'w', encoding="utf-8") as f:
@@ -200,6 +202,14 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     # Cache
     if html_url_prefix is None:
         html_url_prefix = pb.gc("html_url_prefix")
+
+    # Major components
+    # header
+    ht = pb.gc('toggles/features/styling/header_template')
+    ht = f'html/templates/{ht}_header.html'
+    template = template.replace('{header}', OpenIncludedFile(ht))
+    template = template.replace('{toggle_left_pane_text}', f"Toggle {get_content_name_by_pane_id(pb, 'left_pane')} Pane")
+    template = template.replace('{toggle_right_pane_text}', f"Toggle {get_content_name_by_pane_id(pb, 'right_pane')} Pane")
 
     # Header inclusions
     dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/obsidian_core.js"></script>' + "\n"
