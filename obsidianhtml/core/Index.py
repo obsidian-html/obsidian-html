@@ -35,6 +35,13 @@ class Index:
         self.compile_excluded_folder_list()
         self.compile_included_folder_list()
 
+    def compile_html_relpath_lookup_table(self):
+        self.fo_by_html_relpath = {}
+        for fo in self.files.values():
+            rel_path = fo.path['html']['file_relative_path'].as_posix()
+            self.fo_by_html_relpath[rel_path] = fo
+
+
     def import_files_into_file_tree(self):
         ''' This method reads all the files in the input folders - minus the excluded files - converts them into file objects, and puts them in the self.files dict '''
         pb = self.pb

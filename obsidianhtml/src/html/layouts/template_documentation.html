@@ -31,30 +31,7 @@
         {search_html}
 
         <div id="page_holder" class="flex_col">
-                <div id="header" class="header">
-                        <div id="header_flex" class="flex_row">
-                                <a href="{html_url_prefix}/index.html" id="homelink" title="Clear screen and go to homepage">{title}</a>
-                                <div id="menu_toggle_button" class="navbar-button requires_js" onclick="toggle_menu()">
-                                        ≡
-                                </div>
-                                <div id="navbar" class="navbar requires_js">
-                                        {{navbar_links}}
-                                        <div class="icon-tray">
-                                                {theme_button}
-                                                {search_button}
-                                                {graph_button}
-                                                {dirtree_button}
-                                                {tags_page_button}
-                                                {rss_button}
-                                        </div>
-                                        <div style="display: flex; flex-direction:column">
-                                                <div id="left_pane_toggle_nav" class="left_pane_toggle_nav">Toggle Directory Tree Pane</div>
-                                                <div id="right_pane_toggle_nav" class="right_pane_toggle_nav">Toggle Table of Contents Pane</div>
-                                        </div>
-                                </div>
-                        </div>
-                        {theme_popup}
-                </div>
+                {header}
                 <div class="flex_row">
                         {left_pane}
                         <div class="container">

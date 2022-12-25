@@ -2,7 +2,7 @@
 .callout-folded .callout-content {
     display: none;
 }
-.active .callout-content {
+.callout.active .callout-content {
     display: block
 }
 .callout-title-fold {
@@ -23,6 +23,13 @@
     border-radius: 0.1rem 0 0 0.1rem;
     color: var(--callout-color);
 }
+.left_pane_content .callout {
+    background-color: var(--bg-note);
+}
+.right_pane_content .callout {
+    background-color: var(--bg-note);
+}
+
 .callout.active {
     padding-bottom: 0.1rem;
 }

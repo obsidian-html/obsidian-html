@@ -190,6 +190,7 @@ toggles:
   features:
     styling: 
       layout: documentation               # documentation, tabs, minimal
+      header_template: full               # <full, minimal> currently only supported for documentation layout
       max_note_width: 120rem              # not supported for layout: tabs
       add_toc: '<DEPRECATED>'                       # add "[TOC]" (Table of Contents) when missing
       toc_pane: '<DEPRECATED>'                      # removes table of contents from the note and puts it in the right pane (not supported for layout:tabs)
@@ -334,14 +335,25 @@ toggles:
       exclude_paths:            # don't included these paths in the dir list
        - ".gitignore"
 
-
     table_of_contents:
-      add_toc_when_missing: True          # add "[TOC]" (Table of Contents) when missing
+      add_toc_when_missing: False          # add "[TOC]" (Table of Contents) when missing
 
-    side_pane:             # only valid for documentation layout
+    side_pane:              # only valid for documentation layout
       left_pane:
         enabled: True
-        contents: dir_tree # <toc, tag_tree, dir_tree> relevant features should be enabled and configured see docs
+        width: 16rem
+        contents: dir_tree  # <toc, tag_tree, dir_tree, html_page> relevant features should be enabled and configured see docs
+        content_args:       # used for html_page
+          rel_path: 'index.html'
+          div_selector: '.content'
+          strip_sub_divs:
+            - '.toc'
       right_pane:
         enabled: True
-        contents: toc      # <toc, tag_tree, dir_tree> relevant features should be enabled and configured see docs
+        width: 16rem
+        contents: toc       # <toc, tag_tree, dir_tree, html_page> relevant features should be enabled and configured see docs
+        content_args:       # used for html_page
+          rel_path: 'index.html'
+          div_selector: '.content'
+          strip_sub_divs:
+            - '.toc'

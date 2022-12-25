@@ -113,9 +113,9 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
     levelcont.url = theUrl.split('#')[0];
 
     // Arm new links
-    SetLinks(level);
     SetContainer(levelcont);
     LoadTableOfContents(levelcont);
+    SetLinks(level);
 
     // Rerender Mathjax
     if (typeof MathJax !== 'undefined'){
@@ -154,6 +154,7 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
 
 // Change link operation
 function SetLinks(level) {
+    console.log('setting links');
     size_of_rem = getComputedStyle(document.documentElement).fontSize.split("px")[0];
     if (window.visualViewport.width > (1.2 * 40 * size_of_rem)) {
         var links = document.getElementsByTagName('a');
@@ -192,10 +193,13 @@ function SetLinks(level) {
                     if (levelcont.classList.contains('container') == false) {
                         levelcont = levelcont.parentElement;
                     }
+                    if (levelcont.classList.contains('container') == false) {
+                        levelcont = levelcont.parentElement;
+                    }
 
                     var el = levelcont.querySelectorAll(this.getAttribute("href"))[0];
                     if (el) {
-                        el.parentElement.scrollTop = el.offsetTop - rem(1);
+                        el.parentElement.parentElement.scrollTop = el.offsetTop - rem(1);
                     }
                     return false;
                 };

@@ -1,4 +1,5 @@
 from functools import cache
+from bs4 import BeautifulSoup
 
 from ..lib import OpenIncludedFile
 
@@ -31,8 +32,60 @@ def get_side_pane_content(pb, pane_id, node):
         dir_list = pb.treeobj.BuildIndex(current_page=node['url'])
         return dir_list
 
+    if (content_selector == 'html_page'):
+        return get_html_page_content(pb, pane_id)
+
     return ''
 
+@cache
+def get_html_page_content(pb, pane_id):
+    # get args
+    content_args = pb.gc(f'toggles/features/side_pane/{pane_id}/content_args')
+    if not bool(content_args):
+        raise Exception(f'html_page selected for {pane_id} but no content_args were provided')
+
+    file_rtr = content_args['rel_path']
+    div_selector = '.container'
+    if 'div_selector' in content_args:
+        div_selector = content_args['div_selector']
+
+    div_selector, div_attr_type = parse_div_selector(div_selector)
+
+    # get file and convert to soup
+    fo = pb.index.fo_by_html_relpath[file_rtr]
+    dst_abs_path = fo.path['html']['file_absolute_path']
+    with open(dst_abs_path, 'r', encoding="utf-8") as f:
+        html = f.read()
+
+    soup = BeautifulSoup(html, features="html5lib")
+
+    # Get div contents
+    div = soup.find('div', attrs={div_attr_type:div_selector})
+
+    # strip script tags
+    for s in div.select('script'):
+        s.extract()
+
+    # strip script tags
+    for strip_selector in content_args['strip_sub_divs']:
+        div_selector, div_attr_type = parse_div_selector(strip_selector)
+        for s in div.find('div', attrs={div_attr_type:div_selector}):
+            s.extract()
+
+    # wrap content so we can give it proper padding in css
+    output = f'<div class="side-pane-container">{str(div)}</div>'
+
+    return output
+    
+def parse_div_selector(sel):
+    if sel[0] == '#':
+        attr_type = 'id'
+    elif sel[0] == '.':
+        attr_type = 'class'
+    else:
+        raise Exception(f'Could not determine attr type from selector {sel}. Selector should start with "." or "#".')
+
+    return sel[1:], attr_type
 
 def get_side_pane_id_by_content_selector(pb, content_selector):
     # no side panes available when no documentation layout is selected
@@ -50,13 +103,26 @@ def get_side_pane_id_by_content_selector(pb, content_selector):
         else:
             return ''
     return ''
-        
-@cache
-def gc_add_toc_when_missing(pb):
-    depr = pb.gc('toggles/features/styling/toc_pane')
-    if depr != '<DEPRECATED>':
-        return str(int(depr))
 
+def get_content_name_by_pane_id(pb, pane_id):
+    names = {
+        'toc': 'Table of Contents',
+        'dir_tree': 'Directory Tree',
+        'tag_tree': 'Tag Tree',
+        'html_page': pane_id.split('_')[0].title()
+    }
+    return names[pb.gc(f'toggles/features/side_pane/{pane_id}/contents')]
+
+@cache
+def gc_add_toc_when_missing(pb, fo):
+    if 'obs.html.tags' in fo.md.metadata.keys() and 'dont_add_toc' in fo.md.metadata['obs.html.tags']:
+        return False
+
+    depr = pb.gc('toggles/features/styling/add_toc')
+    if depr != '<DEPRECATED>':
+        return depr
+
+    
     res = pb.gc('toggles/features/table_of_contents/add_toc_when_missing')
-    return str(int(res))
+    return res
     
