@@ -281,18 +281,27 @@ class Config:
 
 
     def check_required_values_filled_in(self, config, path='', match_str='<REQUIRED_INPUT>'):
-        def rec(config, path='', match_str='<REQUIRED_INPUT>'):
+        def rec(cfgobj, config, path='', match_str='<REQUIRED_INPUT>'):
             helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'
 
             for k, v in config.items():
                 key_path = '/'.join(x for x in (path, k) if x !='')
                 
                 if isinstance(v, dict):
-                    rec(config[k], path=key_path)
+                    rec(cfgobj, config[k], path=key_path)
 
                 if v == match_str:
-                    raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')
-        rec(config, path, match_str)
+                    if check_required_value_is_required(cfgobj, key_path):
+                        raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')
+                    else:
+                        config[k] = ''
+
+        rec(self, config, path, match_str)
+
+def check_required_value_is_required(cfgobj, key_path):
+    if key_path == 'obsidian_entrypoint_path_str':
+        return cfgobj.get_config('toggles/compile_md')
+    return True
 
 def MergeDictRecurse(base_dict, update_dict, path=''):
     helptext = '\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n'

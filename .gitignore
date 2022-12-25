@@ -1,4 +1,5 @@
 output/*
+input/*
 /test*
 **/__pycache__/**
 local_configs/*
