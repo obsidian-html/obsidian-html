@@ -405,8 +405,12 @@ def convert_markdown_to_html(pb):
                     output += '\n</div>'
 
                 # replace query block with html
-                safe_str = re.escape('<p>{_obsidian_html_query:' + listing + ' }</p>')
-                html = re.sub(safe_str, output, html)
+                try:
+                    safe_str = re.escape('<p>{_obsidian_html_query:' + listing + ' }</p>')
+                    html = re.sub(safe_str, output, html)
+                except:
+                    print(listing)
+                    raise
 
         # write result
         with open(dst_abs_path, 'w', encoding="utf-8") as f:

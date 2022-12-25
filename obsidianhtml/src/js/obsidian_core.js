@@ -169,11 +169,10 @@ function load_page() {
                 l.onclick = function () {
                     // remove current url from the link
                     let current_url = document.URL
-                    console.log(current_url);
                     current_url = decodeURI(current_url.replace(window.location.protocol + '//', '').replace(window.location.host, ''))
                     current_url = current_url.split('#')[0];
 
-                    let link = this.getAttribute("href")
+                    let link = decodeURI(this.getAttribute("href"))
                     link = link.replace(current_url, '')
 
                     // if we are left with something like: '#blabla' then we have an anchor link
@@ -183,15 +182,13 @@ function load_page() {
                         window.location.href = link;
                         return false;
                     }
-
+                    
                     // we scroll to the anchor
                     // we do this manually because scrolling divs suck
                     let levelcont = document.getElementsByClassName("container")[0];
                     var el = levelcont.querySelectorAll(link.replaceAll(':', '\\:'))[0];
-
                     if (el) {
                         getParentContainer(el).scrollTop = el.offsetTop - rem(6);
-
                         el.classList.add('fade-it');
                         setTimeout(function() {
                             el.classList.remove('fade-it');
