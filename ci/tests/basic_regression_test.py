@@ -55,17 +55,17 @@ class TestDefaultMode(ModeTemplate):
         rss = GetRssSoup('obs.html/rss/feed.xml')
         
         # test setting title, description, pubdate with frontmatter yaml
-        item1 = [x for x in rss['articles'] if x['link'].strip() == "https://localhost:8888/rss/rss_index.html"][0]
+        item1 = [x for x in rss['articles'] if x['link'].strip() == "https://localhost:8088/rss/rss_index.html"][0]
         self.assertEqual(item1['title'], 'test_value_title')
         self.assertEqual(item1['description'], 'test_value_description')
         self.assertTrue(item1['pubdate'].startswith('Wed, 10 Dec 1980 00:00:00'))
 
         # test h1 fallback
-        item2 = [x for x in rss['articles'] if x['link'].strip() == "https://localhost:8888/rss/rss_h1.html"][0]
+        item2 = [x for x in rss['articles'] if x['link'].strip() == "https://localhost:8088/rss/rss_h1.html"][0]
         self.assertEqual(item2['title'], 'rss_h1_test')
 
         # test folder exclusion
-        self.assertTrue(len([x for x in rss['articles'] if x['link'].strip() == "https://localhost:8888/rss_exclude1.html"]) == 0)
+        self.assertTrue(len([x for x in rss['articles'] if x['link'].strip() == "https://localhost:8088/rss_exclude1.html"]) == 0)
 
     def test_D_images(self):
         self.scribe('image link should point to correct location and the image should be downloadable.')
@@ -79,7 +79,7 @@ class TestDefaultMode(ModeTemplate):
         self.assertEqual(img['src'], img_rel_url)
 
         # Get image
-        r = requests.get(f'http://localhost:8888{img_rel_url}')
+        r = requests.get(f'http://localhost:8088{img_rel_url}')
         self.assertEqual(len(r.content), 10134)
 
     def test_E_dirtree(self):
@@ -185,7 +185,7 @@ class TestHtmlPrefixMode(ModeTemplate):
         self.assertEqual(img['src'], img_rel_url)
 
         # Get image
-        r = requests.get(f'http://localhost:8888{img_rel_url}')
+        r = requests.get(f'http://localhost:8088{img_rel_url}')
         self.assertEqual(len(r.content), 10134)
 
 class TestCreateIndexFromTagsMode(ModeTemplate):
@@ -348,14 +348,14 @@ if __name__ == '__main__':
     # ----------------------------
     # defer context for webserver
     with ExitStack() as stack:
-        webserver_process = subprocess.Popen(['python', '-m', 'http.server', '--directory', paths['html_output_folder'], '8888'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        webserver_process = subprocess.Popen(['python', '-m', 'http.server', '--directory', paths['html_output_folder'], '8088'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # close server *always* on exit
         stack.callback(partial(webserver_process.terminate))
         stack.callback(partial(print, 'DEFERRED: closed webserver', flush=True))
 
         time.sleep(0.1)
-        print(f"WEBSERVER: started on http://localhost:8888 in {paths['html_output_folder']}", flush=True)
+        print(f"WEBSERVER: started on http://localhost:8088 in {paths['html_output_folder']}", flush=True)
 
         # Run tests
         # ----------------------------

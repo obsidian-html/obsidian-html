@@ -29,7 +29,7 @@ toggles:
   features:
     rss:
       enabled: False
-      host_root: 'https://localhost:8888'
+      host_root: 'https://localhost:8088'
       styling: 
         show_icon: True
       channel: 

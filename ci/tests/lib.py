@@ -56,7 +56,7 @@ def cleanup_temp_dir():
 def requests_get(path):
     if path[0] == '/':
         path = path[1:]
-    url = f"http://localhost:8888/{path}"
+    url = f"http://localhost:8088/{path}"
     return (requests.get(url), url)
 
 def html_get(path, output_dict=False, convert=False):
