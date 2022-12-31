@@ -100,9 +100,10 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Handle notes
     if len(tagtree['notes']) > 0:
         md += '\n# Notes\n'
-        for note_url in tagtree['notes']:
-            note_name = note_url.split('/')[-1].replace(".html", "")
-            md += f'- [{note_name}]({html_url_prefix}/{note_url})\n'
+        for note_tuple in tagtree['notes']:
+            fo, url = note_tuple
+            note_name = fo.md.GetNodeName() #note_url.split('/')[-1].replace(".html", "")
+            md += f'- [{note_name}]({html_url_prefix}/{url})\n'
 
     md += f'\n> [View all tags]({html_url_prefix}/obs.html/tags/index.html)'
 
@@ -124,8 +125,8 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     html = html.replace('{pinnedNode}', 'tagspage')
     html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
-    html = html.replace('{left_pane_content}', '')\
-               .replace('{right_pane_content}', '')
+    html = html.replace('{left_pane}', '')\
+               .replace('{right_pane}', '')
     
     # Write file
     tag_dst_path.parent.mkdir(parents=True, exist_ok=True)   
@@ -145,10 +146,11 @@ def create_foldable_tag_lists(pb):
         notes = ''
         if tag_tree['notes']:
             notes += '<div class="tags-notes" style="font-weight:normal;"><ul class="tag-list">'
-            tag_tree['notes'].sort()
+            tag_tree['notes'] = sorted(tag_tree['notes'], key=lambda x: x[1])  # sort on url #tag_tree['notes'].sort() #
             for note in tag_tree['notes']:
-                note_name = note.split('/')[-1].replace(".html", "")
-                ahref = f'<a href="{pb.gc("html_url_prefix")}/{note}">{note_name}</a>'
+                fo, url = note
+                note_name = fo.md.GetNodeName() #note.split('/')[-1].replace(".html", "")
+                ahref = f'<a href="{pb.gc("html_url_prefix")}/{url}">{note_name}</a>'
                 notes += f'<li>{ahref}</li>'
             notes += '</ul></div>'
 
@@ -189,8 +191,8 @@ def create_foldable_tag_lists(pb):
     html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html, container_wrapper_class_list=['single_tab_page-left-aligned'])
     html = html.replace('{pinnedNode}', 'tagspage')
     html = html.replace('{{navbar_links}}', '\n'.join(pb.navbar_links)) 
-    html = html.replace('{left_pane_content}', '')\
-            .replace('{right_pane_content}', '')
+    html = html.replace('{left_pane}', '')\
+            .replace('{right_pane}', '')
 
     # write to destination
     with open(tag_dst_path_posix, 'w', encoding="utf-8") as f:

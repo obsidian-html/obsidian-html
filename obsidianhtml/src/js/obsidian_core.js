@@ -337,7 +337,8 @@ function SetContainer(container) {
 
 // Adds link icon to headers and creates the anchor link to the header.
 function SetHeaders(container) {
-    let els = container.childNodes;
+    let content = container.getElementsByClassName('content')[0]
+    let els = content.childNodes;
     for (let i = 0; i < els.length; i++) {
         // Only apply this code block to h1, h2, etc
         if (typeof els[i].tagName === 'undefined' || els[i].tagName[0] != 'H' || els[i].tagName == 'HR' ) {

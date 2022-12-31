@@ -109,9 +109,22 @@ class CreateIndexFromDirStructure():
                     break
             if _continue:
                 continue
+            
+            # set name to graph name if is note
+            name = path.stem
+            if path.suffix == '.html':
+                path_key = path.relative_to(self.pb.paths['html_output_folder']).as_posix().replace('.html', '.md')
+                if self.pb.gc('toggles/force_filename_to_lowercase', cached=True):
+                    path_key = path_key.lower()
+                try: # html might be exported and not have a corresponding note
+                    fo = self.pb.index.files[path_key]
+                    name = fo.md.GetNodeName()
+                except:
+                    print(path_key, self.pb.index.files.keys())
+
 
             # append file
-            tree['files'].append({'name': path.stem, 'path': path.as_posix()})
+            tree['files'].append({'name': path.stem, 'graph_name': name, 'path': path.as_posix()})
 
         return tree
 
@@ -192,7 +205,7 @@ class CreateIndexFromDirStructure():
             if tab_level == 1 and f["name"] == "index":
                 return self.pb.gc('toggles/features/create_index_from_dir_structure/homepage_label', cached=True)
             else:
-                return f["name"]
+                return f["graph_name"]
 
         def _recurse(tree, tab_level, path, current_page):
             current_dir = self.get_dir(current_page)
@@ -307,8 +320,8 @@ class CreateIndexFromDirStructure():
         html = PopulateTemplate(pb, 'none', pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=['single_tab_page-left-aligned'])
 
         html = html.replace('{pinnedNode}', 'dirtree')\
-                   .replace('{left_pane_content}', '')\
-                   .replace('{right_pane_content}', '')\
+                   .replace('{left_pane}', '')\
+                   .replace('{right_pane}', '')\
                    .replace('{{navbar_links}}', '\n'.join(pb.navbar_links))\
                    .replace('{dirtree_main_path}', self.rel_output_path)\
                    .replace('{page_depth}', str(page_depth))
