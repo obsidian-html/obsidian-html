@@ -206,7 +206,7 @@ def CompileTagPageMarkdown(pb):
                 link_name = n["file_key"][:-3].split('/')[-1]
 
             # Add to index content
-            index_md_content += f'- [[{link_name}]]\n'
+            index_md_content += f"- [[{link_name}|{n['graph_name']}]]\n"
         index_md_content += '\n'
 
     # store md in pb for retrieval later on
