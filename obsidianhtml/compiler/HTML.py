@@ -146,7 +146,7 @@ def create_foldable_tag_lists(pb):
         notes = ''
         if tag_tree['notes']:
             notes += '<div class="tags-notes" style="font-weight:normal;"><ul class="tag-list">'
-            tag_tree['notes'].sort()
+            tag_tree['notes'] = sorted(tag_tree['notes'], key=lambda x: x[1])  # sort on url #tag_tree['notes'].sort() #
             for note in tag_tree['notes']:
                 fo, url = note
                 note_name = fo.md.GetNodeName() #note.split('/')[-1].replace(".html", "")
