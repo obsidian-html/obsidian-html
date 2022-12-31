@@ -146,7 +146,7 @@ class MarkdownPage:
                 ctagtree = ctagtree['subtags'][subtag]
 
                 if n == (len(tag.split('/')) - 1):
-                    ctagtree['notes'].append(url)
+                    ctagtree['notes'].append((self.fo, url))
 
     def GetVideoHTML(self, file_name, relative_path_corrected, suffix):
         mime_type_lut = {
