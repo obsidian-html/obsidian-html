@@ -243,7 +243,7 @@ class MarkdownPage:
 
             # Obsidian page inclusions use the same tag...
             # Skip if we don't match image suffixes. Inclusions are handled at the end.
-            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0] not in self.pb.gc('included_file_suffixes', cached=True):
+            if len(link.split('.')) == 1 or link.split('.')[-1].split('|')[0].lower() not in self.pb.gc('included_file_suffixes', cached=True):
                 new_link = f'<inclusion href="{link}" />'
 
             safe_link = re.escape('![['+link+']]')
