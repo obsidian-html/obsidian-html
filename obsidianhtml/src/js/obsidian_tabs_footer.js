@@ -103,7 +103,7 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
         var header_id = theUrl.split('#')[1]
         var el = levelcont.querySelectorAll("#" + header_id)[0];
         if (el) {
-            el.parentElement.scrollTop = el.offsetTop - rem(1);
+            el.parentElement.parentElement.scrollTop = el.offsetTop - rem(1);
         }
     } else {
         levelcont.scrollTop = 0;

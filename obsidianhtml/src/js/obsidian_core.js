@@ -205,10 +205,10 @@ function load_page() {
     // scroll to div
     if (window.location.hash.length > 2 && window.location.hash[1] == '!') {
         let link = '#' + window.location.hash.substring(2, window.location.hash.length)
-        let levelcont = document.getElementsByClassName("container")[0];
+        let levelcont = document.getElementsByClassName("container")[0].getElementsByClassName('content')[0];
         var el = levelcont.querySelectorAll(link)[0];
         if (el) {
-            el.parentElement.scrollTop = el.offsetTop - rem(6);
+            el.parentElement.parentElement.scrollTop = el.offsetTop - rem(6);
         }
     }
 
@@ -217,7 +217,7 @@ function load_page() {
     if (tab_mode && window.location.hash != '') {
         let el = document.getElementById(window.location.hash.substr(2));
         if (el) {
-            el.parentElement.scrollTop = el.offsetTop - rem(6);
+            el.parentElement.parentElement.scrollTop = el.offsetTop - rem(6);
         }
     }
 
@@ -337,8 +337,13 @@ function SetContainer(container) {
 
 // Adds link icon to headers and creates the anchor link to the header.
 function SetHeaders(container) {
-    let content = container.getElementsByClassName('content')[0]
-    let els = content.childNodes;
+    let content = container.getElementsByClassName('content')
+    let els = container.childNodes;
+    console.log(content)
+    if (content.length > 0){
+        content = content[0]
+        els = content.childNodes;
+    }
     for (let i = 0; i < els.length; i++) {
         // Only apply this code block to h1, h2, etc
         if (typeof els[i].tagName === 'undefined' || els[i].tagName[0] != 'H' || els[i].tagName == 'HR' ) {
