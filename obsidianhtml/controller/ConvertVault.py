@@ -730,6 +730,38 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         safe_link = r'<source src="'+re.escape(link)+r'"'
         md.page = re.sub(safe_link, new_link, md.page)
 
+    # [?] Handle local img tag-links (copy them over to output)
+    # ------------------------------------------------------------------
+    for tag in re.findall(r'<img src=".*?>', md.page):
+
+        # get template and link from tag
+        # e.g. <img src="200w.gif"  width="200"> --> <img src="{link}"  width="200"> & 200w.gif
+        parts = tag.split('src="')
+        iparts = parts[1].split('"', 1)
+        link = iparts[0]
+        template = parts[0] + 'src="{link}"' + iparts[1]
+
+        l = urllib.parse.unquote(link)
+        if '://' in l:
+            continue
+
+
+        rel_path_str, lo = FindFile(pb.index.files, l, pb)
+        if rel_path_str == False:
+            if pb.gc('toggles/warn_on_skipped_image', cached=True):
+                warnings.warn(f"Media {l} treated as external and not imported in html")
+            continue
+
+        # Copy src to dst
+        lo.copy_file('mth')
+
+        # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
+        new_link = template.replace('{link}', urllib.parse.quote(lo.get_link('html', origin=fo)))
+        safe_link = re.escape(tag)
+        print(2, new_link)
+        print(3, safe_link)
+        md.page = re.sub(safe_link, new_link, md.page)
+
     # [?] Handle local embeddable tag-links (copy them over to output)
     # ------------------------------------------------------------------
     for link in re.findall(r'(?<=<embed src=")([^"]*)', md.page):
