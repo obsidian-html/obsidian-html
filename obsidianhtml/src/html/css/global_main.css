@@ -302,7 +302,7 @@ td {
     padding-right: 1rem;
 }
 
-td:nth-child(2n) {
+td:nth-child(n) {
     border-left: 1px dotted rgb(var(--table-border-color-rgb), 0.3);
 }
 
