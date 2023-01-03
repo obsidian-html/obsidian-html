@@ -53,14 +53,14 @@ def CompileTagPageMarkdown(pb):
         fo = files[k]
 
         # Don't parse if not parsable
+        page_path = fo.fullpath('note')
+        page_path_str = page_path.as_posix()
         if not fo.metadata['is_parsable_note']:
             if verbose(pb):
                 print(f'\t\tSkipping file, not parsable note: {page_path_str}')
             continue
 
         # Determine src file path
-        page_path = fo.fullpath('note')
-        page_path_str = page_path.as_posix()
         if verbose(pb):
             print(f'\t\tParsing note {page_path_str}')
 

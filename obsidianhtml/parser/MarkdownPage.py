@@ -255,6 +255,51 @@ class MarkdownPage:
             safe_link = re.escape('![['+link+']]')
             self.page = re.sub(safe_link, new_link, self.page)
 
+        for tag in re.findall(r'<img src=".*?/>', self.page):
+            print(6, tag)
+
+            # get template and link from tag
+            # e.g. <img src="200w.gif"  width="200"> --> <img src="{link}"  width="200"> & 200w.gif
+            parts = tag.split('src="')
+            iparts = parts[1].split('"', 1)
+            link = iparts[0]
+            template = parts[0] + 'src="{link}"' + iparts[1]
+
+            print(7, template, link)
+
+            l = urllib.parse.unquote(link)
+            if '://' in l:
+                continue
+
+            # Find file
+            rel_path_str, lo = FindFile(self.pb.index.files, link, self.pb)
+            if rel_path_str == False:
+                if self.pb.gc('toggles/verbose_printout', cached=True):
+                    print(f"\t\tImage/file with obsidian link of '{link}' will not be copied over in this step.")
+                    if '://' in link:
+                        print("\t\t\t<continued> The link seems to be external (contains ://)")
+                    else:
+                        print(f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
+                continue
+
+            # Get shorthand info
+            relative_path = lo.path['markdown']['file_relative_path']
+
+            # Copy file over to markdown destination
+            lo.copy_file('ntm')
+
+            # Adjust link in page
+            file_name = urllib.parse.unquote(link)
+            relative_path = relative_path.as_posix()
+            relative_path = ('../' * page_folder_depth) + relative_path
+            new_link = template.replace('{link}', urllib.parse.quote(relative_path))
+
+            print(8, new_link)
+
+            safe_link = re.escape(tag)
+            self.page = re.sub(safe_link, new_link, self.page)
+
+
         # -- [4] Handle local image/video/audio links (copy them over to output)
         for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", self.page):
             unq_link = urllib.parse.unquote(link)
