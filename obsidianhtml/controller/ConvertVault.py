@@ -753,7 +753,8 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             continue
 
         # Copy src to dst
-        lo.copy_file('mth')
+        if lo.path['markdown']['file_absolute_path'].exists():
+            lo.copy_file('mth')
 
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
         new_link = template.replace('{link}', urllib.parse.quote(lo.get_link('html', origin=fo)))
