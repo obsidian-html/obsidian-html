@@ -114,13 +114,19 @@ class MarkdownPage:
         self.codelines = re.findall("`(.*?)`", self.page)
         for i, match in enumerate(self.codelines):
             self.page = self.page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
-           
+
+        self.latexblocks = re.findall("^\$\$([\s\S]*?)\$\$[\s]*?$", self.page, re.MULTILINE)
+        for i, match in enumerate(self.latexblocks):
+            self.page = self.page.replace("$$"+match+"$$", f'%%%latexblock-placeholder-{i}%%%')
+
     def RestoreCodeSections(self):
         """Undo the action of StripCodeSections."""
         for i, value in enumerate(self.codeblocks):
             self.page = self.page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```\n")
         for i, value in enumerate(self.codelines):
-            self.page = self.page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")  
+            self.page = self.page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")
+        for i, value in enumerate(self.latexblocks):
+            self.page = self.page.replace(f'%%%latexblock-placeholder-{i}%%%', f"$${value}$$") 
 
     def add_tag(self, tag):
         if 'tags' not in self.metadata:

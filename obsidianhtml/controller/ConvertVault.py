@@ -758,8 +758,6 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
         new_link = template.replace('{link}', urllib.parse.quote(lo.get_link('html', origin=fo)))
         safe_link = re.escape(tag)
-        print(2, new_link)
-        print(3, safe_link)
         md.page = re.sub(safe_link, new_link, md.page)
 
     # [?] Handle local embeddable tag-links (copy them over to output)
