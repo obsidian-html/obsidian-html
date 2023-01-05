@@ -256,7 +256,6 @@ class MarkdownPage:
             self.page = re.sub(safe_link, new_link, self.page)
 
         for tag in re.findall(r'<img src=".*?/>', self.page):
-            print(6, tag)
 
             # get template and link from tag
             # e.g. <img src="200w.gif"  width="200"> --> <img src="{link}"  width="200"> & 200w.gif
@@ -264,8 +263,6 @@ class MarkdownPage:
             iparts = parts[1].split('"', 1)
             link = iparts[0]
             template = parts[0] + 'src="{link}"' + iparts[1]
-
-            print(7, template, link)
 
             l = urllib.parse.unquote(link)
             if '://' in l:
@@ -293,8 +290,6 @@ class MarkdownPage:
             relative_path = relative_path.as_posix()
             relative_path = ('../' * page_folder_depth) + relative_path
             new_link = template.replace('{link}', urllib.parse.quote(relative_path))
-
-            print(8, new_link)
 
             safe_link = re.escape(tag)
             self.page = re.sub(safe_link, new_link, self.page)
@@ -447,7 +442,7 @@ class MarkdownPage:
 
         # -- [9] Remove inline tags, like #ThisIsATag
         # Inline tags are # connected to text (so no whitespace nor another #)
-        for l in re.findall("(?<!\S)#[^\s#`]+", self.page):
+        for l in re.findall("(?<!\S)#[^\s#`:]+", self.page):
             tag = l.replace('.', '').replace('#', '')
             new_md_str = f"**{tag}**"
 

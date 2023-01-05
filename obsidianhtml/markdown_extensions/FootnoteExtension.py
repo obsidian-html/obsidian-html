@@ -186,7 +186,7 @@ class FootnoteExtension(Extension):
         i, fn = self.getFootnoteByName(name)
         if fn is None:
             raise Exception('Expected footnote definition')
-        self.footnotes[i]['text'] = text
+        self.footnotes[i]['text'] = self.RestoreCodeSections(text)
 
 
     def setFootnoteOrderLookup(self, name):
