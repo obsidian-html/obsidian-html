@@ -1,5 +1,5 @@
 from __future__ import annotations
-import re                   # regex string finding/replacing
+import regex as re                   # regex string finding/replacing
 import yaml
 from pathlib import Path    # 
 import frontmatter          # remove yaml frontmatter from md files
@@ -296,7 +296,7 @@ class MarkdownPage:
 
 
         # -- [4] Handle local image/video/audio links (copy them over to output)
-        for link in re.findall("(?<=\!\[\]\()(.*?)(?=\))", self.page):
+        for tag, link in re.findall("(?<=\!\[(.*?)\]\()(.*?)(?=\))", self.page):
             unq_link = urllib.parse.unquote(link)
             
             #clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
@@ -324,7 +324,7 @@ class MarkdownPage:
             file_name = urllib.parse.unquote(link)
             relative_path = relative_path.as_posix()
             relative_path = ('../' * page_folder_depth) + relative_path
-            new_link = '![]('+urllib.parse.quote(relative_path)+')'
+            new_link = f'![{tag}]('+urllib.parse.quote(relative_path)+')'
 
             # Handle video/audio usecase
             if lo.metadata['is_video']:
@@ -333,10 +333,15 @@ class MarkdownPage:
                 new_link = self.GetAudioHTML(file_name, relative_path, suffix)
             elif lo.metadata['is_embeddable']:
                 new_link = self.GetEmbeddable(file_name, relative_path, suffix)
-            elif len(unq_link.split('|')) > 1:
-                new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{unq_link.split("|")[-1]}">'
+            elif tag != '':
+                width = ''
+                if tag.isdigit():
+                    width = tag
+                elif '|' in tag:
+                    width = tag.split('|')[-1]
+                new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{width}">'
 
-            safe_link = re.escape('![]('+link+')')
+            safe_link = re.escape(f'![{tag}]('+link+')')
             self.page = re.sub(safe_link, new_link, self.page)
 
         # -- [5] Change file name in proper markdown links to path
