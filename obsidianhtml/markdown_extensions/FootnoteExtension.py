@@ -243,10 +243,12 @@ class FootnoteExtension(Extension):
         for index, fn in enumerate(self.footnotes):
             li = etree.SubElement(ol, "li")
             li.set("id", self.makeFootnoteId(fn['id']))
+
             # Parse footnote with surrogate parent as li cannot be used.
             # List block handlers have special logic to deal with li.
             # When we are done parsing, we will copy everything over to li.
-            self.parser.parseChunk(surrogate_parent, fn['text'])
+            if fn['text'] is not None:
+                self.parser.parseChunk(surrogate_parent, fn['text'])
 
             for el in list(surrogate_parent):
                 li.append(el)
