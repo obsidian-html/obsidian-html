@@ -640,7 +640,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
     # Get all local markdown links. 
     # ------------------------------------------------------------------
     # This is any string in between '](' and  ')' with no spaces in between the ( and )
-    proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', md.page)
+    proper_links = re.findall(r'(?<=\]\()[^\s\]]+?(?=\))', md.page)
     for l in proper_links:
         ol = l
         l = urllib.parse.unquote(l)
