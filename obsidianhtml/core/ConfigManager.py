@@ -235,8 +235,7 @@ class Config:
 
     def load_embedded_titles_plugin(self):
         '''
-            This function integrates the EmbeddedTitles plugin. Since this was written, Obsidian has added integral support for Embedded titles, 
-            this is not handled correctly by this code!
+            There are two options for embedded titles: the recent built-in system, or the older embedded titles plugin.
         '''
         pb = self.pb
 
@@ -247,37 +246,11 @@ class Config:
                 print('\t'*(1), f"html: embedded note titles are disabled in config")
             return
         else:
+            pb.config.capabilities_needed['embedded_note_titles'] = True
+            self.plugin_settings['embedded_note_titles'] = {}
             if pb.gc('toggles/verbose_printout', cached=True):
                 print('\t'*(1), f"html: embedded note titles are enabled in config")
 
-        # Enable/disable capability based on whether the plugin is installed
-        embed_plugin_folder_path = pb.paths['original_obsidian_folder'].joinpath('.obsidian/plugins/obsidian-embedded-note-titles').resolve()
-        pb.config.capabilities_needed['embedded_note_titles'] = embed_plugin_folder_path.exists()
-        if pb.gc('toggles/verbose_printout', cached=True):
-            if pb.config.capabilities_needed['embedded_note_titles']:
-                print('\t'*(1), f"html: embedded note title plugin found, enabling embedded_note_titles capability.")
-            else:
-                print('\t'*(1), f"html: embedded note title plugin not found, disabling embedded_note_titles capability.")
-
-        # Load config
-        if pb.config.capabilities_needed['embedded_note_titles']:
-            # carve out space in plugin settings
-            self.plugin_settings['embedded_note_titles'] = {}
-
-            # test if plugin is installed, and load plugin settings if so.
-            data_path = embed_plugin_folder_path.joinpath('data.json').resolve()
-            data_path_exists = False
-            if data_path.exists():
-                with open(data_path, 'r', encoding='utf-8') as f:
-                    self.plugin_settings['embedded_note_titles'] = json.loads(f.read())
-                result = True
-
-            # verbose logging
-            if pb.gc('toggles/verbose_printout', cached=True):
-                if result:
-                    print('\t'*(1), f"html: embedded note titles settings loaded.", pb.config.plugin_settings['embedded_note_titles'])
-                else:
-                    print('\t'*(1), f"html: embedded note titles settings were not found, using defaults.")
 
 
     def check_required_values_filled_in(self, config, path='', match_str='<REQUIRED_INPUT>'):
