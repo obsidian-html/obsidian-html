@@ -688,8 +688,10 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
     # ------------------------------------------------------------------
     for link in re.findall(r'\!\[.*?\]\((.*?)\)', md.page):
         
-        l = urllib.parse.unquote(link)
+        if link.strip() == '':
+            continue
 
+        l = urllib.parse.unquote(link)
         if l[0] == '/':
             l = l.replace('/', '', 1)
 

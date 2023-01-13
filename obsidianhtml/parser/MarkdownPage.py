@@ -301,6 +301,8 @@ class MarkdownPage:
             
             #clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
             clean_link = unq_link.split('|')[0]
+            if clean_link.strip() == '':
+                continue
 
             # Find file
             rel_path_str, lo = FindFile(self.pb.index.files, clean_link, self.pb)
