@@ -35,7 +35,7 @@ class BlockLinkBlockProcessor(BlockProcessor):
 
         # split off last line
         lines = block.split('\n')
-        marker = lines.pop().replace('^','__')
+        marker = lines.pop().strip().replace('^','__')
 
         div = etree.SubElement(parent, 'div')
         div.set('id', marker)
