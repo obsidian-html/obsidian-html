@@ -341,7 +341,7 @@ class MarkdownPage:
                     width = tag
                 elif '|' in tag:
                     width = tag.split('|')[-1]
-                new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{width}">'
+                new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{width}" />'
 
             safe_link = re.escape(f'![{tag}]('+link+')')
             self.page = re.sub(safe_link, new_link, self.page)

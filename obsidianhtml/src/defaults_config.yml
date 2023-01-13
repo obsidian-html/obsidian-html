@@ -216,6 +216,7 @@ toggles:
       enabled: True
     embedded_note_titles:
       enabled: True
+      hide_on_h1: True          # don't add embedded title if the note starts with an h1
 
     search:
       enabled: True
