@@ -46,6 +46,7 @@ from ..markdown_extensions.FormattingExtension import FormattingExtension
 from ..markdown_extensions.EmbeddedSearchExtension import EmbeddedSearchExtension
 from ..markdown_extensions.CodeWrapperExtension import CodeWrapperExtension
 from ..markdown_extensions.AdmonitionExtension import AdmonitionExtension
+from ..markdown_extensions.BlockLinkExtension import BlockLinkExtension
 
 def ConvertVault(config_yaml_location=''):
     # Set config
@@ -851,6 +852,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     extensions.append(CodeWrapperExtension())
     extensions.append(AdmonitionExtension())
+    extensions.append(BlockLinkExtension())
     #extensions.append('custom_tables')
 
 

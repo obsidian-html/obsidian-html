@@ -428,8 +428,13 @@ class MarkdownPage:
                     hashpart = hashpart.replace(' ', '-').lower()
                     newlink += f'#{hashpart}'
             else:
-                newlink = '#' + slugify(hashpart)
-                alias = hashpart
+                if hashpart[0] == '^':
+                    #blockid blocklink
+                    newlink = '#' + hashpart.replace('^','__')
+                else:
+                    # normal anchor
+                    newlink = '#' + slugify(hashpart)
+                    alias = hashpart
 
             # Replace Obsidian link with proper markdown link
             self.page = self.page.replace('[['+l+']]', f"[{alias}]({newlink})")
@@ -485,7 +490,7 @@ class MarkdownPage:
             if not file_object.is_valid_note('note'):
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Error including file or not a markdown file {link}.")
                 continue
-            
+
             # Get code
             #included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
             included_page = file_object.load_markdown_page('note')
@@ -518,11 +523,6 @@ class MarkdownPage:
             # add link to frontmatter yaml so that we can add it to the graphview
             if self.pb.gc('toggles/features/graph/show_inclusions_in_graph'):
                 self.AddInclusionLink(result['rtr_path_str'])
-
-        # -- [#296] Remove block references 
-        if remove_block_references:
-            self.page  = re.sub(r'(?<=\s)(\^\S*?)(?=$|\n)', '', self.page)
-
         # -- [1] Restore codeblocks/-lines
         self.RestoreCodeSections()
 
