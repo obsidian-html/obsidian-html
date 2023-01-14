@@ -351,6 +351,8 @@ class MarkdownPage:
                     if parts[-1].isdigit():
                         width = parts.pop()
                     alt = ''.join(parts)
+                else:
+                    alt = tag
                 new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{width}" alt="{alt}" title="{alt}" />'
 
             safe_link = re.escape(f'![{tag}]('+link+')')
