@@ -245,7 +245,13 @@ class MarkdownPage:
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
         for link in re.findall("(?<=\!\[\[)(.*?)(?=\])", self.page):
-            new_link = '![]('+urllib.parse.quote(link)+')'
+            if '|' in link:
+                parts = link.split('|')
+                l = parts.pop(0)
+                alias = '|'.join(parts)
+                new_link = f'![{alias}]('+urllib.parse.quote(l)+')'
+            else:
+                new_link = '![]('+urllib.parse.quote(link)+')'
 
             # Obsidian page inclusions use the same tag...
             # Skip if we don't match image suffixes. Inclusions are handled at the end.
@@ -337,11 +343,15 @@ class MarkdownPage:
                 new_link = self.GetEmbeddable(file_name, relative_path, suffix)
             elif tag != '':
                 width = ''
+                alt = ''
                 if tag.isdigit():
                     width = tag
                 elif '|' in tag:
-                    width = tag.split('|')[-1]
-                new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{width}" />'
+                    parts = tag.split('|')
+                    if parts[-1].isdigit():
+                        width = parts.pop()
+                    alt = ''.join(parts)
+                new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{width}" alt="{alt}" title="{alt}" />'
 
             safe_link = re.escape(f'![{tag}]('+link+')')
             self.page = re.sub(safe_link, new_link, self.page)
