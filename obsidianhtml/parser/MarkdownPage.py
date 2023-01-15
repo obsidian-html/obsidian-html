@@ -244,7 +244,7 @@ class MarkdownPage:
 
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
-        for link in re.findall("(?<=\!\[\[)(.*?)(?=\])", self.page):
+        for link in re.findall("(?<=\!\[\[)(.*?)(?=\]\])", self.page):
             if '|' in link:
                 parts = link.split('|')
                 l = parts.pop(0)
