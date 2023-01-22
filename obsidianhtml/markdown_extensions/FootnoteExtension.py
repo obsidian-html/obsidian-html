@@ -164,7 +164,7 @@ class FootnoteExtension(Extension):
         """Undo the action of StripCodeSections."""
         for rid in self.codeblocks.keys():
             value = self.codeblocks[rid]
-            block = block.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```\n")
+            block = block.replace(f'%%%codeblock-placeholder-{rid}%%%', f"```{value}```\n")
         for rid in self.codelines.keys():
             value = self.codelines[rid]
             block = block.replace(f'%%%codeline-placeholder-{rid}%%%', f"`{value}`")  
@@ -261,6 +261,9 @@ class FootnoteExtension(Extension):
             # When we are done parsing, we will copy everything over to li.
             if fn['text'] is not None:
                 text = self.RestoreCodeSections(fn['text'])
+
+                # change code blocks so the newlines are not stripped
+                text = convert_codeblocks(text)
                 self.parser.parseChunk(surrogate_parent, text)
 
             for el in list(surrogate_parent):
@@ -531,3 +534,20 @@ class FootnotePostprocessor(Postprocessor):
 def makeExtension(**kwargs):  # pragma: no cover
     """ Return an instance of the FootnoteExtension """
     return FootnoteExtension(**kwargs)
+
+def convert_codeblocks(text):
+    mode = False
+    acc = []
+    for line in text.split('\n'):
+        if line.startswith('```'):
+            if mode == False:
+                acc.append('')
+            mode = not mode
+            continue
+        if mode:
+            acc.append('    ' + line)
+        else:
+            acc.append(line)
+
+    acc = '\n'.join(acc)
+    return acc
