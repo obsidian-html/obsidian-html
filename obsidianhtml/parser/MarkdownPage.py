@@ -8,6 +8,7 @@ import warnings
 
 from ..core.FileFinder import GetObsidianFilePath, FindFile
 from ..lib import DuplicateFileNameInRoot, slugify, MalformedTags, OpenIncludedFile
+from .convert_functions import obs_img_to_md_img
 
 from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock, GetSubHeaderTree
 
@@ -242,25 +243,11 @@ class MarkdownPage:
         # -- [?] Remove whitespace in front of header hashtags
         self.page = re.sub('(^\ [\ ]*)(?=#)', '', self.page, flags=re.MULTILINE)
 
+
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
-        for link in re.findall("(?<=\!\[\[)(.*?)(?=\]\])", self.page):
-            if '|' in link:
-                parts = link.split('|')
-                l = parts.pop(0)
-                alias = '|'.join(parts)
-                new_link = f'![{alias}]('+urllib.parse.quote(l)+')'
-            else:
-                new_link = '![]('+urllib.parse.quote(link)+')'
+        self.page = obs_img_to_md_img(self.pb, self.page)
 
-            # Obsidian page inclusions use the same tag...
-            # Skip if we don't match image suffixes. Inclusions are handled at the end.
-            l = link.split('|')[0]
-            if len(l.split('.')) == 1 or l.split('.')[-1].lower() not in self.pb.gc('included_file_suffixes', cached=True):
-                new_link = f'<inclusion href="{l}" />'
-
-            safe_link = re.escape('![['+link+']]')
-            self.page = re.sub(safe_link, new_link, self.page)
 
         for tag in re.findall(r'<img src=".*?/>', self.page):
 

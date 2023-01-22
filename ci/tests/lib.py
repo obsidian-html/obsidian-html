@@ -21,13 +21,18 @@ def get_paths():
     paths['ci_src']             = paths['root'].joinpath('ci/src').resolve()                        # (..)/obsidian-html/ci/src/
     paths['sys_default_config'] = paths['root'].joinpath('obsidianhtml/src/defaults_config.yml')    # (..)/obsidian-html/obsidianhtml/src/defaults_config.yml
     paths['ci_configs']         = paths['root'].joinpath('ci/configs')                              # (..)/obsidian-html/ci/configs
-    paths['test_vault']         = paths['root'].joinpath('ci/test_vault')                           # (..)/obsidian-html/ci/configs
+    paths['test_vault']         = paths['root'].joinpath('ci/test_vault')                           # (..)/obsidian-html/ci/test_vault
     paths['temp_dir']           = paths['root'].joinpath('tmp')                                     # (..)/obsidian-html/tmp
     paths['temp_cfg']           = paths['temp_dir'].joinpath('config.yml')                          # (..)/obsidian-html/tmp/config.yml
     paths['html_output_folder'] = paths['temp_dir'].joinpath('html')                                # (..)/obsidian-html/tmp/html
     paths['config_yaml']        = paths['ci_configs'].joinpath('default_settings.yml')              # (..)/obsidian-html/ci/configs/default_settings.yml
+    paths['unit_config_yaml']   = paths['ci_configs'].joinpath('unit_test_settings.yml')            # (..)/obsidian-html/ci/configs/unit_test_settings.yml
+    paths['test_entrypoint']    = paths['test_vault'].joinpath('entrypoint.md')                     # (..)/obsidian-html/ci/test_vault/entrypoint.md
+
+    paths['unit_test_input_output_folder']    = paths['root'].joinpath('ci/unit_tests/input_output')    # (..)/obsidian-html/ci/unit_tests/input_output
      
     return paths
+
 
 def convert_vault(USE_PIP_INSTALL):
 
