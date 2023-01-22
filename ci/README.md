@@ -22,3 +22,18 @@ Then open one of the notebooks
 ```sh
 docker build -t obsidian-html-test .; docker image rm obsidian-html-test
 ```
+
+
+# Unit testing
+## First time setup
+Make sure to install the following packages that are not installed by default when installing obsidianhtml, 
+because they are only used for testing:
+``` shell
+pip install termcolor
+```
+
+## Run
+Move to the root of this repo, and then:
+``` shell
+python ci/tests/unit_test_obs_img_to_md.py
+``` 

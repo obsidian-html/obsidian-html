@@ -25,7 +25,11 @@ class Config:
         self.pb = pb
 
         # merge
-        user_config    = self.load_user_config(input_yml_path_str)
+        if pb.user_config_dict is not None:
+            user_config = pb.user_config_dict
+        else:
+            user_config    = self.load_user_config(input_yml_path_str)
+            
         default_config = yaml.safe_load(OpenIncludedFile('defaults_config.yml'))
         self.config    = MergeDictRecurse(default_config, user_config)
 

@@ -1,0 +1,1 @@
+https://github.com/obsidian-html/obsidian-html/issues/553

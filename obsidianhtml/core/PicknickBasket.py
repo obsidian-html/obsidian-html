@@ -18,6 +18,7 @@ class PicknickBasket:
     gzip_hash = ''
     treeobj = None
     jars = None                     # dict with contents to store for later, see it as a cache
+    user_config_dict = None         # fill with a dict to circumvent loading input yaml
 
     def __init__(self):
         self.tagtree = {'notes': [], 'subtags': {}}
@@ -32,7 +33,12 @@ class PicknickBasket:
         self.state = {}
         self.reset_state()
 
-
+    def construct(self, config_yaml_location):
+        # Load config, paths, etc
+        self.loadConfig(config_yaml_location)
+        self.set_paths()
+        self.compile_dynamic_inclusions()
+        self.config.load_embedded_titles_plugin()
 
     def reset_state(self):
         self.state['action'] = 'Unknown'
@@ -48,7 +54,10 @@ class PicknickBasket:
 
     def loadConfig(self, config_yaml_location=''):
         # find correct config yaml
-        input_yml_path_str = find_user_config_yaml_path(config_yaml_location)
+        if self.user_config_dict is None:
+            input_yml_path_str = find_user_config_yaml_path(config_yaml_location)
+        else:
+            input_yml_path_str = ''
 
         # create config object based on config yaml
         self.config = Config(self, input_yml_path_str)
