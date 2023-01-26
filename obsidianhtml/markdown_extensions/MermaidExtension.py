@@ -46,6 +46,8 @@ class MermaidPreprocessor(Preprocessor):
         in_mermaid_code = False
         is_mermaid = False
         for line in lines:
+            old_line = line
+            
             # Wait for starting line with MermaidRegex (~~~ or ``` following by [mM]ermaid )
             if not in_mermaid_code:
                 m_start = MermaidRegex.match(line)
