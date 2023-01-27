@@ -8,6 +8,12 @@
 #*invalid
 # invalid
 #invalid!word
+
+#1990
+#y1990
+#1990y
+#19y90
+
 '''
 
 import sys
@@ -45,7 +51,29 @@ cases = [
         'function':  get_inline_tags,
         'set'     : (['#!invalid'], [])
     },
+    {   'name'    : 'Test inline tags recognized - "#1990"',
+        'function':  get_inline_tags,
+        'set'     : (['#1990'], [])
+    },
+    {   'name'    : 'Test inline tags recognized - "#y1990"',
+        'function':  get_inline_tags,
+        'set'     : (['#!invalid'], [])
+    },
+    {   'name'    : 'Test inline tags recognized - "#1990y"',
+        'function':  get_inline_tags,
+        'set'     : (['#1990y'], ['1990y'])
+    },
+    {   'name'    : 'Test inline tags recognized - "#19_90"',
+        'function':  get_inline_tags,
+        'set'     : (['#19_90'], ['19_90'])
+    },
+
 ]
+
+for case in cases:
+    inp, outp = case['set']
+    left = '"' + ', '.join(inp) + '"'
+    print(f"{left : <13}", '-->  ', outp)
 
 for case in cases:
     test(case)
