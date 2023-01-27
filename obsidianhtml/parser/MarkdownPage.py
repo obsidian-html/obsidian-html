@@ -47,7 +47,6 @@ class MarkdownPage:
             self.metadata, self.page = frontmatter.parse(f.read())
 
         self.SanitizeFrontmatter()
-        self.GetInlineTags()
 
     def SanitizeFrontmatter(self):
         # imitate obsidian shenannigans
@@ -63,14 +62,14 @@ class MarkdownPage:
             elif tags is None:
                 self.metadata['tags'] = []
 
-    def GetInlineTags(self):
+    def parse_inline_tags(self):
         # get frontmatter tags
         if 'tags' not in self.metadata.keys():
             self.metadata['tags'] = []
         frontmatter_tags = self.metadata['tags']
 
         # get inline tags
-        inline_tags = [x[1:].replace('.','') for x in re.findall("(?<!\S)#[^\s#`]+", self.page)]
+        inline_tags = get_inline_tags(self.page)
 
         # merge, and remove duplicates
         self.metadata['tags'] = list(set(frontmatter_tags + inline_tags))
@@ -132,7 +131,8 @@ class MarkdownPage:
     def add_tag(self, tag):
         if 'tags' not in self.metadata:
             self.metadata['tags'] = []
-        self.metadata['tags'].append(tag)
+        if tag not in self.metadata['tags']:
+            self.metadata['tags'].append(tag)
     
     def AddToTagtree(self, tagtree, url=''):
         if 'tags' not in self.metadata:
@@ -454,8 +454,8 @@ class MarkdownPage:
 
         # -- [9] Remove inline tags, like #ThisIsATag
         # Inline tags are # connected to text (so no whitespace nor another #)
-        for l in re.findall("(?<!\S)#[^\s#`:]+", self.page):
-            tag = l.replace('.', '').replace('#', '')
+        for l in get_inline_tags(self.page):
+            tag = l.replace('.', '')
             new_md_str = f"**{tag}**"
 
             if self.pb.gc('toggles/preserve_inline_tags', cached=True):
@@ -463,7 +463,7 @@ class MarkdownPage:
 
             self.add_tag(tag)
 
-            safe_str = re.escape(l)
+            safe_str = '#' + re.escape(l) + r'(?=[^a-zA-Z/\-_])'
             self.page = re.sub(safe_str, new_md_str, self.page)
             
         # -- [10] Add code inclusions
@@ -527,3 +527,6 @@ class MarkdownPage:
         self.RestoreCodeSections()
 
         return self
+
+def get_inline_tags(page):
+    return [x[1:].replace('.','') for x in re.findall("(?<!\S)#[a-zA-Z/\-_]+", page)]
