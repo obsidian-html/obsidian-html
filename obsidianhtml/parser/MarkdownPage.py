@@ -463,7 +463,7 @@ class MarkdownPage:
 
             self.add_tag(tag)
 
-            safe_str = '#' + re.escape(l) + r'(?=[^a-zA-Z/\-_])'
+            safe_str = '#' + re.escape(l) + r'(?=[^\w/\-])'
             self.page = re.sub(safe_str, new_md_str, self.page)
             
         # -- [10] Add code inclusions
@@ -529,4 +529,4 @@ class MarkdownPage:
         return self
 
 def get_inline_tags(page):
-    return [x[1:].replace('.','') for x in re.findall("(?<!\S)#[a-zA-Z/\-_]+", page)]
+    return [x[1:].replace('.','') for x in re.findall("(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]
