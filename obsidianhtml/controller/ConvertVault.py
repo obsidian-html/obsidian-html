@@ -633,7 +633,8 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
     # ------------------------------------------------------------------
-    md.StripCodeSections()     
+    md.StripCodeSections()
+    md.parse_inline_tags()
 
     # Get all local markdown links. 
     # ------------------------------------------------------------------

@@ -32,7 +32,7 @@ if is_windows:
 
 # import functions to test
 from obsidianhtml.parser.convert_functions import obs_img_to_md_img, md_to_html
-
+from obsidianhtml.parser.MarkdownPage import get_inline_tags
 from obsidianhtml.markdown_extensions.FootnoteExtension import convert_codeblocks
 
 
@@ -40,6 +40,23 @@ def check_test_result(case, output):
     if output != case['output']:
         print_fail(case)
         print(f"    - Expected:\n{case['output']}")
+        print(f"    - Got:\n{output}")
+        os.environ["TESTS_FAILED"] = "1"
+    else:
+        print_succes(case)
+
+
+def test(case):
+    # run function
+    if 'set' in case:
+        function_input, expected_output = case['set']
+        output = case['function'](*function_input)
+    else:
+        raise Exception('not implemented')
+
+    if output != expected_output:
+        print_fail(case)
+        print(f"    - Expected:\n{expected_output}")
         print(f"    - Got:\n{output}")
         os.environ["TESTS_FAILED"] = "1"
     else:
