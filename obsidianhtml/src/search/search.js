@@ -2,6 +2,7 @@
 // -----------------------------------------------------------------------------------------------
 
 var SEARCH_DATA_SOURCE = '';                   // search.json contents
+var SEARCH_DATA_LOADED = false;
 var SEARCH_DATA = [];                          // SEARCH_DATA_SOURCE with changes made
 
 var URL_MODE = '{url_mode}';
@@ -14,27 +15,109 @@ var index;
 
 // Get data
 // -----------------------------------------------------------------------------------------------
-setTimeout(LoadSearchData, 500);
+setTimeout(PreLoadSearchData, 500);
 
-function LoadSearchData(){
+async function PreLoadSearchData(){
+    console.log('Try preloading search_data')
     let search_data = ls_get('search_data');
-    let search_hash = ls_get('search_hash');
+    if (search_data){
+        console.log('Using localStorage seach_data as input')
+        SEARCH_DATA_SOURCE = JSON.parse(search_data)
 
-    if (gzip_hash != search_hash || !search_data){
-        // refresh data
-        GzipUnzipLocalFile(CONFIGURED_HTML_URL_PREFIX + '/obs.html/data/search.json.gzip').then(data => {
-            SEARCH_DATA_SOURCE = JSON.parse(data);
-            ls_set('search_data', data);
-            ls_set('search_hash', gzip_hash);
-
-            InitFlexSearch();
-        });
-    }
-    else {
-        // just load cached data
-        SEARCH_DATA_SOURCE = JSON.parse(search_data);
+        // start flex search, using SEARCH_DATA_SOURCE as input
         InitFlexSearch();
+
+        // signal that the data is loaded and does not need to be reloaded
+        SEARCH_DATA_LOADED = true;
+
+        console.log('Preloading search_data succeeded')
+        return
     }
+    console.log('Preloading search_data skipped, not (yet) cached in localStorage.')
+    return
+}
+
+async function LoadSearchData(){
+    if (SEARCH_DATA_LOADED){
+        console.log('Seach already initialized, skipping LoadSearchData()')
+        return
+    }
+
+    console.log('Search engine loading...')
+    const start = performance.now();
+
+    function end_function(){
+        // start flex search, using SEARCH_DATA_SOURCE as input
+        InitFlexSearch();
+
+        // signal that the data is loaded and does not need to be reloaded
+        SEARCH_DATA_LOADED = true;
+
+        // logging
+        console.log('Search engine loaded.')
+        const end = performance.now();
+        console.log(`Execution time search: ${end - start} ms`);
+    }
+
+    // try using cached data
+    let search_hash = ls_get('search_hash');
+    if (gzip_hash == search_hash)
+    {
+        // use parsed search_data (ready to be used) if present
+        let search_data = ls_get('search_data');
+        if (search_data){
+            console.log('Using localStorage seach_data as input')
+            SEARCH_DATA_SOURCE = JSON.parse(search_data)
+            return end_function()
+        }
+
+        // use zipped b64 data if present
+        let search_data_zipped_b64_str = ls_get('search_data_zipped_b64_str');
+        if (search_data_zipped_b64_str)
+        {
+            console.log('Using localStorage search_data_zipped_b64_str as input')
+            let search_data = UnzipData(search_data_zipped_b64_str)
+            SEARCH_DATA_SOURCE = JSON.parse(search_data)
+            return end_function()
+        }
+    }
+
+    // no cached data available, get data and cache it when possible
+    console.log('Loading search data from file...')
+
+    GetGzipContentsAsB64Str(CONFIGURED_HTML_URL_PREFIX + '/obs.html/data/search.json.gzip').then(gzipped_data_str => {
+
+        ls_set('search_hash', gzip_hash);
+
+        console.log('Unzipping search_data_zipped_b64_str to search_data... ')
+        let search_data = UnzipData(gzipped_data_str);
+        console.log('Unzipping search_data_zipped_b64_str to search_data... Done')
+
+        console.log('Try caching search_data... ')
+        try {
+            ls_set('search_data', search_data);
+            console.log('Caching search_data... Done')
+        } 
+        catch (error) {
+            console.error(error);
+            console.log('Caching search_data... Failed')
+
+            console.log('Try Caching search_data_zipped_b64_str... ')
+            try {
+                ls_set('search_data_zipped_b64_str', gzipped_data_str);
+                console.log('Caching search_data_zipped_b64_str... Done.')
+            } 
+            catch (error) {
+                console.error(error);
+                console.log('Caching search_data_zipped_b64_str... Failed')
+            }
+        }
+
+        SEARCH_DATA_SOURCE = JSON.parse(search_data);
+        console.log('Loading search data from file... Done')
+        
+        return end_function()
+    })
 }
 
 function InitFlexSearch(){
@@ -48,7 +131,8 @@ function InitFlexSearch(){
     SEARCH_DATA_SOURCE.forEach(doc => {
         let obj = {
             id: i,
-            content: doc.keywords,
+            //content: doc.keywords,
+            content: doc.content,
             title: doc.title,
             url: get_node_url_adaptive(doc)
         }
@@ -125,7 +209,6 @@ function GetResultsFlex(search_string, hard_search) {
             // add match to list
             else {
                 match_ids.push(record_id);
-                
                 matches.push({ id: record_id, title: SEARCH_DATA[record_id].title, url: SEARCH_DATA[record_id].url, matched_on: [field.field] })
             }
         })
@@ -163,13 +246,56 @@ function GetHtmlFlex(fs_results, search_string, hard_search) {
 }
 
 async function GzipUnzipLocalFile(request_url) {
-    return fetch(request_url)                                                   // make request
+    return fetch(request_url)                                               // make request
         .then(res => res.blob())                                            // read byte data in blob form and continue when fully read
         .then(blob => blob.arrayBuffer())                                   // convert blob to arraybuffer and continue when done
         .then(ab => {
             data = pako.inflate(ab)                                         // go from zipped arraybuffer to unzipped arraybuffer
             return new TextDecoder('utf-8').decode(new Uint8Array(data));   // convert arraybuffer to string
         })
+}
+
+async function GetGzipContentsAsB64Str(request_url) {
+    console.log('Refreshing search data')
+    return fetch(request_url)                                               // make request
+        .then(res => res.blob())                                            // read byte data in blob form and continue when fully read
+        .then(blob => blob.arrayBuffer())                                   // convert blob to arraybuffer and continue when done
+        .then(ab => {
+            return array_buffer_to_b64_str(ab)
+        })
+}
+
+function array_buffer_to_utf8_str(ab){
+    var enc = new TextDecoder("utf-8");
+    let str = enc.decode(ab);
+    return str;
+}
+
+function array_buffer_to_b64_str( buffer ) {
+    var binary = '';
+    var bytes = new Uint8Array( buffer );
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa( binary );
+}
+
+function b64_str_to_array_buffer(base64) {
+    var binary_string = window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+function UnzipData(gzipped_data_str){
+    let zipped_ab = b64_str_to_array_buffer(gzipped_data_str);
+    data_ab = pako.ungzip(zipped_ab);
+    data_str = array_buffer_to_utf8_str(data_ab);
+    return data_str;
 }
 
 

@@ -13,7 +13,7 @@ class SearchHead:
             'title': title,
             'url': url,
             'rtr_url': rtr_url,
-            'keywords': GetKeywords(content),
+            #'keywords': GetKeywords(content),
             'content': SanatizeText(content),
             'tags': GetTags(metadata)
         }
