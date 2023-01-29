@@ -7,7 +7,6 @@ import datetime
 import regex as re
 
 from ..core.FileObject import FileObject
-from ..core.FileFinder import GetNodeId
 from ..parser.MarkdownPage import MarkdownPage
 
 def verbose(pb):
@@ -72,7 +71,7 @@ def CompileTagPageMarkdown(pb):
         metadata = md.metadata
         page = md.page
         node_name = md.GetNodeName()
-        node_id = GetNodeId(fo.path['markdown']['file_relative_path'].as_posix(), pb)
+        node_id = pb.FileFinder.GetNodeId(pb, fo.path['markdown']['file_relative_path'].as_posix())
 
         # Skip if not valid
         if not fo.is_valid_note('note'):

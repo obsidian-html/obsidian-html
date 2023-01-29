@@ -7,7 +7,6 @@ import shutil               # used to remove a non-empty directory, copy files
 from pathlib import Path
 
 from ..lib import DuplicateFileNameInRoot
-from ..core.FileFinder import GetObsidianFilePath
 
 
 class MarkdownLink:
@@ -111,7 +110,7 @@ class MarkdownLink:
     def GetFileObject(self):
         #self.name = self.url.split('/')[-1]
         url = self.url
-        res = GetObsidianFilePath(url, self.pb.index.files, self.pb)
+        res = self.pb.FileFinder.GetObsidianFilePath(url, self.pb)
         if res['fo']:
             self.fo = res['fo']
         return

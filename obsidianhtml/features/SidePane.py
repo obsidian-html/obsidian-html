@@ -111,7 +111,10 @@ def get_content_name_by_pane_id(pb, pane_id):
         'tag_tree': 'Tag Tree',
         'html_page': pane_id.split('_')[0].title()
     }
-    return names[pb.gc(f'toggles/features/side_pane/{pane_id}/contents')]
+    content_key = pb.gc(f'toggles/features/side_pane/{pane_id}/contents')
+    if content_key not in names.keys():
+        return pane_id
+    return names[content_key]
 
 @cache
 def gc_add_toc_when_missing(pb, fo):

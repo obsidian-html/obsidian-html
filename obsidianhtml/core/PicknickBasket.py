@@ -3,6 +3,7 @@ import inspect
 from pathlib import Path
 
 from .ConfigManager import Config, find_user_config_yaml_path
+from .FileFinder import FileFinder
 from ..features.Search import SearchHead
 from ..features.CreateIndexFromDirStructure import CreateIndexFromDirStructure
 
@@ -25,6 +26,8 @@ class PicknickBasket:
         self.jars = {}
         # self.network_tree = NetworkTree(self.verbose)
         self.search = SearchHead()
+
+        self.FileFinder = FileFinder()
 
         # State should be updated whenever we start a new type of operation.
         # When doing an operation by looping through notes, set loop_type to 'note', for links within a note 'note_link', if not in a loop-type operation, set to None.
