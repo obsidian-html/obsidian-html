@@ -220,6 +220,7 @@ toggles:
 
     search:
       enabled: True
+      try_preload: False        # on page refresh, if search_data is stored in localStorage, it will init search, instead of waiting for the search panel to be opened.
       styling:
         show_icon: True
 
