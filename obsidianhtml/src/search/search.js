@@ -8,6 +8,7 @@ var SEARCH_DATA = [];                          // SEARCH_DATA_SOURCE with change
 var URL_MODE = '{url_mode}';
 var RELATIVE_PATHS = {relative_paths};
 var CONFIGURED_HTML_URL_PREFIX = '{configured_html_url_prefix}';
+var TRY_PRELOAD = {try_preload};
 
 var fuse;                               // fuzzy search object
 var index;
@@ -15,7 +16,9 @@ var index;
 
 // Get data
 // -----------------------------------------------------------------------------------------------
-setTimeout(PreLoadSearchData, 500);
+if (TRY_PRELOAD){
+    setTimeout(PreLoadSearchData, 500);
+}
 
 async function PreLoadSearchData(){
     console.log('Try preloading search_data')
