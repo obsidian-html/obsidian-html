@@ -2,6 +2,8 @@ import os
 import yaml
 import glob
 
+import regex as re
+
 from pathlib import Path
 from functools import cache
 
@@ -14,6 +16,7 @@ class CreateIndexFromDirStructure():
         self.pb = pb
         self.html_url_prefix = pb.gc('html_url_prefix')
         self.root = path
+        self.root_str = path.as_posix()
         self.verbose = pb.gc('toggles/verbose_printout') or pb.gc('toggles/features/create_index_from_dir_structure/verbose')
 
         self.exclude_subfolders = pb.gc('toggles/features/create_index_from_dir_structure/exclude_subfolders')
@@ -38,9 +41,13 @@ class CreateIndexFromDirStructure():
         if isinstance(path, str):
             path = Path(path).resolve()
 
+        path_str = path.as_posix()
+        rel_path_str = path_str.replace(self.root_str, '', 1)
+
         return {
             'name': path.name, 
             'path': path.as_posix(),
+            'rel_path': rel_path_str,
             'folders':folders, 
             'files':files
         }
@@ -81,6 +88,7 @@ class CreateIndexFromDirStructure():
         verbose = self.verbose
 
         for path in Path(tree['path']).resolve().glob('*'):
+
             # Exclude configured subfolders
             _continue = False
             for folder in self.exclude_subfolders_str:
@@ -124,7 +132,9 @@ class CreateIndexFromDirStructure():
 
 
             # append file
-            tree['files'].append({'name': path.stem, 'graph_name': name, 'path': path.as_posix()})
+            path_str = path.as_posix()
+            rel_path_str = path_str.replace(self.root_str, '', 1)
+            tree['files'].append({'name': path.stem, 'graph_name': name, 'path': path.as_posix(), 'rel_path': rel_path_str})
 
         return tree
 
@@ -201,6 +211,52 @@ class CreateIndexFromDirStructure():
         return f"{self.html_url_prefix}/{rel_path}"
 
     def BuildIndex(self, current_page='/'):
+        # Get basic html that we will then edit to make it applicable for the current page.
+        proto = self.BuildProtoIndex('/')
+
+        # folder of the current page
+        dir_path = self.get_dir(current_page)
+
+        # -- set current folders to be opened
+        dirs = dir_path.split('/')
+        while dirs and dirs[-1]:
+            cdp = '/'.join(dirs)
+            dirs.pop()
+            dir_css_active = f"``css-dir-active-{cdp}``"
+            proto = proto.replace(dir_css_active, 'active')
+
+        # remove unused tags
+        safe_str = r'``css-dir-active-.*?``'
+        proto = re.sub(safe_str, '', proto)
+
+        # -- set active file
+        file_css_active = f"``css-file-active-{current_page}``"
+        proto = proto.replace(file_css_active, 'active')
+
+        # remove unused tags
+        safe_str = r'``css-file-active-.*?``'
+        proto = re.sub(safe_str, '', proto)
+
+        # -- set folder-note-active
+        folder_note_active = f"``css-folder-note-active-{current_page}``"
+        proto = proto.replace(folder_note_active, 'active')
+
+        # remove unused tags
+        safe_str = r'``css-folder-note-active-.*?``'
+        proto = re.sub(safe_str, '', proto)
+
+        # -- set folder-note-onclick active
+        onclick_active = f"``onclick-folder-note-{current_page}``"
+        proto = proto.replace(onclick_active, 'toggle_dir(this.id)')
+ 
+        # -- set folder-note-onclick inactive
+        safe_str = r'``onclick-folder-note-.*?``'
+        proto = re.sub(safe_str, 'open_folder_note(this)', proto)
+
+        return proto
+
+    @cache
+    def BuildProtoIndex(self, current_page='/'):
         def set_file_name(f, tab_level):
             if tab_level == 1 and f["name"] == "index":
                 return self.pb.gc('toggles/features/create_index_from_dir_structure/homepage_label', cached=True)
@@ -209,44 +265,32 @@ class CreateIndexFromDirStructure():
 
         def _recurse(tree, tab_level, path, current_page):
             current_dir = self.get_dir(current_page)
-            current_abs_path = self.root.joinpath(current_page[1:]).resolve()
-
+            #current_abs_path = self.root.joinpath(current_page[1:]).resolve()
+            current_abs_path = self.root.as_posix() + current_page
+            
             html = ''
 
             if tab_level >= 0:
                 # -- [#288] folder notes 
-                # test if the folder being processed in this loop has an existing folder note
-                has_folder_note, note_abs_path = self.check_has_folder_note(tree['path'])
-
                 # if the folder is the parent of the current_page it needs to be opened when loading the page
                 # a folder note folder needs slightly different design
-                dir_active = ''
                 folder_note_active = ''
                 fnpf = ''
+                folder_id = tree["rel_path"]
 
-                # folder is the parent of the current note
-                if self.in_tree(current_dir, path):
-                    dir_active = 'active'
-
-                # folder is the parent of the current note and is a folder-note folder
-                if has_folder_note and current_abs_path.as_posix() == note_abs_path.as_posix():
-                    dir_active = 'active'
-                    folder_note_active = 'active'
-
-                # folder is a folder-note folder
-                if has_folder_note: 
+                # test if the folder being processed in this loop has an existing folder note
+                has_folder_note, note_abs_path = self.check_has_folder_note(tree['path'])
+                folder_note_rel_path_str = '-'
+                if has_folder_note:
+                    folder_note_rel_path_str = note_abs_path.as_posix().replace(self.root_str, '', 1)
                     fnpf = '<div class="fn_pf"></div>'
                     url = self.convert_abs_path_to_url(note_abs_path)
-
-                    onclick = 'open_folder_note(this)'
-                    if folder_note_active == 'active':
-                        onclick = 'toggle_dir(this.id)'
-
-                    html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button folder_note {folder_note_active}" href="{url}" onclick="{onclick}">{fnpf}{tree["name"]}</button>\n'
+                    onclick = f"``onclick-folder-note-{folder_note_rel_path_str}``"
+                    html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button folder_note ``css-folder-note-active-{folder_note_rel_path_str}``" href="{url}" onclick="{onclick}">{fnpf}{tree["name"]}</button>\n'
                 else:
                     html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
 
-                html += '\t'*tab_level + f'<div id="folder-container-{self.uid}" class="dir-container requires_js {dir_active}" path="{path}">\n'
+                html += '\t'*tab_level + f'<div id="folder-container-{self.uid}" class="dir-container requires_js ``css-dir-active-{folder_id}``" path="{path}">\n'
 
             tab_level += 1
             self.uid += 1
@@ -262,16 +306,13 @@ class CreateIndexFromDirStructure():
                 if self.check_is_folder_note(Path(f['path'])):
                     continue
 
-                rel_path = Path(f['path']).resolve().relative_to(self.root).as_posix()
+                rel_path = f['rel_path'][1:]
+                file_id = f['rel_path']
                 name = set_file_name(f, tab_level)
 
                 if rel_path in excluded_paths:
                     continue
 
-                file_active = ''
-                if '/'+rel_path == current_page:
-                    file_active = 'active'
-                
                 # get link adjustment code
                 class_list = ''
                 external_blank_html = ''
@@ -280,7 +321,7 @@ class CreateIndexFromDirStructure():
                     if self.pb.gc('toggles/external_blank'):
                         external_blank_html = 'target=\"_blank\" '
 
-                html += '\t'*tab_level + f'<li><a class="{file_active}" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
+                html += '\t'*tab_level + f'<li><a class="``css-file-active-{file_id}``" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
             
             tab_level -= 1
             html += '\t'*tab_level + '</ul>\n'

@@ -1,8 +1,6 @@
 import json
 from datetime import date
 
-from .FileFinder import GetNodeId
-
 '''
 This class helps us building the graph.json by keeping track of which notes link to other notes.
 Here, a note is a "node" (hah), and a note linking to another note is a link. 
@@ -47,7 +45,7 @@ class NetworkTree:
         node['metadata'] = md.metadata.copy()
         
         # Use filename as node id, unless 'graph_name' is set in the yaml frontmatter
-        node['id'] = GetNodeId(md.fo.path['markdown']['file_relative_path'].as_posix(), pb)
+        node['id'] = pb.FileFinder.GetNodeId(pb, md.fo.path['markdown']['file_relative_path'].as_posix())
         node['name'] = md.GetNodeName()
             
         # Url is used so you can open the note/node by clicking on it

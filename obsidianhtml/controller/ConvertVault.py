@@ -7,6 +7,7 @@ import shutil
 import warnings
 import yaml
 from time import sleep
+import time
 
 import regex as re          # regex string finding/replacing
 import urllib.parse         # convert link characters like %
@@ -23,7 +24,6 @@ from ..core.ErrorHandling import extra_info
 from ..core.PicknickBasket import PicknickBasket
 from ..core.FileObject import FileObject
 from ..core.Index import Index
-from ..core.FileFinder import GetObsidianFilePath, FindFile, GetNodeId
 
 from ..parser.MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
 from ..parser.MarkdownLink import MarkdownLink
@@ -697,7 +697,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
-        rel_path_str, link_fo = FindFile(pb.index.files, l, pb)
+        rel_path_str, link_fo = pb.FileFinder.FindFile(l, pb)
         if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Image {l} treated as external and not imported in html")
@@ -718,7 +718,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         if '://' in l:
             continue
 
-        rel_path_str, lo = FindFile(pb.index.files, l, pb)
+        rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
         if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
@@ -748,7 +748,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             continue
 
 
-        rel_path_str, lo = FindFile(pb.index.files, l, pb)
+        rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
         if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
@@ -770,7 +770,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         if '://' in l:
             continue
 
-        rel_path_str, lo = FindFile(pb.index.files, l, pb)
+        rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
         if rel_path_str == False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")

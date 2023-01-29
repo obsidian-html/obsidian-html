@@ -6,7 +6,6 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
 
-from ..core.FileFinder import GetObsidianFilePath, FindFile
 from ..lib import DuplicateFileNameInRoot, slugify, MalformedTags, OpenIncludedFile
 from .convert_functions import obs_img_to_md_img
 
@@ -263,7 +262,7 @@ class MarkdownPage:
                 continue
 
             # Find file
-            rel_path_str, lo = FindFile(self.pb.index.files, link, self.pb)
+            rel_path_str, lo = self.pb.FileFinder.FindFile(link, self.pb)
             if rel_path_str == False:
                 if self.pb.gc('toggles/verbose_printout', cached=True):
                     print(f"\t\tImage/file with obsidian link of '{link}' will not be copied over in this step.")
@@ -299,7 +298,7 @@ class MarkdownPage:
                 continue
 
             # Find file
-            rel_path_str, lo = FindFile(self.pb.index.files, clean_link, self.pb)
+            rel_path_str, lo = self.pb.FileFinder.FindFile(clean_link, self.pb)
             if rel_path_str == False:
                 if self.pb.gc('toggles/verbose_printout', cached=True):
                     print(f"\t\tImage/file with obsidian link of '{clean_link}' (original {link}) will not be copied over in this step.")
@@ -358,7 +357,7 @@ class MarkdownPage:
             link = urllib.parse.unquote(l)
 
             if not link.startswith('#'):
-                res = GetObsidianFilePath(link, self.file_tree, self.pb)
+                res = self.pb.FileFinder.GetObsidianFilePath(link, self.pb)
                 rel_path_str = res['rtr_path_str']
                 lo = res['fo']
                 if lo == False:
@@ -410,7 +409,7 @@ class MarkdownPage:
 
             if is_anchor == False:
                 # find link in filetree
-                res = GetObsidianFilePath(l, self.file_tree, self.pb)
+                res = self.pb.FileFinder.GetObsidianFilePath(l, self.pb)
                 rel_path_str = res['rtr_path_str']
                 fo = res['fo']
 
@@ -470,7 +469,7 @@ class MarkdownPage:
         for l in re.findall(r'(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')
 
-            result = GetObsidianFilePath(link, self.file_tree, self.pb)
+            result = self.pb.FileFinder.GetObsidianFilePath(link, self.pb)
             file_object = result['fo']
             header =  result['header']
 

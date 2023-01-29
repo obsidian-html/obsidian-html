@@ -27,6 +27,13 @@ def main():
         command = sys.argv[1]
 
     if command == 'convert':
+        # import cProfile
+        # import pstats
+        # with cProfile.Profile() as pr:
+        #     ConvertVault()
+        # with open('output/output_time.txt', 'w') as f:
+        #     p = pstats.Stats(pr, stream=f)
+        #     p.sort_stats("time").dump_stats(filename="output/profile.prof")
         ConvertVault()
     elif command == 'run':
         Run()
