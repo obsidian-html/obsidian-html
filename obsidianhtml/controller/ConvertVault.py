@@ -504,7 +504,7 @@ def export_user_files(pb):
 
     print('< EXPORTING USER FILES: Done')
 
-@extra_info()
+#@extra_info()
 def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=1, iteration=0):
     '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
 
@@ -569,7 +569,7 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=
         crawl_obsidian_notes_and_convert_to_markdown(link_fo, pb, log_level=log_level, iteration=iteration)
         pb.reset_state()
 
-@extra_info()
+#@extra_info()
 def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=None, log_level=1, capture_in_jar=False):
     '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
     
