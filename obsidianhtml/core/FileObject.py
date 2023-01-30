@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 import platform
 import os
-import inspect
 import shutil               # used to remove a non-empty directory, copy files
 
 

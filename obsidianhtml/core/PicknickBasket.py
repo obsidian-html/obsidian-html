@@ -1,5 +1,3 @@
-import inspect
-
 from pathlib import Path
 
 from .ConfigManager import Config, find_user_config_yaml_path
@@ -51,7 +49,8 @@ class PicknickBasket:
 
     def init_state(self, **kwargs):
         self.reset_state()
-        self.state['subroutine'] = inspect.stack()[1][3]    # this can be overwritten by caller by setting kwarg subroutine='<value>'
+        #self.state['subroutine'] = inspect.stack()[1][3]    # this can be overwritten by caller by setting kwarg subroutine='<value>'
+        self.state['subroutine'] = None
         for key in kwargs.keys():
             self.state[key] = kwargs[key]
 
