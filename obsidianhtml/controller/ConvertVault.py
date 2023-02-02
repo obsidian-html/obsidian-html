@@ -36,7 +36,9 @@ from ..features.SidePane import get_side_pane_html, gc_add_toc_when_missing, get
 from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
 from ..compiler.Templating import ExportStaticFiles
 
-from ..parser.convert_functions import md_to_html
+from ..parser.convert_functions import md_to_html, obs_callout_to_markdown_callout
+
+from ..post_processing import convert_markdown_output as pp_convert_markdown_output
 
 # from ..markdown_extensions.CallOutExtension import CallOutExtension
 # from ..markdown_extensions.DataviewExtension import DataviewExtension
@@ -79,6 +81,7 @@ def ConvertVault(config_yaml_location=''):
     convert_markdown_to_html(pb)
     compile_rss_feed(pb)
     export_user_files(pb)
+    post_processing(pb)
 
     # Wrap up 
     # ---------------------------------------------------------
@@ -959,3 +962,18 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         crawl_markdown_notes_and_convert_to_html(link_fo, pb, backlink_node, log_level=log_level)
         pb.reset_state()
 
+def post_processing(pb):
+    post_processing_modules = pb.gc('toggles/features/post_processing')
+    if len(post_processing_modules) > 0:
+        print('> POST-PROCESSING:')
+
+    for module in post_processing_modules:
+        print(f"\t> {module['module']}")
+        if module['module'] == 'md_markdown_callouts':
+            strict_line_breaks = not pb.gc('toggles/strict_line_breaks') # don't add line breaks if we already add them, because they will double up
+            pp_convert_markdown_output(pb, convert_function=obs_callout_to_markdown_callout, arg_dict={'strict_line_breaks': strict_line_breaks})
+        else:
+            raise Exception(f"Unknown processing module of {module['module']}")
+
+    if len(post_processing_modules) > 0:
+        print('< POST-PROCESSING: Done')
