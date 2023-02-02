@@ -31,16 +31,18 @@ if is_windows:
     os.system('color')
 
 # import functions to test
-from obsidianhtml.parser.convert_functions import obs_img_to_md_img, md_to_html
+from obsidianhtml.parser.convert_functions import obs_img_to_md_img, md_to_html, obs_callout_to_markdown_callout
 from obsidianhtml.parser.MarkdownPage import get_inline_tags
 from obsidianhtml.markdown_extensions.FootnoteExtension import convert_codeblocks
 
 
 def check_test_result(case, output):
+    def show_whitespace(s):
+        return s.replace(' ', '·').replace('\n', '↲\n')
     if output != case['output']:
         print_fail(case)
-        print(f"    - Expected:\n{case['output']}")
-        print(f"    - Got:\n{output}")
+        print(f"Expected:\n{show_whitespace(case['output'])}")
+        print(f"Got:\n{show_whitespace(output)}")
         os.environ["TESTS_FAILED"] = "1"
     else:
         print_succes(case)
