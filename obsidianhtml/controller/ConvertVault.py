@@ -971,7 +971,7 @@ def post_processing(pb):
         print(f"\t> {module['module']}")
         if module['module'] == 'md_markdown_callouts':
             strict_line_breaks = not pb.gc('toggles/strict_line_breaks') # don't add line breaks if we already add them, because they will double up
-            pp_convert_markdown_output(pb, convert_function=obs_callout_to_markdown_callout, arg_dict={'strict_line_breaks': strict_line_breaks})
+            pp_convert_markdown_output(pb.paths['md_folder'], convert_function=obs_callout_to_markdown_callout, arg_dict={'strict_line_breaks': strict_line_breaks})
         else:
             raise Exception(f"Unknown processing module of {module['module']}")
 
