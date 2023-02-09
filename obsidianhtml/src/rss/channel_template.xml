@@ -3,7 +3,7 @@
         <title>{title}</title>
         <link>{website_link}</link>
         <description>{description}</description>
-        <language>{language_code}en-us</language>
+        <language>{language_code}</language>
         <pubDate>{publish_date}</pubDate>
         <lastBuildDate>{last_build_date}</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
