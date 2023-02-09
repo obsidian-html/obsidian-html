@@ -43,14 +43,16 @@ class Optional:
 def create_obsidianhtml_output_folders(pb) -> T.SystemChange:
     ''' We need to ensure that the folders that we write our markdown and html to exist. '''
 
-    print('> CREATING OUTPUT FOLDERS')
+    if pb.gc('toggles/compile_md', cached=True) or pb.gc('toggles/compile_html', cached=True):
+        print('> CREATING OUTPUT FOLDERS')
 
     # create markdown output folder
     if pb.gc('toggles/compile_md', cached=True):
         pb.paths['md_folder'].mkdir(parents=True, exist_ok=True)
 
     # create html output folders
-    pb.paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
+    if pb.gc('toggles/compile_html', cached=True):
+        pb.paths['html_output_folder'].mkdir(parents=True, exist_ok=True)
     
     # create logging output folders
     if pb.gc('toggles/extended_logging', cached=True):

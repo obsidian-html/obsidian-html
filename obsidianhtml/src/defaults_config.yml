@@ -147,6 +147,8 @@ toggles:
   # note that this does not impact the output, Hello.md will be written to Hello.html
   force_filename_to_lowercase: True
 
+  slugify_html_links: False
+
   # If this is false only the entrypoint and all its links (recursively) are processed
   # if true all the notes will be processed
   process_all: False
@@ -276,7 +278,7 @@ toggles:
         managing_editor: 'n/a'
         web_master: 'n/a'
       items:
-        selector: 
+        selector:
           match_keys: []
           exclude_keys: []
           include_subfolders: []

@@ -26,7 +26,8 @@ class Index:
 
     def init_file_tree(self):
         ''' This method sets up everything needed for the file tree. It does not yet load the files into the file tree '''
-        self.files = {}
+        self.files = {}                 # contains every file exactly once (currently twice in the case of the index file)
+        self.aliased_files = {}         # files known under a different path_key, such as for slugged file paths
         self.excluded_folders = []
         self.included_folders = []
         self.input_folder_root = ''

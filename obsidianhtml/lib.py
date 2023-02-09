@@ -93,13 +93,14 @@ def ConvertTitleToMarkdownId(title):
 
     return idstr
 
-def slugify(value, separator='-', unicode=False):
+def slugify(value, separator='-', unicode=False, skip_chars_re=''):
     """ Slugify a string, to make it URL friendly. """
     if not unicode:
         # Replace Extended Latin characters with ASCII, i.e. žlutý → zluty
         value = unicodedata.normalize('NFKD', value)
         value = value.encode('ascii', 'ignore').decode('ascii')
-    value = re.sub(r'[^\w\s-]', ' ', value).strip().lower()
+    
+    value = re.sub(r'[^\w\s\-' + skip_chars_re + ']', ' ', value).strip().lower()
     return re.sub(r'[{}\s]+'.format(separator), separator, value)
 
 

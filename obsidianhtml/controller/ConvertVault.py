@@ -85,11 +85,12 @@ def ConvertVault(config_yaml_location=''):
 
     # Wrap up 
     # ---------------------------------------------------------
-    print('\nYou can find your output at:')
-    if pb.gc('toggles/compile_md'):
-        print(f"\tmd: {pb.paths['md_folder']}")
-    if pb.gc('toggles/compile_html'):
-        print(f"\thtml: {pb.paths['html_output_folder']}")
+    if pb.gc('toggles/compile_md') or pb.gc('toggles/compile_html'):
+        print('\nYou can find your output at:')
+        if pb.gc('toggles/compile_md'):
+            print(f"\tmd: {pb.paths['md_folder']}")
+        if pb.gc('toggles/compile_html'):
+            print(f"\thtml: {pb.paths['html_output_folder']}")
 
 def convert_obsidian_notes_to_markdown(pb):
     if pb.gc('toggles/compile_md', cached=True):
