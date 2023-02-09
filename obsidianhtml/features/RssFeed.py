@@ -217,6 +217,7 @@ class RssFeed():
                 print(f"RSS Feed: warning: no title found for note {path}")
             
             # get publish date
+            publish_date_str = ''
             publish_date = self.select_value(metadata, soup, path, self.publish_date_selectors)
             if not publish_date or publish_date == '':
                 print(f"RSS Feed: warning: no publish_date found for note {path}")
