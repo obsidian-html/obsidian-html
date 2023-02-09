@@ -191,9 +191,9 @@ class RssFeed():
 
             # include: match note on key
             selector = self.item_match_keys_selector
-            if not selector or (isinstance(selector, list) and len(selector)) == 0:
+            if not selector:
                 pass
-            if selector[0] == 'yaml':
+            elif selector[0] == 'yaml':
                 selector_key = selector[1]
                 if len(selector) > 2:
                     selector_prefixes = selector[2]
