@@ -128,7 +128,11 @@ class CreateIndexFromDirStructure():
                     fo = self.pb.index.files[path_key]
                     name = fo.md.GetNodeName()
                 except:
-                    print(path_key, self.pb.index.files.keys())
+                    try:
+                        fo = self.pb.index.aliased_files[path_key]
+                        name = fo.md.GetNodeName()
+                    except:
+                        print(13, path_key)#, self.pb.index.files.keys())
 
 
             # append file

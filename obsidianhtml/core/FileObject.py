@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Type
 
 from ..parser.MarkdownPage import MarkdownPage
-from ..lib import get_rel_html_url_prefix, get_html_url_prefix
+from ..lib import get_rel_html_url_prefix, get_html_url_prefix, slugify
 
 '''
 This object class helps us with keeping track of all the paths.
@@ -144,6 +144,16 @@ class FileObject:
             self.path['html']['file_relative_path'] = target_rel_path
             self.path['html']['suffix'] = self.path['html']['file_absolute_path'].suffix[1:]
 
+        # slugify paths
+        if self.pb.gc('toggles/slugify_html_links', cached=True):
+            _slug_path = slugify(self.path['html']['file_absolute_path'].as_posix(), skip_chars_re=r'/\.')
+            self.path['html']['file_absolute_path'] = Path(_slug_path)
+            _slug_path = slugify(self.path['html']['file_relative_path'].as_posix(), skip_chars_re=r'/\.')
+            self.path['html']['file_relative_path'] = Path(_slug_path)
+
+            self.pb.index.aliased_files[_slug_path] = self
+            self.pb.index.aliased_files[_slug_path[:-5]+'.md'] = self
+
         # Metadata
         # call to self.compile_metadata() should be done manually in the calling function
         self.metadata['depth'] = self._get_depth(self.path['html']['file_relative_path'])
@@ -191,6 +201,15 @@ class FileObject:
         return rel_path.as_posix().count('/')
 
     def get_link(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
+        link = self._get_link(link_type, origin, origin_rel_dst_path_str)
+        if self.pb.gc('toggles/slugify_html_links', cached=True) and link_type == 'html':
+            return slugify(link, skip_chars_re=r'/\.')
+        return link
+
+    def _get_link_slugify(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
+        return 
+
+    def _get_link(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
         # Get origin_rel_dst_path_str
         if origin_rel_dst_path_str is None:
             if origin is not None:
