@@ -216,8 +216,18 @@ class RssFeed():
             if not title:
                 print(f"RSS Feed: warning: no title found for note {path}")
             
-            # get publish date
+            
+            # set default publish date
+            publish_date_default_value = pb.gc('toggles/features/rss/items/publish_date/default_value')
             publish_date_str = ''
+            try:        # Try to convert date to RSS standard date format
+                dt = datetime.fromisoformat(publish_date_default_value)
+                rss_pd_str = ConvertDateToRssFormat(dt)
+                publish_date_str = rss_pd_str
+            except:     # Conversion failed, probably not ISO format, empty string, etc, just use configured value
+                publish_date_str = publish_date_default_value
+
+            # get publish date
             publish_date = self.select_value(metadata, soup, path, self.publish_date_selectors)
             if not publish_date or publish_date == '':
                 print(f"RSS Feed: warning: no publish_date found for note {path}")
@@ -285,7 +295,6 @@ class RssFeed():
                     value = yaml_selector(metadata, selector_key, selector_prefixes, strip_prefix=True)
 
             elif selector[0] == 'path':
-                print(path, type(path))
                 value = selector_path(path, selector[1:])
             else:
                 raise Exception(f"RSS Feed: get_items(): Selector function {selector[0]} not implemented.")
