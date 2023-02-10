@@ -26,6 +26,10 @@
     scrollbar-width: thin;
 }
 
+code {
+    white-space: break-spaces;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     color: rgb(var(--normal-text-color));
