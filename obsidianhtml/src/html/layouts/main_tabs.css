@@ -1,4 +1,4 @@
-@layer layout {
+
     #header #homelink,
     #header #homelink:visited,
     #header #homelink:link,
@@ -59,6 +59,7 @@
     @media (max-width: 800px) {
         .container {
             width: calc(100vw - 4rem);
+            padding: 2rem;
         }
         .container:after {
             content: "\a\a\a\a\a";
@@ -98,17 +99,6 @@
     h1, h2, h3, h4, h5, embeddedtitle {
         scroll-margin-top: 4rem;
     }
-    h1,
-    embeddedtitle {
-        font-size: 28px;
-        line-height: 34px;
-        margin-top: 0px;
-        margin-bottom: 16px;
-        color: inherit;
-        font-weight: 600;
-        border-bottom: 1px solid #d6d5df;
-        padding-bottom: 0.2rem;
-    }
     h1:not(:first-child) {
         margin-top: 2rem;
     }
@@ -119,10 +109,6 @@
         font-weight: 600;
         padding-bottom: 0.2rem;
         margin-top: 2rem;
-    }
-    h1 + h2,
-    embeddedtitle + h2 {
-        margin-top: 1rem;
     }
     h2 + p {
         margin-top: 0rem;
@@ -244,6 +230,10 @@
         .header {
             padding: 0px;
         }
+        .icon-tray {
+            position: initial;
+            margin: auto;
+        }
         .navbar-button {
             display: block;
             margin: auto;
@@ -260,4 +250,4 @@
             padding-bottom: 0rem;        
         }
     }
-}
+
