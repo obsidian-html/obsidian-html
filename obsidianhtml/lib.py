@@ -93,6 +93,9 @@ def ConvertTitleToMarkdownId(title):
 
     return idstr
 
+def slugify_path(value, separator='-', unicode=False, skip_chars_re=r'/\.'):
+    return slugify(value, separator, unicode, skip_chars_re)
+
 def slugify(value, separator='-', unicode=False, skip_chars_re=''):
     """ Slugify a string, to make it URL friendly. """
     if not unicode:
