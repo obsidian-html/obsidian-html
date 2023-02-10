@@ -8,6 +8,7 @@ import regex as re
 
 from ..core.FileObject import FileObject
 from ..parser.MarkdownPage import MarkdownPage
+from ..lib import slugify_path
 
 def verbose(pb):
     return (pb.gc('toggles/verbose_printout', cached=True) or pb.gc('toggles/features/create_index_from_tags/verbose', cached=True))
@@ -283,14 +284,14 @@ def CreateIndexFromTags(pb):
             print(f'\tAdding graph links between index.md and the matched notes')
         
         node = pb.index.network_tree.NewNode()
-        node['id'] = 'index'
         node['name'] = pb.gc('toggles/features/create_index_from_tags/homepage_label').capitalize()
 
         if settings['use_as_homepage']:
+            node['id'] = 'index'
             node['url'] = f'{pb.gc("html_url_prefix")}/index.html'
         else:
+            node['id'] = 'tag_index'
             node['url'] = fo_index_dst_path.get_link('html')
-
 
         pb.index.network_tree.add_node(node)
         bln = node
@@ -299,7 +300,7 @@ def CreateIndexFromTags(pb):
                 node = pb.index.network_tree.NewNode()
                 node['id'] = n['node_id']
                 node['name'] = n['graph_name']
-                node['url'] = f'{pb.gc("html_url_prefix")}/{n["md_rel_path_str"][:-3]}.html'
+                node['url'] = f'{pb.gc("html_url_prefix")}/{slugify_path(n["md_rel_path_str"][:-3])}.html'
                 pb.index.network_tree.add_node(node)
 
                 link = pb.index.network_tree.NewLink()

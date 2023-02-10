@@ -239,13 +239,8 @@ def convert_markdown_to_html(pb):
 
         html = re.sub('\{_obsidian_html_node_id_pattern_:'+node_id+'}', '', html)
 
-        # Create Directory contents
-        # if pb.gc('toggles/features/styling/add_dir_list', cached=True):
-        #     if dir_repstring in html:
-        #         pb.EnsureTreeObj()
-        #         dir_list = pb.treeobj.BuildIndex(current_page=node['url'])
-        #         html = re.sub(dir_repstring, dir_list, html)
-        #         html = re.sub(dir_repstring2, '', html)
+
+
         left_pane = get_side_pane_html(pb, 'left_pane', node)
         html = html.replace('{left_pane}', left_pane)
 
