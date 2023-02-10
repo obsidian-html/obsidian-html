@@ -5,6 +5,9 @@
 .callout.active .callout-content {
     display: block
 }
+.callout.inactive .callout-content {
+    display: none;
+}
 .callout-title-fold {
     transform: rotate(270deg);
     width: 16px;
@@ -23,6 +26,14 @@
     border-radius: 0.1rem 0 0 0.1rem;
     color: var(--callout-color);
 }
+
+.callout-content .callout {
+    margin: 1rem;
+}
+li .callout {
+    margin-top: 0.4rem;
+}
+
 .left_pane_content .callout {
     background-color: var(--bg-note);
 }

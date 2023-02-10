@@ -13,7 +13,8 @@ class CallOutExtension(Extension):
         md.parser.blockprocessors.register(CallOutBlockProcessor(md.parser), 'CallOutExtension', 175)
 
 class CallOutBlockProcessor(BlockProcessor):
-    RE_FENCE_START = r'^> *\[\!.*?].*?\n*' 
+    RE_FENCE_START = r'^ *> *\[\!.*?].*?\n*' 
+    RE_FENCE_LINE= r'^ *>.*'
 
     def __init__(self, parser):
         """Initialization."""
@@ -24,16 +25,56 @@ class CallOutBlockProcessor(BlockProcessor):
         self.svgs = shared_obsidian_svgs
         
     def test(self, parent, block):
-        return re.match(self.RE_FENCE_START, block)
+        for line in block.split('\n'):
+            # don't match blocks starting with lists
+            if re.match(r'^ *-', line):
+                return False
+            if re.match(r'^ *[0-9]+\.', line):
+                return False
+            if re.match(self.RE_FENCE_START, line):
+                return True
+
+        return False
 
     def run(self, parent, blocks):
         #original_block = blocks[0] 
         #blocks[0] = re.sub(self.RE_FENCE_START, '', blocks[0])
 
         block = blocks.pop(0)
-
+        putback = []
+        in_callout = False
         chunk = ''
-        for i, line in enumerate(block.split('\n')):
+        i = -1
+        for line in block.split('\n'):
+            i += 1
+            # skip until reaching the start of the callout
+            if not in_callout:
+                if not re.match(self.RE_FENCE_START, line):
+                    #print('putback', line)
+                    putback.append(line)
+                    continue
+                else:
+                    #print('fence start', line)
+                    in_callout = True
+                    i = 0
+                    # parse putback (not part of the callout)
+                    self.parser.parseChunk(parent, '\n'.join(putback))
+                    putback = []
+            else:
+                if not re.match(self.RE_FENCE_LINE, line):
+                    #print('fence end', line)
+                    in_callout = False
+                    # line no longer part of the callout
+                    # parse what is left of the callout
+                    if chunk != '':
+                        self.parser.parseChunk(data_div, chunk)
+                        chunk = ''
+                    putback.append(line)
+                    continue
+                else:
+                    pass
+                    #print('matched', line)
+
             # first line has information for formatting, extract this
             # and use this space to init the callout div and title div
             if i == 0:
@@ -52,15 +93,17 @@ class CallOutBlockProcessor(BlockProcessor):
                     classlist += ' ' + 'callout-folded'
                 if data['foldable'] and not data['folded']:
                     rasa = '0' # do not remove active class when js is active
+                if data['foldable'] and data['folded']:
+                    classlist += ' ' + 'inactive'
 
                 div.set('class', classlist)
                 div.set('rasa', rasa)
 
                 # add the titlebar subdiv
                 title = etree.SubElement(div, 'div')
-                title.set('class', 'callout-title')
+                title.set('class', 'callout-title ')
                 if data['foldable']:
-                    title.set('onclick', f'toggle(this.parentElement)')
+                    title.set('onclick', f'toggle_callout(this.parentElement)')
 
                 # get the svg for the title bar icon
                 svg_name = data['call-out-class']
@@ -106,6 +149,9 @@ class CallOutBlockProcessor(BlockProcessor):
 
         if chunk != '':
             self.parser.parseChunk(data_div, chunk)
+
+        if len(putback) > 0:
+            self.parser.parseChunk(parent, '\n'.join(putback))
 
         return True 
 

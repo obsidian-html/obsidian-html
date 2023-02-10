@@ -526,8 +526,13 @@ function toggle_id(id){
     return toggle(document.getElementById(id))
 }
 function toggle(el){
-    return cl_toggle(el, 'active') 
+    return cl_toggle(el, 'active')
 }
 
+
+function toggle_callout(el){
+    cl_toggle(el, 'active')
+    cl_toggle(el, 'inactive')
+}
 
 
