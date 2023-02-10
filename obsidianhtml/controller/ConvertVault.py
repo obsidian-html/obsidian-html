@@ -796,7 +796,10 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     if gc_add_toc_when_missing(pb, fo):
         if '[TOC]' not in md.page:
+            embedded_titles_enabled = (pb.config.capabilities_needed['embedded_note_titles'] and not ('obs.html.tags' in fo.md.metadata.keys() and 'dont_add_embedded_title' in fo.md.metadata['obs.html.tags']))
+
             # if h1 is present, place toc after the first h1, else put it at the top of the page.
+            # unless embedded titles are enabled, in that case just put it at the top
             output = ''
             found_h1 = False
             for line in md.page.split('\n'):
@@ -805,7 +808,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
                     output += '\n[TOC]\n\n'
                     found_h1 = True
             
-            if found_h1:
+            if found_h1 and not embedded_titles_enabled:
                 md.page = output
             else: 
                 md.page = '\n[TOC]\n\n' + md.page
