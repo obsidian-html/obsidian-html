@@ -156,58 +156,76 @@ function ReceiveCall(xmlHttp, level, theUrl, callbackpath) {
 function SetLinks(level) {
     console.log('setting links');
     size_of_rem = getComputedStyle(document.documentElement).fontSize.split("px")[0];
-    if (window.visualViewport.width > (1.2 * 40 * size_of_rem)) {
-        var links = document.getElementsByTagName('a');
-        for (let i = 0; i < links.length; i++) {
-            let l = links[i];
-            if (l.className == 'anchor') {
-                continue;
-            }
-            if (l.id == 'homelink') {
-                continue;
-            }
-            if (l.classList.contains('system-link')) {
-                continue;
-            }
-            if (l.classList.contains('external-link')) {
-                continue;
-            }
-            if (l.classList.contains('navbar-link')) {
-                continue;
-            }
+    screen_width_allows_tab_mode = (window.visualViewport.width > (1.2 * 40 * size_of_rem))
 
-            if (no_tab_mode && l.getAttribute("href")[0] == '#') {
-                l.onclick = function () {
-                    let levelcont = document.getElementsByClassName("container")[0];
-                    var el = levelcont.querySelectorAll("#table-of-contents")[0];
-                    if (el) {
-                        el.parentElement.scrollTop = el.offsetTop - rem(1);
-                    }
-                    return false;
-                };
-                continue
-            }
-            if (tab_mode && l.classList.contains('anchor-link')) {
-                l.onclick = function () {
-                    levelcont = this.closest('div')
-                    if (levelcont.classList.contains('container') == false) {
-                        levelcont = levelcont.parentElement;
-                    }
-                    if (levelcont.classList.contains('container') == false) {
-                        levelcont = levelcont.parentElement;
-                    }
+    var links = document.getElementsByTagName('a');
+    for (let i = 0; i < links.length; i++) {
+        let l = links[i];
 
-                    var el = levelcont.querySelectorAll(this.getAttribute("href"))[0];
-                    if (el) {
-                        el.parentElement.parentElement.scrollTop = el.offsetTop - rem(1);
+        // don't overwrite links in these conditions
+        if (l.className == 'anchor') {
+            continue;
+        }
+        if (l.id == 'homelink') {
+            continue;
+        }
+        if (l.classList.contains('system-link')) {
+            continue;
+        }
+        if (l.classList.contains('external-link')) {
+            continue;
+        }
+        if (l.classList.contains('navbar-link')) {
+            continue;
+        }
+        
+        // overwrite links that point to a header on the current page
+        if (l.getAttribute("href").includes('#')){
+            l.onclick = function () {
+                // remove current url from the link
+                let current_url = document.URL
+                current_url = decodeURI(current_url.replace(window.location.protocol + '//', '').replace(window.location.host, ''))
+                current_url = current_url.split('#')[0];
+
+                let link = decodeURI(this.getAttribute("href"))
+                link = link.replace(current_url, '')
+
+                // if we are left with something like: '#blabla' then we have an anchor link
+                // otherwise, we just open the page
+                if (link[0] != '#') {
+                    if ((tab_mode && screen_width_allows_tab_mode)){
+                        httpGetAsync(this.attributes.href.nodeValue, ReceiveCall, level + 1, false);
+                        return false;
                     }
-                    return false;
-                };
-                continue
-            }
-            if (l.onclick != null) {
-                continue;
-            }
+                    else {
+                        link = this.getAttribute("href").replace('#', '#!')
+                        window.location.href = link;
+                        return false;
+                    }
+                }
+                
+                // we scroll to the anchor
+                // we do this manually because scrolling divs suck
+                let levelcont = document.getElementsByClassName("container")[0];
+                var el = levelcont.querySelectorAll(link.replaceAll(':', '\\:'))[0];
+                if (el) {
+                    getParentContainer(el).scrollTop = el.offsetTop - rem(6);
+                    el.classList.add('fade-it');
+                    setTimeout(function() {
+                        el.classList.remove('fade-it');
+                     }, 2000);
+                }
+                return false;
+            };
+            continue
+        }
+
+        // do not overwrite any links that have been set at this point
+        if (l.onclick != null) {
+            continue;
+        }
+        // set default link action for tab mode
+        if ((tab_mode && screen_width_allows_tab_mode)){
             l.onclick = function () {
                 httpGetAsync(this.attributes.href.nodeValue, ReceiveCall, level + 1, false);
                 return false;
@@ -215,6 +233,7 @@ function SetLinks(level) {
         }
     }
 }
+
 
 function CenterNote(level) {
     let cont = document.getElementById('level-' + level);

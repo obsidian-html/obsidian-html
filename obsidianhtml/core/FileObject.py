@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Type
 
 from ..parser.MarkdownPage import MarkdownPage
-from ..lib import get_rel_html_url_prefix, get_html_url_prefix, slugify
+from ..lib import get_rel_html_url_prefix, get_html_url_prefix, slugify_path
 
 '''
 This object class helps us with keeping track of all the paths.
@@ -146,9 +146,10 @@ class FileObject:
 
         # slugify paths
         if self.pb.gc('toggles/slugify_html_links', cached=True):
-            _slug_path = slugify(self.path['html']['file_absolute_path'].as_posix(), skip_chars_re=r'/\.')
+            _slug_path = slugify_path(self.path['html']['file_absolute_path'].as_posix())
             self.path['html']['file_absolute_path'] = Path(_slug_path)
-            _slug_path = slugify(self.path['html']['file_relative_path'].as_posix(), skip_chars_re=r'/\.')
+
+            _slug_path = slugify_path(self.path['html']['file_relative_path'].as_posix())
             self.path['html']['file_relative_path'] = Path(_slug_path)
 
             self.pb.index.aliased_files[_slug_path] = self
@@ -203,11 +204,8 @@ class FileObject:
     def get_link(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
         link = self._get_link(link_type, origin, origin_rel_dst_path_str)
         if self.pb.gc('toggles/slugify_html_links', cached=True) and link_type == 'html':
-            return slugify(link, skip_chars_re=r'/\.')
+            return slugify_path(link)
         return link
-
-    def _get_link_slugify(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
-        return 
 
     def _get_link(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
         # Get origin_rel_dst_path_str

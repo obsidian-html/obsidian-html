@@ -280,16 +280,17 @@ class CreateIndexFromDirStructure():
                 # a folder note folder needs slightly different design
                 folder_note_active = ''
                 fnpf = ''
-                folder_id = tree["rel_path"]
+                folder_id = self.html_url_prefix + tree["rel_path"]
 
                 # test if the folder being processed in this loop has an existing folder note
                 has_folder_note, note_abs_path = self.check_has_folder_note(tree['path'])
                 folder_note_rel_path_str = '-'
                 if has_folder_note:
-                    folder_note_rel_path_str = note_abs_path.as_posix().replace(self.root_str, '', 1)
+                    folder_note_rel_path_str = self.html_url_prefix + note_abs_path.as_posix().replace(self.root_str, '', 1)
                     fnpf = '<div class="fn_pf"></div>'
                     url = self.convert_abs_path_to_url(note_abs_path)
                     onclick = f"``onclick-folder-note-{folder_note_rel_path_str}``"
+                    
                     html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button folder_note ``css-folder-note-active-{folder_note_rel_path_str}``" href="{url}" onclick="{onclick}">{fnpf}{tree["name"]}</button>\n'
                 else:
                     html += '\t'*tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
@@ -311,7 +312,7 @@ class CreateIndexFromDirStructure():
                     continue
 
                 rel_path = f['rel_path'][1:]
-                file_id = f['rel_path']
+                file_id = self.html_url_prefix + f['rel_path']
                 name = set_file_name(f, tab_level)
 
                 if rel_path in excluded_paths:

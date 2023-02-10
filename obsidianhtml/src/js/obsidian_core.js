@@ -165,7 +165,6 @@ function load_page() {
         for (let i = 0; i < links.length; i++) {
             let l = links[i];
             if (l.getAttribute("href").includes('#')) {
-
                 l.onclick = function () {
                     // remove current url from the link
                     let current_url = document.URL

@@ -49,7 +49,7 @@ class NetworkTree:
         node['name'] = md.GetNodeName()
             
         # Url is used so you can open the note/node by clicking on it
-        node['url'] = pb.gc("html_url_prefix") + '/' + rel_dst_path.as_posix()
+        node['url'] = md.fo.get_link('html')
         node['rtr_url'] = rel_dst_path.as_posix()
         pb.index.network_tree.add_node(node)
 

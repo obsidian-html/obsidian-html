@@ -2,7 +2,7 @@ import markdown             # convert markdown to html
 
 from ..core                 import Types as T
 from ..core.FileObject      import FileObject
-from ..lib                  import get_rel_html_url_prefix, get_html_url_prefix
+from ..lib                  import get_rel_html_url_prefix, get_html_url_prefix, slugify_path
 from ..compiler.Templating  import PopulateTemplate
 
 
@@ -17,13 +17,17 @@ def compile_navbar_links(pb) -> T.PBChange:
     elements = []
 
     for l in navbar_links:
+        link = l["link"]
+        if pb.gc('toggles/slugify_html_links'):
+            link = slugify_path(link)
+
         # default
-        el = f'<a class="navbar-link" href="{html_url_prefix}/{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+        el = f'<a class="navbar-link" href="{html_url_prefix}/{link}" title="{l["name"]}">{l["name"]}</a>'
 
         # external links
         if 'type' in l.keys():
             if l['type'] == 'external':
-                el = f'<a class="navbar-link" href="{l["link"]}" title="{l["name"]}">{l["name"]}</a>'
+                el = f'<a class="navbar-link" href="{link}" title="{l["name"]}">{l["name"]}</a>'
             else:
                 raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
 
