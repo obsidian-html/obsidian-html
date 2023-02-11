@@ -850,7 +850,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
             # add embedded title
             if not hide:
-                html_body = f"<embeddedtitle>{title.capitalize()}</embeddedtitle>\n" + html_body 
+                html_body = f"<embeddedtitle>{title}</embeddedtitle>\n" + html_body 
 
     # ------------------------------------------------------------------
     # [14] Tag external/anchor links with a class so they can be decorated differently
