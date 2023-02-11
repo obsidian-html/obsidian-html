@@ -1,36 +1,28 @@
 
 import sys
-import markdown             # convert markdown to html
 import frontmatter
 import gzip
-import shutil
 import warnings
-import yaml
-from time import sleep
-import time
 
 import regex as re          # regex string finding/replacing
 import urllib.parse         # convert link characters like %
 
-from pathlib import Path
 
-from ..lib import   DuplicateFileNameInRoot, \
-                    OpenIncludedFile, CreateStaticFilesFolders, \
-                    WriteFileLog, simpleHash, get_default_appdir_config_yaml_path, get_rel_html_url_prefix, get_html_url_prefix
+from ..lib import   CreateStaticFilesFolders, \
+                    WriteFileLog, simpleHash, get_rel_html_url_prefix, get_html_url_prefix
 
 from ..compiler.Templating import PopulateTemplate
 from ..core import Actor
-from ..core.ErrorHandling import extra_info
 from ..core.PicknickBasket import PicknickBasket
 from ..core.FileObject import FileObject
 from ..core.Index import Index
 
-from ..parser.MarkdownPage import MarkdownPage, convert_markdown_to_header_tree
+from ..parser.MarkdownPage import convert_markdown_to_header_tree
 from ..parser.MarkdownLink import MarkdownLink
 
 from ..features.RssFeed import RssFeed
 from ..features.CreateIndexFromTags import CreateIndexFromTags
-from ..features.EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
+from ..features.EmbeddedSearch import EmbeddedSearch
 from ..features.SidePane import get_side_pane_html, gc_add_toc_when_missing, get_side_pane_id_by_content_selector
 
 from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
@@ -783,10 +775,8 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     if gc_add_toc_when_missing(pb, fo):
         if '[TOC]' not in md.page:
-            embedded_titles_enabled = (pb.config.capabilities_needed['embedded_note_titles'] and not ('obs.html.tags' in fo.md.metadata.keys() and 'dont_add_embedded_title' in fo.md.metadata['obs.html.tags']))
 
-            # if h1 is present, place toc after the first h1, else put it at the top of the page.
-            # unless embedded titles are enabled, in that case just put it at the top
+            # compile output where TOC is placed under the first h1
             output = ''
             found_h1 = False
             for line in md.page.split('\n'):
@@ -794,11 +784,33 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
                 if found_h1 == False and line.startswith('# '):
                     output += '\n[TOC]\n\n'
                     found_h1 = True
-            
-            if found_h1 and not embedded_titles_enabled:
+
+            # If h1 is at the top of the note, this will overwrite the embedded title.
+            # In this case, we always need to put the TOC under the first h1
+            h1_at_top_of_note = False
+            for line in md.page.split('\n'):
+                if line.strip() == '':
+                    continue
+                if line.startswith('# '):
+                    h1_at_top_of_note = True
+                    break
+                break
+
+            if h1_at_top_of_note:
                 md.page = output
-            else: 
-                md.page = '\n[TOC]\n\n' + md.page
+            else:
+                # test if embedded titles are disabled
+                et_cap_enabled = pb.config.capabilities_needed['embedded_note_titles']
+                et_disabled_in_note = ('obs.html.tags' in fo.md.metadata.keys() and 'dont_add_embedded_title' in fo.md.metadata['obs.html.tags'])
+                embedded_titles_disabled = (et_cap_enabled and not et_disabled_in_note)
+
+                # If there is an h1 on the pace, and we are not using embedded titles, put the TOC under the first h1
+                # Otherwise just put it at the top of the page.
+                if found_h1 and embedded_titles_disabled:
+                    md.page = output
+                else: 
+                    md.page = '\n[TOC]\n\n' + md.page
+
 
     # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
     # Cannot start with [, (, nor "
