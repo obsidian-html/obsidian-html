@@ -9,7 +9,7 @@ import warnings
 from ..lib import DuplicateFileNameInRoot, slugify, MalformedTags, OpenIncludedFile
 from .convert_functions import obs_img_to_md_img
 
-from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree, GetReferencedBlock, GetSubHeaderTree
+from .HeaderTree import PrintHeaderTree, convert_markdown_to_header_tree, get_referenced_block, GetSubHeaderTree
 
 
 class MarkdownPage:
@@ -106,7 +106,7 @@ class MarkdownPage:
 
     def StripCodeSections(self):
         """(Temporarily) Remove codeblocks/-lines so that they are not altered in all the conversions. Placeholders are inserted."""
-        self.codeblocks = re.findall("^```([\s\S]*?)```[\s]*?$", self.page, re.MULTILINE)
+        self.codeblocks = re.findall(r"^```([\s\S]*?)```[\s]*?$", self.page, re.MULTILINE)
         for i, match in enumerate(self.codeblocks):
             self.page = self.page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
             
@@ -114,7 +114,7 @@ class MarkdownPage:
         for i, match in enumerate(self.codelines):
             self.page = self.page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
 
-        self.latexblocks = re.findall("^\$\$([\s\S]*?)\$\$[\s]*?$", self.page, re.MULTILINE)
+        self.latexblocks = re.findall(r"^\$\$([\s\S]*?)\$\$[\s]*?$", self.page, re.MULTILINE)
         for i, match in enumerate(self.latexblocks):
             self.page = self.page.replace("$$"+match+"$$", f'%%%latexblock-placeholder-{i}%%%')
 
@@ -446,7 +446,7 @@ class MarkdownPage:
         # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
         # Cannot start with [, (, nor "
         # match 'http://* ' or 'https://* ' (end match by whitespace)
-        for l in re.findall("(?<![\[\(\"])(https*:\/\/.[^\s|]*)", self.page):
+        for l in re.findall(r"(?<![\[\(\"])(https*:\/\/.[^\s|]*)", self.page):
             new_md_link = f"[{l}]({l})"
             safe_link = re.escape(l)
             self.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, self.page)
@@ -502,11 +502,11 @@ class MarkdownPage:
 
                 # option: Referencing block
                 if header[0] == '^':
-                    included_page.page = GetReferencedBlock(header, included_page.page, included_page.rel_src_path.as_posix())
+                    included_page.page = get_referenced_block(header, included_page.page, included_page.rel_src_path.as_posix())
 
                 # option: Referencing header
                 else:
-                    header_dict, root_element = ConvertMarkdownToHeaderTree(included_page.page)
+                    header_dict, root_element = convert_markdown_to_header_tree(included_page.page)
                     header_tree = GetSubHeaderTree(root_element, header)
                     if header_tree == False:
                         included_page.page = f"Obsidianhtml: Error: Unable to find section #{header} in {link.split('#')[0]}"
@@ -528,4 +528,4 @@ class MarkdownPage:
         return self
 
 def get_inline_tags(page):
-    return [x[1:].replace('.','') for x in re.findall("(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]
+    return [x[1:].replace('.','') for x in re.findall(r"(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]

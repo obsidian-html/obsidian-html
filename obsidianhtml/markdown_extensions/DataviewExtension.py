@@ -88,13 +88,13 @@ class DataviewPreprocessor(Preprocessor):
 
         return new_lines
 
-    def get_dataview(self, key, counter, dataview_elements):
-        if dataview_elements is None:
-            dataview_elements = self.get_dataview_elements()
+    # def get_dataview(self, key, counter, dataview_elements):
+    #     if dataview_elements is None:
+    #         dataview_elements = self.get_dataview_elements()
 
-        dataview_element = dataview_elements[key][counter]
+    #     dataview_element = dataview_elements[key][counter]
 
-        return (dataview_element, dataview_elements)
+    #     return (dataview_element, dataview_elements)
     
 
     def load_dataview_elements(self):

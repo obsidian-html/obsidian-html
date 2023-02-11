@@ -18,10 +18,7 @@ def LaunchInstaller():
     # Init
     html = OpenIncludedFile('installer/index.html')
     api = Api()
-    api.windows['self'] = webview.create_window('API example', html=html, js_api=api) 
+    api.wm.windows['self'] = webview.create_window('API example', html=html, js_api=api) 
 
     # Open window
     webview.start()
-
-    # Do stuff
-    print(api.msg) 

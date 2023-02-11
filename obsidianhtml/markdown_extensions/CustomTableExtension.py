@@ -5,7 +5,7 @@ import xml.etree.ElementTree as etree
 
 
 def makeExtension(**kwargs):  # pragma: no cover
-    return CallOutExtension(**kwargs)
+    return CustomTableExtension(**kwargs)
 
 class CustomTableExtension(Extension):
     def extendMarkdown(self, md):

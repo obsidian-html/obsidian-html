@@ -232,7 +232,7 @@ class Config:
                         with open(Path(grapher['path']).resolve()) as f:
                             grapher['contents'] = f.read()
                     except:
-                        raise Exception(f"Could not open user provided grapher file with path {temp_path}")
+                        raise Exception(f"Could not open user provided grapher file with path {grapher['path']}")
             
                 self.pb.graphers.append(grapher)
 

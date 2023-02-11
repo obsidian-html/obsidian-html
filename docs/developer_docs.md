@@ -19,5 +19,46 @@ pip install .
 python -m obsidianhtml -i /path/to/config.yml
 ```
 
+## Contribute to Obsidianhtml
+### Run pylint
+To avoid easily avoidable errors, it is good to run pylint before commiting your code to be pulled.
+For first time setup, run the following:
+``` shell
+pip install pylint
+```
+
+Then, when ready to commit, run the following in the root of this repo:
+``` shell
+pylint obsidianhtml --errors-only --disable=E0602,E1126
+```
+
+Resolve any issues. 
+
+After a proper refactor we can remove some of these options to give more suggestions, but the command above is the main goal.
+
+The disabled codes of E0602,E1126 are done because pylint is buggy / not knowledgable enough and creates false errors. Once in a while we can remove these codes and see if there are
+new errors that *can* be solved, but as of writing the only errors it spits out with these codes are false ones.
+
+For refactoring, this is the current shortlist:
+
+``` shell
+pylint obsidianhtml --disable=E0602,E1126,R0401,R0801,R1702,C0201,C0301
+
+# R1702: too many nested blocks. Would use fewer if I could!
+# R0801: duplicate code. Not always an issue. Don't want to have to worry about a thousand dependants when changing a module.
+# R0401: cyclic import. Does not find cyclic imports, seems to find very long import chains.
+# C0201: Consider iterating the dictionary directly instead of calling .keys()
+#        I like the clarity of iterating over keys, to visually remind me that we are not looping over the values.
+# C0301: Line too long. Deal with it. Comments can make the line longer, I don't want to break the flow with extra comment lines.
+```
+
+Find trailing whitespace in a file with vscode:
+``` 
+Press ctr+f
+Select the .* icon
+Search for: [^\s]+ +\n
+```
+
+
 # Architecture
 [Architecture & Code standards](architecture.md)

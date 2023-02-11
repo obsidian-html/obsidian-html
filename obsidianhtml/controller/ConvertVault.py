@@ -25,7 +25,7 @@ from ..core.PicknickBasket import PicknickBasket
 from ..core.FileObject import FileObject
 from ..core.Index import Index
 
-from ..parser.MarkdownPage import MarkdownPage, ConvertMarkdownToHeaderTree
+from ..parser.MarkdownPage import MarkdownPage, convert_markdown_to_header_tree
 from ..parser.MarkdownLink import MarkdownLink
 
 from ..features.RssFeed import RssFeed
@@ -40,17 +40,6 @@ from ..parser.convert_functions import md_to_html, obs_callout_to_markdown_callo
 
 from ..post_processing import convert_markdown_output as pp_convert_markdown_output
 
-# from ..markdown_extensions.CallOutExtension import CallOutExtension
-# from ..markdown_extensions.DataviewExtension import DataviewExtension
-# from ..markdown_extensions.MermaidExtension import MermaidExtension
-# from ..markdown_extensions.CustomTocExtension import CustomTocExtension
-# from ..markdown_extensions.EraserExtension import EraserExtension
-# from ..markdown_extensions.FootnoteExtension import FootnoteExtension
-# from ..markdown_extensions.FormattingExtension import FormattingExtension
-# from ..markdown_extensions.EmbeddedSearchExtension import EmbeddedSearchExtension
-# from ..markdown_extensions.CodeWrapperExtension import CodeWrapperExtension
-# from ..markdown_extensions.AdmonitionExtension import AdmonitionExtension
-# from ..markdown_extensions.BlockLinkExtension import BlockLinkExtension
 
 def ConvertVault(config_yaml_location=''):
     # Set config
@@ -325,17 +314,20 @@ def convert_markdown_to_html(pb):
                             parts.append(f'<a href="{node["url"]}" ___COLOR___ >{subpaths[i]}</a>')
                         continue
                     else:
+                        url = None
                         if msubpath in pb.index.network_tree.node_lookup:
                             url = pb.index.network_tree.node_lookup[msubpath]['url']
-                            if url != previous_url:
-                                parts.append(f'<a href="{url}" ___COLOR___>{subpaths[i]}</a>')
-                            previous_url = url
-                            continue
+                        elif msubpath in pb.index.network_tree.node_lookup_slug:
+                            url = pb.index.network_tree.node_lookup_slug[msubpath]['url']
                         else:
                             parts.append(f'<span style="color: #666;">{subpaths[i]}</span>')
                             previous_url = ''
                             continue
-
+                        if url != previous_url:
+                            parts.append(f'<a href="{url}" ___COLOR___>{subpaths[i]}</a>')
+                        previous_url = url
+                        continue
+                        
                 parts[-1] = parts[-1].replace('___COLOR___', '')
                 for i, link in enumerate(parts):
                     parts[i] = link.replace('___COLOR___', 'style="color: var(--normal-text-color);"')
@@ -847,7 +839,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             # hide if h1 is present
             hide = False
             if pb.gc('toggles/features/embedded_note_titles/hide_on_h1'):
-                header_dict, root_element = ConvertMarkdownToHeaderTree(md.page)
+                header_dict, root_element = convert_markdown_to_header_tree(md.page)
                 if len(root_element['content']) > 0 and isinstance(root_element['content'][0], dict) and root_element['content'][0]['level'] == 1:
                     hide = True
 

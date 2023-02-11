@@ -53,9 +53,9 @@ class EraserPreprocessor(Preprocessor):
         #self.extension = extension
         #self.verbose = self.extension.getConfig('verbose')
 
-    def verbose_print(self, msg):
-        if self.verbose:
-            print(f"eraser extension: {msg}")
+    # def verbose_print(self, msg):
+    #     if self.verbose:
+    #         print(f"eraser extension: {msg}")
 
     def run(self, lines):
         in_text = 1

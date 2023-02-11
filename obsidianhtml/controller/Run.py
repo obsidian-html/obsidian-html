@@ -164,7 +164,7 @@ def Run():
     html_url_prefix = config['html_url_prefix']
     if html_url_prefix != '':
         if not isinstance(html_url_prefix, str):
-            print(f"ERROR: type if html_url_prefix is {type(s).__name__} where string was expected.")
+            print(f"ERROR: type if html_url_prefix is {type(html_url_prefix).__name__} where string was expected.")
             exit(1)
         if html_output_folder_path.name != html_url_prefix:
             html_output_folder_path = html_output_folder_path.joinpath(config['html_url_prefix'][1:]).resolve()

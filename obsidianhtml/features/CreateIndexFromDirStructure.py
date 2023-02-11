@@ -30,6 +30,7 @@ class CreateIndexFromDirStructure():
         # used in BuildIndex
         self.uid = 0
         self.html = ''
+        self.rel_output_path = None # set by caller before running BuildIndex, search for pb.treeobj.rel_output_path
 
 
     def get_tree(self, path, files=None, folders=None):
