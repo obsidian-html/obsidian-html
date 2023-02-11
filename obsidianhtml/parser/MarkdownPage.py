@@ -1,12 +1,10 @@
 from __future__ import annotations
 import regex as re                   # regex string finding/replacing
-import yaml
 from pathlib import Path    # 
 import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
-import warnings
 
-from ..lib import DuplicateFileNameInRoot, slugify, MalformedTags, OpenIncludedFile
+from ..lib import slugify, MalformedTags, OpenIncludedFile
 from .convert_functions import obs_img_to_md_img
 
 from .HeaderTree import PrintHeaderTree, convert_markdown_to_header_tree, get_referenced_block, GetSubHeaderTree

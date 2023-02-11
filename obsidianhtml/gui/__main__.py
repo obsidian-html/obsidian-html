@@ -1,4 +1,4 @@
-from obsidianhtml.gui import LaunchInstaller, Launch
+from obsidianhtml.gui import Launch
 from obsidianhtml.gui.Templater import CompileHtml
 from obsidianhtml.lib import GetIncludedResourcePath
 

@@ -2,7 +2,6 @@ from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
 import re
-import string
 from pathlib import Path
 
 DataviewRegexBegin = re.compile(r"^\ *\`\`\`\ *dataview")

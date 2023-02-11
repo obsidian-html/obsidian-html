@@ -1,5 +1,4 @@
 import sys
-import json
 import yaml
 
 from functools import cache

@@ -5,9 +5,6 @@ from pathlib import Path
 import webbrowser
 import requests
 
-import threading
-import time
-import sys
 import os
 import webview # pywebview
 

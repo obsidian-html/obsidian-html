@@ -7,7 +7,7 @@ import regex as re
 from pathlib import Path
 from functools import cache
 
-from ..lib import OpenIncludedFile, simpleHash, pushd
+from ..lib import simpleHash, pushd
 from ..compiler.Templating import PopulateTemplate
 
 

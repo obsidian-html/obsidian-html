@@ -1,12 +1,7 @@
-import re                   # regex string finding/replacing
-import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
-import warnings
-import shutil               # used to remove a non-empty directory, copy files
 
 from pathlib import Path
 
-from ..lib import DuplicateFileNameInRoot
 
 
 class MarkdownLink:

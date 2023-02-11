@@ -1,13 +1,8 @@
-import urllib.parse         # convert link characters like %
 
-import frontmatter
-from pathlib import Path 
 import platform
 import datetime
-import regex as re
 
 from ..core.FileObject import FileObject
-from ..parser.MarkdownPage import MarkdownPage
 from ..lib import slugify_path
 
 def verbose(pb):

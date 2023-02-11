@@ -28,7 +28,7 @@ def obs_img_to_md_img(pb, page):
 def md_to_html(pb, page, rel_dst_path):
     import markdown
     from ..markdown_extensions.CallOutExtension import CallOutExtension
-    from ..markdown_extensions.DataviewExtension import DataviewExtension
+    #from ..markdown_extensions.DataviewExtension import DataviewExtension
     from ..markdown_extensions.MermaidExtension import MermaidExtension
     from ..markdown_extensions.CustomTocExtension import CustomTocExtension
     from ..markdown_extensions.EraserExtension import EraserExtension

@@ -2,8 +2,6 @@ from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
 import regex as re
-import string
-from pathlib import Path
 
 RegexBegin = re.compile(r"^ *\`\`\` *ad-cite")
 RegexEnd = re.compile(r"^ *\`\`\`")

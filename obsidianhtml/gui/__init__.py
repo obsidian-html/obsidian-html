@@ -1,11 +1,7 @@
-from ..lib import OpenIncludedFile, GetIncludedFilePaths
+from ..lib import OpenIncludedFile
 #from .MainApi import Api
 from .Api import Api
 
-import threading
-import time
-import sys
-import os
 import webview # pywebview
 
 def Launch():

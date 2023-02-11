@@ -20,8 +20,6 @@ This extension removes these comments.
 from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
-import regex as re
-import string
 
 
 

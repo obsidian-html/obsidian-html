@@ -2,9 +2,6 @@ from ..lib import OpenIncludedFile
 from .lib import open_dialog
 from .InstallerApi import InstallerApi
 
-import threading
-import time
-import sys
 import os
 from pathlib import Path
 

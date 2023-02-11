@@ -6,7 +6,6 @@ import tempfile             # used to create temporary files/folders
 from subprocess import Popen, PIPE
 from pathlib import Path
 
-from ..core import Types as T
 from ..lib import is_installed, pushd, should_ignore
 
 
