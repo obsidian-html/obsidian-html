@@ -33,54 +33,60 @@ class CallOutBlockProcessor(BlockProcessor):
                 return False
             if re.match(self.RE_FENCE_START, line):
                 return True
-
         return False
 
-    def run(self, parent, blocks):
-        #original_block = blocks[0] 
-        #blocks[0] = re.sub(self.RE_FENCE_START, '', blocks[0])
+    def parse_callout_contents(self, data_div, content_chunk):
+        # set state to something other than 'list' to avoid mysterious disappearance of <p> tags.
+        self.parser.state.set('callout')
 
+        # throw the content of the callout back into the works for further parsing and conversion
+        # output will be placed in the data_div
+        self.parser.parseBlocks(data_div, ['\n'.join(content_chunk)])
+
+        # tell python-markdown that we are done with compiling the callout.
+        self.parser.state.reset()
+
+    def parse_putback_contents(self, parent, putback_chunk):
+        # info: putbacks is stuff that comes at the beginning or end of the block that is not 
+        #       part of the callout itself.
+        self.parser.parseChunk(parent, '\n'.join(putback_chunk))
+
+    def run(self, parent, blocks):
         block = blocks.pop(0)
         putback = []
         in_callout = False
-        chunk = ''
+        chunk = []
         i = -1
         for line in block.split('\n'):
             i += 1
             # skip until reaching the start of the callout
             if not in_callout:
                 if not re.match(self.RE_FENCE_START, line):
-                    #print('putback', line)
                     putback.append(line)
                     continue
                 else:
-                    #print('fence start', line)
                     in_callout = True
                     i = 0
-                    # parse putback (not part of the callout)
-                    self.parser.parseChunk(parent, '\n'.join(putback))
+                    self.parse_putback_contents(parent, putback)
                     putback = []
             else:
                 if not re.match(self.RE_FENCE_LINE, line):
-                    #print('fence end', line)
                     in_callout = False
                     # line no longer part of the callout
                     # parse what is left of the callout
-                    if chunk != '':
-                        self.parser.parseChunk(data_div, chunk)
-                        chunk = ''
+                    if len(chunk) > 0:
+                        self.parse_callout_contents(data_div, chunk)
+                        chunk = []
                     putback.append(line)
                     continue
                 else:
                     pass
-                    #print('matched', line)
 
             # first line has information for formatting, extract this
             # and use this space to init the callout div and title div
             if i == 0:
                 # get information on callout from the first line
                 data = self.parseHeader(line)
-                #print(data)
 
                 # create callout div
                 div = etree.SubElement(parent, 'div')
@@ -132,26 +138,18 @@ class CallOutBlockProcessor(BlockProcessor):
 
                 continue
 
-            # remove leading >
-            if line.startswith('>'):
-                line = line[1:]
-            line = line.lstrip()
+            # remove leading > to avoid blockquote blocks.
+            line = re.sub(r'^ *> *', '', line, count=1)
 
-            if line == '':
-                # compile chunk
-                self.parser.parseChunk(data_div, chunk)
+            # Add to chunk with the newline that we used to split the line from the block
+            chunk.append(line)
 
-                # setup new chunk
-                chunk = ''
-                continue
-
-            chunk += line + '\n'
-
-        if chunk != '':
-            self.parser.parseChunk(data_div, chunk)
+        if len(chunk) > 0:
+            self.parse_callout_contents(data_div, chunk)
+            chunk = []
 
         if len(putback) > 0:
-            self.parser.parseChunk(parent, '\n'.join(putback))
+            self.parse_putback_contents(parent, putback)
 
         return True 
 
