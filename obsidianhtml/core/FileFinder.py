@@ -52,7 +52,7 @@ class FileFinder:
         files = self.files
         olink = link
         search = False
-        #searchstring = 'Pages/textfile.txt'
+        searchstring = None #searchstring = 'Pages/textfile.txt'
 
         # remove leading / ../ or ./
         if link[0] == '/':

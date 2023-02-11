@@ -106,7 +106,7 @@ class Ledger:
             raise Exception(f'id {id} not known (Ledger.set_value())')
 
         if isinstance(value, Path):
-            value = val.resolve().as_posix()
+            value = value.resolve().as_posix()
 
         self.ledger[id] = value
         self.write_to_file()

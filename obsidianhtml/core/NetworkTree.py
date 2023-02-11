@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from ..lib import slugify_path
 
 '''
 This class helps us building the graph.json by keeping track of which notes link to other notes.
@@ -18,6 +19,7 @@ class NetworkTree:
 
         self.tree = {'nodes': [], 'links': []}
         self.node_lookup = {}
+        self.node_lookup_slug = {}
 
         self.node_graph = None
         self.node_graph_lookup = None
@@ -111,6 +113,8 @@ class NetworkTree:
     def compile_node_lookup(self):
         for n in self.tree['nodes']:
             self.node_lookup[n['id']] = n
+            self.node_lookup_slug[slugify_path(n['id'])] = n
+    
     
     def AddCrosslinks(self):
         for link in self.tree['links']:

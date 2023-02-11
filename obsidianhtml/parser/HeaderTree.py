@@ -1,5 +1,4 @@
 import regex as re
-import yaml
 from ..lib import slugify
 
 # Purpose:
@@ -7,10 +6,10 @@ from ..lib import slugify
 # If a h1 header is given, all the content from that header until the next h1 will be returned.
 #
 # Usage:
-#   from .HeaderTree import PrintHeaderTree, ConvertMarkdownToHeaderTree
+#   from .HeaderTree import PrintHeaderTree, convert_markdown_to_header_tree
 #   from .lib import slugify
 #   header_id = slugify("My Header Name")
-#   header_dict, root_element = ConvertMarkdownToHeaderTree(markdown_content_as_string)
+#   header_dict, root_element = convert_markdown_to_header_tree(markdown_content_as_string)
 #   print(PrintHeaderTree(header_dict[header_id]))
 
 def _newElement():
@@ -30,12 +29,12 @@ def PrintHeaderTree(root_element):
             page.append(element)
     return '\n'.join(page)
 
-def GetSubHeaderTree(header_tree, header_selector): 
+def GetSubHeaderTree(header_tree, header_selector):
     # header_selector can look like this: section1#h3 (which will be different from section2#h3, for example)
     # if false is returned, something went wrong in the parsing step, the caller can decided whether to bug out or to ignore the link
 
     def recurse_selector(header_tree, header_selector):
-        # get md-title for the next block 
+        # get md-title for the next block
         if header_selector.count('#') == 0:
             header_element = header_selector
             new_header_selector = ''
@@ -46,7 +45,7 @@ def GetSubHeaderTree(header_tree, header_selector):
 
         # find tree element that matches md_title
         result = recurse_tree(header_tree, md_title)
-        if result is None: 
+        if result is None:
             print(f'ERROR: header with title {md_title} was not found')
             return False
 
@@ -78,7 +77,7 @@ def GetSubHeaderTree(header_tree, header_selector):
     return recurse_selector(header_tree, header_selector)
 
 
-def ConvertMarkdownToHeaderTree(code):
+def convert_markdown_to_header_tree(code):
     lines = code.split('\n')
     current_element = _newElement()
     root_element = current_element
@@ -90,68 +89,70 @@ def ConvertMarkdownToHeaderTree(code):
             continue
 
         # First char == '#', see if the string makes a header
-        is_header = True
         looking_for_space = True
-        header_formed = False
         level = 0
         for i, char in enumerate(line):
-            if looking_for_space == True and char == '#':
+            if looking_for_space is True and char == '#':
                 level += 1
                 continue
-            if looking_for_space == True and char == ' ':
+            if looking_for_space is True and char == ' ':
                 looking_for_space = False
 
                 # no string after '[#]* ' makes an invalid header, discard
                 if len(line) < i:
                     break
+
                 # Header found
-                else:
-                    new_element = _newElement()
-                    new_element['level'] = level
-                    new_element['title'] = line[i+1:len(line)]
-                    md_title = slugify(new_element['title'])
-                    
-                    if md_title in header_dict.keys():
-                        i = 1
-                        while (md_title + '_' + str(i)) in header_dict.keys():
-                            i += 1 
-                        md_title = md_title + '_' + str(i)
-                    new_element['md-title'] = md_title
+                new_element = _newElement()
+                new_element['level'] = level
+                new_element['title'] = line[i+1:len(line)]
+                md_title = slugify(new_element['title'])
+                
+                if md_title in header_dict.keys():
+                    i = 1
+                    while (md_title + '_' + str(i)) in header_dict.keys():
+                        i += 1
+                    md_title = md_title + '_' + str(i)
+                new_element['md-title'] = md_title
 
-                    # Move up in the tree until both levels are equal, or current_element['level'] is higher than level
-                    while level < current_element['level']:
-                        current_element = current_element['parent']
-                    if level > current_element['level']:
-                        # add to children of current_element
-                        current_element['content'].append(new_element)
-                        new_element['parent'] = current_element
-                    elif level == current_element['level']:
-                        # add to children of parent of current_element
-                        current_element['parent']['content'].append(new_element)
-                        new_element['parent'] = current_element['parent']
+                # Move up in the tree until both levels are equal, or current_element['level'] is higher than level
+                while level < current_element['level']:
+                    current_element = current_element['parent']
+                if level > current_element['level']:
+                    # add to children of current_element
+                    current_element['content'].append(new_element)
+                    new_element['parent'] = current_element
+                elif level == current_element['level']:
+                    # add to children of parent of current_element
+                    current_element['parent']['content'].append(new_element)
+                    new_element['parent'] = current_element['parent']
 
-                    # Add to header_dict for easy retrieval
-                    header_dict[new_element['md-title']] = new_element
+                # Add to header_dict for easy retrieval
+                header_dict[new_element['md-title']] = new_element
 
-                    # Iterate
-                    current_element = new_element
+                # Iterate
+                current_element = new_element
     return header_dict, root_element
 
-def GetReferencedBlock(reference, contents, rel_path_str):
+def get_referenced_block(reference, contents, rel_path_str):
+    ''' This function will look in the contents of rel_path_str,
+        for the block that is tagged with reference `reference`,  https://help.obsidian.md/Linking+notes+and+files/Internal+links#Link+to+a+block+in+a+note
+        and return only the content of that block.
+    '''
     chunks = []
     current_chunk = ''
     last_line = ''
     for line in contents.split('\n'):
         if line.strip() == '':
             # return chunk if reference is found
-            if reference == last_line.strip().split(' ')[-1]:                                       # reference always has to be seperated by at least 1 space and end with a newline and be on the last line of a paragraph
+            if reference == last_line.strip().rsplit(" ", maxsplit=1)[-1]:                          # reference always has to be seperated by at least 1 space and end with a newline and be on the last line of a paragraph
                 clean_chunk = re.sub(r'(?<=\s|^)(\^\S*?)(?=$|\n)', '', current_chunk.strip())       # we want to get a non-empty chunk, the reference itself does not count as "non-empty", so remove this
                 if clean_chunk == '':
                     clean_chunk = re.sub(r'(?<=\s|^)(\^\S*?)(?=$|\n)', '', chunks[-1].strip())      # current chunk is empty, get last non-empty one and remove the reference from the end
                 return clean_chunk
 
             # add current_chunk to chunk list as long as it is not empty
-            if current_chunk.strip() != '':                                     
+            if current_chunk.strip() != '':
                 chunks.append(current_chunk)
 
             # start a new chunk
@@ -176,7 +177,7 @@ def GetReferencedBlock(reference, contents, rel_path_str):
 # def FindHeaderTreeKey(key_list, key):
 #     # this code will find a key in the key list that is the same as the provided key
 #     # with the option for one or more '-' at any location in the provided key relative to
-#     # the keys in the keylist 
+#     # the keys in the keylist
 
 #     if key in key_list:
 #         return key
@@ -194,7 +195,7 @@ def GetReferencedBlock(reference, contents, rel_path_str):
 #         raise Exception(f"Header {key} not found in list of {key_list}")
 
 #     # more than one match found
-#     # wifi-2-4-vs-5-0   wifi-24-vs-50  
+#     # wifi-2-4-vs-5-0   wifi-24-vs-50
 #     c = 0
 #     for k in naive_matches:
 #         for char in k:
@@ -208,6 +209,6 @@ def GetReferencedBlock(reference, contents, rel_path_str):
 #                     c += 1
 #                     if c == len(key):
 #                         return k
-#             else: 
+#             else:
 #                 continue
 #     raise Exception(f"Header {key} not found in list of {key_list}")
