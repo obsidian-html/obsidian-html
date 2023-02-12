@@ -110,6 +110,7 @@ blockquote p {
     width: fit-content;
     background-color: var(--bg-accent);
     border-radius: 2px;
+    text-align: center;
 }
 .container figure figcaption {
     margin: -5px 0 0 0;
