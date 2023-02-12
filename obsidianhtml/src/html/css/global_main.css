@@ -101,7 +101,7 @@ blockquote p {
 }
 
 .container img {
-    max-width: 100%;
+    max-width: calc(100% - 0.4rem);
     padding: 0.2rem;
 }
 .container figure {
