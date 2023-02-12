@@ -16,7 +16,6 @@ import time
 
 def Run():
     # to be configured by commandline args
-    entrypoint_provided = False
     config_path_str = ''
     entrypoint_path_str = ''
     output_folder_path_str = ''

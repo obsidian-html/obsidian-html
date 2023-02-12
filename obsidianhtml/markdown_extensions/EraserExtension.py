@@ -56,7 +56,6 @@ class EraserPreprocessor(Preprocessor):
     #         print(f"eraser extension: {msg}")
 
     def run(self, lines):
-        in_text = 1
         in_comment = 0
         in_codeblock = 0
         in_codeline = 0
@@ -73,11 +72,9 @@ class EraserPreprocessor(Preprocessor):
                         # -[`]- singular backtick
                         if in_codeline:
                             in_codeline = 0
-                            in_text = 1
                             #new_line += '<intext>'
                         else:
                             in_codeline = 1
-                            in_text = 0
                             #new_line += '<incodeline>'
 
                     # We only act when we are at the end of a ``` block the character before the ``` should not be a `
@@ -86,11 +83,9 @@ class EraserPreprocessor(Preprocessor):
                         # ``[`] codeblock
                         if in_codeblock:
                             in_codeblock = 0
-                            in_text = 1
                             #new_line += '<intext>'
                         else:
                             in_codeblock = 1
-                            in_text = 0
                             #new_line += '<incodeblock>'
 
                     # `` will have no effect on us, so no need to test for it
@@ -103,11 +98,9 @@ class EraserPreprocessor(Preprocessor):
                         if prev_char(line, i) == '%': 
                             if in_comment:
                                 in_comment = 0
-                                in_text = 1
                                 #new_line += '<intext>'
                             else:
                                 in_comment = 1
-                                in_text = 0
                                 #new_line += '<incomment>'
                             continue
 

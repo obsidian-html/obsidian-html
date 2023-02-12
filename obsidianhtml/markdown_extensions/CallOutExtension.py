@@ -57,6 +57,7 @@ class CallOutBlockProcessor(BlockProcessor):
         in_callout = False
         chunk = []
         i = -1
+        data_div = None
         for line in block.split('\n'):
             i += 1
             # skip until reaching the start of the callout
@@ -164,19 +165,19 @@ class CallOutBlockProcessor(BlockProcessor):
         bracket_content = ''
         tail = ''
         for ch in line:
-            if start_bracket == False and ch == '[':
+            if start_bracket is False and ch == '[':
                 start_bracket = True
                 continue
-            if start_bracket == True:
+            if start_bracket is True:
                 if ch == ']':
                     end_bracket = True 
                     continue
-                if ch == '!' and end_bracket == False:
+                if ch == '!' and end_bracket is False:
                     continue
-                if end_bracket == False:
+                if end_bracket is False:
                     bracket_content += ch
                     continue
-            if end_bracket == True:
+            if end_bracket is True:
                 tail += ch
 
         # read tail to get configuration

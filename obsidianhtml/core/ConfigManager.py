@@ -50,7 +50,7 @@ class Config:
         '''
         
         # Make sure the user passes in a config file
-        if input_yml_path_str == False:
+        if input_yml_path_str is False:
             print('ERROR: No config file passed in. Use -i <path/to/config.yml> to pass in a config yaml.')
             print_global_help_and_exit(1)
 
@@ -88,14 +88,14 @@ class Config:
         self.config['_css_file'] = f'main_{layout}.css'
 
     def check_entrypoint_exists(self):
-        if self.config['toggles']['compile_md'] == False:       # don't check vault if we are compiling directly from markdown to html
+        if self.config['toggles']['compile_md'] is False:       # don't check vault if we are compiling directly from markdown to html
             return
         if not Path(self.config['obsidian_entrypoint_path_str']).exists():
             print(f"Error: entrypoint note {self.config['obsidian_entrypoint_path_str']} does not exist.")
             exit(1)
 
     def set_obsidian_folder_path_str(self):
-        if self.config['toggles']['compile_md'] == False:       # don't check vault if we are compiling directly from markdown to html
+        if self.config['toggles']['compile_md'] is False:       # don't check vault if we are compiling directly from markdown to html
             return
 
         # Use user provided obsidian_folder_path_str
@@ -219,7 +219,6 @@ class Config:
             
             # Get grapher template code
             self.pb.graphers = []
-            i = 0
             for grapher in self.pb.gc('toggles/features/graph/templates', cached=True):
                 gid = grapher['id']
 

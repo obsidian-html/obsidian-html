@@ -164,7 +164,7 @@ class ConfigChecker:
         self.ledger = main_api.ledger
 
     def DetermineDefaultConfigFolderPath(self):
-        config_folder_path = dirs = AppDirs("obsidianhtml", "obsidianhtml")
+        return AppDirs("obsidianhtml", "obsidianhtml")
 
     def presetConfigPath(self):
         # get configured value

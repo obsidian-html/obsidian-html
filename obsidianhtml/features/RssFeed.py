@@ -362,7 +362,6 @@ def selector_first_paragraphs(soup, number_of_paragraphs, delimiter):
     return value
 
 def selector_first_header(soup, header_level):
-    value = ''
     header = soup.body.find('h'+str(header_level))
     if header is None:
         return ''

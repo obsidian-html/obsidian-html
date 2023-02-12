@@ -28,7 +28,6 @@ class CodeWrapperPreprocessor(Preprocessor):
         self.extension = extension
 
     def run(self, lines):
-        qualifier = 'standard'
         new_lines = []
         m_start = None
         m_end = None

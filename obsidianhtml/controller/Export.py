@@ -7,8 +7,6 @@ def RunExport():
     # Export packaged html template so users can edit it and then use their custom template
     # ---------------------------------------------------------
     command = ''
-    export_html_template_target_path = None
-    layout = 'documentation'
 
     # determine command
     if len(sys.argv) < 3:

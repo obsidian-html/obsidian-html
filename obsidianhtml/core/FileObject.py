@@ -63,7 +63,7 @@ class FileObject:
         return self.path[output]['file_absolute_path']
 
     def is_valid_note(self, output):
-        if self.fullpath(output).exists() == False:
+        if self.fullpath(output).exists() is False:
             return False
         if self.fullpath(output).suffix != '.md':
             return False

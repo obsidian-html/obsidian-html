@@ -424,22 +424,21 @@ class FootnoteInlineProcessor(InlineProcessor):
 
     def handleMatch(self, m, data):
         name = m.group(1)
-        id = None 
+        footnote_id = None 
 
         i, fn = self.footnotes.getFootnoteByName(name)
         if fn is not None:
-            id = fn['id']
-            text = fn['text']
+            footnote_id = fn['id']
 
-        if id is None:
+        if footnote_id is None:
             return None, None, None
 
         sup = etree.Element("sup")
         a = etree.SubElement(sup, "a")
-        sup.set('id', self.footnotes.makeFootnoteRefId(str(id), found=True))
-        a.set('href', '#' + self.footnotes.makeFootnoteId(str(id)))
+        sup.set('id', self.footnotes.makeFootnoteRefId(str(footnote_id), found=True))
+        a.set('href', '#' + self.footnotes.makeFootnoteId(str(footnote_id)))
         a.set('class', 'footnote-ref')
-        a.text = str(id)
+        a.text = str(footnote_id)
         return sup, m.start(0), m.end(0)
 
 
@@ -540,7 +539,7 @@ def convert_codeblocks(text):
     acc = []
     for line in text.split('\n'):
         if line.startswith('```'):
-            if mode == False:
+            if mode is False:
                 acc.append('')
             mode = not mode
             continue

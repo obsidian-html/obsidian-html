@@ -170,7 +170,7 @@ class CreateIndexFromDirStructure():
     @cache
     def check_has_folder_note(self, folder_abs_path_str):
         settings = self.pb.gc('toggles/features/folder_notes', cached=True)
-        if settings['enabled'] == False:
+        if settings['enabled'] is False:
             return (False, '')
 
         folder_abs_path = Path(folder_abs_path_str)
@@ -187,7 +187,7 @@ class CreateIndexFromDirStructure():
 
     def check_is_folder_note(self, note_abs_path):
         settings = self.pb.gc('toggles/features/folder_notes', cached=True)
-        if settings['enabled'] == False:
+        if settings['enabled'] is False:
             return False
 
         # Homepage cannot be folder note
@@ -269,17 +269,12 @@ class CreateIndexFromDirStructure():
                 return f["graph_name"]
 
         def _recurse(tree, tab_level, path, current_page):
-            current_dir = self.get_dir(current_page)
-            #current_abs_path = self.root.joinpath(current_page[1:]).resolve()
-            current_abs_path = self.root.as_posix() + current_page
-            
             html = ''
 
             if tab_level >= 0:
                 # -- [#288] folder notes 
                 # if the folder is the parent of the current_page it needs to be opened when loading the page
                 # a folder note folder needs slightly different design
-                folder_note_active = ''
                 fnpf = ''
                 folder_id = self.html_url_prefix + tree["rel_path"]
 

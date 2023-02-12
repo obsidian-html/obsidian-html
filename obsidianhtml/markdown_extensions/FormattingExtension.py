@@ -42,7 +42,7 @@ class FormattingInlineProcessor(InlineProcessor):
         super().__init__(pattern)
         self.extension = extension
 
-        if mode == False:
+        if mode is False:
             raise Exception('Mode should not be false')
 
         self.mode = mode

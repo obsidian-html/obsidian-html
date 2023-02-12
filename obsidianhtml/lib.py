@@ -143,7 +143,7 @@ def is_installed(command):
     try:
         p = Popen([command], stdout=PIPE, stderr=PIPE)
         output, error = p.communicate()
-    except FileNotFoundError as ex:
+    except FileNotFoundError:
         return False
     return True
 

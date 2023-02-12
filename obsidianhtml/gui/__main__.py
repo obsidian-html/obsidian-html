@@ -14,7 +14,7 @@ def main():
         else:
             raise Exception(f'Argument {sys.argv[1]} unknown')
     else:
-        if isDistFolderPresent() == False:
+        if isDistFolderPresent() is False:
             CompileHtml()
         Launch()
 

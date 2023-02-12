@@ -10,7 +10,6 @@ def verbose(pb):
 
 def CompileTagPageMarkdown(pb):
     # get settings
-    paths = pb.paths
     files = pb.index.files
     settings = pb.gc('toggles/features/create_index_from_tags')
 
@@ -65,16 +64,12 @@ def CompileTagPageMarkdown(pb):
         md.parse_inline_tags()
         
         metadata = md.metadata
-        page = md.page
         node_name = md.GetNodeName()
         node_id = pb.FileFinder.GetNodeId(pb, fo.path['markdown']['file_relative_path'].as_posix())
 
         # Skip if not valid
         if not fo.is_valid_note('note'):
             continue
-
-        # get full list of tags to match
-        tags = metadata['tags'] 
 
         # Check for each of the tags if its present
         # Skip if none matched
@@ -85,7 +80,7 @@ def CompileTagPageMarkdown(pb):
                     print(f'\t\tMatched note {k} on tag {t}')
                 matched = True
         
-        if matched == False:
+        if matched is False:
             continue
 
         # determine sorting value
@@ -215,7 +210,6 @@ def CompileTagPageMarkdown(pb):
 def CreateIndexFromTags(pb):
     # get settings
     paths = pb.paths
-    files = pb.index.files
     settings = pb.gc('toggles/features/create_index_from_tags')
 
     # method          = settings['sort']['method']
@@ -231,7 +225,7 @@ def CreateIndexFromTags(pb):
     # This is not good if we don't target the temp folder (copy_vault_to_tempdir = True)
     # Because we don't want to mess around in people's vaults.
     # So disable this feature if that setting is turned off
-    if pb.gc('copy_vault_to_tempdir') == False:
+    if pb.gc('copy_vault_to_tempdir') is False:
         raise Exception("The feature 'CREATE INDEX FROM TAGS' needs to write an index file to the obsidian path. We don't want to write in your vault, so in order to use this feature set 'copy_vault_to_tempdir: True' in your config.")
 
     # shorthand 
@@ -265,8 +259,6 @@ def CreateIndexFromTags(pb):
         f.write(md_content)
 
     # add file to file tree
-    now = datetime.datetime.now().isoformat()
-
     fo_index_dst_path = FileObject(pb)
     fo_index_dst_path.init_note_path(index_dst_path)
     fo_index_dst_path.init_markdown_path()

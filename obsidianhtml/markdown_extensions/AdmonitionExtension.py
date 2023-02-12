@@ -28,12 +28,10 @@ class AdmonitionPreprocessor(Preprocessor):
         self.extension = extension
 
     def run(self, lines):
-        qualifier = 'standard'
         new_lines = []
         m_start = None
         m_end = None
         in_code = False
-        lang = ''
 
         for line in lines:
             m_start = None

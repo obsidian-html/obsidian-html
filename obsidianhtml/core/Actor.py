@@ -26,7 +26,7 @@ class Optional:
     def remove_previous_obsidianhtml_output(pb) -> T.SystemChange:
         ''' Cleanup the result of the previous run (md and html folders) '''
 
-        if pb.gc('toggles/no_clean', cached=True) == False:
+        if pb.gc('toggles/no_clean', cached=True) is False:
             print('> CLEARING OUTPUT FOLDERS')
             if pb.gc('toggles/compile_md', cached=True):
                 if pb.paths['md_folder'].exists():

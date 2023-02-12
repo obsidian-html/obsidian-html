@@ -34,10 +34,10 @@ class FileFinder:
         # Find file. Values will be False when file is not found.
         output['rtr_path_str'], output['fo'] = self._FindFile(link, html_url_prefix, force_filename_to_lowercase)
 
-        if output['fo'] == False and link.startswith('/'):
+        if output['fo'] is False and link.startswith('/'):
             output['rtr_path_str'], output['fo'] = self._FindFile(link[1:], html_url_prefix, force_filename_to_lowercase)
 
-        if output['fo'] == False and not link.startswith('/'):
+        if output['fo'] is False and not link.startswith('/'):
             output['rtr_path_str'], output['fo'] = self._FindFile('/'+link, html_url_prefix, force_filename_to_lowercase)
 
         return output

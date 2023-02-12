@@ -167,7 +167,6 @@ class InstallerApi:
     def CheckGit(self):
         issues = []
         good = []
-        fixes = []
         issue_template = {
             'name': '',
             'msg': ''

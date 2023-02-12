@@ -132,7 +132,6 @@ class NetworkTree:
 
     def CompileNoteGraphDataStructure(self):
         d = {'id': '', 'title': '', 'linkTo': None, 'referencedBy': None}
-        id_lookup = {}
         note_lookup = {}
         note_graph = []
         for node in self.tree['nodes']:
