@@ -189,7 +189,7 @@ toggles:
   external_blank: False
 
   # If alt text is specified, place it in a figure caption under the image.
-  img_alt_text_use_figure: False
+  img_alt_text_use_figure: True
 
   # Will preserve inline tags. This will give polluted markdown output
   preserve_inline_tags: True
