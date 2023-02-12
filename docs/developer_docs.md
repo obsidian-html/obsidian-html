@@ -20,6 +20,11 @@ python -m obsidianhtml -i /path/to/config.yml
 ```
 
 ## Contribute to Obsidianhtml
+## Introduction
+When contributing code to the project, please take into consideration the following requirements:
+- Run a linter to avoid obvious errors
+- Run black to apply standardizes formatting, so that we don't pollute PR's with format changes
+
 ### Running linting
 To avoid easily avoidable errors, it is good to run a linter before commiting your code to be pulled.
 
@@ -68,7 +73,6 @@ Search for: [^\s]+ +\n
 ```
 
 ### Run Ruff
-
 For first time setup, run the following:
 ``` shell
 pip install ruff
@@ -79,6 +83,19 @@ See pyproject.toml for configuration
 Then, when ready to commit, run the following in the root of this repo:
 ``` shell
 ruff check obsidianhtml  
+```
+
+### Run black
+For first time setup, run the following:
+``` shell
+pip install black
+```
+
+See pyproject.toml for configuration
+
+Then, when ready to commit, run the following in the root of this repo:
+``` shell
+black obsidianhtml
 ```
 
 # Architecture

@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import platform
 import os
-import shutil               # used to remove a non-empty directory, copy files
+import shutil  # used to remove a non-empty directory, copy files
 
 
 from pathlib import Path
@@ -11,7 +11,7 @@ from pathlib import Path
 from ..parser.MarkdownPage import MarkdownPage
 from ..lib import get_rel_html_url_prefix, slugify_path
 
-'''
+"""
 This object class helps us with keeping track of all the paths.
 There are three types of paths:
 
@@ -31,18 +31,19 @@ we can compile all the relevant paths in one pass.
 The links have some complexity because we can configure to use absolute links or relative links.
 For simplicity's sake, we just compile both link types within the same function. There are some functions to automatically
 get the correct link based on the configurations.
-'''
+"""
+
 
 class FileObject:
-    pb = None                   # contains all config, paths, etc (global pass in config object)
-    path = None                 # hashtable with all relevant file paths
-    link = None                 # hashtable with all links
-    metadata = None             # information on the note, such as modified_date
-    md = None                   # MarkdownPage object
-    node = None                 # Node object, filled in, linked to network_tree
+    pb = None  # contains all config, paths, etc (global pass in config object)
+    path = None  # hashtable with all relevant file paths
+    link = None  # hashtable with all links
+    metadata = None  # information on the note, such as modified_date
+    md = None  # MarkdownPage object
+    node = None  # Node object, filled in, linked to network_tree
 
-    processed_ntm = False       # whether the note has already been processed in the note --> markdown flow
-    processed_mth = False       # whether the note has already been processed in the markdown --> html flow
+    processed_ntm = False  # whether the note has already been processed in the note --> markdown flow
+    processed_mth = False  # whether the note has already been processed in the markdown --> html flow
 
     def __init__(self, pb):
         self.pb = pb
@@ -53,216 +54,216 @@ class FileObject:
 
         # These values are not set under self.compile_metadata()
         # So the default values need to be set here.
-        self.metadata['is_entrypoint'] = False
+        self.metadata["is_entrypoint"] = False
 
     def load_markdown_page(self, input_type):
         self.md = MarkdownPage(self, input_type)
         return self.md
 
     def fullpath(self, output):
-        return self.path[output]['file_absolute_path']
+        return self.path[output]["file_absolute_path"]
 
     def is_valid_note(self, output):
         if self.fullpath(output).exists() is False:
             return False
-        if self.fullpath(output).suffix != '.md':
+        if self.fullpath(output).suffix != ".md":
             return False
         return True
 
     def init_note_path(self, source_file_absolute_path, compile_metadata=True):
-        self.oh_file_type = 'obs_to_md'
+        self.oh_file_type = "obs_to_md"
 
         # Configured folders
-        source_folder_path = self.pb.paths['obsidian_folder']
-        target_folder_path = self.pb.paths['md_folder']
+        source_folder_path = self.pb.paths["obsidian_folder"]
+        target_folder_path = self.pb.paths["md_folder"]
 
         # Note
-        self.path['note'] = {}
-        self.path['note']['folder_path'] = source_folder_path
-        self.path['note']['file_absolute_path'] = source_file_absolute_path
-        self.path['note']['file_relative_path'] = source_file_absolute_path.relative_to(source_folder_path)
-        self.path['note']['suffix'] = self.path['note']['file_absolute_path'].suffix[1:]
+        self.path["note"] = {}
+        self.path["note"]["folder_path"] = source_folder_path
+        self.path["note"]["file_absolute_path"] = source_file_absolute_path
+        self.path["note"]["file_relative_path"] = source_file_absolute_path.relative_to(source_folder_path)
+        self.path["note"]["suffix"] = self.path["note"]["file_absolute_path"].suffix[1:]
 
         # Markdown
-        self.path['markdown'] = {}
-        self.path['markdown']['folder_path'] = target_folder_path
+        self.path["markdown"] = {}
+        self.path["markdown"]["folder_path"] = target_folder_path
 
-        if self.path['note']['file_relative_path'] == self.pb.paths['rel_obsidian_entrypoint']:
+        if self.path["note"]["file_relative_path"] == self.pb.paths["rel_obsidian_entrypoint"]:
             # rewrite path to index.md if the note is configured as the entrypoint.
-            self.metadata['is_entrypoint'] = True
-            self.path['markdown']['file_absolute_path'] = target_folder_path.joinpath('index.md')
-            self.path['markdown']['file_relative_path'] = self.path['markdown']['file_absolute_path'].relative_to(target_folder_path)
+            self.metadata["is_entrypoint"] = True
+            self.path["markdown"]["file_absolute_path"] = target_folder_path.joinpath("index.md")
+            self.path["markdown"]["file_relative_path"] = self.path["markdown"]["file_absolute_path"].relative_to(target_folder_path)
 
             # also add self to pb.index.files under the key 'index.md' so it is findable
-            self.pb.index.files['index.md'] = self
+            self.pb.index.files["index.md"] = self
         else:
-            self.path['markdown']['file_absolute_path'] = target_folder_path.joinpath(self.path['note']['file_relative_path'])
-            self.path['markdown']['file_relative_path'] = self.path['note']['file_relative_path']
+            self.path["markdown"]["file_absolute_path"] = target_folder_path.joinpath(self.path["note"]["file_relative_path"])
+            self.path["markdown"]["file_relative_path"] = self.path["note"]["file_relative_path"]
 
-        self.path['markdown']['suffix'] = self.path['markdown']['file_absolute_path'].suffix[1:]
+        self.path["markdown"]["suffix"] = self.path["markdown"]["file_absolute_path"].suffix[1:]
 
         # Metadata
-        self.metadata['depth'] = self._get_depth(self.path['note']['file_relative_path'])
+        self.metadata["depth"] = self._get_depth(self.path["note"]["file_relative_path"])
         if compile_metadata:
-            self.compile_metadata(source_file_absolute_path)            # is_note, creation_time, modified_time, is_video, is_audio, is_includable
+            self.compile_metadata(source_file_absolute_path)  # is_note, creation_time, modified_time, is_video, is_audio, is_includable
 
     def init_markdown_path(self, source_file_absolute_path=None):
-        self.oh_file_type = 'md_to_html'
+        self.oh_file_type = "md_to_html"
 
-        source_folder_path = self.pb.paths['md_folder']
-        target_folder_path = self.pb.paths['html_output_folder']
+        source_folder_path = self.pb.paths["md_folder"]
+        target_folder_path = self.pb.paths["html_output_folder"]
 
         # compile the path['markdown'] section, or reuse the section from the previous step
         if source_file_absolute_path is None:
-            source_file_absolute_path = self.path['markdown']['file_absolute_path']
+            source_file_absolute_path = self.path["markdown"]["file_absolute_path"]
         else:
-            self.path['markdown'] = {}
-            self.path['markdown']['folder_path'] = source_folder_path
-            self.path['markdown']['file_absolute_path'] = source_file_absolute_path
-            self.path['markdown']['file_relative_path'] = source_file_absolute_path.relative_to(source_folder_path)
-            self.path['markdown']['suffix'] = source_file_absolute_path.suffix[1:]
+            self.path["markdown"] = {}
+            self.path["markdown"]["folder_path"] = source_folder_path
+            self.path["markdown"]["file_absolute_path"] = source_file_absolute_path
+            self.path["markdown"]["file_relative_path"] = source_file_absolute_path.relative_to(source_folder_path)
+            self.path["markdown"]["suffix"] = source_file_absolute_path.suffix[1:]
 
         # html
-        self.path['html'] = {}
-        self.path['html']['folder_path'] = target_folder_path
+        self.path["html"] = {}
+        self.path["html"]["folder_path"] = target_folder_path
 
-        if self.path['markdown']['file_relative_path'] == self.pb.paths['rel_md_entrypoint_path']:
+        if self.path["markdown"]["file_relative_path"] == self.pb.paths["rel_md_entrypoint_path"]:
             # rewrite path to index.html if the markdown note is configured as the entrypoint.
-            self.metadata['is_entrypoint'] = True
-            self.path['html']['file_absolute_path'] = target_folder_path.joinpath('index.html')
-            self.path['html']['file_relative_path'] = self.path['html']['file_absolute_path'].relative_to(target_folder_path)
+            self.metadata["is_entrypoint"] = True
+            self.path["html"]["file_absolute_path"] = target_folder_path.joinpath("index.html")
+            self.path["html"]["file_relative_path"] = self.path["html"]["file_absolute_path"].relative_to(target_folder_path)
         else:
             # rewrite markdown suffix to html suffix
-            target_rel_path_posix = self.path['markdown']['file_relative_path'].as_posix()
-            if target_rel_path_posix[-3:] == '.md':
-                target_rel_path = Path(target_rel_path_posix[:-3] + '.html')
+            target_rel_path_posix = self.path["markdown"]["file_relative_path"].as_posix()
+            if target_rel_path_posix[-3:] == ".md":
+                target_rel_path = Path(target_rel_path_posix[:-3] + ".html")
             else:
                 target_rel_path = Path(target_rel_path_posix)
 
-            self.path['html']['file_absolute_path'] = target_folder_path.joinpath(target_rel_path)
-            self.path['html']['file_relative_path'] = target_rel_path
-            self.path['html']['suffix'] = self.path['html']['file_absolute_path'].suffix[1:]
+            self.path["html"]["file_absolute_path"] = target_folder_path.joinpath(target_rel_path)
+            self.path["html"]["file_relative_path"] = target_rel_path
+            self.path["html"]["suffix"] = self.path["html"]["file_absolute_path"].suffix[1:]
 
         # slugify paths
-        if self.pb.gc('toggles/slugify_html_links', cached=True):
-            _slug_path = slugify_path(self.path['html']['file_absolute_path'].as_posix())
-            self.path['html']['file_absolute_path'] = Path(_slug_path)
+        if self.pb.gc("toggles/slugify_html_links", cached=True):
+            _slug_path = slugify_path(self.path["html"]["file_absolute_path"].as_posix())
+            self.path["html"]["file_absolute_path"] = Path(_slug_path)
 
-            _slug_path = slugify_path(self.path['html']['file_relative_path'].as_posix())
-            self.path['html']['file_relative_path'] = Path(_slug_path)
+            _slug_path = slugify_path(self.path["html"]["file_relative_path"].as_posix())
+            self.path["html"]["file_relative_path"] = Path(_slug_path)
 
             self.pb.index.aliased_files[_slug_path] = self
-            self.pb.index.aliased_files[_slug_path[:-5]+'.md'] = self
+            self.pb.index.aliased_files[_slug_path[:-5] + ".md"] = self
 
         # Metadata
         # call to self.compile_metadata() should be done manually in the calling function
-        self.metadata['depth'] = self._get_depth(self.path['html']['file_relative_path'])
+        self.metadata["depth"] = self._get_depth(self.path["html"]["file_relative_path"])
 
     def compile_metadata(self, path, cached=False):
-        if cached and 'is_note' in self.metadata:
+        if cached and "is_note" in self.metadata:
             return
         self.set_times(path)
         self.set_file_types(path)
 
     def set_file_types(self, path):
-        self.metadata['is_note'] = False
-        self.metadata['is_video'] = False
-        self.metadata['is_audio'] = False
-        self.metadata['is_embeddable'] = False
-        self.metadata['is_includable_file'] = False
-        self.metadata['is_parsable_note'] = False
+        self.metadata["is_note"] = False
+        self.metadata["is_video"] = False
+        self.metadata["is_audio"] = False
+        self.metadata["is_embeddable"] = False
+        self.metadata["is_includable_file"] = False
+        self.metadata["is_parsable_note"] = False
 
         suffix = path.suffix[1:].lower()
-        
-        if suffix == 'md':
-            self.metadata['is_note'] = True
-        if suffix in self.pb.gc('included_file_suffixes', cached=True):
-            self.metadata['is_includable_file'] = True
-        if suffix in self.pb.gc('video_format_suffixes', cached=True):
-            self.metadata['is_video'] = True
-        if suffix in self.pb.gc('audio_format_suffixes', cached=True):
-            self.metadata['is_audio'] = True
-        if suffix in self.pb.gc('embeddable_file_suffixes', cached=True):
-            self.metadata['is_embeddable'] = True
 
-        if path.exists() and self.metadata['is_note']:
-            self.metadata['is_parsable_note'] = True
+        if suffix == "md":
+            self.metadata["is_note"] = True
+        if suffix in self.pb.gc("included_file_suffixes", cached=True):
+            self.metadata["is_includable_file"] = True
+        if suffix in self.pb.gc("video_format_suffixes", cached=True):
+            self.metadata["is_video"] = True
+        if suffix in self.pb.gc("audio_format_suffixes", cached=True):
+            self.metadata["is_audio"] = True
+        if suffix in self.pb.gc("embeddable_file_suffixes", cached=True):
+            self.metadata["is_embeddable"] = True
+
+        if path.exists() and self.metadata["is_note"]:
+            self.metadata["is_parsable_note"] = True
 
     def set_times(self, path):
-        if platform.system() == 'Windows' or platform.system() == 'Darwin':
-            self.metadata['creation_time'] = datetime.datetime.fromtimestamp(os.path.getctime(path)).isoformat()
-            self.metadata['modified_time'] = datetime.datetime.fromtimestamp(os.path.getmtime(path)).isoformat()
+        if platform.system() == "Windows" or platform.system() == "Darwin":
+            self.metadata["creation_time"] = datetime.datetime.fromtimestamp(os.path.getctime(path)).isoformat()
+            self.metadata["modified_time"] = datetime.datetime.fromtimestamp(os.path.getmtime(path)).isoformat()
         else:
-            self.metadata['modified_time'] = datetime.datetime.fromtimestamp(os.path.getmtime(path)).isoformat()
+            self.metadata["modified_time"] = datetime.datetime.fromtimestamp(os.path.getmtime(path)).isoformat()
 
     def get_depth(self, mode):
-        return self._get_depth(self.path[mode]['file_relative_path'])
-    def _get_depth(self, rel_path):
-        return rel_path.as_posix().count('/')
+        return self._get_depth(self.path[mode]["file_relative_path"])
 
-    def get_link(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
+    def _get_depth(self, rel_path):
+        return rel_path.as_posix().count("/")
+
+    def get_link(self, link_type, origin: "FileObject" = None, origin_rel_dst_path_str=None):
         link = self._get_link(link_type, origin, origin_rel_dst_path_str)
-        if self.pb.gc('toggles/slugify_html_links', cached=True) and link_type == 'html':
+        if self.pb.gc("toggles/slugify_html_links", cached=True) and link_type == "html":
             return slugify_path(link)
         return link
 
-    def _get_link(self, link_type, origin:'FileObject'=None, origin_rel_dst_path_str=None):
+    def _get_link(self, link_type, origin: "FileObject" = None, origin_rel_dst_path_str=None):
         # Get origin_rel_dst_path_str
         if origin_rel_dst_path_str is None:
             if origin is not None:
-                origin_rel_dst_path_str = origin.path[link_type]['file_relative_path'].as_posix()
+                origin_rel_dst_path_str = origin.path[link_type]["file_relative_path"].as_posix()
             else:
-                origin_rel_dst_path_str = self.path[link_type]['file_relative_path'].as_posix()
+                origin_rel_dst_path_str = self.path[link_type]["file_relative_path"].as_posix()
 
         # recompile links for the given origin_path and return correct link (absolute or relative)
-        if link_type == 'markdown':
+        if link_type == "markdown":
             self.compile_markdown_link(origin_rel_dst_path_str)
 
-            if self.pb.gc('toggles/relative_path_md', cached=True):
-                return self.link[link_type]['relative']
+            if self.pb.gc("toggles/relative_path_md", cached=True):
+                return self.link[link_type]["relative"]
 
-        elif link_type == 'html':
+        elif link_type == "html":
             self.compile_html_link(origin_rel_dst_path_str)
 
-            if self.pb.gc('toggles/relative_path_html', cached=True):
-                return self.link[link_type]['relative']
+            if self.pb.gc("toggles/relative_path_html", cached=True):
+                return self.link[link_type]["relative"]
 
-        return self.link[link_type]['absolute']
+        return self.link[link_type]["absolute"]
 
     def compile_markdown_link(self, origin_rel_dst_path_str):
-        self.link['markdown'] = {}
+        self.link["markdown"] = {}
 
         # Absolute
-        web_abs_path = self.path['markdown']['file_relative_path'].as_posix()
-        self.link['markdown']['absolute'] = '/'+web_abs_path
+        web_abs_path = self.path["markdown"]["file_relative_path"].as_posix()
+        self.link["markdown"]["absolute"] = "/" + web_abs_path
 
         # Relative
         prefix = get_rel_html_url_prefix(origin_rel_dst_path_str)
-        self.link['markdown']['relative'] = prefix+'/'+web_abs_path
+        self.link["markdown"]["relative"] = prefix + "/" + web_abs_path
 
     def compile_html_link(self, origin_rel_dst_path_str):
-        self.link['html'] = {}
+        self.link["html"] = {}
 
         # Absolute
-        html_url_prefix = self.pb.gc('html_url_prefix')
-        abs_link = self.path['html']['file_relative_path'].as_posix()
-        self.link['html']['absolute'] = html_url_prefix+'/'+abs_link
+        html_url_prefix = self.pb.gc("html_url_prefix")
+        abs_link = self.path["html"]["file_relative_path"].as_posix()
+        self.link["html"]["absolute"] = html_url_prefix + "/" + abs_link
 
         # Relative
         prefix = get_rel_html_url_prefix(origin_rel_dst_path_str)
-        self.link['html']['relative'] = prefix+'/'+self.path['html']['file_relative_path'].as_posix()
+        self.link["html"]["relative"] = prefix + "/" + self.path["html"]["file_relative_path"].as_posix()
 
     def copy_file(self, mode):
-        if mode == 'ntm':
-            src_file_path = self.path['note']['file_absolute_path']
-            dst_file_path = self.path['markdown']['file_absolute_path']
-        elif mode == 'mth':
-            src_file_path = self.path['markdown']['file_absolute_path']
-            dst_file_path = self.path['html']['file_absolute_path']
+        if mode == "ntm":
+            src_file_path = self.path["note"]["file_absolute_path"]
+            dst_file_path = self.path["markdown"]["file_absolute_path"]
+        elif mode == "mth":
+            src_file_path = self.path["markdown"]["file_absolute_path"]
+            dst_file_path = self.path["html"]["file_absolute_path"]
 
-        if self.pb.gc('toggles/verbose_printout', cached=True):
-            print(f'Copying file over (mode={mode}) from {src_file_path} to {dst_file_path}')
+        if self.pb.gc("toggles/verbose_printout", cached=True):
+            print(f"Copying file over (mode={mode}) from {src_file_path} to {dst_file_path}")
 
         dst_file_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src_file_path, dst_file_path)
-

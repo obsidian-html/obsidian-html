@@ -1,8 +1,8 @@
 from __future__ import annotations
-import regex as re                   # regex string finding/replacing
+import regex as re  # regex string finding/replacing
 from pathlib import Path
-import frontmatter          # remove yaml frontmatter from md files
-import urllib.parse         # convert link characters like %
+import frontmatter  # remove yaml frontmatter from md files
+import urllib.parse  # convert link characters like %
 
 from ..lib import slugify, MalformedTags, OpenIncludedFile
 from .. import note2md
@@ -12,28 +12,28 @@ from .HeaderTree import PrintHeaderTree, convert_markdown_to_header_tree, get_re
 
 
 class MarkdownPage:
-    page = None             # Pure markdown code read from src file
-    yaml = None             # Yaml is stripped from the src file and saved here
-    codeblocks = None       # used to safely store ```codeblock content
-    codelines = None        # Used to safely store `codeline` content
-    links = None            # Used to recurse to any page linked to by this page
+    page = None  # Pure markdown code read from src file
+    yaml = None  # Yaml is stripped from the src file and saved here
+    codeblocks = None  # used to safely store ```codeblock content
+    codelines = None  # Used to safely store `codeline` content
+    links = None  # Used to recurse to any page linked to by this page
 
-    src_path  = None        # Path() object of src file
-    rel_src_path  = None    # Path() object relative to given markdown root folder (src_folder_path)
+    src_path = None  # Path() object of src file
+    rel_src_path = None  # Path() object relative to given markdown root folder (src_folder_path)
     dst_folder_path = None  # Path() object of given markdown output folder
-    dst_path = None         # Path() object of destination file
+    dst_path = None  # Path() object of destination file
 
     isEntryPoint = False
 
-    file_tree = None        # Tree of files that are found in the root folder
+    file_tree = None  # Tree of files that are found in the root folder
 
-    def __init__(self, fo:'FileObject', input_type):
+    def __init__(self, fo: "FileObject", input_type):
         self.pb = fo.pb
         self.fo = fo
         self.file_tree = self.pb.index.files
 
-        self.src_path = fo.path[input_type]['file_absolute_path']
-        self.rel_src_path = fo.path[input_type]['file_relative_path']
+        self.src_path = fo.path[input_type]["file_absolute_path"]
+        self.rel_src_path = fo.path[input_type]["file_relative_path"]
         self.input_type = input_type
 
         self.links = []
@@ -48,159 +48,151 @@ class MarkdownPage:
 
     def SanitizeFrontmatter(self):
         # imitate obsidian shenannigans
-        if 'tags' in self.metadata.keys():
-            tags = self.metadata['tags']
+        if "tags" in self.metadata.keys():
+            tags = self.metadata["tags"]
             if isinstance(tags, str):
-                if ' ' in tags.strip() or ',' in tags:
-                    self.metadata['tags'] = [x.rstrip(',') for x in tags.replace(',', ' ').split(' ') if x != '']
-                elif tags.strip() == '':
-                    self.metadata['tags'] = []
+                if " " in tags.strip() or "," in tags:
+                    self.metadata["tags"] = [x.rstrip(",") for x in tags.replace(",", " ").split(" ") if x != ""]
+                elif tags.strip() == "":
+                    self.metadata["tags"] = []
                 else:
-                    self.metadata['tags'] = [tags, ]
+                    self.metadata["tags"] = [
+                        tags,
+                    ]
             elif tags is None:
-                self.metadata['tags'] = []
+                self.metadata["tags"] = []
 
     def parse_inline_tags(self):
         # get frontmatter tags
-        if 'tags' not in self.metadata.keys():
-            self.metadata['tags'] = []
-        frontmatter_tags = self.metadata['tags']
+        if "tags" not in self.metadata.keys():
+            self.metadata["tags"] = []
+        frontmatter_tags = self.metadata["tags"]
 
         # get inline tags
         inline_tags = get_inline_tags(self.page)
 
         # merge, and remove duplicates
-        self.metadata['tags'] = list(set(frontmatter_tags + inline_tags))
+        self.metadata["tags"] = list(set(frontmatter_tags + inline_tags))
 
     def HasTag(self, ttag):
-        tags = self.metadata['tags']
+        tags = self.metadata["tags"]
         for tag in tags:
             if ttag == tag:
                 return True
-            parts = tag.split('/')
+            parts = tag.split("/")
             root = parts[0]
             if ttag == root:
                 return True
             if len(parts) > 1:
                 for part in parts[1:]:
-                    root = root + '/' + part
+                    root = root + "/" + part
                     if ttag == root:
                         return True
         return False
 
     # [425] Add included references as links in graph view
     def AddInclusionLink(self, relative_md_path):
-        if 'obs.html.data' not in self.metadata:
-            self.metadata['obs.html.data'] = {}
-        if 'inclusion_references' not in self.metadata['obs.html.data']:
-            self.metadata['obs.html.data']['inclusion_references'] = []
-        if relative_md_path not in self.metadata['obs.html.data']['inclusion_references'] :
-            self.metadata['obs.html.data']['inclusion_references'] .append(relative_md_path)
+        if "obs.html.data" not in self.metadata:
+            self.metadata["obs.html.data"] = {}
+        if "inclusion_references" not in self.metadata["obs.html.data"]:
+            self.metadata["obs.html.data"]["inclusion_references"] = []
+        if relative_md_path not in self.metadata["obs.html.data"]["inclusion_references"]:
+            self.metadata["obs.html.data"]["inclusion_references"].append(relative_md_path)
 
     def GetNodeName(self):
-        if 'graph_name' in self.metadata.keys():
-            return self.metadata['graph_name']
+        if "graph_name" in self.metadata.keys():
+            return self.metadata["graph_name"]
         else:
-            return self.fo.path['markdown']['file_relative_path'].stem
+            return self.fo.path["markdown"]["file_relative_path"].stem
 
     def StripCodeSections(self):
         """(Temporarily) Remove codeblocks/-lines so that they are not altered in all the conversions. Placeholders are inserted."""
         self.codeblocks = re.findall(r"^```([\s\S]*?)```[\s]*?$", self.page, re.MULTILINE)
         for i, match in enumerate(self.codeblocks):
-            self.page = self.page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
+            self.page = self.page.replace("```" + match + "```", f"%%%codeblock-placeholder-{i}%%%")
 
         self.codelines = re.findall("`(.*?)`", self.page)
         for i, match in enumerate(self.codelines):
-            self.page = self.page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
+            self.page = self.page.replace("`" + match + "`", f"%%%codeline-placeholder-{i}%%%")
 
         self.latexblocks = re.findall(r"^\$\$([\s\S]*?)\$\$[\s]*?$", self.page, re.MULTILINE)
         for i, match in enumerate(self.latexblocks):
-            self.page = self.page.replace("$$"+match+"$$", f'%%%latexblock-placeholder-{i}%%%')
+            self.page = self.page.replace("$$" + match + "$$", f"%%%latexblock-placeholder-{i}%%%")
 
     def RestoreCodeSections(self):
         """Undo the action of StripCodeSections."""
         for i, value in enumerate(self.codeblocks):
-            self.page = self.page.replace(f'%%%codeblock-placeholder-{i}%%%', f"```{value}```\n")
+            self.page = self.page.replace(f"%%%codeblock-placeholder-{i}%%%", f"```{value}```\n")
         for i, value in enumerate(self.codelines):
-            self.page = self.page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")
+            self.page = self.page.replace(f"%%%codeline-placeholder-{i}%%%", f"`{value}`")
         for i, value in enumerate(self.latexblocks):
-            self.page = self.page.replace(f'%%%latexblock-placeholder-{i}%%%', f"$${value}$$")
+            self.page = self.page.replace(f"%%%latexblock-placeholder-{i}%%%", f"$${value}$$")
 
     def add_tag(self, tag):
-        if 'tags' not in self.metadata:
-            self.metadata['tags'] = []
-        if tag not in self.metadata['tags']:
-            self.metadata['tags'].append(tag)
+        if "tags" not in self.metadata:
+            self.metadata["tags"] = []
+        if tag not in self.metadata["tags"]:
+            self.metadata["tags"].append(tag)
 
-    def AddToTagtree(self, tagtree, url=''):
-        if 'tags' not in self.metadata:
+    def AddToTagtree(self, tagtree, url=""):
+        if "tags" not in self.metadata:
             return
 
-        if url == '':
-            url = self.fo.get_link('html')
+        if url == "":
+            url = self.fo.get_link("html")
 
-        for tag in self.metadata['tags']:
-            if (not isinstance(tag, str)):
+        for tag in self.metadata["tags"]:
+            if not isinstance(tag, str):
                 raise MalformedTags(f"Tag {tag} in frontmatter of \"{self.src_path}\" is of type {type(tag)}, but should be a string. (Items under 'tags:' can not include a ':' on its line).")
 
-        for tag in self.metadata['tags']:
+        for tag in self.metadata["tags"]:
             ctagtree = tagtree
-            for n, subtag in enumerate(tag.split('/')):
-                if subtag not in ctagtree['subtags'].keys():
-                    ctagtree['subtags'][subtag] = {'notes': [], 'subtags': {}}
-                ctagtree = ctagtree['subtags'][subtag]
+            for n, subtag in enumerate(tag.split("/")):
+                if subtag not in ctagtree["subtags"].keys():
+                    ctagtree["subtags"][subtag] = {"notes": [], "subtags": {}}
+                ctagtree = ctagtree["subtags"][subtag]
 
-                if n == (len(tag.split('/')) - 1):
-                    ctagtree['notes'].append((self.fo, url))
+                if n == (len(tag.split("/")) - 1):
+                    ctagtree["notes"].append((self.fo, url))
 
     def GetVideoHTML(self, file_name, relative_path_corrected, suffix):
         mime_type_lut = {
-            'mp4': 'video/mp4',
-            'webm': 'video/webm',
-            'flv': 'video/x-flv',
-            '3gp': 'video/3gpp',
-            'mov': 'video/quicktime',
-            'wmv': 'video/x-ms-wmv',
-            'avi': 'video/x-msvideo',
-            'ogv': 'video/ogg',
-            'mkv': 'video/x-matroska'
+            "mp4": "video/mp4",
+            "webm": "video/webm",
+            "flv": "video/x-flv",
+            "3gp": "video/3gpp",
+            "mov": "video/quicktime",
+            "wmv": "video/x-ms-wmv",
+            "avi": "video/x-msvideo",
+            "ogv": "video/ogg",
+            "mkv": "video/x-matroska",
         }
         if suffix not in mime_type_lut:
-            mime_type = ''
+            mime_type = ""
         else:
             mime_type = mime_type_lut[suffix]
 
-        video_template = OpenIncludedFile('html/templates/video_template.html')
-        return video_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
+        video_template = OpenIncludedFile("html/templates/video_template.html")
+        return video_template.replace("{url}", relative_path_corrected).replace("{mime_type}", mime_type)
 
     def GetAudioHTML(self, file_name, relative_path_corrected, suffix):
-        mime_type_lut = {
-            'mp3': 'audio/mpeg',
-            'webm': 'audio/webm',
-            'm4a': 'audio/mp4',
-            'wav': 'audio/x-wav',
-            'ogg': 'audio/ogg',
-            '3gp': 'video/3gpp',
-            'flac': 'audio/flac'
-        }
+        mime_type_lut = {"mp3": "audio/mpeg", "webm": "audio/webm", "m4a": "audio/mp4", "wav": "audio/x-wav", "ogg": "audio/ogg", "3gp": "video/3gpp", "flac": "audio/flac"}
         if suffix not in mime_type_lut:
-            mime_type = ''
+            mime_type = ""
         else:
             mime_type = mime_type_lut[suffix]
 
-        audio_template = OpenIncludedFile('html/templates/audio_template.html')
-        return audio_template.replace('{url}', relative_path_corrected).replace('{mime_type}', mime_type)
+        audio_template = OpenIncludedFile("html/templates/audio_template.html")
+        return audio_template.replace("{url}", relative_path_corrected).replace("{mime_type}", mime_type)
 
     def GetEmbeddable(self, file_name, relative_path_corrected, suffix):
         return f'<embed src="{relative_path_corrected}" width="90%" height="700px">'
 
     def GetImageHTML(self, relative_path_corrected, width, alt):
-        image_template = OpenIncludedFile('html/templates/image_template.html')
-        return image_template\
-                 .replace('{relative_path}', urllib.parse.quote(relative_path_corrected))\
-                 .replace('{width}', width).replace('{alt}', alt)
+        image_template = OpenIncludedFile("html/templates/image_template.html")
+        return image_template.replace("{relative_path}", urllib.parse.quote(relative_path_corrected)).replace("{width}", width).replace("{alt}", alt)
 
-    def ConvertObsidianPageToMarkdownPage(self, origin:'FileObject'=None, include_depth=0, includer_page_depth=None, remove_block_references=True):
+    def ConvertObsidianPageToMarkdownPage(self, origin: "FileObject" = None, include_depth=0, includer_page_depth=None, remove_block_references=True):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
 
         # -- Set origin (calling page), this will always be self.fo unless origin is passed in
@@ -208,55 +200,52 @@ class MarkdownPage:
             origin = self.fo
 
         # -- Get page depth
-        page_folder_depth = self.fo.metadata['depth']
+        page_folder_depth = self.fo.metadata["depth"]
 
         if includer_page_depth is not None:
             page_folder_depth = includer_page_depth
             # overwrite
-            if self.fo.metadata['is_entrypoint']:
+            if self.fo.metadata["is_entrypoint"]:
                 page_folder_depth = 0
 
         # -- [??] Remove spaces in front of codeblock open and close lines
         # Obisidian allows spaces in front, markdown does not
-        self.page = re.sub(r'(^ *```)', '```', self.page, flags=re.MULTILINE)
+        self.page = re.sub(r"(^ *```)", "```", self.page, flags=re.MULTILINE)
 
         # -- [1] Replace code blocks with placeholders so they aren't altered
         # They will be restored at the end
         self.StripCodeSections()
 
         # -- [??] Insert extra newline between two centered mathjax blocks
-        self.page = re.sub(r'\$\$\ *\n\$\$', '$$ \n\n$$', self.page, flags=re.MULTILINE)
+        self.page = re.sub(r"\$\$\ *\n\$\$", "$$ \n\n$$", self.page, flags=re.MULTILINE)
 
         # -- [??] Replace \| with |
-        self.page = re.sub(r'\\\|', '|', self.page, flags=re.MULTILINE)
+        self.page = re.sub(r"\\\|", "|", self.page, flags=re.MULTILINE)
 
         # -- [2] Add newline between paragraph and lists
-        buffer = ''
+        buffer = ""
         prev_is_list_line = False
-        for i, line in enumerate(self.page.split('\n')):
+        for i, line in enumerate(self.page.split("\n")):
             current_is_list_line = False
             clean_line = line.strip()
             if len(clean_line) == 0:
                 current_is_list_line = False
-            elif clean_line[0] == '-':
+            elif clean_line[0] == "-":
                 current_is_list_line = True
             if current_is_list_line and (prev_is_list_line is False):
-                buffer += '\n'
-            buffer += '\n' + line
+                buffer += "\n"
+            buffer += "\n" + line
             prev_is_list_line = current_is_list_line
         self.page = buffer
 
         # -- [?] Remove whitespace in front of header hashtags
-        self.page = re.sub('(^\ [\ ]*)(?=#)', '', self.page, flags=re.MULTILINE)
-
+        self.page = re.sub("(^\ [\ ]*)(?=#)", "", self.page, flags=re.MULTILINE)
 
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
         self.page = note2md.obs_img_to_md_img(self.pb, self.page)
 
-
         for tag in re.findall(r'<img src=".*?/>', self.page):
-
             # get template and link from tag
             # e.g. <img src="200w.gif"  width="200"> --> <img src="{link}"  width="200"> & 200w.gif
             parts = tag.split('src="')
@@ -265,131 +254,130 @@ class MarkdownPage:
             template = parts[0] + 'src="{link}"' + iparts[1]
 
             unquoted_link = urllib.parse.unquote(link)
-            if '://' in unquoted_link:
+            if "://" in unquoted_link:
                 continue
 
             # Find file
             rel_path_str, lo = self.pb.FileFinder.FindFile(link, self.pb)
             if rel_path_str is False:
-                if self.pb.gc('toggles/verbose_printout', cached=True):
+                if self.pb.gc("toggles/verbose_printout", cached=True):
                     print(f"\t\tImage/file with obsidian link of '{link}' will not be copied over in this step.")
-                    if '://' in link:
+                    if "://" in link:
                         print("\t\t\t<continued> The link seems to be external (contains ://)")
                     else:
                         print(f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
                 continue
 
             # Get shorthand info
-            relative_path = lo.path['markdown']['file_relative_path']
+            relative_path = lo.path["markdown"]["file_relative_path"]
 
             # Copy file over to markdown destination
-            lo.copy_file('ntm')
+            lo.copy_file("ntm")
 
             # Adjust link in page
             file_name = urllib.parse.unquote(link)
             relative_path = relative_path.as_posix()
-            relative_path = ('../' * page_folder_depth) + relative_path
-            new_link = template.replace('{link}', urllib.parse.quote(relative_path))
+            relative_path = ("../" * page_folder_depth) + relative_path
+            new_link = template.replace("{link}", urllib.parse.quote(relative_path))
 
             safe_link = re.escape(tag)
             self.page = re.sub(safe_link, new_link, self.page)
-
 
         # -- [4] Handle local image/video/audio links (copy them over to output)
         for tag, link in re.findall("(?<=\!\[(.*?)\]\()(.*?)(?=\))", self.page):
             unq_link = urllib.parse.unquote(link)
 
-            #clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
-            clean_link = unq_link.split('|')[0]
-            if clean_link.strip() == '':
+            # clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
+            clean_link = unq_link.split("|")[0]
+            if clean_link.strip() == "":
                 continue
 
             # Find file
             rel_path_str, lo = self.pb.FileFinder.FindFile(clean_link, self.pb)
             if rel_path_str is False:
-                if self.pb.gc('toggles/verbose_printout', cached=True):
+                if self.pb.gc("toggles/verbose_printout", cached=True):
                     print(f"\t\tImage/file with obsidian link of '{clean_link}' (original {link}) will not be copied over in this step.")
-                    if '://' in link:
+                    if "://" in link:
                         print("\t\t\t<continued> The link seems to be external (contains ://)")
                     else:
                         print(f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
                 continue
 
             # Get shorthand info
-            suffix = lo.path['note']['suffix']
-            relative_path = lo.path['markdown']['file_relative_path']
+            suffix = lo.path["note"]["suffix"]
+            relative_path = lo.path["markdown"]["file_relative_path"]
 
             # Copy file over to markdown destination
-            lo.copy_file('ntm')
+            lo.copy_file("ntm")
 
             # Adjust link in page
             file_name = urllib.parse.unquote(link)
             relative_path = relative_path.as_posix()
-            relative_path = ('../' * page_folder_depth) + relative_path
-            new_link = f'![{tag}]('+urllib.parse.quote(relative_path)+')'
+            relative_path = ("../" * page_folder_depth) + relative_path
+            new_link = f"![{tag}](" + urllib.parse.quote(relative_path) + ")"
 
             # Handle video/audio usecase
-            if lo.metadata['is_video']:
+            if lo.metadata["is_video"]:
                 new_link = self.GetVideoHTML(file_name, relative_path, suffix)
-            elif lo.metadata['is_audio']:
+            elif lo.metadata["is_audio"]:
                 new_link = self.GetAudioHTML(file_name, relative_path, suffix)
-            elif lo.metadata['is_embeddable']:
+            elif lo.metadata["is_embeddable"]:
                 new_link = self.GetEmbeddable(file_name, relative_path, suffix)
-            elif tag != '':
-                width = ''
-                alt = ''
+            elif tag != "":
+                width = ""
+                alt = ""
                 if tag.isdigit():
                     width = tag
-                elif '|' in tag:
-                    parts = tag.split('|')
+                elif "|" in tag:
+                    parts = tag.split("|")
                     if parts[-1].isdigit():
                         width = parts.pop()
-                    alt = ''.join(parts)
+                    alt = "".join(parts)
                 else:
                     alt = tag
-                if alt.strip() and self.pb.gc('toggles/img_alt_text_use_figure', cached=True):
+                if alt.strip() and self.pb.gc("toggles/img_alt_text_use_figure", cached=True):
                     new_link = self.GetImageHTML(relative_path, width, alt)
                 else:
                     new_link = f'<img src="{urllib.parse.quote(relative_path)}" width="{width}" alt="{alt}" title="{alt}" />'
 
-            safe_link = re.escape(f'![{tag}]('+link+')')
+            safe_link = re.escape(f"![{tag}](" + link + ")")
             self.page = re.sub(safe_link, new_link, self.page)
 
         # -- [5] Change file name in proper markdown links to path
         # And while we are busy, change the path to point to the full relative path
-        proper_links = re.findall(r'(?<=\]\()[^\s\]]+(?=\))', self.page)
+        proper_links = re.findall(r"(?<=\]\()[^\s\]]+(?=\))", self.page)
         for matched_link in proper_links:
             # There is currently no way to match links containing parentheses, AND not matching the last ) in a link like ([test](link))
-            if matched_link.endswith(')'):
+            if matched_link.endswith(")"):
                 matched_link = matched_link[:-1]
 
             # Get the filename
             link = urllib.parse.unquote(matched_link)
 
-            if not link.startswith('#'):
+            if not link.startswith("#"):
                 res = self.pb.FileFinder.GetObsidianFilePath(link, self.pb)
-                rel_path_str = res['rtr_path_str']
-                lo = res['fo']
+                rel_path_str = res["rtr_path_str"]
+                lo = res["fo"]
                 if lo is False:
                     continue
 
                 # Determine if file is markdown
-                isMd = (Path(rel_path_str).suffix == '.md')
+                isMd = Path(rel_path_str).suffix == ".md"
                 if isMd:
                     # Add to list to recurse to the link later
                     self.links.append(lo)
 
                 # Get file info
-                file_link = lo.get_link('markdown', origin=origin)
+                file_link = lo.get_link("markdown", origin=origin)
 
                 # Update link
-                new_link = ']('+urllib.parse.quote(file_link)+')'
-                safe_link = re.escape(']('+matched_link+')')
+                new_link = "](" + urllib.parse.quote(file_link) + ")"
+                safe_link = re.escape("](" + matched_link + ")")
                 self.page = re.sub(f"(?<![\[\(])({safe_link})", new_link, self.page)
 
                 if isMd is False:
                     # Copy file over to new location
-                    lo.copy_file('ntm')
+                    lo.copy_file("ntm")
 
         # -- [6] Replace Obsidian links with proper markdown
         # This is any string in between [[ and ]], e.g. [[My Note]]
@@ -397,8 +385,8 @@ class MarkdownPage:
         for matched_link in md_links:
             # A link in Obsidian can have the format 'filename|alias'
             # If a link does not have an alias, the link name will function as the alias.
-            parts = matched_link.split('|')
-            filename = parts[0].split('/')[-1]
+            parts = matched_link.split("|")
+            filename = parts[0].split("/")[-1]
 
             # Set alias i.e. [alias](link)
             alias = parts[0]
@@ -406,51 +394,50 @@ class MarkdownPage:
                 alias = parts[1]
 
             # Split #Chapter
-            hashpart = ''
-            parts = filename.split('#')
+            hashpart = ""
+            parts = filename.split("#")
             if len(parts) > 1:
                 filename = parts[0]
                 hashpart = parts[1]
 
             # Case: hashpart exists, filename is empty --> anchor link
             is_anchor = False
-            if hashpart != '' and filename == '':
+            if hashpart != "" and filename == "":
                 is_anchor = True
 
             if is_anchor is False:
                 # find link in filetree
                 res = self.pb.FileFinder.GetObsidianFilePath(matched_link, self.pb)
-                rel_path_str = res['rtr_path_str']
-                fo = res['fo']
+                rel_path_str = res["rtr_path_str"]
+                fo = res["fo"]
 
                 if rel_path_str is False:
-                    link = '/not_created.md'
+                    link = "/not_created.md"
                 else:
-                    link = fo.get_link('markdown', origin=origin)
-                    if not fo.metadata['is_note']:
-                        fo.copy_file('ntm')
+                    link = fo.get_link("markdown", origin=origin)
+                    if not fo.metadata["is_note"]:
+                        fo.copy_file("ntm")
                     else:
                         self.links.append(fo)
                 newlink = urllib.parse.quote(link)
 
-                if hashpart != '':
-                    hashpart = hashpart.replace(' ', '-').lower()
-                    newlink += f'#{hashpart}'
+                if hashpart != "":
+                    hashpart = hashpart.replace(" ", "-").lower()
+                    newlink += f"#{hashpart}"
             else:
-                if hashpart[0] == '^':
-                    #blockid blocklink
-                    newlink = '#' + hashpart.replace('^','__')
+                if hashpart[0] == "^":
+                    # blockid blocklink
+                    newlink = "#" + hashpart.replace("^", "__")
                 else:
                     # normal anchor
-                    newlink = '#' + slugify(hashpart)
+                    newlink = "#" + slugify(hashpart)
                     alias = hashpart
 
             # Replace Obsidian link with proper markdown link
-            self.page = self.page.replace('[['+matched_link+']]', f"[{alias}]({newlink})")
-
+            self.page = self.page.replace("[[" + matched_link + "]]", f"[{alias}]({newlink})")
 
         # -- [7] Fix newline issue by adding three spaces before any newline
-        if not self.pb.gc('toggles/strict_line_breaks'):
+        if not self.pb.gc("toggles/strict_line_breaks"):
             self.page = self.page.replace("\n", "   \n")
 
         # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
@@ -464,25 +451,24 @@ class MarkdownPage:
         # -- [9] Remove inline tags, like #ThisIsATag
         # Inline tags are # connected to text (so no whitespace nor another #)
         for matched_link in get_inline_tags(self.page):
-            tag = matched_link.replace('.', '')
+            tag = matched_link.replace(".", "")
             new_md_str = f"**{tag}**"
 
-            if self.pb.gc('toggles/preserve_inline_tags', cached=True):
+            if self.pb.gc("toggles/preserve_inline_tags", cached=True):
                 new_md_str = "`{_obsidian_pattern_tag_" + tag + "}`"
 
             self.add_tag(tag)
 
-            safe_str = '#' + re.escape(matched_link) + r'(?=[^\w/\-])'
+            safe_str = "#" + re.escape(matched_link) + r"(?=[^\w/\-])"
             self.page = re.sub(safe_str, new_md_str, self.page)
 
         # -- [10] Add code inclusions
         for matched_link in re.findall(r'(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
-            link = matched_link.replace('<inclusion href="', '').replace('" />', '')
+            link = matched_link.replace('<inclusion href="', "").replace('" />', "")
 
             result = self.pb.FileFinder.GetObsidianFilePath(link, self.pb)
-            file_object = result['fo']
-            header =  result['header']
-
+            file_object = result["fo"]
+            header = result["header"]
 
             if file_object is False:
                 self.page = self.page.replace(matched_link, f"> **obsidian-html error:** Could not find page {link}.")
@@ -491,27 +477,27 @@ class MarkdownPage:
             self.links.append(file_object)
 
             if include_depth > 3:
-                link_path = file_object.get_link('markdown', origin=origin)
+                link_path = file_object.get_link("markdown", origin=origin)
                 self.page = self.page.replace(matched_link, f"[{link}]({link_path}).")
                 continue
 
-            file_object.path['note']['file_absolute_path']
-            if not file_object.is_valid_note('note'):
+            file_object.path["note"]["file_absolute_path"]
+            if not file_object.is_valid_note("note"):
                 self.page = self.page.replace(matched_link, f"> **obsidian-html error:** Error including file or not a markdown file {link}.")
                 continue
 
             # Get code
-            #included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
-            included_page = file_object.load_markdown_page('note')
+            # included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
+            included_page = file_object.load_markdown_page("note")
             included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth, remove_block_references=False)
 
             # Get subsection of code if header is present
-            if header != '':
+            if header != "":
                 # Prepare document
                 included_page.StripCodeSections()
 
                 # option: Referencing block
-                if header[0] == '^':
+                if header[0] == "^":
                     included_page.page = get_referenced_block(header, included_page.page, included_page.rel_src_path.as_posix())
 
                 # option: Referencing header
@@ -526,16 +512,17 @@ class MarkdownPage:
                 # Wrap up
                 included_page.RestoreCodeSections()
 
-            self.page = self.page.replace(matched_link, '\n' + included_page.page + '\n')
+            self.page = self.page.replace(matched_link, "\n" + included_page.page + "\n")
 
             # [425] Add included references as links in graph view
             # add link to frontmatter yaml so that we can add it to the graphview
-            if self.pb.gc('toggles/features/graph/show_inclusions_in_graph'):
-                self.AddInclusionLink(result['rtr_path_str'])
+            if self.pb.gc("toggles/features/graph/show_inclusions_in_graph"):
+                self.AddInclusionLink(result["rtr_path_str"])
         # -- [1] Restore codeblocks/-lines
         self.RestoreCodeSections()
 
         return self
 
+
 def get_inline_tags(page):
-    return [x[1:].replace('.','') for x in re.findall(r"(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]
+    return [x[1:].replace(".", "") for x in re.findall(r"(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]

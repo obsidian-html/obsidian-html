@@ -10,9 +10,9 @@ from .lib import OpenIncludedFile, GetIncludedResourcePath
 shared_obsidian_svgs = {}
 
 # get svgs
-svg_dir = GetIncludedResourcePath('svgs')
-for svg_file_name in [f for f in listdir(svg_dir) if isfile(join(svg_dir, f))]:     # get all files in svg_dir
-    svg_name = svg_file_name.replace('.html','')
-    shared_obsidian_svgs[svg_name] = OpenIncludedFile(f'svgs/{svg_file_name}')
+svg_dir = GetIncludedResourcePath("svgs")
+for svg_file_name in [f for f in listdir(svg_dir) if isfile(join(svg_dir, f))]:  # get all files in svg_dir
+    svg_name = svg_file_name.replace(".html", "")
+    shared_obsidian_svgs[svg_name] = OpenIncludedFile(f"svgs/{svg_file_name}")
 
-shared_obsidian_svgs['default'] = shared_obsidian_svgs['note']
+shared_obsidian_svgs["default"] = shared_obsidian_svgs["note"]
