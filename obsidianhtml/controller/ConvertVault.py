@@ -24,13 +24,14 @@ from ..features.RssFeed import RssFeed
 from ..features.CreateIndexFromTags import CreateIndexFromTags
 from ..features.EmbeddedSearch import EmbeddedSearch
 from ..features.SidePane import get_side_pane_html, gc_add_toc_when_missing, get_side_pane_id_by_content_selector
+from ..features import post_processing
 
 from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
 from ..compiler.Templating import ExportStaticFiles
 
-from ..parser.convert_functions import md_to_html, obs_callout_to_markdown_callout
+#from ..parser.convert_functions import md_to_html
+from .. import md2html
 
-from ..post_processing import convert_markdown_output as pp_convert_markdown_output
 
 
 def ConvertVault(config_yaml_location=''):
@@ -62,7 +63,7 @@ def ConvertVault(config_yaml_location=''):
     convert_markdown_to_html(pb)
     compile_rss_feed(pb)
     export_user_files(pb)
-    post_processing(pb)
+    run_post_processing(pb)
 
     # Wrap up 
     # ---------------------------------------------------------
@@ -827,7 +828,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
-    html_body = md_to_html(pb, md.page, rel_dst_path)
+    html_body = md2html.md_to_html(pb, md.page, rel_dst_path)
     html_body = f'<div class="content">{html_body}</div>'
 
     if (capture_in_jar):
@@ -965,16 +966,18 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         crawl_markdown_notes_and_convert_to_html(link_fo, pb, backlink_node, log_level=log_level)
         pb.reset_state()
 
-def post_processing(pb):
+def run_post_processing(pb):
     post_processing_modules = pb.gc('toggles/features/post_processing')
     if len(post_processing_modules) > 0:
         print('> POST-PROCESSING:')
-
     for module in post_processing_modules:
         print(f"\t> {module['module']}")
         if module['module'] == 'md_markdown_callouts':
-            strict_line_breaks = not pb.gc('toggles/strict_line_breaks') # don't add line breaks if we already add them, because they will double up
-            pp_convert_markdown_output(pb.paths['md_folder'], convert_function=obs_callout_to_markdown_callout, arg_dict={'strict_line_breaks': strict_line_breaks})
+            post_processing.convert_markdown_output(
+                pb.paths['md_folder'], 
+                convert_function=post_processing.obs_callout_to_markdown_callout, 
+                arg_dict={'strict_line_breaks': (not pb.gc('toggles/strict_line_breaks'))}  # don't add line breaks if we already add them, because they will double up
+            )
         else:
             raise Exception(f"Unknown processing module of {module['module']}")
 

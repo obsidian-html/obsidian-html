@@ -9,7 +9,7 @@ sys.path.insert(1, str(Path(os.path.realpath(__file__)).parent.parent.parent))
 
 # import pb and tests
 from unit_tests.unit_test_init import pb, paths, get_input_as_str, check_test_result, print_succes, print_fail, \
-                                      md_to_html, convert_codeblocks
+                                      md2html, convert_codeblocks
 
 def run_tests():
     case = {
@@ -27,7 +27,7 @@ def run_tests():
         'input'  : get_input_as_str(paths, 'codeblocks_in_footnote'),
         'output' : ''
     }
-    res = md_to_html(pb, case['input'], rel_dst_path='')
+    res = md2html.md_to_html(pb, case['input'], rel_dst_path='')
     if '<code>' in res:
         print_succes(case)
     else:

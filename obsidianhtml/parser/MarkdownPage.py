@@ -5,7 +5,7 @@ import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 
 from ..lib import slugify, MalformedTags, OpenIncludedFile
-from .convert_functions import obs_img_to_md_img
+from .. import note2md
 
 from .HeaderTree import PrintHeaderTree, convert_markdown_to_header_tree, get_referenced_block, GetSubHeaderTree
 
@@ -243,7 +243,7 @@ class MarkdownPage:
 
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
-        self.page = obs_img_to_md_img(self.pb, self.page)
+        self.page = note2md.obs_img_to_md_img(self.pb, self.page)
 
 
         for tag in re.findall(r'<img src=".*?/>', self.page):
