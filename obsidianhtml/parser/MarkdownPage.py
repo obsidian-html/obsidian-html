@@ -6,7 +6,7 @@ import urllib.parse         # convert link characters like %
 
 from ..lib import slugify, MalformedTags, OpenIncludedFile
 from .. import note2md
-from .core import FileObject
+from ..core import FileObject
 
 from .HeaderTree import PrintHeaderTree, convert_markdown_to_header_tree, get_referenced_block, GetSubHeaderTree
 

@@ -49,13 +49,13 @@ def ConvertVault(config_yaml_location=''):
 
     # Setup filesystem
     # ---------------------------------------------------------
-    tmpdir = Actor.Optional.copy_vault_to_tempdir(pb)
+    tmpdir = Actor.Optional.copy_vault_to_tempdir(pb)       # DO NOT REMOVE "tmpdir ="  out of front, or the folder will be immediately removed!
     Actor.Optional.remove_previous_obsidianhtml_output(pb)
     Actor.create_obsidianhtml_output_folders(pb)
 
     # Load input files into file tree
     # ---------------------------------------------------------
-    index = Index(pb)
+    Index(pb)
 
     # Convert 
     # ---------------------------------------------------------
@@ -111,12 +111,12 @@ def convert_obsidian_notes_to_markdown(pb):
         # Keep going until all other files are processed
         if pb.gc('toggles/process_all', cached=True):
             print('\t> FEATURE: PROCESS ALL')
-            unparsed = [x for x in pb.index.files.values() if x.processed_ntm == False]
+            unparsed = [x for x in pb.index.files.values() if x.processed_ntm is False]
             i = 0
             l = len(unparsed)
             for fo in unparsed:
                 i += 1
-                if pb.gc('toggles/verbose_printout', cached=True) == True:
+                if pb.gc('toggles/verbose_printout', cached=True) is True:
                     print(f'\t\t{i}/{l} - ' + str(fo.path['note']['file_absolute_path']))
                 pb.init_state(action='n2m_process_all', loop_type='note', current_fo=fo, subroutine='crawl_obsidian_notes_and_convert_to_markdown')
                 crawl_obsidian_notes_and_convert_to_markdown(fo, pb, log_level=2)
@@ -156,13 +156,13 @@ def convert_markdown_to_html(pb):
         pb.reset_state()
 
     # Keep going until all other files are processed
-    if pb.gc('toggles/process_all') == True:
+    if pb.gc('toggles/process_all') is True:
         print('\t> FEATURE: PROCESS ALL')
-        unparsed = [x for x in pb.index.files.values() if x.processed_mth == False]
+        unparsed = [x for x in pb.index.files.values() if x.processed_mth is False]
         i = 0; l = len(unparsed)
         for fo in unparsed:
             i += 1
-            if pb.gc('toggles/verbose_printout', cached=True) == True:
+            if pb.gc('toggles/verbose_printout', cached=True) is True:
                 print(f'\t\t{i}/{l} - ' + str(fo.path['markdown']['file_absolute_path']))
 
             pb.init_state(action='m2h_process_all', loop_type='md_note', current_fo=fo, subroutine='crawl_markdown_notes_and_convert_to_html')
@@ -492,10 +492,6 @@ def export_user_files(pb):
 def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=1, iteration=0):
     '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
 
-    # Unpack so we don't have to type too much.
-    paths = pb.paths        # Paths of interest, such as the output and input folders
-    files = pb.index.files        # Hashtable of all files found in the obsidian vault
-
     # Don't parse if not parsable
     if not fo.metadata['is_parsable_note']:
         return
@@ -534,9 +530,9 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=
         return
 
     for link_fo in md.links:
-        if link_fo == False or link_fo.processed_ntm == True:
+        if link_fo is False or link_fo.processed_ntm is True:
             if pb.gc('toggles/verbose_printout', cached=True):
-                if link_fo == False:
+                if link_fo is False:
                     print('\t'*log_level, f"(ntm) Skipping converting {link_fo.link}, link not internal or not valid.")
                 else:
                     print('\t'*log_level, f"(ntm) Skipping converting {link_fo.link}, already processed.")
@@ -599,7 +595,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     # Skip further processing if processing has happened already for this file
     # ------------------------------------------------------------------
-    if fo.processed_mth == True:
+    if fo.processed_mth is True:
         return
 
     if pb.gc('toggles/verbose_printout', cached=True):
@@ -636,7 +632,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         link = MarkdownLink(pb, l, page_path, paths['md_folder'])
 
         # Don't process in the following cases (link empty or // in the link)
-        if link.isValid == False or link.isExternal == True: 
+        if link.isValid is False or link.isExternal is True: 
             continue
 
         # [12] Copy non md files over wholesale, then we're done for that kind of file
@@ -682,7 +678,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
         rel_path_str, link_fo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str == False:
+        if rel_path_str is False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Image {l} treated as external and not imported in html")
             continue
@@ -703,7 +699,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             continue
 
         rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str == False:
+        if rel_path_str is False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
             continue
@@ -733,7 +729,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
 
         rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str == False:
+        if rel_path_str is False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
             continue
@@ -755,7 +751,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             continue
 
         rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str == False:
+        if rel_path_str is False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
             continue
@@ -782,7 +778,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             found_h1 = False
             for line in md.page.split('\n'):
                 output += line + '\n'
-                if found_h1 == False and line.startswith('# '):
+                if found_h1 is False and line.startswith('# '):
                     output += '\n[TOC]\n\n'
                     found_h1 = True
 
@@ -858,7 +854,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
             # hideOnMetadataField
             if 'hideOnMetadataField' in pb.config.plugin_settings['embedded_note_titles'].keys() and pb.config.plugin_settings['embedded_note_titles']['hideOnMetadataField']:
-                if 'embedded-title' in node['metadata'].keys() and node['metadata']['embedded-title'] == False:
+                if 'embedded-title' in node['metadata'].keys() and node['metadata']['embedded-title'] is False:
                     hide = True 
 
             # add embedded title
@@ -876,7 +872,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             new_str = f"<a href=\"{l}\" class=\"anchor-link\""
         
         # not internal or internal and not .html file
-        elif (not l[0] in ('/','.')) or ('.' in l.split('/')[-1] and '.html' not in l.split('/')[-1]):
+        elif (l[0] not in ('/', '.')) or ('.' in l.split('/')[-1] and '.html' not in l.split('/')[-1]):
             # add in target="_blank" (or not)
             external_blank_html = ''
             if pb.gc('toggles/external_blank', cached=True):
