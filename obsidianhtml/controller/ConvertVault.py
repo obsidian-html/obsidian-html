@@ -778,7 +778,7 @@ def convert_markdown_page_to_html_and_export(fo:'FileObject', pb, backlink_node=
 
 
     if gc_add_toc_when_missing(pb, fo):
-        md.page = 'test \n' + add_toc_when_missing(pb, md.page, md.metadata)
+        md.page = add_toc_when_missing(pb, md.page, md.metadata)
 
     # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
     # Cannot start with [, (, nor "
