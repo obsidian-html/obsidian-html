@@ -1,10 +1,11 @@
-import webview # pywebview
+import webview  # pywebview
 
-def open_dialog(window, mode="open_file", file_types=None, directory='', allow_multiple=False):
-    ''' Returns tuple (when allow_multiple==True), string (when allow_multiple==False), or None (when canceled) '''
+
+def open_dialog(window, mode="open_file", file_types=None, directory="", allow_multiple=False):
+    """Returns tuple (when allow_multiple==True), string (when allow_multiple==False), or None (when canceled)"""
 
     if file_types is None:
-        file_types = ('All files (*.*)',)
+        file_types = ("All files (*.*)",)
 
     print(mode, directory)
     if mode == "open_file":
@@ -17,5 +18,5 @@ def open_dialog(window, mode="open_file", file_types=None, directory='', allow_m
     if result is None:
         return None
     if allow_multiple:
-        return result 
+        return result
     return result[0]

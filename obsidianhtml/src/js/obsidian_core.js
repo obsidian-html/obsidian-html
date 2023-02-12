@@ -257,11 +257,15 @@ function LoadTableOfContents(container_div)
                 let tpd = document.getElementById(toc_pane_div);
                 tpd.display = 'block';
                 tpd.innerHTML = '<span class="toc-header">Table of contents</span>' + '<div class="toc-contents">' + collection[0].innerHTML + '</div>';
+                toc.remove();
             }
             else {
                 toc.style.display = 'block';
                 toc.innerHTML = '<h3>Table of Contents</h1>\n' + toc.innerHTML
             }
+        }
+        else{
+            toc.remove();
         }
     }
 

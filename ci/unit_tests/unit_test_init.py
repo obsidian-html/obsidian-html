@@ -35,6 +35,7 @@ from obsidianhtml import note2md
 from obsidianhtml import md2html
 from obsidianhtml.parser.MarkdownPage import get_inline_tags
 from obsidianhtml.markdown_extensions.FootnoteExtension import convert_codeblocks
+from obsidianhtml.features.post_processing import obs_callout_to_markdown_callout
 
 
 def check_test_result(case, output):

@@ -6,6 +6,7 @@ import re
 RegexBegin = re.compile(r"^\ *\`\`\`")
 RegexEnd = re.compile(r"^\ *\`\`\`")
 
+
 class CodeWrapperExtension(Extension):
     # def __init__(self, **kwargs):
     #     self.config = {
@@ -14,13 +15,16 @@ class CodeWrapperExtension(Extension):
     #     }
     #     super(CodeWrapperExtension, self).__init__(**kwargs)
 
-    """ Add source code hilighting to markdown codeblocks. """
+    """Add source code hilighting to markdown codeblocks."""
+
     def extendMarkdown(self, md):
-        md.preprocessors.register(CodeWrapperPreprocessor(self, md), 'code_wrapper', 35)
+        md.preprocessors.register(CodeWrapperPreprocessor(self, md), "code_wrapper", 35)
         md.registerExtension(self)
 
-def makeExtension(**kwargs): 
+
+def makeExtension(**kwargs):
     return CodeWrapperExtension(**kwargs)
+
 
 class CodeWrapperPreprocessor(Preprocessor):
     def __init__(self, extension, md=None):
@@ -32,7 +36,7 @@ class CodeWrapperPreprocessor(Preprocessor):
         m_start = None
         m_end = None
         in_code = False
-        lang = ''
+        lang = ""
 
         for line in lines:
             m_start = None
@@ -41,18 +45,18 @@ class CodeWrapperPreprocessor(Preprocessor):
             if not in_code:
                 m_start = RegexBegin.match(line)
                 if m_start:
-                    lang = line.replace('```','').strip()
-                    if lang == '':
-                        lang = 'general'
+                    lang = line.replace("```", "").strip()
+                    if lang == "":
+                        lang = "general"
                     new_lines.append(f'<div class="lang-{lang}">')
                     in_code = True
-                #else:
+                # else:
                 new_lines.append(line)
             else:
                 new_lines.append(line)
                 m_end = RegexEnd.match(line)
                 if m_end:
                     in_code = False
-                    new_lines.append('</div>')
- 
+                    new_lines.append("</div>")
+
         return new_lines
