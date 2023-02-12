@@ -29,7 +29,6 @@ from markdown.util import code_escape, parseBoolValue, AMP_SUBSTITUTE, HTML_PLAC
 from markdown.treeprocessors import UnescapeTreeprocessor
 import re
 import html
-import unicodedata
 import xml.etree.ElementTree as etree
 
 from ..lib import slugify

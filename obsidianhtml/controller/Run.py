@@ -1,9 +1,7 @@
 import sys
-import os
 import yaml
 from pathlib import Path
 import tempfile
-from appdirs import AppDirs
 
 from ..lib import    print_global_help_and_exit
 from ..lib import    FindVaultByEntrypoint, OpenIncludedFile, YamlIndentDumper, get_obshtml_appdir_folder_path, get_default_appdir_config_yaml_path
@@ -18,7 +16,6 @@ import time
 
 def Run():
     # to be configured by commandline args
-    entrypoint_provided = False
     config_path_str = ''
     entrypoint_path_str = ''
     output_folder_path_str = ''
@@ -34,17 +31,17 @@ def Run():
     for i, v in enumerate(sys.argv):
         if v == '-i':
             if len(sys.argv) < (i + 2):
-                print(f'No config path given.\n  Use `obsidianhtml run -i /target/path/to/config.yml` to provide input.')
+                print('No config path given.\n  Use `obsidianhtml run -i /target/path/to/config.yml` to provide input.')
                 print_global_help_and_exit(1)
             config_path_str = sys.argv[i+1]
         elif v == '-f':
             if len(sys.argv) < (i + 2):
-                print(f'No entrypoint path given.\n  Use `obsidianhtml run -f /target/path/to/entrypoint.md` to provide input.')
+                print('No entrypoint path given.\n  Use `obsidianhtml run -f /target/path/to/entrypoint.md` to provide input.')
                 print_global_help_and_exit(1)
             entrypoint_path_str = sys.argv[i+1]
         elif v == '-o':
             if len(sys.argv) < (i + 2):
-                print(f'No output folder path given.\n  Use `obsidianhtml run -o /target/path/to/output/folder` to provide input.')
+                print('No output folder path given.\n  Use `obsidianhtml run -o /target/path/to/output/folder` to provide input.')
                 print_global_help_and_exit(1)
             output_folder_path_str = sys.argv[i+1]
 
@@ -52,7 +49,7 @@ def Run():
             clean_toggle = True
         elif v == '--subfolder':
             if len(sys.argv) < (i + 2):
-                print(f'No subfolder path given.\n  Use `obsidianhtml run --subfolder test to provide input.')
+                print('No subfolder path given.\n  Use `obsidianhtml run --subfolder test to provide input.')
                 print_global_help_and_exit(1)
             subfolder = sys.argv[i+1]
 
@@ -115,11 +112,11 @@ def Run():
     if 'md_entrypoint_path_str' in config.keys() and 'md_folder_path_str' not in config.keys():
         config['md_folder_path_str'] = Path(config['md_entrypoint_path_str']).resolve().parent.as_posix()
         print_set_var(config, 'md_folder_path_str', reason='based on other provided user setting from the config file', category='info')
-        print(f"WARNING: md_folder_path_str was automatically filled in because it was absent, but md_entrypoint_path_str was present.\n\tThis might not be what you want. Either remove md_entrypoint_path_str from your config, or add md_folder_path_str to your config explicitly to remove this warning.")
+        print("WARNING: md_folder_path_str was automatically filled in because it was absent, but md_entrypoint_path_str was present.\n\tThis might not be what you want. Either remove md_entrypoint_path_str from your config, or add md_folder_path_str to your config explicitly to remove this warning.")
     if 'md_folder_path_str' in config.keys() and 'md_entrypoint_path_str' not in config.keys():
         config['md_entrypoint_path_str'] = Path(config['md_folder_path_str']).resolve().joinpath('index.md').as_posix()
         print_set_var(config, 'md_entrypoint_path_str', reason='based on other provided user setting from the config file', category='info')
-        print(f"WARNING: md_entrypoint_path_str was automatically filled in because it was absent, but md_folder_path_str was present.\n\tThis might not be what you want. Either remove md_folder_path_str from your config, or add md_entrypoint_path_str to your config explicitly to remove this warning.")
+        print("WARNING: md_entrypoint_path_str was automatically filled in because it was absent, but md_folder_path_str was present.\n\tThis might not be what you want. Either remove md_folder_path_str from your config, or add md_entrypoint_path_str to your config explicitly to remove this warning.")
 
     # set output folder
     output_folder_path_as_posix = ''
@@ -129,7 +126,7 @@ def Run():
             output_folder_path_as_posix = output_folder_path.as_posix()
             print(f'INFO: Internal config var was set. (provided by user through commandline):\n\t[internal] output_folder_path: {output_folder_path_as_posix} ')
         else:
-            print(f'INFO: Creating tempdir')
+            print('INFO: Creating tempdir')
             with tempfile.TemporaryDirectory(prefix='obshtml_') as tempdir_path:
                 output_folder_path = Path(tempdir_path).resolve()
                 output_folder_path_as_posix = output_folder_path.as_posix()
@@ -182,7 +179,7 @@ def Run():
     ConvertVault(config_save_path.as_posix())
 
     print(f"\nGenerated config yaml saved to {config_save_path}")
-    print(f"\nTip: use this command next to _only_ convert your vault using these saved settings, and not start a webserver:")
+    print("\nTip: use this command next to _only_ convert your vault using these saved settings, and not start a webserver:")
     print(f"\n\tobsidianhtml convert -i {config_save_path}\n")
 
     # Start webserver
@@ -232,7 +229,7 @@ def TestConfig(config):
     # If user sets md_entrypoint_path_str but not md_folder_path_str, the former would be overwritten
     # This is confusing, so don't allow this
     if 'md_entrypoint_path_str' in config.keys() and 'md_folder_path_str' not in config.keys():
-        problems.append(f"md_entrypoint_path_str")
+        problems.append("md_entrypoint_path_str")
 
 def print_set_var(config, key, reason='', category='info', skip_header=False):
     prefix = ''

@@ -1,9 +1,5 @@
 from ..lib import OpenIncludedFile
 
-import threading
-import time
-import sys
-import os
 import webview # pywebview
 
 class WindowManager:

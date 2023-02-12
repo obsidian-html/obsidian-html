@@ -1,15 +1,11 @@
 import time
-import platform
 import json
 
 from datetime import datetime
-from pathlib import Path
 from bs4 import BeautifulSoup
 from html import escape
-from time import sleep
 
 from ..lib import OpenIncludedFile
-from ..core.PicknickBasket import PicknickBasket
 
 def ConvertDateToRssFormat(datetime_object):
     return datetime_object.strftime("%a, %d %b %Y %H:%M:%S ") + time.tzname[0]
@@ -366,7 +362,6 @@ def selector_first_paragraphs(soup, number_of_paragraphs, delimiter):
     return value
 
 def selector_first_header(soup, header_level):
-    value = ''
     header = soup.body.find('h'+str(header_level))
     if header is None:
         return ''

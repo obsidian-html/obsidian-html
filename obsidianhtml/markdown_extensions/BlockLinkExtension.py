@@ -6,7 +6,6 @@ https://help.obsidian.md/Linking+notes+and+files/Internal+links
 
 from markdown.extensions import Extension
 from markdown.blockprocessors import BlockProcessor
-import re
 import xml.etree.ElementTree as etree
 
 

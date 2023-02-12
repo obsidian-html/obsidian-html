@@ -1,4 +1,4 @@
-from obsidianhtml.gui import LaunchInstaller, Launch
+from obsidianhtml.gui import Launch
 from obsidianhtml.gui.Templater import CompileHtml
 from obsidianhtml.lib import GetIncludedResourcePath
 
@@ -14,7 +14,7 @@ def main():
         else:
             raise Exception(f'Argument {sys.argv[1]} unknown')
     else:
-        if isDistFolderPresent() == False:
+        if isDistFolderPresent() is False:
             CompileHtml()
         Launch()
 

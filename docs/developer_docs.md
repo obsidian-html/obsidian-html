@@ -20,8 +20,16 @@ python -m obsidianhtml -i /path/to/config.yml
 ```
 
 ## Contribute to Obsidianhtml
+### Running linting
+To avoid easily avoidable errors, it is good to run a linter before commiting your code to be pulled.
+
+I know of two linters as of writing this, pylint and ruff.
+
+Ruff is supposed to be a lot faster than pylint. The two sections below will explain how to run each.
+You can choose either.
+
 ### Run pylint
-To avoid easily avoidable errors, it is good to run pylint before commiting your code to be pulled.
+
 For first time setup, run the following:
 ``` shell
 pip install pylint
@@ -59,6 +67,19 @@ Select the .* icon
 Search for: [^\s]+ +\n
 ```
 
+### Run Ruff
+
+For first time setup, run the following:
+``` shell
+pip install ruff
+```
+
+See pyproject.toml for configuration
+
+Then, when ready to commit, run the following in the root of this repo:
+``` shell
+ruff check obsidianhtml  
+```
 
 # Architecture
 [Architecture & Code standards](architecture.md)

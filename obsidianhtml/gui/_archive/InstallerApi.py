@@ -5,9 +5,6 @@ from pathlib import Path
 import webbrowser
 import requests
 
-import threading
-import time
-import sys
 import os
 import webview # pywebview
 
@@ -152,7 +149,7 @@ class InstallerApi:
     def CheckGithubUsername(self, username):
         r = requests.get(f'https://github.com/{username}')
         if r.status_code == 404:
-            return {'message': f'Username was not found. Tip: the username is not your email address, nor the whole http://github.com/<username> url.', 'code': 405, 'data':{}}
+            return {'message': 'Username was not found. Tip: the username is not your email address, nor the whole http://github.com/<username> url.', 'code': 405, 'data':{}}
 
         # check if repo already exists
         repo_exists = True
@@ -164,13 +161,12 @@ class InstallerApi:
         if r.status_code == 404:
             repo_exists = False
 
-        return {'message': f'Success', 'code': 200, 'data':{'username': username, 'repo_name': repo_name, 'repo_url': repo_url, 'repo_exists': repo_exists}}
+        return {'message': 'Success', 'code': 200, 'data':{'username': username, 'repo_name': repo_name, 'repo_url': repo_url, 'repo_exists': repo_exists}}
         #raise Exception(f'test exception {username}')
 
     def CheckGit(self):
         issues = []
         good = []
-        fixes = []
         issue_template = {
             'name': '',
             'msg': ''
@@ -182,7 +178,7 @@ class InstallerApi:
         else:
             issue = issue_template.copy()
             issue['name'] = 'git_not_installed'
-            issue['msg'] = f'Git is not installed'
+            issue['msg'] = 'Git is not installed'
             issues.append(issue)
 
         output = os.popen('git config --global user.name ').read()
@@ -191,7 +187,7 @@ class InstallerApi:
         else:
             issue = issue_template.copy()
             issue['name'] = 'git_username_not_configured'
-            issue['msg'] = f'Git user.name is not configured.'
+            issue['msg'] = 'Git user.name is not configured.'
             issues.append(issue)
 
         output = os.popen('git config --global user.email ').read()
@@ -200,7 +196,7 @@ class InstallerApi:
         else:
             issue = issue_template.copy()
             issue['name'] = 'git_email_not_configured'
-            issue['msg'] = f'Git user.email is not configured.'
+            issue['msg'] = 'Git user.email is not configured.'
             issues.append(issue)
 
 
@@ -218,7 +214,7 @@ class InstallerApi:
     def SetGitUsername(self, username):
         self.git_username = username
         output = os.popen(f'git config --global user.name {username}').read()
-        output = os.popen(f'git config --global user.name').read() 
+        output = os.popen('git config --global user.name').read() 
         if output.strip() == username:
             response = {'message': f'succesfully set username to {output}', 'code': 200, 'data': ''}
         else:
@@ -229,7 +225,7 @@ class InstallerApi:
     def SetGitEmail(self, email):
         self.git_email = email
         output = os.popen(f'git config --global user.email {email}').read()
-        output = os.popen(f'git config --global user.email').read() 
+        output = os.popen('git config --global user.email').read() 
         if output.strip() == email:
             response = {'message': f'succesfully set user.email to {output}', 'code': 200, 'data': ''}
         else:
@@ -279,7 +275,7 @@ class InstallerApi:
 
             if url == f'{self.repo_url}.git':
                 response['code'] = 200
-                response['message'] += f" Repo found in the expected location with the expected url. Skipping cloning step, as this is the desired state for this step."
+                response['message'] += " Repo found in the expected location with the expected url. Skipping cloning step, as this is the desired state for this step."
                 response['data'] = {'ready':True}
                 return response
 
@@ -332,7 +328,7 @@ class InstallerApi:
         value = self.ledger.get("gitpages_configured")
 
         if value:
-            return {'message': f'Gitpage settings are configured', 'data': True}
+            return {'message': 'Gitpage settings are configured', 'data': True}
         else:
-            return {'message': f'Gitpage settings are not yet configured', 'data': False}
+            return {'message': 'Gitpage settings are not yet configured', 'data': False}
 

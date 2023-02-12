@@ -7,8 +7,6 @@ def RunExport():
     # Export packaged html template so users can edit it and then use their custom template
     # ---------------------------------------------------------
     command = ''
-    export_html_template_target_path = None
-    layout = 'documentation'
 
     # determine command
     if len(sys.argv) < 3:
@@ -35,14 +33,14 @@ def ExportLayout():
     for i, v in enumerate(sys.argv):
         if v == '-o':
             if len(sys.argv) < (i + 2):
-                print(f'No output path given.\n  Use `obsidianhtml export -o /target/path/to/template.html` to provide input.')
+                print('No output path given.\n  Use `obsidianhtml export -o /target/path/to/template.html` to provide input.')
                 print_export_help_and_exit(1)
             else:
                 export_html_template_target_path = Path(sys.argv[i+1]).resolve()
 
         if v == '-l':
             if len(sys.argv) < (i + 2):
-                print(f'No layout name given.\n  Use `obsidianhtml export -l <documentation/tabs/no_tabs>` to provide input.')
+                print('No layout name given.\n  Use `obsidianhtml export -l <documentation/tabs/no_tabs>` to provide input.')
                 print_export_help_and_exit(1)
             else:
                 layout = sys.argv[i+1]
@@ -70,7 +68,7 @@ def ExportDefaultConfig():
     for i, v in enumerate(sys.argv):
         if v == '-o':
             if len(sys.argv) < (i + 2):
-                print(f'No output path given.\n  Use `obsidianhtml export default-config -o /save/location.yml` to provide input.')
+                print('No output path given.\n  Use `obsidianhtml export default-config -o /save/location.yml` to provide input.')
                 print_export_help_and_exit(1)
             else:
                 output_path = Path(sys.argv[i+1]).resolve()
