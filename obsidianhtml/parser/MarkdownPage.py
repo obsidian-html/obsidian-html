@@ -1,6 +1,5 @@
 from __future__ import annotations
 import regex as re                   # regex string finding/replacing
-import yaml
 from pathlib import Path
 import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %

@@ -1,7 +1,7 @@
 import shutil
 
 
-from ..features.CopyVault import CreateTemporaryCopy
+from ..core.CopyVault import CreateTemporaryCopy
 
 from . import Types as T
 

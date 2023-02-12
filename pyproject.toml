@@ -3,8 +3,9 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
-select = ["E"] #F841"]
+#select = ["E"] #F841"]
 ignore = ["E501", "E402", "E741", "E722"]
+# E501: Line too long; Comments will also cause this
 # E402: Module level import not at top of file; Docstring will cause this error
 # E741: Ambiguous variable name; Will get to this later
 # E722: Do not use bare `except`; Will get to this later

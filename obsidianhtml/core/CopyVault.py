@@ -131,7 +131,7 @@ def copytree_shutil(src, dst, symlinks=False, ignore=None, copy_function=shutil.
                 copy_function(srcname, dstname)
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except Error as err:
+        except Exception as err:
             print(err)
             errors.extend(err.args[0])
         except EnvironmentError as why:
@@ -145,7 +145,7 @@ def copytree_shutil(src, dst, symlinks=False, ignore=None, copy_function=shutil.
         else:
             errors.extend((src, dst, str(why), 'copystat error'))
     if errors:
-        raise Error(errors)
+        raise Exception(errors)
 
 def copytree_shutil_walk(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy,
              ignore_dangling_symlinks=False, pb=None):
@@ -193,7 +193,7 @@ def copytree_shutil_walk(src, dst, symlinks=False, ignore=None, copy_function=sh
 
             # catch the Error from the recursive copytree so that we can
             # continue with other files
-            except Error as err:
+            except Exception as err:
                 print(err)
                 errors.extend(err.args[0])
             except EnvironmentError as why:

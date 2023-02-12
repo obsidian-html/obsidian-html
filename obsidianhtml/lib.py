@@ -222,3 +222,11 @@ def get_html_url_prefix(pb, rel_path_str=None, abs_path_str=None):
     else:
         html_url_prefix = pb.gc('html_url_prefix')
     return html_url_prefix
+
+def retain_reference(*args):
+    ''' Goal of this function is to trick people and linters into thinking that the reference is "used".
+        This is necessary for e.g. tempdir references, where if we don't catch the returned value in 
+        a reference, the tempdir is immediately removed.
+    '''
+    for arg in args:
+        pass

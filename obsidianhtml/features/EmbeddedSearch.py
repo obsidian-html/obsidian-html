@@ -9,20 +9,20 @@ from pathlib import Path
 
 from whoosh import index
 from whoosh.qparser import MultifieldParser, OrGroup
-from whoosh.fields import *
+from whoosh import fields
 
 from ..lib import    print_global_help_and_exit, get_obshtml_appdir_folder_path
 
 
 def InitWhoosh(index_dir):
-    schema = Schema(
-        id=ID(stored=True),
-        path=TEXT(stored=True),
-        file=TEXT(stored=True),
-        title=TEXT(stored=True),
-        content=TEXT(stored=True),
-        tags=TEXT(stored=True),
-        tags_keyword=KEYWORD(stored=True)
+    schema = fields.Schema(
+        id=fields.ID(stored=True),
+        path=fields.TEXT(stored=True),
+        file=fields.TEXT(stored=True),
+        title=fields.TEXT(stored=True),
+        content=fields.TEXT(stored=True),
+        tags=fields.TEXT(stored=True),
+        tags_keyword=fields.KEYWORD(stored=True)
     )
 
     if not os.path.exists(index_dir):
@@ -102,6 +102,7 @@ def RemoveKeywordPhrasesFromCleanQuery(qp, clean_query):
     qo = PostProcessParse(qp, nodes)
     return qo
 
+
 def PostProcessParse(qp, obj, normalize=True, debug=False):
     # Converts nodes-object to query-object.
     # The nodes object is the result of qp.process(query), instead of qp.parse(query).
@@ -110,14 +111,14 @@ def PostProcessParse(qp, obj, normalize=True, debug=False):
     
     q = obj.query(qp)
     if not q:
-        q = query.NullQuery
+        q = fields.query.NullQuery
     if debug:
-        print_debug(debug, "Pre-normalized query: %r" % q)
+        print("Pre-normalized query: %r" % q)
 
     if normalize:
         q = q.normalize()
         if debug:
-            print_debug(debug, "Normalized query: %r" % q)
+            print("Normalized query: %r" % q)
     return q
 
 class EmbeddedSearch:
