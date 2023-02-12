@@ -23,8 +23,10 @@ from ..parser.MarkdownLink import MarkdownLink
 from ..features.RssFeed import RssFeed
 from ..features.CreateIndexFromTags import CreateIndexFromTags
 from ..features.EmbeddedSearch import EmbeddedSearch
-from ..features.SidePane import get_side_pane_html, gc_add_toc_when_missing, get_side_pane_id_by_content_selector
+from ..features.SidePane import get_side_pane_html, get_side_pane_id_by_content_selector
+from ..features.add_toc_when_missing import gc_add_toc_when_missing, add_toc_when_missing
 from ..features import post_processing
+
 
 from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
 from ..compiler.Templating import ExportStaticFiles
@@ -159,7 +161,8 @@ def convert_markdown_to_html(pb):
     if pb.gc('toggles/process_all') is True:
         print('\t> FEATURE: PROCESS ALL')
         unparsed = [x for x in pb.index.files.values() if x.processed_mth is False]
-        i = 0; l = len(unparsed)
+        i = 0
+        l = len(unparsed)
         for fo in unparsed:
             i += 1
             if pb.gc('toggles/verbose_printout', cached=True) is True:
@@ -549,17 +552,20 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=
         crawl_obsidian_notes_and_convert_to_markdown(link_fo, pb, log_level=log_level, iteration=iteration)
         pb.reset_state()
 
-#@extra_info()
-def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=None, log_level=1, capture_in_jar=False):
-    '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
-    
+
+def convert_markdown_page_to_html_and_export(fo:'FileObject', pb, backlink_node=None, log_level=1, capture_in_jar=False):
+    '''
+        Takes a file object, opens the markdown file, edits the contents to prepare for conversion to html, copies images and other resources over to the 
+        output location, converts the md to html, writes the html content to the output directory, returns all the links to other markdown pages found
+        in the page.
+    '''
     # Unpack picknick basket so we don't have to type too much.
     paths = pb.paths                    # Paths of interest, such as the output and input folders
     files = pb.index.files                    # Hashtable of all files found in the obsidian vault
 
     # Don't parse if not parsable
     if not fo.metadata['is_parsable_note']:
-        return
+        return ([], [])
 
     page_path = fo.path['markdown']['file_absolute_path']
     rel_dst_path = fo.path['html']['file_relative_path']
@@ -596,7 +602,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
     # Skip further processing if processing has happened already for this file
     # ------------------------------------------------------------------
     if fo.processed_mth is True:
-        return
+        return ([], [])
 
     if pb.gc('toggles/verbose_printout', cached=True):
         print('\t'*log_level, f"html: converting {page_path.as_posix()}")
@@ -770,44 +776,9 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         # convert the common [[_TOC_]] into [TOC]
         md.page = md.page.replace('[[_TOC_]]', '[TOC]')
 
+
     if gc_add_toc_when_missing(pb, fo):
-        if '[TOC]' not in md.page:
-
-            # compile output where TOC is placed under the first h1
-            output = ''
-            found_h1 = False
-            for line in md.page.split('\n'):
-                output += line + '\n'
-                if found_h1 is False and line.startswith('# '):
-                    output += '\n[TOC]\n\n'
-                    found_h1 = True
-
-            # If h1 is at the top of the note, this will overwrite the embedded title.
-            # In this case, we always need to put the TOC under the first h1
-            h1_at_top_of_note = False
-            for line in md.page.split('\n'):
-                if line.strip() == '':
-                    continue
-                if line.startswith('# '):
-                    h1_at_top_of_note = True
-                    break
-                break
-
-            if h1_at_top_of_note:
-                md.page = output
-            else:
-                # test if embedded titles are disabled
-                et_cap_enabled = pb.config.capabilities_needed['embedded_note_titles']
-                et_disabled_in_note = ('obs.html.tags' in fo.md.metadata.keys() and 'dont_add_embedded_title' in fo.md.metadata['obs.html.tags'])
-                embedded_titles_disabled = (et_cap_enabled and not et_disabled_in_note)
-
-                # If there is an h1 on the pace, and we are not using embedded titles, put the TOC under the first h1
-                # Otherwise just put it at the top of the page.
-                if found_h1 and embedded_titles_disabled:
-                    md.page = output
-                else: 
-                    md.page = '\n[TOC]\n\n' + md.page
-
+        md.page = 'test \n' + add_toc_when_missing(pb, md.page, md.metadata)
 
     # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
     # Cannot start with [, (, nor "
@@ -909,11 +880,11 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
     # This shows the "Show Graph" button, and adds the js code to handle showing the graph
     if pb.gc('toggles/features/graph/enabled', cached=True):
         graph_template = pb.graph_template.replace('{id}', simpleHash(html_body))\
-                                       .replace('{pinnedNode}', node['id'])\
-                                       .replace('{pinnedNodeGraph}', str(node['nid']))\
-                                       .replace('{html_url_prefix}', html_url_prefix)\
-                                       .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
-                                       .replace('{graph_classes}', '')
+                                    .replace('{pinnedNode}', node['id'])\
+                                    .replace('{pinnedNodeGraph}', str(node['nid']))\
+                                    .replace('{html_url_prefix}', html_url_prefix)\
+                                    .replace('{graph_coalesce_force}', pb.gc('toggles/features/graph/coalesce_force', cached=True))\
+                                    .replace('{graph_classes}', '')
         html_body += f"\n{graph_template}\n"
 
     # Add node_id to page so that we can fetch this in the second-pass
@@ -925,8 +896,8 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
     html = PopulateTemplate(pb, node['id'], pb.dynamic_inclusions, pb.html_template, content=html_body)
 
     html = html.replace('{pinnedNode}', node['id'])\
-               .replace('{html_url_prefix}', html_url_prefix)\
-               .replace('{page_depth}', str(page_depth))\
+            .replace('{html_url_prefix}', html_url_prefix)\
+            .replace('{page_depth}', str(page_depth))\
 
     # [?] Documentation styling: Navbar
     # ------------------------------------------------------------------
@@ -946,11 +917,21 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
     # Set file to processed
     fo.processed_mth = True
 
-    # > Done with this markdown page!
+    # Return links to crawl through linked notes
+    # ------------------------------------------------------------------
+    return (backlink_node, md.links)
+
+#@extra_info()
+def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=None, log_level=1, capture_in_jar=False):
+    '''This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page.'''
+
+    # Convert and export page, and collect links to other markdown pages found in the page.
+    # ------------------------------------------------------------------
+    node, md_links = convert_markdown_page_to_html_and_export(fo, pb, backlink_node, log_level, capture_in_jar)
 
     # Recurse for every link in the current page
     # ------------------------------------------------------------------
-    for link_fo in md.links:
+    for link_fo in md_links:
         if not link_fo.is_valid_note('markdown'):
             continue
 
@@ -959,7 +940,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             print('\t'*(log_level+1), f"html: initiating conversion for {link_fo.fullpath('markdown')} (parent {fo.fullpath('markdown')})")
 
         pb.init_state(action='m2h', loop_type='md_note', current_fo=link_fo, subroutine='crawl_markdown_notes_and_convert_to_html')
-        crawl_markdown_notes_and_convert_to_html(link_fo, pb, backlink_node, log_level=log_level)
+        crawl_markdown_notes_and_convert_to_html(link_fo, pb, backlink_node=node, log_level=log_level)
         pb.reset_state()
 
 def run_post_processing(pb):

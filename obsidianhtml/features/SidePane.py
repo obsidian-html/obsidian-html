@@ -116,16 +116,5 @@ def get_content_name_by_pane_id(pb, pane_id):
         return pane_id
     return names[content_key]
 
-@cache
-def gc_add_toc_when_missing(pb, fo):
-    if 'obs.html.tags' in fo.md.metadata.keys() and 'dont_add_toc' in fo.md.metadata['obs.html.tags']:
-        return False
 
-    depr = pb.gc('toggles/features/styling/add_toc')
-    if depr != '<DEPRECATED>':
-        return depr
-
-    
-    res = pb.gc('toggles/features/table_of_contents/add_toc_when_missing')
-    return res
     

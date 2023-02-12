@@ -1,5 +1,5 @@
 
-import os, os.path
+import os
 import sys
 import json
 import gzip
