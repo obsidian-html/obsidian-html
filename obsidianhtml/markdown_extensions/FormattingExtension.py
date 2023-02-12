@@ -8,9 +8,6 @@ Added inline footnote functionality
 """
 from markdown.extensions import Extension
 from markdown.inlinepatterns import InlineProcessor
-from markdown import util
-from collections import OrderedDict
-import re
 import xml.etree.ElementTree as etree
 
 
@@ -45,7 +42,7 @@ class FormattingInlineProcessor(InlineProcessor):
         super().__init__(pattern)
         self.extension = extension
 
-        if mode == False:
+        if mode is False:
             raise Exception('Mode should not be false')
 
         self.mode = mode

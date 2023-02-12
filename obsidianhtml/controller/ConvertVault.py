@@ -1,44 +1,37 @@
 
 import sys
-import markdown             # convert markdown to html
 import frontmatter
 import gzip
-import shutil
 import warnings
-import yaml
-from time import sleep
-import time
 
 import regex as re          # regex string finding/replacing
 import urllib.parse         # convert link characters like %
 
-from pathlib import Path
 
-from ..lib import   DuplicateFileNameInRoot, \
-                    OpenIncludedFile, CreateStaticFilesFolders, \
-                    WriteFileLog, simpleHash, get_default_appdir_config_yaml_path, get_rel_html_url_prefix, get_html_url_prefix
+from ..lib import   CreateStaticFilesFolders, \
+                    WriteFileLog, simpleHash, get_rel_html_url_prefix, get_html_url_prefix
 
 from ..compiler.Templating import PopulateTemplate
 from ..core import Actor
-from ..core.ErrorHandling import extra_info
 from ..core.PicknickBasket import PicknickBasket
 from ..core.FileObject import FileObject
 from ..core.Index import Index
 
-from ..parser.MarkdownPage import MarkdownPage, convert_markdown_to_header_tree
+from ..parser.MarkdownPage import convert_markdown_to_header_tree
 from ..parser.MarkdownLink import MarkdownLink
 
 from ..features.RssFeed import RssFeed
 from ..features.CreateIndexFromTags import CreateIndexFromTags
-from ..features.EmbeddedSearch import EmbeddedSearch, ConvertObsidianQueryToWhooshQuery
+from ..features.EmbeddedSearch import EmbeddedSearch
 from ..features.SidePane import get_side_pane_html, gc_add_toc_when_missing, get_side_pane_id_by_content_selector
+from ..features import post_processing
 
 from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
 from ..compiler.Templating import ExportStaticFiles
 
-from ..parser.convert_functions import md_to_html, obs_callout_to_markdown_callout
+#from ..parser.convert_functions import md_to_html
+from .. import md2html
 
-from ..post_processing import convert_markdown_output as pp_convert_markdown_output
 
 
 def ConvertVault(config_yaml_location=''):
@@ -56,13 +49,13 @@ def ConvertVault(config_yaml_location=''):
 
     # Setup filesystem
     # ---------------------------------------------------------
-    tmpdir = Actor.Optional.copy_vault_to_tempdir(pb)
+    tmpdir = Actor.Optional.copy_vault_to_tempdir(pb)       # DO NOT REMOVE "tmpdir ="  out of front, or the folder will be immediately removed!
     Actor.Optional.remove_previous_obsidianhtml_output(pb)
     Actor.create_obsidianhtml_output_folders(pb)
 
     # Load input files into file tree
     # ---------------------------------------------------------
-    index = Index(pb)
+    Index(pb)
 
     # Convert 
     # ---------------------------------------------------------
@@ -70,7 +63,7 @@ def ConvertVault(config_yaml_location=''):
     convert_markdown_to_html(pb)
     compile_rss_feed(pb)
     export_user_files(pb)
-    post_processing(pb)
+    run_post_processing(pb)
 
     # Wrap up 
     # ---------------------------------------------------------
@@ -118,12 +111,12 @@ def convert_obsidian_notes_to_markdown(pb):
         # Keep going until all other files are processed
         if pb.gc('toggles/process_all', cached=True):
             print('\t> FEATURE: PROCESS ALL')
-            unparsed = [x for x in pb.index.files.values() if x.processed_ntm == False]
+            unparsed = [x for x in pb.index.files.values() if x.processed_ntm is False]
             i = 0
             l = len(unparsed)
             for fo in unparsed:
                 i += 1
-                if pb.gc('toggles/verbose_printout', cached=True) == True:
+                if pb.gc('toggles/verbose_printout', cached=True) is True:
                     print(f'\t\t{i}/{l} - ' + str(fo.path['note']['file_absolute_path']))
                 pb.init_state(action='n2m_process_all', loop_type='note', current_fo=fo, subroutine='crawl_obsidian_notes_and_convert_to_markdown')
                 crawl_obsidian_notes_and_convert_to_markdown(fo, pb, log_level=2)
@@ -163,13 +156,13 @@ def convert_markdown_to_html(pb):
         pb.reset_state()
 
     # Keep going until all other files are processed
-    if pb.gc('toggles/process_all') == True:
+    if pb.gc('toggles/process_all') is True:
         print('\t> FEATURE: PROCESS ALL')
-        unparsed = [x for x in pb.index.files.values() if x.processed_mth == False]
+        unparsed = [x for x in pb.index.files.values() if x.processed_mth is False]
         i = 0; l = len(unparsed)
         for fo in unparsed:
             i += 1
-            if pb.gc('toggles/verbose_printout', cached=True) == True:
+            if pb.gc('toggles/verbose_printout', cached=True) is True:
                 print(f'\t\t{i}/{l} - ' + str(fo.path['markdown']['file_absolute_path']))
 
             pb.init_state(action='m2h_process_all', loop_type='md_note', current_fo=fo, subroutine='crawl_markdown_notes_and_convert_to_html')
@@ -253,7 +246,7 @@ def convert_markdown_to_html(pb):
                 snippet += '</ul>'
                 snippet = f'<div class="backlinks">\n{snippet}\n</div>\n'
             else:
-                snippet = f'<div class="backlinks" style="display:none"></div>\n'
+                snippet = '<div class="backlinks" style="display:none"></div>\n'
 
             # replace placeholder with list & write output
             html = re.sub('\{_obsidian_html_backlinks_pattern_\}', snippet, html)
@@ -370,7 +363,7 @@ def convert_markdown_to_html(pb):
                         
                         # Add path matches
                         if doc['matches']['path']:
-                            output += f'\n\t\t\t<div class="match-row">\n\t\t\t\t' + doc['matches']['path'] + '\n\t\t\t</div>'
+                            output += '\n\t\t\t<div class="match-row">\n\t\t\t\t' + doc['matches']['path'] + '\n\t\t\t</div>'
 
                         # Add content mathes
                         for match in doc['matches']['content']:
@@ -499,10 +492,6 @@ def export_user_files(pb):
 def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=1, iteration=0):
     '''This functions converts an obsidian note to a markdown file and calls itself on any local note links it finds in the page.'''
 
-    # Unpack so we don't have to type too much.
-    paths = pb.paths        # Paths of interest, such as the output and input folders
-    files = pb.index.files        # Hashtable of all files found in the obsidian vault
-
     # Don't parse if not parsable
     if not fo.metadata['is_parsable_note']:
         return
@@ -541,9 +530,9 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo:'FileObject', pb, log_level=
         return
 
     for link_fo in md.links:
-        if link_fo == False or link_fo.processed_ntm == True:
+        if link_fo is False or link_fo.processed_ntm is True:
             if pb.gc('toggles/verbose_printout', cached=True):
-                if link_fo == False:
+                if link_fo is False:
                     print('\t'*log_level, f"(ntm) Skipping converting {link_fo.link}, link not internal or not valid.")
                 else:
                     print('\t'*log_level, f"(ntm) Skipping converting {link_fo.link}, already processed.")
@@ -606,7 +595,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     # Skip further processing if processing has happened already for this file
     # ------------------------------------------------------------------
-    if fo.processed_mth == True:
+    if fo.processed_mth is True:
         return
 
     if pb.gc('toggles/verbose_printout', cached=True):
@@ -643,7 +632,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         link = MarkdownLink(pb, l, page_path, paths['md_folder'])
 
         # Don't process in the following cases (link empty or // in the link)
-        if link.isValid == False or link.isExternal == True: 
+        if link.isValid is False or link.isExternal is True: 
             continue
 
         # [12] Copy non md files over wholesale, then we're done for that kind of file
@@ -689,7 +678,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         # Only handle local image files (images located in the root folder)
         # Doublecheck, who knows what some weird '../../folder/..' does...
         rel_path_str, link_fo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str == False:
+        if rel_path_str is False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Image {l} treated as external and not imported in html")
             continue
@@ -710,7 +699,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             continue
 
         rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str == False:
+        if rel_path_str is False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
             continue
@@ -740,7 +729,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
 
         rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str == False:
+        if rel_path_str is False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
             continue
@@ -762,7 +751,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             continue
 
         rel_path_str, lo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str == False:
+        if rel_path_str is False:
             if pb.gc('toggles/warn_on_skipped_image', cached=True):
                 warnings.warn(f"Media {l} treated as external and not imported in html")
             continue
@@ -783,22 +772,42 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     if gc_add_toc_when_missing(pb, fo):
         if '[TOC]' not in md.page:
-            embedded_titles_enabled = (pb.config.capabilities_needed['embedded_note_titles'] and not ('obs.html.tags' in fo.md.metadata.keys() and 'dont_add_embedded_title' in fo.md.metadata['obs.html.tags']))
 
-            # if h1 is present, place toc after the first h1, else put it at the top of the page.
-            # unless embedded titles are enabled, in that case just put it at the top
+            # compile output where TOC is placed under the first h1
             output = ''
             found_h1 = False
             for line in md.page.split('\n'):
                 output += line + '\n'
-                if found_h1 == False and line.startswith('# '):
+                if found_h1 is False and line.startswith('# '):
                     output += '\n[TOC]\n\n'
                     found_h1 = True
-            
-            if found_h1 and not embedded_titles_enabled:
+
+            # If h1 is at the top of the note, this will overwrite the embedded title.
+            # In this case, we always need to put the TOC under the first h1
+            h1_at_top_of_note = False
+            for line in md.page.split('\n'):
+                if line.strip() == '':
+                    continue
+                if line.startswith('# '):
+                    h1_at_top_of_note = True
+                    break
+                break
+
+            if h1_at_top_of_note:
                 md.page = output
-            else: 
-                md.page = '\n[TOC]\n\n' + md.page
+            else:
+                # test if embedded titles are disabled
+                et_cap_enabled = pb.config.capabilities_needed['embedded_note_titles']
+                et_disabled_in_note = ('obs.html.tags' in fo.md.metadata.keys() and 'dont_add_embedded_title' in fo.md.metadata['obs.html.tags'])
+                embedded_titles_disabled = (et_cap_enabled and not et_disabled_in_note)
+
+                # If there is an h1 on the pace, and we are not using embedded titles, put the TOC under the first h1
+                # Otherwise just put it at the top of the page.
+                if found_h1 and embedded_titles_disabled:
+                    md.page = output
+                else: 
+                    md.page = '\n[TOC]\n\n' + md.page
+
 
     # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
     # Cannot start with [, (, nor "
@@ -815,7 +824,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
     # [11] Convert markdown to html
     # ------------------------------------------------------------------
-    html_body = md_to_html(pb, md.page, rel_dst_path)
+    html_body = md2html.md_to_html(pb, md.page, rel_dst_path)
     html_body = f'<div class="content">{html_body}</div>'
 
     if (capture_in_jar):
@@ -845,7 +854,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
 
             # hideOnMetadataField
             if 'hideOnMetadataField' in pb.config.plugin_settings['embedded_note_titles'].keys() and pb.config.plugin_settings['embedded_note_titles']['hideOnMetadataField']:
-                if 'embedded-title' in node['metadata'].keys() and node['metadata']['embedded-title'] == False:
+                if 'embedded-title' in node['metadata'].keys() and node['metadata']['embedded-title'] is False:
                     hide = True 
 
             # add embedded title
@@ -863,7 +872,7 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
             new_str = f"<a href=\"{l}\" class=\"anchor-link\""
         
         # not internal or internal and not .html file
-        elif (not l[0] in ('/','.')) or ('.' in l.split('/')[-1] and '.html' not in l.split('/')[-1]):
+        elif (l[0] not in ('/', '.')) or ('.' in l.split('/')[-1] and '.html' not in l.split('/')[-1]):
             # add in target="_blank" (or not)
             external_blank_html = ''
             if pb.gc('toggles/external_blank', cached=True):
@@ -953,16 +962,18 @@ def crawl_markdown_notes_and_convert_to_html(fo:'FileObject', pb, backlink_node=
         crawl_markdown_notes_and_convert_to_html(link_fo, pb, backlink_node, log_level=log_level)
         pb.reset_state()
 
-def post_processing(pb):
+def run_post_processing(pb):
     post_processing_modules = pb.gc('toggles/features/post_processing')
     if len(post_processing_modules) > 0:
         print('> POST-PROCESSING:')
-
     for module in post_processing_modules:
         print(f"\t> {module['module']}")
         if module['module'] == 'md_markdown_callouts':
-            strict_line_breaks = not pb.gc('toggles/strict_line_breaks') # don't add line breaks if we already add them, because they will double up
-            pp_convert_markdown_output(pb.paths['md_folder'], convert_function=obs_callout_to_markdown_callout, arg_dict={'strict_line_breaks': strict_line_breaks})
+            post_processing.convert_markdown_output(
+                pb.paths['md_folder'], 
+                convert_function=post_processing.obs_callout_to_markdown_callout, 
+                arg_dict={'strict_line_breaks': (not pb.gc('toggles/strict_line_breaks'))}  # don't add line breaks if we already add them, because they will double up
+            )
         else:
             raise Exception(f"Unknown processing module of {module['module']}")
 

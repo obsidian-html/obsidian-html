@@ -2,8 +2,6 @@ from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
 import re
-import string
-from pathlib import Path
 
 RegexBegin = re.compile(r"^\ *\`\`\`")
 RegexEnd = re.compile(r"^\ *\`\`\`")
@@ -30,7 +28,6 @@ class CodeWrapperPreprocessor(Preprocessor):
         self.extension = extension
 
     def run(self, lines):
-        qualifier = 'standard'
         new_lines = []
         m_start = None
         m_end = None
@@ -56,6 +53,6 @@ class CodeWrapperPreprocessor(Preprocessor):
                 m_end = RegexEnd.match(line)
                 if m_end:
                     in_code = False
-                    new_lines.append(f'</div>')
+                    new_lines.append('</div>')
  
         return new_lines

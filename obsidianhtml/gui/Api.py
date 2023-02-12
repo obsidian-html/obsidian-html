@@ -1,4 +1,3 @@
-from ..lib import OpenIncludedFile
 
 from .WindowManager import WindowManager
 from .Ledger import Ledger
@@ -6,13 +5,7 @@ from .ConfigChecker import ConfigChecker
 from .lib import open_dialog
 
 from pathlib import Path
-import yaml 
 
-import threading
-import time
-import sys
-import os
-import webview # pywebview
 
 
 

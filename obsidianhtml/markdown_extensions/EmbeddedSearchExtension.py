@@ -2,8 +2,6 @@ from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
 import re
-import string
-from pathlib import Path
 
 RegexBegin = re.compile(r"^\ *\`\`\`\ *query")
 RegexEnd = re.compile(r"^\ *\`\`\`")

@@ -7,10 +7,9 @@ import shutil               # used to remove a non-empty directory, copy files
 
 
 from pathlib import Path
-from typing import Type
 
 from ..parser.MarkdownPage import MarkdownPage
-from ..lib import get_rel_html_url_prefix, get_html_url_prefix, slugify_path
+from ..lib import get_rel_html_url_prefix, slugify_path
 
 '''
 This object class helps us with keeping track of all the paths.
@@ -64,7 +63,7 @@ class FileObject:
         return self.path[output]['file_absolute_path']
 
     def is_valid_note(self, output):
-        if self.fullpath(output).exists() == False:
+        if self.fullpath(output).exists() is False:
             return False
         if self.fullpath(output).suffix != '.md':
             return False

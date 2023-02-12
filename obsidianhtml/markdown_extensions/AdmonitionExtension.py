@@ -2,8 +2,6 @@ from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
 import regex as re
-import string
-from pathlib import Path
 
 RegexBegin = re.compile(r"^ *\`\`\` *ad-cite")
 RegexEnd = re.compile(r"^ *\`\`\`")
@@ -30,12 +28,10 @@ class AdmonitionPreprocessor(Preprocessor):
         self.extension = extension
 
     def run(self, lines):
-        qualifier = 'standard'
         new_lines = []
         m_start = None
         m_end = None
         in_code = False
-        lang = ''
 
         for line in lines:
             m_start = None
@@ -44,7 +40,7 @@ class AdmonitionPreprocessor(Preprocessor):
             if not in_code:
                 m_start = RegexBegin.match(line)
                 if m_start:
-                    new_lines.append(f'<div class="ad-cite">')
+                    new_lines.append('<div class="ad-cite">')
                     in_code = True
                 else:
                     new_lines.append(line)
@@ -58,7 +54,7 @@ class AdmonitionPreprocessor(Preprocessor):
                     new_lines.append(title_code)
                 elif m_end:
                     in_code = False
-                    new_lines.append(f'</div>')
+                    new_lines.append('</div>')
                 else:
                     new_lines.append(line)
  

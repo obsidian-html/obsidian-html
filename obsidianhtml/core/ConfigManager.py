@@ -1,5 +1,4 @@
 import sys
-import json
 import yaml
 
 from functools import cache
@@ -51,7 +50,7 @@ class Config:
         '''
         
         # Make sure the user passes in a config file
-        if input_yml_path_str == False:
+        if input_yml_path_str is False:
             print('ERROR: No config file passed in. Use -i <path/to/config.yml> to pass in a config yaml.')
             print_global_help_and_exit(1)
 
@@ -89,14 +88,14 @@ class Config:
         self.config['_css_file'] = f'main_{layout}.css'
 
     def check_entrypoint_exists(self):
-        if self.config['toggles']['compile_md'] == False:       # don't check vault if we are compiling directly from markdown to html
+        if self.config['toggles']['compile_md'] is False:       # don't check vault if we are compiling directly from markdown to html
             return
         if not Path(self.config['obsidian_entrypoint_path_str']).exists():
             print(f"Error: entrypoint note {self.config['obsidian_entrypoint_path_str']} does not exist.")
             exit(1)
 
     def set_obsidian_folder_path_str(self):
-        if self.config['toggles']['compile_md'] == False:       # don't check vault if we are compiling directly from markdown to html
+        if self.config['toggles']['compile_md'] is False:       # don't check vault if we are compiling directly from markdown to html
             return
 
         # Use user provided obsidian_folder_path_str
@@ -108,7 +107,7 @@ class Config:
                     exit(1)
                 return
             else:
-                print(f"ERROR: Obsidianhtml could not find a valid vault. (Tip: obsidianhtml looks for the .obsidian folder)")
+                print("ERROR: Obsidianhtml could not find a valid vault. (Tip: obsidianhtml looks for the .obsidian folder)")
                 exit(1)
             return
 
@@ -220,7 +219,6 @@ class Config:
             
             # Get grapher template code
             self.pb.graphers = []
-            i = 0
             for grapher in self.pb.gc('toggles/features/graph/templates', cached=True):
                 gid = grapher['id']
 
@@ -246,13 +244,13 @@ class Config:
         if not pb.gc('toggles/features/embedded_note_titles/enabled', cached=True):
             pb.config.capabilities_needed['embedded_note_titles'] = False
             if pb.gc('toggles/verbose_printout', cached=True):
-                print('\t'*(1), f"html: embedded note titles are disabled in config")
+                print('\t'*(1), "html: embedded note titles are disabled in config")
             return
         else:
             pb.config.capabilities_needed['embedded_note_titles'] = True
             self.plugin_settings['embedded_note_titles'] = {}
             if pb.gc('toggles/verbose_printout', cached=True):
-                print('\t'*(1), f"html: embedded note titles are enabled in config")
+                print('\t'*(1), "html: embedded note titles are enabled in config")
 
 
 
@@ -330,7 +328,7 @@ def find_user_config_yaml_path(config_yaml_location) -> T.OSAbsolutePosx:
         for i, v in enumerate(sys.argv):
             if v == '-i':
                 if len(sys.argv) < (i + 2):
-                    print(f'No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
+                    print('No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
                     #print_global_help_and_exit(1)
                     exit(1)
                 input_yml_path_str = sys.argv[i+1]
@@ -355,7 +353,7 @@ def find_user_config_yaml_path(config_yaml_location) -> T.OSAbsolutePosx:
             print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
 
     if input_yml_path_str == '':
-        print(f'No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
+        print('No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.')
         exit(1)
 
     return input_yml_path_str

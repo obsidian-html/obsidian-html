@@ -2,7 +2,6 @@ from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
 import re
-import string
 from pathlib import Path
 
 DataviewRegexBegin = re.compile(r"^\ *\`\`\`\ *dataview")
@@ -38,16 +37,12 @@ class DataviewPreprocessor(Preprocessor):
         self.extension = extension
 
     def run(self, lines):
-        table_counter = 0
-        line_counter = 0
-        dataview_elements = None
 
         new_lines = []
         
         m_start = None
         m_end = None
         in_dataview_code = False
-        is_dataview = False
 
         for line in lines:
             m_start = None

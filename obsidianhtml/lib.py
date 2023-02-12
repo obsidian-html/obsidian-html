@@ -1,15 +1,7 @@
 import os                   #
 import re                   # regex string finding/replacing
 import yaml
-import frontmatter          # remove yaml frontmatter from md files
-import warnings
-import shutil               # used to remove a non-empty directory, copy files
-import tempfile             # used to create temporary files/folders
-import time
 import unicodedata
-import glob
-
-import urllib.parse         # convert link characters like %
 
 from pathlib import Path    # 
 from string import ascii_letters, digits
@@ -18,10 +10,9 @@ from subprocess import Popen, PIPE
 from appdirs import AppDirs
 
 # Open source files in the package
-import importlib.resources as pkg_resources
 import importlib.util
 
-from . import src 
+#from . import src 
  
 class DuplicateFileNameInRoot(Exception):
     pass
@@ -152,7 +143,7 @@ def is_installed(command):
     try:
         p = Popen([command], stdout=PIPE, stderr=PIPE)
         output, error = p.communicate()
-    except FileNotFoundError as ex:
+    except FileNotFoundError:
         return False
     return True
 

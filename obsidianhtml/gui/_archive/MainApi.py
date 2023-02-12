@@ -2,9 +2,6 @@ from ..lib import OpenIncludedFile
 from .lib import open_dialog
 from .InstallerApi import InstallerApi
 
-import threading
-import time
-import sys
 import os
 from pathlib import Path
 
@@ -167,7 +164,7 @@ class ConfigChecker:
         self.ledger = main_api.ledger
 
     def DetermineDefaultConfigFolderPath(self):
-        config_folder_path = dirs = AppDirs("obsidianhtml", "obsidianhtml")
+        return AppDirs("obsidianhtml", "obsidianhtml")
 
     def presetConfigPath(self):
         # get configured value

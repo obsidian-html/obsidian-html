@@ -89,16 +89,16 @@ def parse_div_selector(sel):
 
 def get_side_pane_id_by_content_selector(pb, content_selector):
     # no side panes available when no documentation layout is selected
-    if (pb.gc(f'toggles/features/styling/layout') in ['tabs', 'no_tabs', 'minimal']):
+    if (pb.gc('toggles/features/styling/layout') in ['tabs', 'no_tabs', 'minimal']):
         return ''
         
-    if (content_selector == pb.gc(f'toggles/features/side_pane/left_pane/contents')):
-        if (pb.gc(f'toggles/features/side_pane/left_pane/enabled')):
+    if (content_selector == pb.gc('toggles/features/side_pane/left_pane/contents')):
+        if (pb.gc('toggles/features/side_pane/left_pane/enabled')):
             return 'left_pane_content'
         else:
             return ''
-    if (content_selector == pb.gc(f'toggles/features/side_pane/right_pane/contents')):
-        if (pb.gc(f'toggles/features/side_pane/right_pane/enabled')):
+    if (content_selector == pb.gc('toggles/features/side_pane/right_pane/contents')):
+        if (pb.gc('toggles/features/side_pane/right_pane/enabled')):
             return 'right_pane_content'
         else:
             return ''

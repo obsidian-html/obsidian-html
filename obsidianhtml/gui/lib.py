@@ -1,7 +1,3 @@
-import threading
-import time
-import sys
-import os
 import webview # pywebview
 
 def open_dialog(window, mode="open_file", file_types=None, directory='', allow_multiple=False):

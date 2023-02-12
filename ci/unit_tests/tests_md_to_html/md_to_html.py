@@ -9,7 +9,7 @@ sys.path.insert(1, str(Path(os.path.realpath(__file__)).parent.parent.parent))
 
 # import pb and tests
 from unit_tests.unit_test_init import pb, paths, get_input_as_str, test, check_test_result, print_succes, print_fail, \
-                                      md_to_html, convert_codeblocks
+                                      md2html, convert_codeblocks
 
 def run_tests():
     pass

@@ -31,7 +31,8 @@ if is_windows:
     os.system('color')
 
 # import functions to test
-from obsidianhtml.parser.convert_functions import obs_img_to_md_img, md_to_html, obs_callout_to_markdown_callout
+from obsidianhtml import note2md
+from obsidianhtml import md2html
 from obsidianhtml.parser.MarkdownPage import get_inline_tags
 from obsidianhtml.markdown_extensions.FootnoteExtension import convert_codeblocks
 
