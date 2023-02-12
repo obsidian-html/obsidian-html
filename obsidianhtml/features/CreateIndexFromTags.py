@@ -153,12 +153,12 @@ def CompileTagPageMarkdown(pb):
             )
 
     if len(_files.keys()) == 0:
-        raise Exception(f"No notes found with the given tags.")
+        raise Exception("No notes found with the given tags.")
 
     if verbose(pb):
-        print(f'\tBuilding index.md')
+        print('\tBuilding index.md')
 
-    index_md_content = f''
+    index_md_content = ''
     for t in index_dict.keys():
         # Add header
         index_md_content += f'## {t}\n'
@@ -276,7 +276,7 @@ def CreateIndexFromTags(pb):
     if pb.gc('toggles/features/create_index_from_tags/add_links_in_graph_tree', cached=True):
 
         if verbose(pb):
-            print(f'\tAdding graph links between index.md and the matched notes')
+            print('\tAdding graph links between index.md and the matched notes')
         
         node = pb.index.network_tree.NewNode()
         node['name'] = pb.gc('toggles/features/create_index_from_tags/homepage_label').capitalize()

@@ -15,13 +15,13 @@ def ServeDir(port=8888, directory='./'):
             for i, v in enumerate(sys.argv):
                 if v == '--directory':
                     if len(sys.argv) < (i + 2):
-                        print(f'No directory path given for serve.\n  Use `obsidianhtml serve --directory /target/path/to/html/folder` to provide input.')
+                        print('No directory path given for serve.\n  Use `obsidianhtml serve --directory /target/path/to/html/folder` to provide input.')
                         exit(1)
                     directory = sys.argv[i+1]
 
                 if v == '--port':
                     if len(sys.argv) < (i + 2):
-                        print(f'No port given for serve.\n  Use `obsidianhtml serve --port 8654` to provide input.')
+                        print('No port given for serve.\n  Use `obsidianhtml serve --port 8654` to provide input.')
                         exit(1)
                     port = sys.argv[i+1]
 

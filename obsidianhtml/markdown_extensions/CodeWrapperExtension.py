@@ -54,6 +54,6 @@ class CodeWrapperPreprocessor(Preprocessor):
                 m_end = RegexEnd.match(line)
                 if m_end:
                     in_code = False
-                    new_lines.append(f'</div>')
+                    new_lines.append('</div>')
  
         return new_lines

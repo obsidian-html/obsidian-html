@@ -246,7 +246,7 @@ def convert_markdown_to_html(pb):
                 snippet += '</ul>'
                 snippet = f'<div class="backlinks">\n{snippet}\n</div>\n'
             else:
-                snippet = f'<div class="backlinks" style="display:none"></div>\n'
+                snippet = '<div class="backlinks" style="display:none"></div>\n'
 
             # replace placeholder with list & write output
             html = re.sub('\{_obsidian_html_backlinks_pattern_\}', snippet, html)
@@ -363,7 +363,7 @@ def convert_markdown_to_html(pb):
                         
                         # Add path matches
                         if doc['matches']['path']:
-                            output += f'\n\t\t\t<div class="match-row">\n\t\t\t\t' + doc['matches']['path'] + '\n\t\t\t</div>'
+                            output += '\n\t\t\t<div class="match-row">\n\t\t\t\t' + doc['matches']['path'] + '\n\t\t\t</div>'
 
                         # Add content mathes
                         for match in doc['matches']['content']:

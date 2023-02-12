@@ -42,7 +42,7 @@ def CompileCss(css_list):
     return '<style>\n' + AddTabs("\n".join(css), 2) + '\n\t</style>'
 
 def CompileJs():
-    return AddTabs(OpenIncludedFile(f'installer/units/js/core.js'), 2)
+    return AddTabs(OpenIncludedFile('installer/units/js/core.js'), 2)
 
 def GetComponents():
     components = {}

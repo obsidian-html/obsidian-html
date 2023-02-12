@@ -109,7 +109,7 @@ class CallOutBlockProcessor(BlockProcessor):
                 title = etree.SubElement(div, 'div')
                 title.set('class', 'callout-title ')
                 if data['foldable']:
-                    title.set('onclick', f'toggle_callout(this.parentElement)')
+                    title.set('onclick', 'toggle_callout(this.parentElement)')
 
                 # get the svg for the title bar icon
                 svg_name = data['call-out-class']

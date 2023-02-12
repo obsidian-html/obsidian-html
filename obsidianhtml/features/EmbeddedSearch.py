@@ -223,19 +223,19 @@ def CliEmbeddedSearch():
     for i, v in enumerate(sys.argv):
         if v == '-q':
             if len(sys.argv) < (i + 2):
-                print(f'No query string given.\n  Use `obsidianhtml search -q "test"` to provide input.')
+                print('No query string given.\n  Use `obsidianhtml search -q "test"` to provide input.')
                 print_global_help_and_exit(1)
             query_string = sys.argv[i+1]
 
         if v == '-z':
             if len(sys.argv) < (i + 2):
-                print(f'No search data zip path given.\n  Use `obsidianhtml search -z /path/to/obs.html/data/search.json.gzip` to provide input.')
+                print('No search data zip path given.\n  Use `obsidianhtml search -z /path/to/obs.html/data/search.json.gzip` to provide input.')
                 print_global_help_and_exit(1)
             search_json_gzip_path = sys.argv[i+1]
 
         if v == '-d':
             if len(sys.argv) < (i + 2):
-                print(f'No search data json path given.\n  Use `obsidianhtml search -d /home/user/.config/obsidianhtml/search.json` to provide input.')
+                print('No search data json path given.\n  Use `obsidianhtml search -d /home/user/.config/obsidianhtml/search.json` to provide input.')
                 print_global_help_and_exit(1)
             search_data_path = sys.argv[i+1]
 
@@ -252,7 +252,7 @@ def CliEmbeddedSearch():
         print_global_help_and_exit(1)
 
     if query_string is None:
-        print(f'No query string given.\n  Use `obsidianhtml search -q "test"` to provide input.')
+        print('No query string given.\n  Use `obsidianhtml search -q "test"` to provide input.')
         print_global_help_and_exit(1)
 
     # Init search 
