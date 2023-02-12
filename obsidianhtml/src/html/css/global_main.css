@@ -104,6 +104,19 @@ blockquote p {
     max-width: 100%;
     padding: 0.2rem;
 }
+.container figure {
+    margin: 0;
+    padding: 2px;
+    width: fit-content;
+    background-color: var(--bg-accent);
+    border-radius: 2px;
+}
+.container figure figcaption {
+    margin: -5px 0 0 0;
+    padding: 3px 5px;
+    text-align: center;
+    color: var(--color-accent3);
+}
 
 .container video {
     margin: auto;

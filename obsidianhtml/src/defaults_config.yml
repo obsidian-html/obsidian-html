@@ -4,11 +4,11 @@
 # The first folder that contains all obsidian files
 # Can be absent when toggles/compile_md == False
 # Use full path or relative path, but don't use ~/
-# DEPRECATED: obsidian_entrypoint_path_str can be used by itself, 
+# DEPRECATED: obsidian_entrypoint_path_str can be used by itself,
 # obsidianhtml will find the vault folder automatically.
 obsidian_folder_path_str: '<DEPRECATED>'
 
-# The note that will be used as the index.html 
+# The note that will be used as the index.html
 # should be in obsidian_folder_path_str
 # Can be absent when toggles/compile_md == False
 # Use full path or relative path, but don't use ~/
@@ -38,7 +38,7 @@ log_output_folder_path_str: 'output/log'
 #                              OPERATIONS                                #
 ##########################################################################
 # When not an empty list, this setting will restrict the subfolders
-# of the vault that will be included. This allows you to ensure that 
+# of the vault that will be included. This allows you to ensure that
 # only those folders are included in the output. Links pointing to notes
 # outside of the included folders will be treated as non-existent.
 # Note that the obsidian_entrypoint_path_str needs to be in one of these folders.
@@ -69,7 +69,7 @@ exclude_subfolders: '<DEPRECATED>'
 # and so forth. NOTE: DOES NOT APPLY TO INCLUSIONS!
 max_note_depth: -1
 
-# Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data. 
+# Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data.
 # Should be fine to turn off if copying the vault takes too long / disk space is too limited.
 # The tempdir is automatically removed on exit of the program.
 copy_vault_to_tempdir: True
@@ -83,7 +83,7 @@ copy_vault_to_tempdir_method: default
 # Enable to print the files being copied
 copy_vault_to_tempdir_follow_copy: false
 
-# ObsidianHtml needs to be able to discern between included notes and included files, because included files 
+# ObsidianHtml needs to be able to discern between included notes and included files, because included files
 # need to be treated differently. This is a configurable setting because we might've missed certain suffixes
 # of files that are includable.
 included_file_suffixes: ['jpg', 'jpeg', 'gif', 'png', 'bmp', 'svg', 'mp4', 'webm', 'ogv', 'mov', 'mkv', 'mp3', 'wav', 'm4a', 'ogg', '3gp', 'flac', 'pdf']
@@ -91,7 +91,7 @@ video_format_suffixes: ['mp4', 'webm', 'ogv', 'mov', 'mkv']
 audio_format_suffixes: ['mp3', 'webm', 'wav', 'm4a', 'ogg', '3gp', 'flac']
 
 # files that should be included via an <embed> tag:
-embeddable_file_suffixes: ['pdf'] 
+embeddable_file_suffixes: ['pdf']
 
 # Used to strip the http url hostpart of a link to get a relative link
 # e.g. for value "https://git.com/user/repo/-/wikis/mywiki/" then:
@@ -110,7 +110,7 @@ site_name: 'Obsidian-Html/Notes'
 # use '/html_prefix' (prepend slash, no slash at the end)
 html_url_prefix: ''
 
-# Provide the fullpath to a template file to use instead of standard template. 
+# Provide the fullpath to a template file to use instead of standard template.
 # Note that this file must contain at least "{content}" somewhere in the page.
 html_template_path_str: ''
 
@@ -147,6 +147,8 @@ toggles:
   # note that this does not impact the output, Hello.md will be written to Hello.html
   force_filename_to_lowercase: True
 
+  # Slugify all HTML links. Note this will affect most internal uses of filename as well, like when matching
+  # against exclusion lists.
   slugify_html_links: False
 
   # If this is false only the entrypoint and all its links (recursively) are processed
@@ -174,7 +176,7 @@ toggles:
   # Whether the markdown interpreter assumes relative path when no / at the beginning of a link
   relative_path_md: True
 
-  # Whether the html paths will be relative. 
+  # Whether the html paths will be relative.
   # Note: This is only useful if you want to open the html locally on your machine without using a webserver
   #  and is generally not advised. This will also disable all features that need a webserver to function
   #  such as the graph view.
@@ -184,13 +186,16 @@ toggles:
   no_tabs: '<REMOVED>'
 
   # Whether external http anchor links should have a target of "_blank"
-  external_blank: False  
+  external_blank: False
+
+  # If alt text is specified, place it in a figure caption under the image.
+  img_alt_text_use_figure: False
 
   # Will preserve inline tags. This will give polluted markdown output
   preserve_inline_tags: True
-  
+
   features:
-    styling: 
+    styling:
       layout: documentation               # documentation, tabs, minimal
       header_template: full               # <full, minimal> currently only supported for documentation layout
       max_note_width: 120rem              # not supported for layout: tabs
@@ -241,7 +246,7 @@ toggles:
 
     folder_notes:
       enabled: False
-      placement: 'outside folder'     # 'inside folder' , 'outside folder' 
+      placement: 'outside folder'     # 'inside folder' , 'outside folder'
       naming: 'folder name'           # 'folder name', 'index', 'aurkibidea', 'etc'
 
     eraser:
@@ -250,7 +255,7 @@ toggles:
     breadcrumbs:
       enabled: False
 
-    # Include code to build the graph view per page 
+    # Include code to build the graph view per page
     graph:
       enabled: True                   # Include code to build the graph view per page (default: True)
       templates:
@@ -268,9 +273,9 @@ toggles:
     rss:
       enabled: False
       host_root: 'https://localhost:8000/'
-      styling: 
+      styling:
         show_icon: True
-      channel: 
+      channel:
         title: 'Notes'
         website_link: '<https://your website.com>'
         description: '<your description>'
@@ -289,13 +294,13 @@ toggles:
             - ['yaml','rss:description']
             - ['first-paragraphs', 2, '<br/><br/>']
             - ['first-header', 1]
-        title: 
-          selectors: 
+        title:
+          selectors:
             - ['yaml','rss:title']
             - ['first-header', 1]
-            - ['path', ['parent',1], '/ ', ['stem']]
-        publish_date: 
-          selectors: 
+            - ['path', ['parent',1], '/', ['stem']]
+        publish_date:
+          selectors:
             - ['yaml','rss:publish_date']
             - ['yaml_strip','tags',['date/']]
           iso_formatted: True
@@ -306,7 +311,7 @@ toggles:
       enabled: True
       verbose: False
       rel_output_path: 'obs.html/dir_index.html'
-      styling: 
+      styling:
         show_icon: True
       exclude_subfolders:
         - ".git"
@@ -364,5 +369,5 @@ toggles:
             - '.toc'
 
     post_processing: []
-    # post_processing: 
+    # post_processing:
     #   - module: md_markdown_callouts

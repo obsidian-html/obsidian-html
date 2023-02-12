@@ -1,7 +1,7 @@
 from __future__ import annotations
 import regex as re                   # regex string finding/replacing
 import yaml
-from pathlib import Path    # 
+from pathlib import Path
 import frontmatter          # remove yaml frontmatter from md files
 import urllib.parse         # convert link characters like %
 import warnings
@@ -40,7 +40,7 @@ class MarkdownPage:
         self.links = []
         self.codeblocks = []
         self.codelines = []
-        
+
         # Load contents of entrypoint and strip frontmatter yaml.
         with open(self.src_path, encoding="utf-8") as f:
             self.metadata, self.page = frontmatter.parse(f.read())
@@ -109,7 +109,7 @@ class MarkdownPage:
         self.codeblocks = re.findall(r"^```([\s\S]*?)```[\s]*?$", self.page, re.MULTILINE)
         for i, match in enumerate(self.codeblocks):
             self.page = self.page.replace("```"+match+"```", f'%%%codeblock-placeholder-{i}%%%')
-            
+
         self.codelines = re.findall("`(.*?)`", self.page)
         for i, match in enumerate(self.codelines):
             self.page = self.page.replace("`"+match+"`", f'%%%codeline-placeholder-{i}%%%')
@@ -125,14 +125,14 @@ class MarkdownPage:
         for i, value in enumerate(self.codelines):
             self.page = self.page.replace(f'%%%codeline-placeholder-{i}%%%', f"`{value}`")
         for i, value in enumerate(self.latexblocks):
-            self.page = self.page.replace(f'%%%latexblock-placeholder-{i}%%%', f"$${value}$$") 
+            self.page = self.page.replace(f'%%%latexblock-placeholder-{i}%%%', f"$${value}$$")
 
     def add_tag(self, tag):
         if 'tags' not in self.metadata:
             self.metadata['tags'] = []
         if tag not in self.metadata['tags']:
             self.metadata['tags'].append(tag)
-    
+
     def AddToTagtree(self, tagtree, url=''):
         if 'tags' not in self.metadata:
             return
@@ -193,13 +193,19 @@ class MarkdownPage:
     def GetEmbeddable(self, file_name, relative_path_corrected, suffix):
         return f'<embed src="{relative_path_corrected}" width="90%" height="700px">'
 
+    def GetImageHTML(self, relative_path_corrected, width, alt):
+        image_template = OpenIncludedFile('html/templates/image_template.html')
+        return image_template\
+                 .replace('{relative_path}', urllib.parse.quote(relative_path_corrected))\
+                 .replace('{width}', width).replace('{alt}', alt)
+
     def ConvertObsidianPageToMarkdownPage(self, origin:'OH_file'=None, include_depth=0, includer_page_depth=None, remove_block_references=True):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
 
         # -- Set origin (calling page), this will always be self.fo unless origin is passed in
         if origin is None:
-            origin = self.fo 
-        
+            origin = self.fo
+
         # -- Get page depth
         page_folder_depth = self.fo.metadata['depth']
 
@@ -215,7 +221,7 @@ class MarkdownPage:
 
         # -- [1] Replace code blocks with placeholders so they aren't altered
         # They will be restored at the end
-        self.StripCodeSections() 
+        self.StripCodeSections()
 
         # -- [??] Insert extra newline between two centered mathjax blocks
         self.page = re.sub(r'\$\$\ *\n\$\$', '$$ \n\n$$', self.page, flags=re.MULTILINE)
@@ -291,7 +297,7 @@ class MarkdownPage:
         # -- [4] Handle local image/video/audio links (copy them over to output)
         for tag, link in re.findall("(?<=\!\[(.*?)\]\()(.*?)(?=\))", self.page):
             unq_link = urllib.parse.unquote(link)
-            
+
             #clean_link_name = urllib.parse.unquote(link).split('/')[-1].split('|')[0]
             clean_link = unq_link.split('|')[0]
             if clean_link.strip() == '':
@@ -340,7 +346,10 @@ class MarkdownPage:
                     alt = ''.join(parts)
                 else:
                     alt = tag
-                new_link = f'<img src="{urllib.parse.quote(relative_path)}"  width="{width}" alt="{alt}" title="{alt}" />'
+                if alt.strip() and self.pb.gc('toggles/img_alt_text_use_figure', cached=True):
+                    new_link = self.GetImageHTML(relative_path, width, alt)
+                else:
+                    new_link = f'<img src="{urllib.parse.quote(relative_path)}" width="{width}" alt="{alt}" title="{alt}" />'
 
             safe_link = re.escape(f'![{tag}]('+link+')')
             self.page = re.sub(safe_link, new_link, self.page)
@@ -464,7 +473,7 @@ class MarkdownPage:
 
             safe_str = '#' + re.escape(l) + r'(?=[^\w/\-])'
             self.page = re.sub(safe_str, new_md_str, self.page)
-            
+
         # -- [10] Add code inclusions
         for l in re.findall(r'(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
             link = l.replace('<inclusion href="', '').replace('" />', '')
@@ -477,7 +486,7 @@ class MarkdownPage:
             if file_object == False:
                 self.page = self.page.replace(l, f"> **obsidian-html error:** Could not find page {link}.")
                 continue
-            
+
             self.links.append(file_object)
 
             if include_depth > 3:
@@ -496,7 +505,7 @@ class MarkdownPage:
             included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth, remove_block_references=False)
 
             # Get subsection of code if header is present
-            if header != '': 
+            if header != '':
                 # Prepare document
                 included_page.StripCodeSections()
 
@@ -515,7 +524,7 @@ class MarkdownPage:
 
                 # Wrap up
                 included_page.RestoreCodeSections()
-            
+
             self.page = self.page.replace(l, '\n' + included_page.page + '\n')
 
             # [425] Add included references as links in graph view
