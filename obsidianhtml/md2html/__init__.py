@@ -464,21 +464,20 @@ def get_tags(node):
     return []
 
 def insert_tags_footer(pb, html, tags, md_metadata):
-    if 'obs.html.tags' in md_metadata.keys() and 'no_tag_footer' in md_metadata['obs.html.tags']:
-        return html
+    # remove placeholder
+    if bool(tags) is False or ('obs.html.tags' in md_metadata.keys() and 'no_tag_footer' in md_metadata['obs.html.tags']):
+        return re.sub(r'\{_obsidian_html_tags_footer_pattern_\}', '', html)
 
-    snippet = ''
-    if tags:
-        snippet = "<h2>Tags</h2>\n<ul>\n"
-        for tag in tags:
-            url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
-            snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
+    snippet = "<h2>Tags</h2>\n<ul>\n"
+    for tag in tags:
+        url = f'{pb.gc("html_url_prefix")}/obs.html/tags/{tag}/index.html'
+        snippet += f'\t<li><a class="backlink" href="{url}">{tag}</a></li>\n'
 
-            if pb.gc('toggles/preserve_inline_tags', cached=True):
-                placeholder = re.escape("<code>{_obsidian_pattern_tag_" + tag + "}</code>")
-                inline_tag = f'<a class="inline-tag" href="{url}">{tag}</a>'
-                html = re.sub(placeholder, inline_tag, html)
-        snippet += '</ul>'
+        if pb.gc('toggles/preserve_inline_tags', cached=True):
+            placeholder = re.escape("<code>{_obsidian_pattern_tag_" + tag + "}</code>")
+            inline_tag = f'<a class="inline-tag" href="{url}">{tag}</a>'
+            html = re.sub(placeholder, inline_tag, html)
+    snippet += '</ul>'
 
     # replace placeholder with list & write output
-    return re.sub('\{_obsidian_html_tags_footer_pattern_\}', snippet, html)
+    return re.sub(r'\{_obsidian_html_tags_footer_pattern_\}', snippet, html)
