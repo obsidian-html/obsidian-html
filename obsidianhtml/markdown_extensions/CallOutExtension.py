@@ -44,7 +44,8 @@ class CallOutBlockProcessor(BlockProcessor):
 
         # throw the content of the callout back into the works for further parsing and conversion
         # output will be placed in the data_div
-        self.parser.parseBlocks(data_div, ["\n".join(content_chunk)])
+        blocks = "\n".join(content_chunk).split('\n\n')
+        self.parser.parseBlocks(data_div, blocks)
 
         # tell python-markdown that we are done with compiling the callout.
         self.parser.state.reset()
@@ -146,7 +147,7 @@ class CallOutBlockProcessor(BlockProcessor):
             line = re.sub(r"^ *> *", "", line, count=1)
 
             # Add to chunk with the newline that we used to split the line from the block
-            chunk.append(line)
+            chunk.append(line.strip())
 
         if len(chunk) > 0:
             self.parse_callout_contents(data_div, chunk)
