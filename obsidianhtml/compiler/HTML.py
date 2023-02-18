@@ -28,7 +28,7 @@ def compile_navbar_links(pb) -> T.PBChange:
 
         # internal links
         if not el:
-            if l[pb.gc("toggles/slugify_html_links"):
+            if pb.gc("toggles/slugify_html_links"):
                 link = slugify_path(link)
             el = f'<a class="navbar-link" href="{html_url_prefix}/{link}" title="{l["name"]}">{l["name"]}</a>'
 
