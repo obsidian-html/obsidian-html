@@ -17,11 +17,7 @@ def compile_navbar_links(pb) -> T.PBChange:
 
     for l in navbar_links:
         link = l["link"]
-        if pb.gc("toggles/slugify_html_links"):
-            link = slugify_path(link)
-
-        # default
-        el = f'<a class="navbar-link" href="{html_url_prefix}/{link}" title="{l["name"]}">{l["name"]}</a>'
+        el = None
 
         # external links
         if "type" in l.keys():
@@ -29,6 +25,12 @@ def compile_navbar_links(pb) -> T.PBChange:
                 el = f'<a class="navbar-link" href="{link}" title="{l["name"]}">{l["name"]}</a>'
             else:
                 raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
+
+        # internal links
+        if not el:
+            if pb.gc("toggles/slugify_html_links"):
+                link = slugify_path(link)
+            el = f'<a class="navbar-link" href="{html_url_prefix}/{link}" title="{l["name"]}">{l["name"]}</a>'
 
         elements.append(el)
 
