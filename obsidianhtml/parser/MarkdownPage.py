@@ -134,18 +134,24 @@ class MarkdownPage:
         if tag not in self.metadata["tags"]:
             self.metadata["tags"].append(tag)
 
-    def AddToTagtree(self, tagtree, url=""):
+    def get_tags(self):
         if "tags" not in self.metadata:
-            return
+            return []
+        return self.metadata["tags"]
 
+    def AddToTagtree(self, tagtree, url=""):
         if url == "":
             url = self.fo.get_link("html")
 
-        for tag in self.metadata["tags"]:
+        # collect tags
+        tags = self.get_tags()
+
+        for tag in self.get_tags():
+            # test is str
             if not isinstance(tag, str):
                 raise MalformedTags(f"Tag {tag} in frontmatter of \"{self.src_path}\" is of type {type(tag)}, but should be a string. (Items under 'tags:' can not include a ':' on its line).")
 
-        for tag in self.metadata["tags"]:
+            # add tag in correct place in the tagtree
             ctagtree = tagtree
             for n, subtag in enumerate(tag.split("/")):
                 if subtag not in ctagtree["subtags"].keys():
