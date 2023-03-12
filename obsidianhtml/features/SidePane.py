@@ -1,7 +1,7 @@
 from functools import cache
 from bs4 import BeautifulSoup
 
-from ..lib import OpenIncludedFile
+from ..lib import OpenIncludedFile, expect_list
 
 
 def get_side_pane_html(pb, pane_id, node):
@@ -71,7 +71,7 @@ def get_html_page_content(pb, pane_id):
     # strip script tags
     for strip_selector in content_args["strip_sub_divs"]:
         div_selector, div_attr_type = parse_div_selector(strip_selector)
-        for s in div.find("div", attrs={div_attr_type: div_selector}):
+        for s in expect_list(div.find_all("div", attrs={div_attr_type: div_selector})):
             s.extract()
 
     # wrap content so we can give it proper padding in css
