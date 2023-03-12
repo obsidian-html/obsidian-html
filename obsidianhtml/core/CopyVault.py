@@ -87,9 +87,9 @@ def copy_tree_rsync(src_dir, dst_dir, exclude, verbose=False):
     p = Popen(command, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate()
     if p.returncode != 0:
-        print("Copy failed %d %s %s" % (p.returncode, output.decode("ascii").replace("\\n", "\n"), error))
+        print("Copy failed %d %s %s" % (p.returncode, output.decode("utf-8").replace("\\n", "\n"), error))
     else:
-        print("Copy succeeded %d %s %s" % (p.returncode, output.decode("ascii").replace("\\n", "\n"), error))
+        print("Copy succeeded %d %s %s" % (p.returncode, output.decode("utf-8").replace("\\n", "\n"), error))
 
 
 def copytree_shutil(src, dst, symlinks=False, ignore=None, copy_function=shutil.copy, ignore_dangling_symlinks=False, pb=None):
