@@ -160,7 +160,7 @@ def create_foldable_tag_lists_html(pb, strip_tags=None):
         subtags = ""
         subtags_keys = list(tag_tree["subtags"].keys())
         subtags_keys.sort()
-        
+
         for key in subtags_keys:
             # filter
             full_path = "/".join(list(filter(None, [path, name, key])))

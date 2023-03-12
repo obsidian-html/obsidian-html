@@ -251,9 +251,9 @@ def retain_reference(*args):
     for arg in args:
         pass
 
+
 def expect_list(var):
     """Will wrap any non-list type in a list, will return an empty list if 'var is None'"""
     if var is None:
         return list()
     return list(var)
-
