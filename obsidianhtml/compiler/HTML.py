@@ -1,7 +1,8 @@
 import markdown  # convert markdown to html
+from functools import cache
 
 from ..core import Types as T
-from ..lib import get_rel_html_url_prefix, slugify_path
+from ..lib import get_rel_html_url_prefix, slugify_path, expect_list
 from ..compiler.Templating import PopulateTemplate
 
 
@@ -137,10 +138,12 @@ def recurseTagList(tagtree, tagpath, pb, level):
     return rel_dst_path_as_posix
 
 
-def create_foldable_tag_lists(pb):
-    """Appends the output of recurseTagList by changing the tags/index.html to a dropdown page"""
+@cache
+def create_foldable_tag_lists_html(pb, strip_tags=None):
+    # strip_tags set
+    strip_tags = expect_list(strip_tags)
 
-    def rec_tag_tree_foldable(tag_tree, name, id, path=""):
+    def rec_tag_tree_foldable(tag_tree, name, id, path="", strip_tags=None):
         subid = 0
 
         notes = ""
@@ -157,8 +160,15 @@ def create_foldable_tag_lists(pb):
         subtags = ""
         subtags_keys = list(tag_tree["subtags"].keys())
         subtags_keys.sort()
+        
         for key in subtags_keys:
-            subtags += rec_tag_tree_foldable(tag_tree["subtags"][key], key, str(id) + str(subid), "/".join(list(filter(None, [path, name]))))
+            # filter
+            full_path = "/".join(list(filter(None, [path, name, key])))
+            if full_path in strip_tags:
+                continue
+
+            # get subtags
+            subtags += rec_tag_tree_foldable(tag_tree=tag_tree["subtags"][key], name=key, id=(str(id) + str(subid)), path="/".join(list(filter(None, [path, name]))), strip_tags=strip_tags)
             subid += 1
 
         header = ""
@@ -171,6 +181,14 @@ def create_foldable_tag_lists(pb):
 
         html = f'<div class="subtags">{header}{contents}</div>'
         return html
+
+    # compile html
+    html = rec_tag_tree_foldable(tag_tree=pb.tagtree, name="", id="tags-", strip_tags=strip_tags)
+    return html
+
+
+def create_foldable_tag_lists(pb):
+    """Appends the output of recurseTagList by changing the tags/index.html to a dropdown page"""
 
     # set output path
     tags_folder = pb.paths["html_output_folder"].joinpath("obs.html/tags/")
@@ -186,7 +204,7 @@ def create_foldable_tag_lists(pb):
         html_url_prefix = pb.sc(path="html_url_prefix", value=get_rel_html_url_prefix(rel_dst_path_as_posix))
 
     # compile html
-    html = rec_tag_tree_foldable(pb.tagtree, "", "tags-")
+    html = create_foldable_tag_lists_html(pb)
     html = PopulateTemplate(pb, "none", pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html, container_wrapper_class_list=["single_tab_page-left-aligned"])
     html = html.replace("{pinnedNode}", "tagspage")
     html = html.replace("{{navbar_links}}", "\n".join(pb.navbar_links))

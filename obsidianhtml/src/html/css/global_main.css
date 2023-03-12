@@ -522,7 +522,7 @@ a.navbar-link:hover {
 }
 
 .tags-pane-content {
-    margin: 1rem;
+    margin: 0rem;
     max-width: 20vw;
 }
 .tags-pane-content h2 {
@@ -720,9 +720,8 @@ li {
 }
 
 .dir-container {
-    padding-left: 1rem;
     display: none;
-    padding-left: 1.5rem;
+    padding-left: 0.8rem;
 }
 
 .dir-container.active {

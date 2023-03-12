@@ -353,11 +353,13 @@ toggles:
         enabled: True
         width: 16rem
         contents: dir_tree  # <toc, tag_tree, dir_tree, html_page> relevant features should be enabled and configured see docs
-        content_args:       # used for html_page
-          rel_path: 'index.html'
-          div_selector: '.content'
-          strip_sub_divs:
+        content_args:       
+          rel_path: 'index.html'    # used for html_page
+          div_selector: '.content'  # used for html_page
+          strip_sub_divs:           # used for html_page
             - '.toc'
+          strip_tags: []            # used for tag_tree
+            
       right_pane:
         enabled: True
         width: 16rem

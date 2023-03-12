@@ -24,9 +24,13 @@ def get_side_pane_content(pb, pane_id, node):
         return ""
 
     if content_selector == "tag_tree":
-        if "tags_page_html" not in pb.jars.keys():
-            raise Exception("Make sure that you have enabled the feature create_index_from_tags and that it isnt used as the homepage! tags_page_html not found in jars")
-        return '<div class="tags-pane-content">' + pb.jars["tags_page_html"] + "</div>"
+        # if "tags_page_html" not in pb.jars.keys():
+        #     raise Exception("Make sure that you have enabled the feature create_index_from_tags and that it isnt used as the homepage! tags_page_html not found in jars")
+        # return '<div class="tags-pane-content">' + pb.jars["tags_page_html"] + "</div>"
+        from ..compiler.HTML import create_foldable_tag_lists_html
+        strip_tags = tuple(pb.gc(f"toggles/features/side_pane/{pane_id}/content_args/strip_tags"))
+        html = create_foldable_tag_lists_html(pb, strip_tags)
+        return '<div class="tags-pane-content">' + html + "</div>"
 
     if content_selector == "dir_tree":
         pb.EnsureTreeObj()
