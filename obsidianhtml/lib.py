@@ -259,22 +259,26 @@ def expect_list(var):
         return list()
     return list(var)
 
+
 def pprint_json(obj):
     from json import JSONEncoder
+
     class class_encoder(JSONEncoder):
-            def default(self, o):
-                return o.__name__
+        def default(self, o):
+            return o.__name__
+
     print(json.dumps(obj, indent=2, cls=class_encoder))
+
 
 def verbose_enough(level, verbosity):
     verbosity_ranks = {
-        'quiet': 0,
-        'error': 10,
-        'deprecation': 20,
-        'info': 30,
-        'debug': 100,
+        "quiet": 0,
+        "error": 10,
+        "deprecation": 20,
+        "info": 30,
+        "debug": 100,
     }
     verbosity_rank_set = verbosity_ranks[verbosity.lower()]
     verbosity_rank_current = verbosity_ranks[level.lower()]
-    verbose_enough = (verbosity_rank_current <= verbosity_rank_set)
+    verbose_enough = verbosity_rank_current <= verbosity_rank_set
     return verbose_enough
