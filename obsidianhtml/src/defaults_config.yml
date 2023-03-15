@@ -19,6 +19,11 @@ obsidian_entrypoint_path_str: '<REQUIRED_INPUT>'
 # Use full path or relative path, but don't use ~/
 md_folder_path_str:  'output/md'
 
+module_data_folder: 'output/mod'
+verbosity: info
+meta_modules_post: []
+modules: []
+
 # Markdown entrypoint path
 # This has to be md_folder_path_str + '/index.md' when toggles/compile_md == True
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
@@ -156,7 +161,8 @@ toggles:
   process_all: False
 
   # Can be overwritten ad-hoc by using "obsidianhtml -i config.yml -v" (the -v option)
-  verbose_printout: False
+  verbose_printout: False # deprecated for verbose
+
   debug_filetree_keys: False
 
   # Write extra information to log_output_folder_path_str
