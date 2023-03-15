@@ -1,15 +1,19 @@
 from .. import ObsidianHtmlModule
 
+
 class PutConfigModule(ObsidianHtmlModule):
     """
     This module will load the config yaml as provided by the user, it will then get the default config from ObsidianHtml and merge the two.
     """
+
     @property
     def requires(self):
         return tuple()
+
     @property
     def provides(self):
-        return tuple(['config.yml'])
+        return tuple(["config.yml"])
+
     @property
     def alters(self):
         return tuple()
@@ -32,5 +36,5 @@ class PutConfigModule(ObsidianHtmlModule):
         pass
 
     def run2(self):
-        self.print('error', f'AAAAaaa {self.module_name}')
+        self.print("error", f"AAAAaaa {self.module_name}")
         return True

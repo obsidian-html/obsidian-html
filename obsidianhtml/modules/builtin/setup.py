@@ -20,16 +20,20 @@ import os
 import yaml
 from pathlib import Path
 
+
 class SetupModule(ObsidianHtmlModule):
     """
     This module will create the arguments.yml file based on the given sysargs.
     """
+
     @property
     def requires(self):
         return tuple()
+
     @property
     def provides(self):
-        return tuple(['arguments.yml'])
+        return tuple(["arguments.yml"])
+
     @property
     def alters(self):
         return tuple()
@@ -51,7 +55,7 @@ class SetupModule(ObsidianHtmlModule):
                 return "help"
 
             if len(sys.argv) < 2 or sys.argv[1][0] == "-":
-                self.cached_print('deprecation', 'DEPRECATION WARNING: You did not pass in a command. Assuming you meant "convert". Starting version 4.0.0 providing a command will become mandatory.')
+                self.cached_print("deprecation", 'DEPRECATION WARNING: You did not pass in a command. Assuming you meant "convert". Starting version 4.0.0 providing a command will become mandatory.')
                 return "convert"
             else:
                 command = sys.argv[1]
@@ -73,13 +77,13 @@ class SetupModule(ObsidianHtmlModule):
         return arguments
 
     def write_arguments_yaml(self, arguments):
-        self.write('arguments.yml', arguments, asyaml=True)
+        self.write("arguments.yml", arguments, asyaml=True)
 
     # --- get user config file path
     def get_user_config_path(self, arguments):
         # try path that was given via sys.argv:
-        if os.path.isfile(arguments['config_path']):
-            return arguments['config_path']
+        if os.path.isfile(arguments["config_path"]):
+            return arguments["config_path"]
 
         # Try "config.yml", as per https://github.com/obsidian-html/obsidian-html/issues/57
         if os.path.isfile("config.yml"):
@@ -91,6 +95,7 @@ class SetupModule(ObsidianHtmlModule):
 
         # Try appdir
         from ...lib import get_default_appdir_config_yaml_path
+
         input_yml_path_str = get_default_appdir_config_yaml_path().as_posix()
         if os.path.isfile(input_yml_path_str):
             self.cached_print("info", f"No config provided, using config at {input_yml_path_str} (Default config path)")
@@ -99,7 +104,7 @@ class SetupModule(ObsidianHtmlModule):
         self.cached_print("error", "No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.")
         self.printout_cache(force=True)
         exit(1)
-    
+
     def run(self):
         # parse sys.argv and create arguments dict
         arguments = self.get_arguments_dict()
@@ -108,7 +113,7 @@ class SetupModule(ObsidianHtmlModule):
         user_config_path = self.get_user_config_path(arguments)
 
         # get contents of the user config, default_config, and merge them to derive the final config file
-        with open(user_config_path, 'r') as f:
+        with open(user_config_path, "r") as f:
             user_config_yaml = f.read()
         user_config = yaml.safe_load(user_config_yaml)
 
@@ -125,9 +130,9 @@ class SetupModule(ObsidianHtmlModule):
         Path(self.module_data_fpps).mkdir(exist_ok=True)
 
         # write config files to module data folder - now we have access to info such as verbosity
-        self.write('config.yml', config, asyaml=True)
-        self.write('user_config.yml', user_config, asyaml=True)
-        
+        self.write("config.yml", config, asyaml=True)
+        self.write("user_config.yml", user_config, asyaml=True)
+
         # print cached lines now that we know what to print and what not
         self.printout_cache()
 
@@ -136,6 +141,3 @@ class SetupModule(ObsidianHtmlModule):
 
         # return module data folder so that the rest of the program knows where to find the info.
         return self.module_data_fpps
-
-
-

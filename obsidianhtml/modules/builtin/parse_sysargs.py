@@ -2,16 +2,20 @@ from .. import ObsidianHtmlModule
 
 import sys
 
+
 class ParseSysArgsModule(ObsidianHtmlModule):
     """
     This module will create the arguments.yml file based on the given sysargs.
     """
+
     @property
     def requires(self):
         return tuple()
+
     @property
     def provides(self):
-        return tuple(['arguments.yml'])
+        return tuple(["arguments.yml"])
+
     @property
     def alters(self):
         return tuple()
@@ -21,7 +25,7 @@ class ParseSysArgsModule(ObsidianHtmlModule):
             return "help"
 
         if len(sys.argv) < 2 or sys.argv[1][0] == "-":
-            self.print('deprecation', 'DEPRECATION WARNING: You did not pass in a command. Assuming you meant "convert". Starting version 4.0.0 providing a command will become mandatory.')
+            self.print("deprecation", 'DEPRECATION WARNING: You did not pass in a command. Assuming you meant "convert". Starting version 4.0.0 providing a command will become mandatory.')
             return "convert"
         else:
             command = sys.argv[1]
@@ -36,11 +40,10 @@ class ParseSysArgsModule(ObsidianHtmlModule):
         return ""
 
     def run(self):
-        self.print('info', f'running {self.module_name}')
+        self.print("info", f"running {self.module_name}")
 
         arguments = {}
         arguments["command"] = self.determine_command()
         arguments["config_path"] = self.determine_config_path()
 
-        self.write('arguments.yml', arguments, asyaml=True)
-
+        self.write("arguments.yml", arguments, asyaml=True)
