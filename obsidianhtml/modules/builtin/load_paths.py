@@ -78,7 +78,7 @@ class LoadPathsModule(ObsidianHtmlModule):
             paths[key] = paths[key].as_posix()
 
         # Export
-        self.write("paths.json", paths, asjson=True)
+        self.modfile("paths.json", paths).to_json().write()
 
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
@@ -87,6 +87,6 @@ class LoadPathsModule(ObsidianHtmlModule):
 
     def integrate_save(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
-        pb.paths = self.read("paths.json", asjson=True)
+        pb.paths = self.modfile("paths.json").read().from_json()
         for key in pb.paths:
             pb.paths[key] = Path(pb.paths[key])

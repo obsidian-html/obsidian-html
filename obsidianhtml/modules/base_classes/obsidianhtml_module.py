@@ -62,12 +62,13 @@ class ObsidianHtmlModule(ABC):
     @cache
     def config(self):
         """Read the config.yml file and load the yaml content so that we can easily use the values in the module"""
-        content = self.read("config.yml", allow_absent=True)
-        if content != "":
-            return hash_wrap(yaml.safe_load(content))
-        content = self.read("user_config.yml", allow_absent=True)
-        if content != "":
-            return hash_wrap(yaml.safe_load(content))
+        cfg = self.modfile("config.yml", allow_absent=True).read().from_yaml()
+        if cfg is not None:
+            return cfg
+
+        cfg = self.modfile("user_config.yml", allow_absent=True).read().from_yaml()
+        if cfg is not None:
+            return cfg
 
         raise Exception("Could not load config file")
 
@@ -91,38 +92,8 @@ class ObsidianHtmlModule(ABC):
             rel_path_str_posix = rel_path_str_posix[1:]
         return self.module_data_fpps + "/" + rel_path_str_posix
 
-    def read(self, resource_rel_path, allow_absent=False, asjson=False, asyaml=False):
-        path = self.path(resource_rel_path)
-
-        # test if file exists
-        if not os.path.isfile(path):
-            if not allow_absent:
-                raise Exception("Module execution error: Tried to read non-existent resource {path}. Use allow_absent=True if empty string should be returned.")
-            else:
-                return ""
-
-        with open(self.path(resource_rel_path), "r") as f:
-            contents = f.read()
-        if asjson:
-            return json.loads(contents)
-        if asyaml:
-            return yaml.safe_load(contents)
-        return contents
-
-    def write(self, resource_rel_path, contents, asjson=False, asyaml=False):
-        if asjson:
-
-            class class_encoder(json.JSONEncoder):
-                def default(self, o):
-                    return o.__name__
-
-            contents = json.dumps(contents, indent=2, cls=class_encoder)
-
-        if asyaml:
-            contents = yaml.dump(contents)
-
-        with open(self.path(resource_rel_path), "w", encoding="utf-8") as f:
-            return f.write(contents)
+    def modfile(self, resource_rel_path, contents="", encoding="utf-8", allow_absent=False):
+        return handlers.file.File(path=self.path(resource_rel_path), contents=contents, encoding=encoding, allow_absent=allow_absent)
 
     def print(self, level, msg, force=False):
         if not force and not verbose_enough(level, self.verbosity):

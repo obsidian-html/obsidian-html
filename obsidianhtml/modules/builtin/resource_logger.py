@@ -87,7 +87,7 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
 
         # write to resource
         output.append("\n(log.resources created by resource_logger module)")
-        self.write("log.resources", "\n".join(output))
+        self.modfile("log.resources", contents="\n".join(output)).write()
 
         if self.verbose_enough("debug", self.verbosity):
             output = ["writing to `log.resources`:\n"] + output + [""]

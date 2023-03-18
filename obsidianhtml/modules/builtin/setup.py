@@ -77,7 +77,7 @@ class SetupModule(ObsidianHtmlModule):
         return arguments
 
     def write_arguments_yaml(self, arguments):
-        self.write("arguments.yml", arguments, asyaml=True)
+        self.modfile("arguments.yml", arguments).to_yaml().write()
 
     # --- get user config file path
     def get_user_config_path(self, arguments):
@@ -158,8 +158,8 @@ class SetupModule(ObsidianHtmlModule):
         Path(self.module_data_fpps).mkdir(exist_ok=True)
 
         # write config files to module data folder - now we have access to info such as verbosity
-        self.write("config.yml", config, asyaml=True)
-        self.write("user_config.yml", user_config, asyaml=True)
+        self.modfile("config.yml", config).to_yaml().write()
+        self.modfile("user_config.yml", user_config).to_yaml().write()
 
         # print cached lines now that we know what to print and what not
         self.printout_cache()
