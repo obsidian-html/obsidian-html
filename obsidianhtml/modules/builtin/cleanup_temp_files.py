@@ -1,5 +1,5 @@
 import os
-from .. import ObsidianHtmlModule
+from ..base_classes import ObsidianHtmlModule
 
 
 class CleanupTempFilesModule(ObsidianHtmlModule):
@@ -26,7 +26,7 @@ class CleanupTempFilesModule(ObsidianHtmlModule):
         return True
 
     def run(self):
-        for resource in ["log.resources"]:
+        for resource in ["log.resources", "config.yml", "arguments.yml", "paths.json"]:
             path = self.path(resource)
             if os.path.isfile(path):
                 self.print("info", f"removing {path}")

@@ -5,6 +5,8 @@ from .FileFinder import FileFinder
 from ..features.Search import SearchHead
 from ..features.CreateIndexFromDirStructure import CreateIndexFromDirStructure
 
+from ..modules import controller as module_controller
+
 
 class PicknickBasket:
     state = None  # used for debugging info, keeps track of what we are doing at each point in time
@@ -19,6 +21,7 @@ class PicknickBasket:
     treeobj = None
     jars = None  # dict with contents to store for later, see it as a cache
     user_config_dict = None  # fill with a dict to circumvent loading input yaml
+    module_data_folder = None  # integration with new control flow based on modules
 
     def __init__(self):
         self.tagtree = {"notes": [], "subtags": {}}
@@ -38,7 +41,9 @@ class PicknickBasket:
     def construct(self, config_yaml_location):
         # Load config, paths, etc
         self.loadConfig(config_yaml_location)
-        self.set_paths()
+
+        module_controller.run_module(module_name="load_paths", pb=self)  # INTEGRATION. Previously: `self.set_paths()`
+
         self.compile_dynamic_inclusions()
         self.config.load_embedded_titles_plugin()
 

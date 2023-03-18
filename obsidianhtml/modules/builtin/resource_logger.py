@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from .. import ObsidianHtmlModule
+from ..base_classes import ObsidianHtmlModule
 
 
 class ResourceLoggerMetaModule(ObsidianHtmlModule):

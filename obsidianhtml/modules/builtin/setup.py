@@ -11,7 +11,7 @@ know where to find the user config file until we have parsed the sys.argv
 self.print commands will be cached until we know the verbosity, and then printed.
 """
 
-from .. import ObsidianHtmlModule
+from ..base_classes import ObsidianHtmlModule
 from ...lib import OpenIncludedFile
 from ...core.ConfigManager import MergeDictRecurse
 
@@ -105,6 +105,31 @@ class SetupModule(ObsidianHtmlModule):
         self.printout_cache(force=True)
         exit(1)
 
+    # --- check user config
+    def check_required_values_filled_in(self, config, path="", match_str="<REQUIRED_INPUT>"):
+        def rec(config, path="", match_str="<REQUIRED_INPUT>"):
+            helptext = "\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n"
+
+            for k, v in config.items():
+                key_path = "/".join(x for x in (path, k) if x != "")
+
+                if isinstance(v, dict):
+                    rec(config[k], path=key_path)
+
+                if v == match_str:
+                    if self.check_required_value_is_required(config, key_path):
+                        raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')
+                    else:
+                        config[k] = ""
+
+        rec(config, path, match_str)
+
+    def check_required_value_is_required(self, config, key_path):
+        if key_path == "obsidian_entrypoint_path_str":
+            return self.gc("toggles/compile_md", config=config)
+        return True
+
+    # --- main function
     def run(self):
         # parse sys.argv and create arguments dict
         arguments = self.get_arguments_dict()
@@ -119,6 +144,9 @@ class SetupModule(ObsidianHtmlModule):
 
         default_config = yaml.safe_load(OpenIncludedFile("defaults_config.yml"))
         config = MergeDictRecurse(default_config, user_config)
+
+        # check if config is valid
+        self.check_required_values_filled_in(config)
 
         # set module data folder so that we can write output
         if "module_data_folder" not in config:
