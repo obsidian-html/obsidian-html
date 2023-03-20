@@ -27,6 +27,13 @@ class hash_wrap:
     def __contains__(self, key):
         return key in self.dict
 
+    def __iter__(self):
+        return self.dict.__iter__()
+    def keys(self):
+        return self.dict.keys()
+    def unwrap(self):
+        return self.dict
+
 
 def pprint_json(obj):
     from json import JSONEncoder

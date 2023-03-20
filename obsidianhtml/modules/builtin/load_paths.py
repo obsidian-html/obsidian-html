@@ -83,10 +83,10 @@ class LoadPathsModule(ObsidianHtmlModule):
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
         self._integrate_ensure_module_data_folder()
-        self.write("config.yml", yaml.dump(pb.config.config))
+        self.modfile("config.yml", pb.config.config).to_yaml().write()
 
     def integrate_save(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
-        pb.paths = self.modfile("paths.json").read().from_json()
+        pb.paths = self.modfile("paths.json").read().from_json().unwrap()
         for key in pb.paths:
             pb.paths[key] = Path(pb.paths[key])
