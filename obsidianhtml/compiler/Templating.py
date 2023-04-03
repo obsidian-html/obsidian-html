@@ -19,33 +19,33 @@ def ExportStaticFiles(pb):
 
     css_files_list = [["html/css/global_main.css", "global_main.css"]]
 
-    if pb.config.feature_is_enabled("graph", cached=True):
+    if pb.ConfigManager.feature_is_enabled("graph", cached=True):
         copy_file_list.append(["imported/3d-force-graph.v1.70.10.min.js", "3d-force-graph.js"])
         css_files_list.append(["graph/graph.css", "graph.css"])
         copy_file_list.append(["graph/graph.svg", "graph.svg"])
         # copy_file_list.append(['graph/default_grapher_2d.js', 'default_grapher_2d.js'])
         # copy_file_list.append(['graph/default_grapher_3d.js', 'default_grapher_3d.js'])
 
-    if pb.config.feature_is_enabled("mermaid_diagrams", cached=True):
+    if pb.ConfigManager.feature_is_enabled("mermaid_diagrams", cached=True):
         copy_file_list.append(["imported/mermaid.9.0.1.min.js", "mermaid.9.0.1.min.js"])
         copy_file_list.append(["imported/mermaid.9.0.1.min.js.map", "mermaid.9.0.1.min.js.map"])
         copy_file_list.append(["html/css/mermaid.css", "mermaid.css"])
 
-    if pb.config.feature_is_enabled("code_highlight", cached=True):
+    if pb.ConfigManager.feature_is_enabled("code_highlight", cached=True):
         css_files_list.append(["html/css/codehilite.css", "codehilite.css"])
 
-    if pb.config.feature_is_enabled("search", cached=True):
+    if pb.ConfigManager.feature_is_enabled("search", cached=True):
         copy_file_list.append(["search/search.svg", "search.svg"])
         copy_file_list.append(["search/pako.js", "pako.js"])
         copy_file_list.append(["search/search.js", "search.js"])
         css_files_list.append(["search/search.css", "search.css"])
         copy_file_list.append(["imported/flexsearch.v0.7.2.bundle.js", "flexsearch.bundle.js"])
 
-    # if pb.config.feature_is_enabled('math_latex', cached=True):
+    # if pb.ConfigManager.feature_is_enabled('math_latex', cached=True):
     #     copy_file_list.append(['latex/load_mathjax.js', 'load_mathjax.js'])
     #     copy_file_list.append(['imported/mathjax.v3.es5.tex-chtml.js', 'tex-chtml.js'])
 
-    if pb.config.feature_is_enabled("callouts", cached=True):
+    if pb.ConfigManager.feature_is_enabled("callouts", cached=True):
         css_files_list.append(["html/css/callouts.css", "callouts.css"])
 
     if pb.gc("toggles/features/styling/layout", cached=True) == "documentation":
@@ -209,34 +209,34 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/encoding.js"></script>' + "\n"
     dynamic_inclusions += '<link rel="stylesheet" href="' + html_url_prefix + '/obs.html/static/master.css" />' + "\n"
 
-    if pb.config.feature_is_enabled("callouts", cached=True):
+    if pb.ConfigManager.feature_is_enabled("callouts", cached=True):
         pass
         # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/callouts.css" />' + "\n"
 
-    if pb.config.feature_is_enabled("graph", cached=True):
+    if pb.ConfigManager.feature_is_enabled("graph", cached=True):
         pass
         # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/graph.css" />' + "\n"
 
-    # if pb.config.feature_is_enabled('code_highlight', cached=True):
+    # if pb.ConfigManager.feature_is_enabled('code_highlight', cached=True):
     # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/codehilite.css" />' + "\n"
 
-    if pb.config.feature_is_enabled("mermaid_diagrams", cached=True):
+    if pb.ConfigManager.feature_is_enabled("mermaid_diagrams", cached=True):
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/mermaid.9.0.1.min.js"></script>' + "\n"
         # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
 
-    if pb.config.feature_is_enabled("math_latex", cached=True):
+    if pb.ConfigManager.feature_is_enabled("math_latex", cached=True):
         # dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/tex-chtml.js"></script>' + "\n"
         # dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js"></script>' + "\n"
         dynamic_inclusions += OpenIncludedFile("latex/load_mathjax_header_template.html") + "\n"
         # dynamic_inclusions += '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + "\n"
 
-    if pb.config.feature_is_enabled("search", cached=True):
+    if pb.ConfigManager.feature_is_enabled("search", cached=True):
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/flexsearch.bundle.js"></script>' + "\n"
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/pako.js"></script>' + "\n"
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/search.js"></script>' + "\n"
         # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/search.css" />' + "\n"
 
-    if pb.config.capabilities_needed["directory_tree"]:
+    if pb.ConfigManager.capabilities_needed["directory_tree"]:
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/dirtree.js"></script>' + "\n"
 
     if dynamic_includes is not None:
@@ -252,31 +252,31 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/obsidian_tabs_footer.js" type="text/javascript"></script>' + "\n"
 
     # Include toggled components
-    if pb.config.ShowIcon("rss"):
+    if pb.ConfigManager.ShowIcon("rss"):
         code = OpenIncludedFile("rss/button_template.html")
         template = template.replace("{rss_button}", code)
     else:
         template = template.replace("{rss_button}", "")
 
-    if pb.config.ShowIcon("graph"):
+    if pb.ConfigManager.ShowIcon("graph"):
         code = OpenIncludedFile("graph/button_template.html")
         template = template.replace("{graph_button}", code)
     else:
         template = template.replace("{graph_button}", "")
 
-    if pb.config.ShowIcon("search"):
+    if pb.ConfigManager.ShowIcon("search"):
         code = OpenIncludedFile("search/button_template.html")
         template = template.replace("{search_button}", code)
     else:
         template = template.replace("{search_button}", "")
 
-    if pb.config.ShowIcon("tags_page"):
+    if pb.ConfigManager.ShowIcon("tags_page"):
         code = OpenIncludedFile("tags_page/button_template.html")
         template = template.replace("{tags_page_button}", code)
     else:
         template = template.replace("{tags_page_button}", "")
 
-    if pb.config.ShowIcon("theme_picker"):
+    if pb.ConfigManager.ShowIcon("theme_picker"):
         code = OpenIncludedFile("html/themes/button_template.html")
         template = template.replace("{theme_button}", code)
         code = OpenIncludedFile("html/themes/popup.html")
@@ -285,7 +285,7 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
         template = template.replace("{theme_button}", "")
         template = template.replace("{theme_popup}", "")
 
-    if pb.config.ShowIcon("create_index_from_dir_structure"):
+    if pb.ConfigManager.ShowIcon("create_index_from_dir_structure"):
         output_path = html_url_prefix + "/" + pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path", cached=True)
         code = OpenIncludedFile("index_from_dir_structure/button_template.html")
         code = code.replace("{dirtree_index_path}", output_path)
@@ -293,12 +293,12 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     else:
         template = template.replace("{dirtree_button}", "")
 
-    if pb.config.feature_is_enabled("search", cached=True):
+    if pb.ConfigManager.feature_is_enabled("search", cached=True):
         template = template.replace("{search_html}", OpenIncludedFile("search/search.html"))
     else:
         template = template.replace("{search_html}", "")
 
-    if pb.config.feature_is_enabled("search", cached=True):
+    if pb.ConfigManager.feature_is_enabled("search", cached=True):
         template = template.replace("{search_html}", OpenIncludedFile("search/search.html"))
     else:
         template = template.replace("{search_html}", "")

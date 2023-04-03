@@ -1,3 +1,4 @@
+import yaml
 from pathlib import Path
 
 from .ConfigManager import Config, find_user_config_yaml_path
@@ -38,14 +39,46 @@ class PicknickBasket:
         self.state = {}
         self.reset_state()
 
-    def construct(self, config_yaml_location):
-        # Load config, paths, etc
+    def integrate(self, config_yaml_location, module_data_folder):
+        """
+        This function is responsible for loading in all the data from the setup module into pb. 
+        This will become superfluous when the pb is factored out completely
+        """
+        self.module_data_folder = module_data_folder
+        arguments_yaml_path = module_data_folder + "/" + "arguments.yml"
+        with open(arguments_yaml_path, "r") as f:
+            arguments = yaml.safe_load(f.read())
+
+        with open(config_yaml_location, 'r') as f:
+            self.config = yaml.safe_load(f.read())
+
+        if "verbose" in arguments:
+            self.verbose = arguments["verbose"]
+
+
+    def construct(self, config_yaml_location, module_data_folder):
+        """ Load config, paths, etc """
+
+        # load config into pb
         self.loadConfig(config_yaml_location)
-
-        module_controller.run_module(module_name="load_paths", pb=self)  # INTEGRATION. Previously: `self.set_paths()`
-
         self.compile_dynamic_inclusions()
-        self.config.load_embedded_titles_plugin()
+        self.ConfigManager.load_embedded_titles_plugin()
+
+
+    def loadConfig(self, config_yaml_location=""):
+        # # find correct config yaml
+        # if self.user_config_dict is None:
+        #     input_yml_path_str = find_user_config_yaml_path(config_yaml_location)
+        # else:
+        #     input_yml_path_str = ""
+
+        # create config object based on config yaml
+        self.ConfigManager = Config(self, self.module_data_folder + '/config.yml')
+
+        # build up config object further
+        self.ConfigManager.LoadIncludedFiles()
+        self.configured_html_prefix = self.gc("html_url_prefix")
+
 
     def reset_state(self):
         self.state["action"] = "Unknown"
@@ -60,19 +93,6 @@ class PicknickBasket:
         for key in kwargs.keys():
             self.state[key] = kwargs[key]
 
-    def loadConfig(self, config_yaml_location=""):
-        # find correct config yaml
-        if self.user_config_dict is None:
-            input_yml_path_str = find_user_config_yaml_path(config_yaml_location)
-        else:
-            input_yml_path_str = ""
-
-        # create config object based on config yaml
-        self.config = Config(self, input_yml_path_str)
-
-        # build up config object further
-        self.config.LoadIncludedFiles()
-        self.configured_html_prefix = self.gc("html_url_prefix")
 
     def set_paths(self):
         pb = self
@@ -127,11 +147,11 @@ class PicknickBasket:
 
     def gc(self, path: str, cached=False):
         if cached:
-            return self.config._get_config_cached(path)
-        return self.config.get_config(path)
+            return self.ConfigManager._get_config_cached(path)
+        return self.ConfigManager.get_config(path)
 
     def sc(self, path, value):
-        return self.config.set_config(path, value)
+        return self.ConfigManager.set_config(path, value)
 
     def EnsureTreeObj(self):
         if self.treeobj is None:

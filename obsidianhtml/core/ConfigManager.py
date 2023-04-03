@@ -23,19 +23,25 @@ class Config:
         """
         self.pb = pb
 
-        # merge
-        if pb.user_config_dict is not None:
-            user_config = pb.user_config_dict
-        else:
-            user_config = self.load_user_config(input_yml_path_str)
+        # # merge
+        # if pb.user_config_dict is not None:
+        #     user_config = pb.user_config_dict
+        # else:
+        #     user_config = self.load_user_config(input_yml_path_str)
 
-        default_config = yaml.safe_load(OpenIncludedFile("defaults_config.yml"))
-        self.config = MergeDictRecurse(default_config, user_config)
+        # default_config = yaml.safe_load(OpenIncludedFile("defaults_config.yml"))
+        # self.config = MergeDictRecurse(default_config, user_config)
 
+        # with open(input_yml_path_str, 'r') as f:
+        #     self.config = yaml.safe_load(f.read())
+        
+        # temporary
+        self.config = self.pb.config
+        
         # check settings / set missing values / overwriting values
-        self.check_required_values_filled_in(self.config)
-        self.resolve_deprecations(default_config, user_config)  # Temporary patches during deprecation
-        self.overwrite_values()
+        # self.check_required_values_filled_in(self.config)
+        #self.resolve_deprecations(default_config, user_config)  # Temporary patches during deprecation
+        #self.overwrite_values()
         self.check_entrypoint_exists()  # A value for the entrypoint is required, as this will become the index
         self.set_obsidian_folder_path_str()  # Determine obsidian folder path based on either the user telling us, or from the entrypoint
         self.load_capabilities_needed()  # Capabilities are "summary toggles" that can tell us at a glance whether we should enable something or not.
@@ -43,51 +49,15 @@ class Config:
         # Plugins
         self.plugin_settings = {}
 
-    def load_user_config(self, input_yml_path_str=False) -> dict:
-        """
-        Will load the config.yml as provided by the user, and convert it to a python dict, which is returned.
-        Any error in this process will be terminating.
-        Auto loading a config yaml based on default locations should be done elsewhere. The determined path can then be filled in in input_yml_path_str.
-        """
 
-        # Make sure the user passes in a config file
-        if input_yml_path_str is False:
-            print("ERROR: No config file passed in. Use -i <path/to/config.yml> to pass in a config yaml.")
-            print_global_help_and_exit(1)
-
-        # Load input yaml
-        try:
-            with open(input_yml_path_str, "rb") as f:
-                input_config = yaml.safe_load(f.read())
-        except FileNotFoundError:
-            print(f"Could not locate the config file {input_yml_path_str}.\n  Please try passing the exact location of it with the `obsidianhtml -i /your/path/to/{input_yml_path_str}` parameter.")
-            print_global_help_and_exit(1)
-
-        # Return
-        return input_config
-
+    # DITCH
     def resolve_deprecations(self, base_dict, update_dict):
         # if exclude_subfolders is present, copy it to exclude_glob
         if "exclude_subfolders" in update_dict.keys() and isinstance(update_dict["exclude_subfolders"], list):
             self.config["exclude_glob"] = self.config["exclude_subfolders"]
 
-    def overwrite_values(self):
-        # (If -v is passed in, __init__.py will set self.verbose to true)
-        if self.pb.verbose is not None:
-            self.config["toggles"]["verbose_printout"] = self.pb.verbose
-        else:
-            self.pb.verbose = self.config["toggles"]["verbose_printout"]
 
-        # Set toggles/no_tabs
-        layout = self.config["toggles"]["features"]["styling"]["layout"]
-        if layout == "tabs":
-            self.config["toggles"]["no_tabs"] = False
-        else:
-            self.config["toggles"]["no_tabs"] = True
-
-        # Set main css file
-        self.config["_css_file"] = f"main_{layout}.css"
-
+    # MOVE
     def check_entrypoint_exists(self):
         if self.config["toggles"]["compile_md"] is False:  # don't check vault if we are compiling directly from markdown to html
             return
@@ -95,6 +65,7 @@ class Config:
             print(f"Error: entrypoint note {self.config['obsidian_entrypoint_path_str']} does not exist.")
             exit(1)
 
+    # MOVE
     def set_obsidian_folder_path_str(self):
         if self.config["toggles"]["compile_md"] is False:  # don't check vault if we are compiling directly from markdown to html
             return
@@ -124,6 +95,7 @@ class Config:
             )
             exit(1)
 
+    # MOVE
     def load_capabilities_needed(self):
         self.capabilities_needed = {}
         gc = self.get_config
@@ -244,12 +216,12 @@ class Config:
 
         # Do nothing if embedded_note_titles are not globally enabled
         if not pb.gc("toggles/features/embedded_note_titles/enabled", cached=True):
-            pb.config.capabilities_needed["embedded_note_titles"] = False
+            pb.ConfigManager.capabilities_needed["embedded_note_titles"] = False
             if pb.gc("toggles/verbose_printout", cached=True):
                 print("\t" * (1), "html: embedded note titles are disabled in config")
             return
         else:
-            pb.config.capabilities_needed["embedded_note_titles"] = True
+            pb.ConfigManager.capabilities_needed["embedded_note_titles"] = True
             self.plugin_settings["embedded_note_titles"] = {}
             if pb.gc("toggles/verbose_printout", cached=True):
                 print("\t" * (1), "html: embedded note titles are enabled in config")

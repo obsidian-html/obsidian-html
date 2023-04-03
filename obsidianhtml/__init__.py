@@ -20,10 +20,10 @@ def main():
     # ---------------------------------------------------------
     # Set default command
     if len(sys.argv) < 2 or sys.argv[1][0] == "-":
-        print('DEPRECATION WARNING: You did not pass in a command. Assuming you meant "convert". Starting version 4.0.0 providing a command will become mandatory.')
-        command = "convert"
-    else:
-        command = sys.argv[1]
+        print("You did not pass in a command. If you want to convert your vault, run `obsidianhtml convert [arguments]`")
+        print_global_help_and_exit(1)
+
+    command = sys.argv[1]
 
     # Execute command
     if command == "convert":

@@ -32,7 +32,7 @@ class SetupModule(ObsidianHtmlModule):
 
     @property
     def provides(self):
-        return tuple(["arguments.yml"])
+        return tuple(["config.yml", "user_config.yml", "arguments.yml"])
 
     @property
     def alters(self):
@@ -44,6 +44,7 @@ class SetupModule(ObsidianHtmlModule):
         self.print_cache.append((level, msg))
 
     def printout_cache(self, force=False):
+        """Before we have the verbosity information we write prints to a cache, this function prints this cache when the verbosity information is known"""
         if hasattr(self, "print_cache"):
             for level, msg in self.print_cache:
                 self.print(level, msg, force=force)
@@ -55,10 +56,9 @@ class SetupModule(ObsidianHtmlModule):
                 return "help"
 
             if len(sys.argv) < 2 or sys.argv[1][0] == "-":
-                self.cached_print("deprecation", 'DEPRECATION WARNING: You did not pass in a command. Assuming you meant "convert". Starting version 4.0.0 providing a command will become mandatory.')
-                return "convert"
-            else:
-                command = sys.argv[1]
+                raise Exception("You did not pass in a command. If you want to convert your vault, run `obsidianhtml convert [arguments]`")
+
+            return sys.argv[1]
 
         def determine_config_path():
             for i, v in enumerate(sys.argv):
@@ -70,14 +70,18 @@ class SetupModule(ObsidianHtmlModule):
                     return sys.argv[i + 1]
             return ""
 
+        def determine_verbose_overwrite():
+            for i, v in enumerate(sys.argv):
+                if v == "-v":
+                    return True
+            return False
+
         arguments = {}
         arguments["command"] = determine_command()
         arguments["config_path"] = determine_config_path()
-
+        if determine_verbose_overwrite():
+            arguments["verbose"] = True
         return arguments
-
-    def write_arguments_yaml(self, arguments):
-        self.modfile("arguments.yml", arguments).to_yaml().write()
 
     # --- get user config file path
     def get_user_config_path(self, arguments):
@@ -105,29 +109,7 @@ class SetupModule(ObsidianHtmlModule):
         self.printout_cache(force=True)
         exit(1)
 
-    # --- check user config
-    def check_required_values_filled_in(self, config, path="", match_str="<REQUIRED_INPUT>"):
-        def rec(config, path="", match_str="<REQUIRED_INPUT>"):
-            helptext = "\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n"
 
-            for k, v in config.items():
-                key_path = "/".join(x for x in (path, k) if x != "")
-
-                if isinstance(v, dict):
-                    rec(config[k], path=key_path)
-
-                if v == match_str:
-                    if self.check_required_value_is_required(config, key_path):
-                        raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')
-                    else:
-                        config[k] = ""
-
-        rec(config, path, match_str)
-
-    def check_required_value_is_required(self, config, key_path):
-        if key_path == "obsidian_entrypoint_path_str":
-            return self.gc("toggles/compile_md", config=config)
-        return True
 
     # --- main function
     def run(self):
@@ -145,9 +127,6 @@ class SetupModule(ObsidianHtmlModule):
         default_config = yaml.safe_load(OpenIncludedFile("defaults_config.yml"))
         config = MergeDictRecurse(default_config, user_config)
 
-        # check if config is valid
-        self.check_required_values_filled_in(config)
-
         # set module data folder so that we can write output
         if "module_data_folder" not in config:
             self.printout_cache(force=True)
@@ -155,17 +134,15 @@ class SetupModule(ObsidianHtmlModule):
         self.set_module_data_folder_path(config["module_data_folder"])
 
         # ensure module data folder exists
-        Path(self.module_data_fpps).mkdir(exist_ok=True)
+        Path(self.module_data_folder).mkdir(exist_ok=True)
 
         # write config files to module data folder - now we have access to info such as verbosity
         self.modfile("config.yml", config).to_yaml().write()
         self.modfile("user_config.yml", user_config).to_yaml().write()
+        self.modfile("arguments.yml", arguments).to_yaml().write()
 
         # print cached lines now that we know what to print and what not
         self.printout_cache()
 
-        # output the arguments.yml now that we know where to write them to
-        self.write_arguments_yaml(arguments)
-
         # return module data folder so that the rest of the program knows where to find the info.
-        return self.module_data_fpps
+        return self.module_data_folder

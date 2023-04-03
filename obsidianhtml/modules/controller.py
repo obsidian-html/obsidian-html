@@ -4,22 +4,29 @@ from . import builtin
 from .lib import verbose_enough
 
 
-def run_module(module_name, module_data_folder=None, module_class_name=None, method="run", module_source="built-in", pb=None):
+def run_module(module_name, module_data_folder=None, module_class_name=None, method="run", module_source="built-in", pb=None, verbosity=None):
     # integrate with "old" pb control flow: get module_data_folder from pb, if passed in
     if pb is not None:
         if module_data_folder is None:
             if pb.module_data_folder is None:
                 module_data_folder = pb.gc("module_data_folder")
+            else:
+                module_data_folder = pb.module_data_folder
+
+    if verbosity is None:
+        verbosity = "error"
 
     # instantiate module
     module_class = get_module_class(module_name, module_class_name, module_source)
-    module = module_class(module_data_fpps=module_data_folder, module_name=module_name)
+    module = module_class(module_data_folder=module_data_folder, module_name=module_name)
 
     # integrate with "old" pb control flow: read out pb and create files in module data folder
     if pb is not None:
         module.integrate_load(pb)  # to be implemented by the module
 
     # run method
+    if verbose_enough("info", verbosity):
+        print(f'[ {"INFO":^5} ] module.controller.run_module() ::', f"{module_name}.{method}()")
     func = getattr(module, method)
     result = func()  # to be implemented by the module
 
@@ -78,7 +85,7 @@ def load_module_itenary(user_config_file_path):
     return (module_cfg["modules"], module_cfg["meta_modules_post"])
 
 
-def run_modules(modules, meta_modules_post, module_data_fpps, verbosity):
+def run_modules(modules, meta_modules_post, module_data_folder, verbosity):
     instantiated_modules = {}
 
     for listing in modules:
@@ -90,22 +97,22 @@ def run_modules(modules, meta_modules_post, module_data_fpps, verbosity):
             module_name=listing["name"],
             persistent=listing["persistent"],
             instantiated_modules=instantiated_modules,
-            module_data_fpps=module_data_fpps,
+            module_data_folder=module_data_folder,
             verbosity=verbosity,
         )
 
         # run method
         method = listing["method"]
         if verbose_enough("info", verbosity):
-            print(f'[ {"INFO":^5} ] module.controller.run_module ::', f"{listing['name']}.{method}()")
+            print(f'[ {"INFO":^5} ] module.controller.run_modules() ::', f"{listing['name']}.{method}()")
         result = getattr(module_obj, method)()
 
         # Run post meta modules
         # ------------------------
-        run_post_modules(meta_modules_post, module_obj, module_run_result=result, instantiated_modules=instantiated_modules, module_data_fpps=module_data_fpps, verbosity=verbosity)
+        run_post_modules(meta_modules_post, module_obj, module_run_result=result, instantiated_modules=instantiated_modules, module_data_folder=module_data_folder, verbosity=verbosity)
 
 
-def run_post_modules(meta_modules_post, module_obj, module_run_result, instantiated_modules, module_data_fpps, verbosity):
+def run_post_modules(meta_modules_post, module_obj, module_run_result, instantiated_modules, module_data_folder, verbosity):
     for listing in meta_modules_post:
         # instantiate module
         meta_module_obj = instantiate_module(
@@ -113,7 +120,7 @@ def run_post_modules(meta_modules_post, module_obj, module_run_result, instantia
             module_name=listing["name"],
             persistent=listing["persistent"],
             instantiated_modules=instantiated_modules,
-            module_data_fpps=module_data_fpps,
+            module_data_folder=module_data_folder,
             verbosity=verbosity,
             level=1,
         )
@@ -131,7 +138,7 @@ def run_post_modules(meta_modules_post, module_obj, module_run_result, instantia
         result = getattr(meta_module_obj, method)(module=module_obj, result=module_run_result)
 
 
-def instantiate_module(module_class, module_name, instantiated_modules, persistent, module_data_fpps, verbosity="deprecation", level=0):
+def instantiate_module(module_class, module_name, instantiated_modules, persistent, module_data_folder, verbosity="deprecation", level=0):
     """This function instantiates modules, and stores the resulting object, so that it can be retrieved when persistence is enabled on the module"""
     if persistent == True and module_class.__name__ in instantiated_modules:
         if verbose_enough("debug", verbosity):
@@ -140,7 +147,7 @@ def instantiate_module(module_class, module_name, instantiated_modules, persiste
     else:
         if verbose_enough("debug", verbosity):
             print(f'[ {"DEBUG":^5} ] {"* "*level}module.controller.instantiate_module :: instantiation of module: ', module_name)
-        module_obj = module_class(module_data_fpps=module_data_fpps, module_name=module_name)
+        module_obj = module_class(module_data_folder=module_data_folder, module_name=module_name)
         instantiated_modules[module_class.__name__] = module_obj
 
     return module_obj
@@ -150,5 +157,5 @@ def run_module_setup():
     """Runs the setup module, which creates the module data folder, and places the arguments.yml and config.yml files there.
     Normally, modules don't return anything, if they do, that means they failed. In this special case we need to get the module data folder back.
     """
-    print(f'[ {"INFO":^5} ] module.controller.run_module ::', f"setup_module.run()")
+    print(f'[ {"INFO":^5} ] module.controller.run_module_setup() ::', f"setup_module.run()")
     return run_module(module_name="setup_module", module_data_folder="/tmp")

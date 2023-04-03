@@ -1,6 +1,7 @@
 import sys
 import frontmatter
 import gzip
+import yaml
 
 import regex as re  # regex string finding/replacing
 
@@ -23,19 +24,29 @@ from ..features import post_processing
 from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
 from ..compiler.Templating import ExportStaticFiles
 
+from ..modules import controller as module_controller
+
 
 def ConvertVault(config_yaml_location=""):
     # Set config
     # ---------------------------------------------------------
     pb = PicknickBasket()
 
-    # Set verbosity (overwrite config)
-    for i, v in enumerate(sys.argv):
-        if v == "-v":
-            pb.verbose = True
-            break
+    # Bootstrap module system
+    # The first module will always have to be run, and we need info back, so this is a bit of a weird one as far as modules are concerned
+    # ----------------------------------------------------------
+    module_data_folder = module_controller.run_module_setup()
+    config_file_path = module_data_folder + "/config.yml"
 
-    pb.construct(config_yaml_location)
+    with open(config_file_path, 'r') as f:
+        cfg = yaml.safe_load(f.read())
+        verbosity = cfg["verbosity"]
+
+    module_controller.run_module(module_name="process_config", pb=pb, module_data_folder=module_data_folder, verbosity=verbosity)
+    module_controller.run_module(module_name="load_paths", pb=pb, module_data_folder=module_data_folder, verbosity=verbosity)  # INTEGRATION. Previously: `self.set_paths()`
+
+    pb.integrate(config_file_path, module_data_folder)  # INTEGRATION.
+    pb.construct(config_file_path, module_data_folder)   # INTEGRATION.
 
     # Setup filesystem
     # ---------------------------------------------------------
@@ -367,7 +378,7 @@ def convert_markdown_to_html(pb):
         with open(op, "w", encoding="utf-8") as f:
             f.write(html)
 
-    if pb.config.capabilities_needed["graph_data"]:
+    if pb.ConfigManager.capabilities_needed["graph_data"]:
         # add crosslinks to graph data
         pb.index.network_tree.AddCrosslinks()
 
@@ -376,7 +387,7 @@ def convert_markdown_to_html(pb):
         with open(pb.paths["html_output_folder"].joinpath("obs.html").joinpath("data/graph.json"), "w", encoding="utf-8") as f:
             f.write(pb.index.network_tree.OutputJson())
 
-    if pb.config.capabilities_needed["search_data"]:
+    if pb.ConfigManager.capabilities_needed["search_data"]:
         # Compress search json and write to static folder
         gzip_path = pb.paths["html_output_folder"].joinpath("obs.html").joinpath("data/search.json.gzip")
         gzip_path.parent.mkdir(parents=True, exist_ok=True)

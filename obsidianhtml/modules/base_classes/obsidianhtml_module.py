@@ -11,8 +11,8 @@ from .. import handlers
 
 
 class ObsidianHtmlModule(ABC):
-    def __init__(self, module_data_fpps, module_name, persistent=False):
-        self.set_module_data_folder_path(module_data_fpps)
+    def __init__(self, module_data_folder, module_name, persistent=False):
+        self.set_module_data_folder_path(module_data_folder)
 
         self.module_class_name = self.__class__.__name__
         self.module_name = module_name
@@ -42,13 +42,13 @@ class ObsidianHtmlModule(ABC):
         pass
 
     @abstractmethod
-    def run(self, module_data_fpps):
+    def run(self, module_data_folder):
         """Single entrypoint that will be called when it is time for the module to do its thing"""
         print("I am useless! Overwrite me!")
 
     def _integrate_ensure_module_data_folder(self):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
-        Path(self.module_data_fpps).mkdir(exist_ok=True)
+        Path(self.module_data_folder).mkdir(exist_ok=True)
 
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
@@ -90,10 +90,10 @@ class ObsidianHtmlModule(ABC):
         """Returns the path of a resource"""
         if rel_path_str_posix[0] == "/":
             rel_path_str_posix = rel_path_str_posix[1:]
-        return self.module_data_fpps + "/" + rel_path_str_posix
+        return self.module_data_folder + "/" + rel_path_str_posix
 
     def modfile(self, resource_rel_path, contents="", encoding="utf-8", allow_absent=False):
-        return handlers.file.File(path=self.path(resource_rel_path), contents=contents, encoding=encoding, allow_absent=allow_absent)
+        return handlers.file.File(resource_rel_path=resource_rel_path, path=self.path(resource_rel_path), contents=contents, encoding=encoding, allow_absent=allow_absent, module=self)
 
     def print(self, level, msg, force=False):
         if not force and not verbose_enough(level, self.verbosity):
@@ -107,9 +107,9 @@ class ObsidianHtmlModule(ABC):
 
     def set_module_data_folder_path(self, module_data_folder_path):
         if module_data_folder_path[-1] == "/":
-            self.module_data_fpps = module_data_folder_path[:-1]
+            self.module_data_folder = module_data_folder_path[:-1]
         else:
-            self.module_data_fpps = module_data_folder_path
+            self.module_data_folder = module_data_folder_path
 
     def test_module_validity(self):
         """Tests whether the custom module follows the rules"""
