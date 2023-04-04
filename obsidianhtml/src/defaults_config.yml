@@ -97,6 +97,7 @@ embeddable_file_suffixes: ['pdf']
 # How to populate non-Markdown files in the output directory.
 # Note that hard links do not work cross-filesystem, and some environments may need administrative rights to create links.
 # Hard links are also more prone to data loss due to the sharing of inodes. `symlink` is a good safe bet, if your environment works with it.
+# If you store your vault in a Git repository, you will need to modify `core.symlinks` in your gitconfig or else only the links will be committed; see `man git-config`.
 # `default` is `copy` for backwards compatibility to avoid breaking configurations.
 # `copy` simply copies the files from the input folder to the output.
 # `symlink` creates a symbolic link, or soft link, that points to the input file.
