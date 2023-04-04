@@ -78,7 +78,7 @@ copy_vault_to_tempdir: True
 # `default` will try to use rsync if it is installed, and otherwise use `shutil`
 # `rsync` will do the same, but give a warning when it falls back to shutil
 # `shutil` will just use shutil to copy. Use this when rsync is installed but is giving problems.
-# `shutil_walk` will walk the directory tree manually, and call `shutil` for each branch. This has been seen to work better on Macs in some cases.
+# `shutil_walk` will walk the directory tree manually, and call the copy function for each branch. This has been seen to work better on Macs in some cases.
 copy_vault_to_tempdir_method: default
 
 # Enable to print the files being copied
