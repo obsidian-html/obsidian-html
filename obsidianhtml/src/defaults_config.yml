@@ -78,6 +78,7 @@ copy_vault_to_tempdir: True
 # `default` will try to use rsync if it is installed, and otherwise use `shutil`
 # `rsync` will do the same, but give a warning when it falls back to shutil
 # `shutil` will just use shutil to copy. Use this when rsync is installed but is giving problems.
+# `shutil_walk` will walk the directory tree manually, and call `shutil` for each branch. This has been seen to work better on Macs in some cases.
 copy_vault_to_tempdir_method: default
 
 # Enable to print the files being copied
@@ -92,6 +93,19 @@ audio_format_suffixes: ['mp3', 'webm', 'wav', 'm4a', 'ogg', '3gp', 'flac']
 
 # files that should be included via an <embed> tag:
 embeddable_file_suffixes: ['pdf']
+
+# How to populate non-Markdown files in the output directory.
+# Note that hard links do not work cross-filesystem, and some environments may need administrative rights to create links.
+# Hard links are also more prone to data loss due to the sharing of inodes. `symlink` is a good safe bet, if your environment works with it.
+# `default` is `copy` for backwards compatibility to avoid breaking configurations.
+# `copy` simply copies the files from the input folder to the output.
+# `symlink` creates a symbolic link, or soft link, that points to the input file.
+# `hardlink` creates a hard link
+copy_output_file_method: default
+
+# If links should be fully resolved before linking.
+# This is useful on filesystems that do not allow symlinks of symlinks, or where these nested links can affect permissions, like on some BSDs.
+resolve_output_file_links: true
 
 # Used to strip the http url hostpart of a link to get a relative link
 # e.g. for value "https://git.com/user/repo/-/wikis/mywiki/" then:

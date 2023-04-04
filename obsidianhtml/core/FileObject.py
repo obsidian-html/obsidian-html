@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import platform
 import os
+import os.path
 import shutil  # used to remove a non-empty directory, copy files
 
 
@@ -262,8 +263,24 @@ class FileObject:
             src_file_path = self.path["markdown"]["file_absolute_path"]
             dst_file_path = self.path["html"]["file_absolute_path"]
 
+        link_mode = self.pb.gc("copy_output_file_method", cached=True)
+        resolve_links = self.pb.gc("resolve_output_file_links", cached=True)
+        if link_mode == 'default':
+            link_mode = 'copy'
         if self.pb.gc("toggles/verbose_printout", cached=True):
-            print(f"Copying file over (mode={mode}) from {src_file_path} to {dst_file_path}")
+            print(f"{'Copy' if link_mode == 'copy' else 'Link'}ing file (mode={mode}) from {src_file_path} to {dst_file_path}")
 
         dst_file_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(src_file_path, dst_file_path)
+        if link_mode == 'copy':
+            shutil.copyfile(src_file_path, dst_file_path)
+        else:
+            if resolve_links:
+                src_file_path = os.path.realpath(src_file_path)
+            if link_mode == 'symlink':
+                os.symlink(src_file_path, dst_file_path)
+            elif link_mode == 'hardlink':
+                os.link(src_file_path, dst_file_path)
+            else:
+                raise Exception(f'Bad copy_output_file_method "{copy_output_file_method}", expected one of: default, copy, symlink, hardlink')
+
+
