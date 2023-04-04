@@ -69,6 +69,7 @@ exclude_subfolders: '<DEPRECATED>'
 # and so forth. NOTE: DOES NOT APPLY TO INCLUSIONS!
 max_note_depth: -1
 
+# =============================== COPY VAULT SETTINGS ============================
 # Safety feature: make a copy of the provided vault, and operate on that, so that bugs are less likely to affect the vault data.
 # Should be fine to turn off if copying the vault takes too long / disk space is too limited.
 # The tempdir is automatically removed on exit of the program.
@@ -83,6 +84,8 @@ copy_vault_to_tempdir_method: default
 
 # Enable to print the files being copied
 copy_vault_to_tempdir_follow_copy: false
+# =============================== /COPY VAULT SETTINGS ============================
+
 
 # ObsidianHtml needs to be able to discern between included notes and included files, because included files
 # need to be treated differently. This is a configurable setting because we might've missed certain suffixes
