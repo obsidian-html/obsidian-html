@@ -277,8 +277,10 @@ class FileObject:
         if link_mode == 'copy':
             shutil.copyfile(src_file_path, dst_file_path)
         elif link_mode == 'symlink':
-            os.symlink(src_file_path, dst_file_path)
+            if not os.path.exists(dst_file_path):
+                os.symlink(src_file_path, dst_file_path)
         elif link_mode == 'hardlink':
-            os.link(src_file_path, dst_file_path)
+            if not os.path.exists(dst_file_path):
+                os.link(src_file_path, dst_file_path)
         else:
             raise Exception(f'Bad copy_output_file_method "{copy_output_file_method}", expected one of: default, copy, symlink, hardlink')
