@@ -109,12 +109,10 @@ class SetupModule(ObsidianHtmlModule):
         self.printout_cache(force=True)
         exit(1)
 
-
-
     # --- main function
     def run(self):
         # parse sys.argv and create arguments dict
-        arguments = self.get_arguments_dict()
+        arguments = self.store("arguments", self.get_arguments_dict())
 
         # get path to user_config
         user_config_path = self.get_user_config_path(arguments)
@@ -125,7 +123,7 @@ class SetupModule(ObsidianHtmlModule):
         user_config = yaml.safe_load(user_config_yaml)
 
         default_config = yaml.safe_load(OpenIncludedFile("defaults_config.yml"))
-        config = MergeDictRecurse(default_config, user_config)
+        config = self.store("config", MergeDictRecurse(default_config, user_config))
 
         # set module data folder so that we can write output
         if "module_data_folder" not in config:
@@ -146,3 +144,12 @@ class SetupModule(ObsidianHtmlModule):
 
         # return module data folder so that the rest of the program knows where to find the info.
         return self.module_data_folder
+
+    def integrate_load(self, pb):
+        pass
+
+    def integrate_save(self, pb):
+        pb.arguments = self.retrieve("arguments")
+        if "verbose" in pb.arguments:
+            pb.verbose = pb.arguments["verbose"]
+        pb.module_data_folder = self.module_data_folder

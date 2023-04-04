@@ -196,6 +196,7 @@ def fetch_str(command):
 
 
 def FindVaultByEntrypoint(entrypoint_path):
+    """Starts at the entrypoint and returns the first parent that contains a '.obsidian' folder"""
     vault_found = False
 
     # Allow both folders and entrypoint notes to be passed in

@@ -28,9 +28,10 @@ class PicknickBasket:
         self.tagtree = {"notes": [], "subtags": {}}
         self.jars = {}
         # self.network_tree = NetworkTree(self.verbose)
-        self.search = SearchHead()
 
+        self.search = SearchHead()
         self.FileFinder = FileFinder()
+        self.ConfigManager = Config(self)
 
         # State should be updated whenever we start a new type of operation.
         # When doing an operation by looping through notes, set loop_type to 'note', for links within a note 'note_link', if not in a loop-type operation, set to None.
@@ -39,46 +40,15 @@ class PicknickBasket:
         self.state = {}
         self.reset_state()
 
-    def integrate(self, config_yaml_location, module_data_folder):
-        """
-        This function is responsible for loading in all the data from the setup module into pb. 
-        This will become superfluous when the pb is factored out completely
-        """
-        self.module_data_folder = module_data_folder
-        arguments_yaml_path = module_data_folder + "/" + "arguments.yml"
-        with open(arguments_yaml_path, "r") as f:
-            arguments = yaml.safe_load(f.read())
-
-        with open(config_yaml_location, 'r') as f:
-            self.config = yaml.safe_load(f.read())
-
-        if "verbose" in arguments:
-            self.verbose = arguments["verbose"]
 
 
     def construct(self, config_yaml_location, module_data_folder):
-        """ Load config, paths, etc """
+        """Load config, paths, etc"""
 
         # load config into pb
-        self.loadConfig(config_yaml_location)
+        self.ConfigManager.LoadIncludedFiles()
         self.compile_dynamic_inclusions()
         self.ConfigManager.load_embedded_titles_plugin()
-
-
-    def loadConfig(self, config_yaml_location=""):
-        # # find correct config yaml
-        # if self.user_config_dict is None:
-        #     input_yml_path_str = find_user_config_yaml_path(config_yaml_location)
-        # else:
-        #     input_yml_path_str = ""
-
-        # create config object based on config yaml
-        self.ConfigManager = Config(self, self.module_data_folder + '/config.yml')
-
-        # build up config object further
-        self.ConfigManager.LoadIncludedFiles()
-        self.configured_html_prefix = self.gc("html_url_prefix")
-
 
     def reset_state(self):
         self.state["action"] = "Unknown"
@@ -92,30 +62,6 @@ class PicknickBasket:
         self.state["subroutine"] = None
         for key in kwargs.keys():
             self.state[key] = kwargs[key]
-
-
-    def set_paths(self):
-        pb = self
-        paths = {
-            "obsidian_folder": Path(pb.gc("obsidian_folder_path_str")).resolve(),
-            "md_folder": Path(pb.gc("md_folder_path_str")).resolve(),
-            "obsidian_entrypoint": Path(pb.gc("obsidian_entrypoint_path_str")).resolve(),
-            "md_entrypoint": Path(pb.gc("md_entrypoint_path_str")).resolve(),
-            "html_output_folder": Path(pb.gc("html_output_folder_path_str")).resolve(),
-        }
-        paths["original_obsidian_folder"] = paths["obsidian_folder"]  # use only for lookups!
-        paths["dataview_export_folder"] = paths["obsidian_folder"].joinpath(pb.gc("toggles/features/dataview/folder"))
-
-        if pb.gc("toggles/extended_logging", cached=True):
-            paths["log_output_folder"] = Path(pb.gc("log_output_folder_path_str")).resolve()
-
-        # Deduce relative paths
-        if pb.gc("toggles/compile_md", cached=True):
-            paths["rel_obsidian_entrypoint"] = paths["obsidian_entrypoint"].relative_to(paths["obsidian_folder"])
-        paths["rel_md_entrypoint_path"] = paths["md_entrypoint"].relative_to(paths["md_folder"])
-
-        # Set paths
-        pb.paths = paths
 
     def update_paths(self, reason, **kwargs):
         # If for any reason the paths need to be updated, this is the function to do it through

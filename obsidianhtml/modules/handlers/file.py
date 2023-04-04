@@ -24,7 +24,7 @@ class File:
 
         self.is_module_file = is_module_file
         self.module = module
-        #self.via_integration = via_integration # don't do provides/requires check if read/write is done in the integration step
+        # self.via_integration = via_integration # don't do provides/requires check if read/write is done in the integration step
 
         self.allow_absent = False
 
@@ -32,8 +32,8 @@ class File:
         # check whether module reports reading this inupt
         if self.is_module_file and self.resource_rel_path not in self.module.requires:
             # temporary: while integrate methods exist: don't do checks for the integrate methods
-            if inspect.stack()[1][3] not in ('integrate_save', 'integrate_load'):
-                raise Exception(f'ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires.')
+            if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
+                raise Exception(f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires.")
 
         if not os.path.isfile(self.path):
             if not self.allow_absent:
@@ -49,8 +49,8 @@ class File:
         # check whether module reports writing this output
         if self.is_module_file and self.resource_rel_path not in self.module.provides:
             # temporary: while integrate methods exist: don't do checks for the integrate methods
-            if inspect.stack()[1][3] not in ('integrate_save', 'integrate_load'):
-                raise Exception(f'ModuleMisConfiguration: Module {self.module.module_name} writes to {self.resource_rel_path} but this is not reported in self.provides.')
+            if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
+                raise Exception(f"ModuleMisConfiguration: Module {self.module.module_name} writes to {self.resource_rel_path} but this is not reported in self.provides.")
 
         # write file
         with open(self.path, "w", encoding=self.encoding) as f:

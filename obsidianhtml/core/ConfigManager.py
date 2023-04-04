@@ -14,7 +14,7 @@ class Config:
     config = None
     pb = None
 
-    def __init__(self, pb, input_yml_path_str=False):
+    def __init__(self, pb):
         """
         This init function will do three steps:
         - Merging default config with user config
@@ -22,111 +22,46 @@ class Config:
         - Setting missing values / Checking for illegal configuration
         """
         self.pb = pb
-
-        # # merge
-        # if pb.user_config_dict is not None:
-        #     user_config = pb.user_config_dict
-        # else:
-        #     user_config = self.load_user_config(input_yml_path_str)
-
-        # default_config = yaml.safe_load(OpenIncludedFile("defaults_config.yml"))
-        # self.config = MergeDictRecurse(default_config, user_config)
-
-        # with open(input_yml_path_str, 'r') as f:
-        #     self.config = yaml.safe_load(f.read())
-        
-        # temporary
-        self.config = self.pb.config
-        
-        # check settings / set missing values / overwriting values
-        # self.check_required_values_filled_in(self.config)
-        #self.resolve_deprecations(default_config, user_config)  # Temporary patches during deprecation
-        #self.overwrite_values()
-        self.check_entrypoint_exists()  # A value for the entrypoint is required, as this will become the index
-        self.set_obsidian_folder_path_str()  # Determine obsidian folder path based on either the user telling us, or from the entrypoint
-        self.load_capabilities_needed()  # Capabilities are "summary toggles" that can tell us at a glance whether we should enable something or not.
-
-        # Plugins
         self.plugin_settings = {}
-
 
     # DITCH
     def resolve_deprecations(self, base_dict, update_dict):
         # if exclude_subfolders is present, copy it to exclude_glob
         if "exclude_subfolders" in update_dict.keys() and isinstance(update_dict["exclude_subfolders"], list):
-            self.config["exclude_glob"] = self.config["exclude_subfolders"]
+            self.pb.config["exclude_glob"] = self.pb.config["exclude_subfolders"]
 
+    # # MOVE
+    # def load_capabilities_needed(self):
+    #     self.capabilities_needed = {}
+    #     gc = self.get_config
 
-    # MOVE
-    def check_entrypoint_exists(self):
-        if self.config["toggles"]["compile_md"] is False:  # don't check vault if we are compiling directly from markdown to html
-            return
-        if not Path(self.config["obsidian_entrypoint_path_str"]).exists():
-            print(f"Error: entrypoint note {self.config['obsidian_entrypoint_path_str']} does not exist.")
-            exit(1)
+    #     self.capabilities_needed["directory_tree"] = False
+    #     if gc("toggles/features/styling/add_dir_list") or gc("toggles/features/create_index_from_dir_structure/enabled"):
+    #         self.capabilities_needed["directory_tree"] = True
 
-    # MOVE
-    def set_obsidian_folder_path_str(self):
-        if self.config["toggles"]["compile_md"] is False:  # don't check vault if we are compiling directly from markdown to html
-            return
+    #     self.capabilities_needed["search_data"] = False
+    #     if gc("toggles/features/search/enabled") or gc("toggles/features/graph/enabled") or gc("toggles/features/embedded_search/enabled"):
+    #         self.capabilities_needed["search_data"] = True
 
-        # Use user provided obsidian_folder_path_str
-        if "obsidian_folder_path_str" in self.config and self.config["obsidian_folder_path_str"] != "<DEPRECATED>":
-            result = FindVaultByEntrypoint(self.config["obsidian_folder_path_str"])
-            if result:
-                if Path(result) != Path(self.config["obsidian_folder_path_str"]).resolve():
-                    print(f"Error: The configured obsidian_folder_path_str is not the vault root. Change its value to {result}")
-                    exit(1)
-                return
-            else:
-                print("ERROR: Obsidianhtml could not find a valid vault. (Tip: obsidianhtml looks for the .obsidian folder)")
-                exit(1)
-            return
-
-        # Determine obsidian_folder_path_str from obsidian_entrypoint_path_str
-        result = FindVaultByEntrypoint(self.config["obsidian_entrypoint_path_str"])
-        if result:
-            self.config["obsidian_folder_path_str"] = result
-            if self.pb.verbose:
-                print(f"Set obsidian_folder_path_str to {result}")
-        else:
-            print(
-                f"ERROR: Obsidian vault not found based on entrypoint {self.config['obsidian_entrypoint_path_str']}.\n\tDid you provide a note that is in a valid vault? (Tip: obsidianhtml looks for the .obsidian folder)"
-            )
-            exit(1)
-
-    # MOVE
-    def load_capabilities_needed(self):
-        self.capabilities_needed = {}
-        gc = self.get_config
-
-        self.capabilities_needed["directory_tree"] = False
-        if gc("toggles/features/styling/add_dir_list") or gc("toggles/features/create_index_from_dir_structure/enabled"):
-            self.capabilities_needed["directory_tree"] = True
-
-        self.capabilities_needed["search_data"] = False
-        if gc("toggles/features/search/enabled") or gc("toggles/features/graph/enabled") or gc("toggles/features/embedded_search/enabled"):
-            self.capabilities_needed["search_data"] = True
-
-        self.capabilities_needed["graph_data"] = False
-        if gc("toggles/features/rss/enabled") or gc("toggles/features/graph/enabled"):
-            self.capabilities_needed["graph_data"] = True
+    #     self.capabilities_needed["graph_data"] = False
+    #     if gc("toggles/features/rss/enabled") or gc("toggles/features/graph/enabled"):
+    #         self.capabilities_needed["graph_data"] = True
 
     def verbose(self):
-        return self.config["toggles"]["verbose_printout"]
+        return self.pb.config["toggles"]["verbose_printout"]
 
     def disable_feature(self, feature_key_name):
-        self.config["toggles"]["features"][feature_key_name]["enabled"] = False
+        self.pb.config["toggles"]["features"][feature_key_name]["enabled"] = False
 
     @cache
     def _feature_is_enabled_cached(self, feature_key_name):
-        return self.config["toggles"]["features"][feature_key_name]["enabled"]
+        return self.pb.config["toggles"]["features"][feature_key_name]["enabled"]
 
     def feature_is_enabled(self, feature_key_name, cached=False):
         if cached:
             return self._feature_is_enabled_cached(feature_key_name)
         else:
-            return self.config["toggles"]["features"][feature_key_name]["enabled"]
+            return self.pb.config["toggles"]["features"][feature_key_name]["enabled"]
 
     @cache
     def _get_config_cached(self, path: str):
@@ -135,7 +70,7 @@ class Config:
     def get_config(self, path: str):
         keys = [x for x in path.strip().split("/") if x != ""]
 
-        value = self.config
+        value = self.pb.config
         path = []
         for key in keys:
             path.append(key)
@@ -151,7 +86,7 @@ class Config:
         keys = [x for x in path.split("/") if x != ""]
 
         # find key
-        ptr = self.config
+        ptr = self.pb.config
         ptr_path = []
         for key in keys[:-1]:
             ptr_path.append(key)

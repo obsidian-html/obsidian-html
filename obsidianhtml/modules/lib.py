@@ -43,7 +43,6 @@ class hash_wrap:
         return self.dict
 
 
-
 def pprint_json(obj):
     from json import JSONEncoder
 

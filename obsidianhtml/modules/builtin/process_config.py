@@ -22,7 +22,6 @@ class ProcessConfigModule(ObsidianHtmlModule):
     def alters(self):
         return tuple()
 
-
     # --- check user config
     def check_required_values_filled_in(self, config, path="", match_str="<REQUIRED_INPUT>"):
         def rec(config, path="", match_str="<REQUIRED_INPUT>"):
@@ -49,8 +48,8 @@ class ProcessConfigModule(ObsidianHtmlModule):
 
     def overwrite_values(self, config, arguments):
         # (If -v is passed in, __init__.py will set self.verbose to true)
-        if 'verbose' in arguments:
-            config["toggles"]["verbose_printout"] = arguments['verbose']
+        if "verbose" in arguments:
+            config["toggles"]["verbose_printout"] = arguments["verbose"]
 
         # Set toggles/no_tabs
         layout = config["toggles"]["features"]["styling"]["layout"]
@@ -80,41 +79,12 @@ class ProcessConfigModule(ObsidianHtmlModule):
 
         return capabilities_needed
 
-    def set_obsidian_folder_path_str(self):
-        if self.config["toggles"]["compile_md"] is False:  # don't check vault if we are compiling directly from markdown to html
-            return
-
-        # Use user provided obsidian_folder_path_str
-        if "obsidian_folder_path_str" in self.config and self.config["obsidian_folder_path_str"] != "<DEPRECATED>":
-            result = FindVaultByEntrypoint(self.config["obsidian_folder_path_str"])
-            if result:
-                if Path(result) != Path(self.config["obsidian_folder_path_str"]).resolve():
-                    print(f"Error: The configured obsidian_folder_path_str is not the vault root. Change its value to {result}")
-                    exit(1)
-                return
-            else:
-                print("ERROR: Obsidianhtml could not find a valid vault. (Tip: obsidianhtml looks for the .obsidian folder)")
-                exit(1)
-            return
-
-        # Determine obsidian_folder_path_str from obsidian_entrypoint_path_str
-        result = FindVaultByEntrypoint(self.config["obsidian_entrypoint_path_str"])
-        if result:
-            self.config["obsidian_folder_path_str"] = result
-            if self.pb.verbose:
-                print(f"Set obsidian_folder_path_str to {result}")
-        else:
-            print(
-                f"ERROR: Obsidian vault not found based on entrypoint {self.config['obsidian_entrypoint_path_str']}.\n\tDid you provide a note that is in a valid vault? (Tip: obsidianhtml looks for the .obsidian folder)"
-            )
-            exit(1)
-
     def run(self):
         config = self.config
 
         # check if config is valid
         self.check_required_values_filled_in(config)
-        
+
         # mutate config
         arguments = self.modfile("arguments.yml").read().from_yaml()
         self.overwrite_values(config, arguments)
@@ -123,17 +93,14 @@ class ProcessConfigModule(ObsidianHtmlModule):
         self.modfile("config.yml", config).to_yaml().write()
 
         # capabilities_needed.json
-        capabilities_needed = self.load_capabilities_needed()
+        capabilities_needed = self.store("capabilities_needed", self.load_capabilities_needed())
         self.modfile("capabilities.json", capabilities_needed).to_json().write()
-
 
     def integrate_load(self, pb):
         pass
 
-
     def integrate_save(self, pb):
-        pass
-    #     """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
-    #     pb.paths = self.modfile("paths.json").read().from_json().unwrap()
-    #     for key in pb.paths:
-    #         pb.paths[key] = Path(pb.paths[key])
+        pb.config = self.config
+        pb.configured_html_prefix = self.config["html_url_prefix"]  # REFACTOR: REPLACE
+
+        pb.ConfigManager.capabilities_needed = self.retrieve("capabilities_needed")

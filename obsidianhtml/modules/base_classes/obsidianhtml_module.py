@@ -23,6 +23,9 @@ class ObsidianHtmlModule(ABC):
         # shortcuts
         self.verbose_enough = verbose_enough
 
+        # init
+        self._stash = {}  # see self.stash()
+
     @property
     @abstractmethod
     def requires(self):
@@ -93,19 +96,34 @@ class ObsidianHtmlModule(ABC):
         return self.module_data_folder + "/" + rel_path_str_posix
 
     def modfile(self, resource_rel_path, contents="", encoding="utf-8", allow_absent=False):
+        """Returns an object through which module files can be read and written in a standardized way"""
         return handlers.file.File(resource_rel_path=resource_rel_path, path=self.path(resource_rel_path), contents=contents, encoding=encoding, allow_absent=allow_absent, module=self)
 
     def print(self, level, msg, force=False):
+        """Print (or not print) based on verbosity"""
         if not force and not verbose_enough(level, self.verbosity):
             return
 
         print(f"[{level.upper():^7}] * {msg}")
+
+    def store(self, key, value, overwrite=False):
+        """Saves the value under the key for later use in the module"""
+        if overwrite is False and key in self._stash:
+            raise Exception(f"Module Validity Error: Value {value} is stored twice, without overwrite being set to true.")
+
+        self._stash[key] = value
+        return value
+
+    def retrieve(self, key):
+        """Retrievs stored value from the internal stash"""
+        return self._stash[key]
 
     def allow_post_module(self, meta_module):
         """Return True if post module is allowed to run after this one, else return False"""
         return True
 
     def set_module_data_folder_path(self, module_data_folder_path):
+        """Ensures that the module_data_folder is not prefixed with a '/'"""
         if module_data_folder_path[-1] == "/":
             self.module_data_folder = module_data_folder_path[:-1]
         else:

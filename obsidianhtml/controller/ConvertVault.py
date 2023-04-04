@@ -35,18 +35,16 @@ def ConvertVault(config_yaml_location=""):
     # Bootstrap module system
     # The first module will always have to be run, and we need info back, so this is a bit of a weird one as far as modules are concerned
     # ----------------------------------------------------------
-    module_data_folder = module_controller.run_module_setup()
+    module_data_folder = module_controller.run_module_setup(pb=pb)
     config_file_path = module_data_folder + "/config.yml"
-
-    with open(config_file_path, 'r') as f:
+    with open(config_file_path, "r") as f:
         cfg = yaml.safe_load(f.read())
         verbosity = cfg["verbosity"]
 
     module_controller.run_module(module_name="process_config", pb=pb, module_data_folder=module_data_folder, verbosity=verbosity)
     module_controller.run_module(module_name="load_paths", pb=pb, module_data_folder=module_data_folder, verbosity=verbosity)  # INTEGRATION. Previously: `self.set_paths()`
 
-    pb.integrate(config_file_path, module_data_folder)  # INTEGRATION.
-    pb.construct(config_file_path, module_data_folder)   # INTEGRATION.
+    pb.construct(config_file_path, module_data_folder)  # INTEGRATION.
 
     # Setup filesystem
     # ---------------------------------------------------------

@@ -23,37 +23,46 @@ class LoadPathsModule(ObsidianHtmlModule):
     def alters(self):
         return tuple()
 
+    # REFACTOR
     def set_obsidian_folder_path_str(self):
         if self.gc("toggles/compile_md") is False:  # don't check vault if we are compiling directly from markdown to html
-            return
+            return ""
 
         # Use user provided obsidian_folder_path_str
         if "obsidian_folder_path_str" in self.config and self.config["obsidian_folder_path_str"] != "<DEPRECATED>":
             result = FindVaultByEntrypoint(self.config["obsidian_folder_path_str"])
+            # check that entrypoint is located inside an obsidian vault
             if result:
                 if Path(result) != Path(self.config["obsidian_folder_path_str"]).resolve():
                     print(f"Error: The configured obsidian_folder_path_str is not the vault root. Change its value to {result}")
                     exit(1)
-                return result
+                return self.check_entrypoint_exists(result)
             else:
                 print("ERROR: Obsidianhtml could not find a valid vault. (Tip: obsidianhtml looks for the .obsidian folder)")
                 exit(1)
-            return result
+            return self.check_entrypoint_exists(result)
 
         # Determine obsidian_folder_path_str from obsidian_entrypoint_path_str
         result = FindVaultByEntrypoint(self.config["obsidian_entrypoint_path_str"])
         if result:
-            return result
+            return self.check_entrypoint_exists(result)
         else:
             print(
                 f"ERROR: Obsidian vault not found based on entrypoint {self.config['obsidian_entrypoint_path_str']}.\n\tDid you provide a note that is in a valid vault? (Tip: obsidianhtml looks for the .obsidian folder)"
             )
             exit(1)
 
+    def check_entrypoint_exists(self, entrypoint):
+        """Returns the inputted entrypoint, if the file exists, otherwise it errors"""
+        if self.config["toggles"]["compile_md"] is False:  # don't check vault if we are compiling directly from markdown to html
+            return entrypoint
+        if not Path(entrypoint).exists():
+            print(f"Error: entrypoint note {self.config['obsidian_entrypoint_path_str']} does not exist.")
+            exit(1)
+        return entrypoint
+
     def run(self):
         gc = self.gc
-
-        self.set_obsidian_folder_path_str()
 
         paths = {
             "obsidian_folder": Path(self.set_obsidian_folder_path_str()),
@@ -83,8 +92,6 @@ class LoadPathsModule(ObsidianHtmlModule):
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
         pass
-        #self._integrate_ensure_module_data_folder()
-        #self.modfile("config.yml", pb.ConfigManager.config).to_yaml().write()
 
     def integrate_save(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""

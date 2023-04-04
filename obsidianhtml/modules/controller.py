@@ -153,9 +153,9 @@ def instantiate_module(module_class, module_name, instantiated_modules, persiste
     return module_obj
 
 
-def run_module_setup():
+def run_module_setup(pb=None):
     """Runs the setup module, which creates the module data folder, and places the arguments.yml and config.yml files there.
     Normally, modules don't return anything, if they do, that means they failed. In this special case we need to get the module data folder back.
     """
     print(f'[ {"INFO":^5} ] module.controller.run_module_setup() ::', f"setup_module.run()")
-    return run_module(module_name="setup_module", module_data_folder="/tmp")
+    return run_module(module_name="setup_module", module_data_folder="/tmp", pb=pb)
