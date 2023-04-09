@@ -20,7 +20,7 @@ obsidian_entrypoint_path_str: '<REQUIRED_INPUT>'
 md_folder_path_str:  'output/md'
 
 module_data_folder: 'output/mod'
-verbosity: info
+verbosity: error #info
 meta_modules_post: []
 modules: []
 

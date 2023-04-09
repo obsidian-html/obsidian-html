@@ -29,11 +29,14 @@ class File:
         self.allow_absent = False
 
     def read(self):
-        # check whether module reports reading this inupt
-        if self.is_module_file and self.resource_rel_path not in self.module.requires:
+        # check whether module reports reading this input (or has already written it)
+        if self.is_module_file and self.resource_rel_path not in self.module.requires and self.resource_rel_path not in self.module.written_files.listing():
             # temporary: while integrate methods exist: don't do checks for the integrate methods
             if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
                 raise Exception(f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires.")
+
+        # record reading the file
+        self.module.read_files.add(self.resource_rel_path)
 
         if not os.path.isfile(self.path):
             if not self.allow_absent:
@@ -51,6 +54,9 @@ class File:
             # temporary: while integrate methods exist: don't do checks for the integrate methods
             if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
                 raise Exception(f"ModuleMisConfiguration: Module {self.module.module_name} writes to {self.resource_rel_path} but this is not reported in self.provides.")
+
+        # record writing to the file
+        self.module.written_files.add(self.resource_rel_path)
 
         # write file
         with open(self.path, "w", encoding=self.encoding) as f:

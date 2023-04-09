@@ -10,11 +10,11 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
     """
 
     @property
-    def provides(self):
-        return tuple(["log.resources"])
+    def requires(self):
+        return tuple(["config.yml", "log.resources"])
 
     @property
-    def requires(self):
+    def provides(self):
         return tuple(["log.resources"])
 
     @property
@@ -46,24 +46,37 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
             resource_state = "failed"
             module_result = "failed"
 
-        for resource_path in module.provides:
-            action = "alter"
+        for record in module.read_files.log:
+            resource_rel_path = record["resource_rel_path"]
+
+            if resource_rel_path not in self.resources.keys():
+                print(f"ERROR: Resource read but not yet written: {resource_rel_path} according to history. This points to a bug.")
+                self.resources[resource_rel_path] = self.new_resource_listing(state="error")
+
+            hist = self.new_resource_history_listing(module_name=module.module_name, action="read", result="succeeded")
+            hist["datetime"] = record["datetime"]
+
+            self.resources[resource_rel_path]["history"].append(hist)
+
+        for record in module.written_files.log:
+            resource_rel_path = record["resource_rel_path"]
 
             # create resourcelisting
-            if resource_path not in self.resources.keys():
-                self.resources[resource_path] = self.new_resource_listing(state=resource_state)
+            action = "alter"
+            if resource_rel_path not in self.resources.keys():
+                self.resources[resource_rel_path] = self.new_resource_listing(state=resource_state)
                 action = "create"
 
-            # add history
-            if result is not None:
-                action = "failed"
             hist = self.new_resource_history_listing(module_name=module.module_name, action=action, result=module_result)
-            self.resources[resource_path]["history"].append(hist)
+            hist["datetime"] = record["datetime"]
+
+            self.resources[resource_rel_path]["history"].append(hist)
+
 
     def finalize(self):
         self.setup()
 
-        verb = {"alter": "altered", "create": "created"}
+        verb = {"alter": "altered", "create": "created", "read": "read"}
         output = []
         output.append("Resource log:\n-------------")
         output.append("(arguments.yml, config.yml, and user_config.yml created by setup module)\n")
@@ -92,3 +105,10 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
         if self.verbose_enough("debug", self.verbosity):
             output = ["writing to `log.resources`:\n"] + output + [""]
             self.print("DEBUG", "\n".join(output), force=True)
+
+
+    def allow_post_module(self, meta_module):
+        """Return True if post module is allowed to run after this one, else return False"""
+        if meta_module.module_class_name == self.module_class_name:
+            return False
+        return True

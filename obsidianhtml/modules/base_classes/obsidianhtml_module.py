@@ -5,10 +5,24 @@ import json
 from abc import ABC, abstractmethod
 from functools import cache
 from pathlib import Path
+from datetime import datetime
 
 from ..lib import verbose_enough, hash_wrap
 from .. import handlers
 
+
+class FileAccessLog():
+    def __init__(self):
+        self.log = []
+
+    def add(self, resource_rel_path):
+        self.log.append({
+            "datetime": datetime.now().isoformat(),
+            "resource_rel_path": resource_rel_path,
+        })
+
+    def listing(self):
+        return [x["resource_rel_path"] for x in self.log]
 
 class ObsidianHtmlModule(ABC):
     def __init__(self, module_data_folder, module_name, persistent=None):
@@ -25,6 +39,10 @@ class ObsidianHtmlModule(ABC):
 
         # init
         self._stash = {}  # see self.stash()
+
+        # records
+        self.written_files = FileAccessLog()
+        self.read_files = FileAccessLog()
 
     @property
     @abstractmethod

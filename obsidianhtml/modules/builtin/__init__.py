@@ -6,6 +6,7 @@ from .load_paths import LoadPathsModule
 from .load_file_tree import LoadFileTreeModule
 from .cleanup_temp_files import CleanupTempFilesModule
 from .resource_logger import ResourceLoggerMetaModule
+from .html_templater import HtmlTemplaterModule
 
 builtin_module_aliases = {
     "setup_module": SetupModule,
@@ -14,4 +15,5 @@ builtin_module_aliases = {
     "load_file_tree": LoadFileTreeModule,
     "cleanup_temp_files": CleanupTempFilesModule,
     "resource_logger": ResourceLoggerMetaModule,
+    "html_templater": HtmlTemplaterModule,
 }

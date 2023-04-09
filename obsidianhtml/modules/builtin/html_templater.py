@@ -28,6 +28,11 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
         return tuple()
 
     def run(self):
+        if self.persistent:
+            print("Hi, I am set to be persistent")
+        else:
+            print("Hi, I am not set to be persistent")
+
         # Default to persistent mode
         if self.persistent is None:
             self.persistent = True

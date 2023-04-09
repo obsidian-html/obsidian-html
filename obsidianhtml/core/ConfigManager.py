@@ -30,22 +30,6 @@ class Config:
         if "exclude_subfolders" in update_dict.keys() and isinstance(update_dict["exclude_subfolders"], list):
             self.pb.config["exclude_glob"] = self.pb.config["exclude_subfolders"]
 
-    # # MOVE
-    # def load_capabilities_needed(self):
-    #     self.capabilities_needed = {}
-    #     gc = self.get_config
-
-    #     self.capabilities_needed["directory_tree"] = False
-    #     if gc("toggles/features/styling/add_dir_list") or gc("toggles/features/create_index_from_dir_structure/enabled"):
-    #         self.capabilities_needed["directory_tree"] = True
-
-    #     self.capabilities_needed["search_data"] = False
-    #     if gc("toggles/features/search/enabled") or gc("toggles/features/graph/enabled") or gc("toggles/features/embedded_search/enabled"):
-    #         self.capabilities_needed["search_data"] = True
-
-    #     self.capabilities_needed["graph_data"] = False
-    #     if gc("toggles/features/rss/enabled") or gc("toggles/features/graph/enabled"):
-    #         self.capabilities_needed["graph_data"] = True
 
     def verbose(self):
         return self.pb.config["toggles"]["verbose_printout"]
@@ -102,6 +86,7 @@ class Config:
         return self.pb.gc(f"toggles/features/{feature_name}/enabled") and self.pb.gc(f"toggles/features/{feature_name}/styling/show_icon")
 
     def LoadIncludedFiles(self):
+        # MOVE: html_templater module
         # Get html template code.
         if self.pb.gc("toggles/compile_html", cached=True):
             # Every note will become a html page, where the body comes from the note's markdown,
@@ -119,6 +104,7 @@ class Config:
 
             self.pb.html_template = html_template
 
+        # MOVE: load_graph module
         if self.pb.gc("toggles/features/graph/enabled", cached=True):
             # Get graph template
             self.pb.graph_template = OpenIncludedFile("graph/graph_template.html")

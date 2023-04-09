@@ -2,11 +2,15 @@
     This is still in development, for now just use run_module() from controller.py
 """
 
+import yaml
+from .controller import get_module_class
+from .lib import verbose_enough
 
-def load_module_itenary(user_config_file_path):
+
+def load_module_itenary(config_file_path):
     """This function takes the compiled config.yml path and generates all module lists used for the module system."""
 
-    with open(user_config_file_path, "r") as f:
+    with open(config_file_path, "r") as f:
         module_cfg = yaml.safe_load(f.read())
 
     def hydrate_module_list(mod):
