@@ -29,6 +29,7 @@ class LoadFileTreeModule(ObsidianHtmlModule):
         return tuple()
 
     def run(self):
+        # TODO: rewrite
         # get input folder
         if self.gc("toggles/compile_md", cached=True):
             self.input_folder_root = self.pb.paths["obsidian_folder"]

@@ -11,7 +11,7 @@ from .. import handlers
 
 
 class ObsidianHtmlModule(ABC):
-    def __init__(self, module_data_folder, module_name, persistent=False):
+    def __init__(self, module_data_folder, module_name, persistent=None):
         self.set_module_data_folder_path(module_data_folder)
 
         self.module_class_name = self.__class__.__name__
@@ -95,9 +95,22 @@ class ObsidianHtmlModule(ABC):
             rel_path_str_posix = rel_path_str_posix[1:]
         return self.module_data_folder + "/" + rel_path_str_posix
 
-    def modfile(self, resource_rel_path, contents="", encoding="utf-8", allow_absent=False):
+    def modfile(
+        self,
+        resource_rel_path,
+        contents="",
+        encoding="utf-8",
+        allow_absent=False,
+    ):
         """Returns an object through which module files can be read and written in a standardized way"""
-        return handlers.file.File(resource_rel_path=resource_rel_path, path=self.path(resource_rel_path), contents=contents, encoding=encoding, allow_absent=allow_absent, module=self)
+        return handlers.file.File(
+            resource_rel_path=resource_rel_path,
+            path=self.path(resource_rel_path),
+            contents=contents,
+            encoding=encoding,
+            allow_absent=allow_absent,
+            module=self,
+        )
 
     def print(self, level, msg, force=False):
         """Print (or not print) based on verbosity"""
@@ -109,7 +122,9 @@ class ObsidianHtmlModule(ABC):
     def store(self, key, value, overwrite=False):
         """Saves the value under the key for later use in the module"""
         if overwrite is False and key in self._stash:
-            raise Exception(f"Module Validity Error: Value {value} is stored twice, without overwrite being set to true.")
+            raise Exception(
+                f"Module Validity Error: Value {value} is stored twice, without overwrite being set to true."
+            )
 
         self._stash[key] = value
         return value
@@ -147,10 +162,19 @@ class ObsidianHtmlModule(ABC):
         if not isinstance(self.alters, tuple):
             log_error("Module Validity Error: self.alters() should return a tuple")
         else:
-            allowed_alters_values = ("md_notes", "html_notes", "vault_notes", "md_misc", "html_misc", "vault_misc")
+            allowed_alters_values = (
+                "md_notes",
+                "html_notes",
+                "vault_notes",
+                "md_misc",
+                "html_misc",
+                "vault_misc",
+            )
             for val in self.alters:
                 if val not in allowed_alters_values:
-                    log_error(f"Module Validity Error: value {val} in self.alters is not allowed. Allowed values: {allowed_alters_values}")
+                    log_error(
+                        f"Module Validity Error: value {val} in self.alters is not allowed. Allowed values: {allowed_alters_values}"
+                    )
 
         if failed:
             raise Exception("\n- " + "\n- ".join(errors))
