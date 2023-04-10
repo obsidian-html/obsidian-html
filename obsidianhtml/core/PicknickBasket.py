@@ -54,17 +54,6 @@ class PicknickBasket:
         for key in kwargs.keys():
             self.state[key] = kwargs[key]
 
-    # def update_paths(self, reason, **kwargs):
-    #     # If for any reason the paths need to be updated, this is the function to do it through
-    #     if reason == "using_tmpdir":
-    #         if "tmpdir" not in kwargs:
-    #             raise Exception("tmpdir kwarg expected when updating paths because of using tmpdir!")
-    #         # update paths
-    #         self.paths["obsidian_folder"] = Path(kwargs.get("tmpdir").name).resolve()
-    #         self.paths["obsidian_entrypoint"] = self.paths["obsidian_folder"].joinpath(self.paths["rel_obsidian_entrypoint"])
-    #     else:
-    #         raise Exception(f"path update reason {reason} unknown")
-
     def gc(self, path: str, cached=False):
         if cached:
             return self.ConfigManager._get_config_cached(path)
