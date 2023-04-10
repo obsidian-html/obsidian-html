@@ -1,3 +1,6 @@
+"""This file contains all the code necessary to run a single module ad-hoc, in the most general case.
+For functions to handle running a list of modules, or custom wrappers for the run_module function, see module_runner.py"""
+
 import yaml
 
 from . import builtin
@@ -38,7 +41,7 @@ class run_module_result:
         return self.output
 
 
-def run_module(module_name=None, module=None, module_data_folder=None, module_class_name=None, method="run", module_source="built-in", pb=None, verbosity=None):
+def run_module(module_name=None, module=None, module_data_folder=None, module_class_name=None, meta_modules_post=None, method="run", module_source="built-in", pb=None, verbosity=None):
     if module is None:
         # Either needs to be set
         if module_name is None:
@@ -80,21 +83,42 @@ def run_module(module_name=None, module=None, module_data_folder=None, module_cl
     return run_module_result(module=module, output=result)
 
 
-def run_module_setup(pb=None):
-    """Runs the setup module, which creates the module data folder, and places the arguments.yml and config.yml files there.
-    Normally, modules don't return anything, if they do, that means they failed. In this special case we need to get the module data folder back.
-    """
+def load_module_itenary(module_data_folder):
+    """This function takes the compiled config.yml path and generates all module lists used for the module system."""
 
-    result = run_module(module_name="setup_module", module_data_folder="/tmp", pb=pb)
+    config_file_path = module_data_folder + '/config.yml'
+    with open(config_file_path, "r") as f:
+        module_cfg = yaml.safe_load(f.read())
 
-    # Now that the setup_module is done running, we quickly get the verbosity value from it so that we can print the logging.
-    # (Normally we'd use result.get_module(), but the setup_module is not meant to be persistent, so this method would give either None
-    # or an error)
-    module = result._module
-    if verbose_enough('info', module.verbosity):
-        print(
-            f'[ {"INFO":^5} ] module.controller.run_module_setup() ::',
-            "setup_module.run() (finished running)",
+    def hydrate_module_list(mod):
+        # fill in defaults
+        if "type" not in mod.keys():
+            mod["type"] = "built-in"
+        if "method" not in mod.keys():
+            mod["method"] = "run"
+        if "persistent" not in mod.keys():
+            mod["persistent"] = None
+        if "post_modules" not in mod.keys():
+            mod["post_modules"] = []
+        if "pre_modules" not in mod.keys():
+            mod["pre_modules"] = []
+        if "post_modules_blacklist" not in mod.keys():
+            mod["post_modules_blacklist"] = []
+        if "pre_modules_blacklist" not in mod.keys():
+            mod["pre_modules_blacklist"] = []
+        if "module" not in mod.keys():
+            mod["module"] = None
+
+        # get actual class instead of string
+        mod["module"] = get_module_class(
+            module_name=mod["name"],
+            module_class_name=mod["module"],
+            module_source=mod["type"],
         )
 
-    return result
+    for mod in module_cfg["modules"]:
+        hydrate_module_list(mod)
+    for mod in module_cfg["meta_modules_post"]:
+        hydrate_module_list(mod)
+
+    return (module_cfg["modules"], module_cfg["meta_modules_post"])
