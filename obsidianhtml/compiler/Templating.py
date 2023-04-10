@@ -255,7 +255,7 @@ def PopulateTemplate(
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/search.js"></script>' + "\n"
         # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/search.css" />' + "\n"
 
-    if pb.ConfigManager.capabilities_needed["directory_tree"]:
+    if pb.capabilities_needed["directory_tree"]:
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/dirtree.js"></script>' + "\n"
 
     if dynamic_includes is not None:

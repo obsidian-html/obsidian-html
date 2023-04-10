@@ -7,6 +7,7 @@ from .load_file_tree import LoadFileTreeModule
 from .cleanup_temp_files import CleanupTempFilesModule
 from .resource_logger import ResourceLoggerMetaModule
 from .html_templater import HtmlTemplaterModule
+from .load_graphers import LoadGrapherModule
 
 builtin_module_aliases = {
     "setup_module": SetupModule,
@@ -16,4 +17,5 @@ builtin_module_aliases = {
     "cleanup_temp_files": CleanupTempFilesModule,
     "resource_logger": ResourceLoggerMetaModule,
     "html_templater": HtmlTemplaterModule,
+    "load_graphers": LoadGrapherModule,
 }

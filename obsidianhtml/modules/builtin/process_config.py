@@ -77,7 +77,12 @@ class ProcessConfigModule(ObsidianHtmlModule):
         if gc("toggles/features/rss/enabled") or gc("toggles/features/graph/enabled"):
             capabilities_needed["graph_data"] = True
 
+        capabilities_needed["embedded_note_titles"] = False
+        if gc("toggles/features/embedded_note_titles/enabled"):
+            capabilities_needed["embedded_note_titles"] = True
+
         return capabilities_needed
+
 
     def run(self):
         config = self.config
@@ -102,5 +107,4 @@ class ProcessConfigModule(ObsidianHtmlModule):
     def integrate_save(self, pb):
         pb.config = self.config
         pb.configured_html_prefix = self.config["html_url_prefix"]  # REFACTOR: REPLACE
-
-        pb.ConfigManager.capabilities_needed = self.retrieve("capabilities_needed")
+        pb.capabilities_needed = self.retrieve("capabilities_needed")

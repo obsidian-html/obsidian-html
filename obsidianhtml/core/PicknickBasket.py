@@ -32,6 +32,9 @@ class PicknickBasket:
         self.search = SearchHead()
         self.FileFinder = FileFinder()
         self.ConfigManager = Config(self)
+        self.plugin_settings = {
+            "embedded_note_titles": {} # <- does nothing at the moment, should be factored out
+        } 
 
         # State should be updated whenever we start a new type of operation.
         # When doing an operation by looping through notes, set loop_type to 'note', for links within a note 'note_link', if not in a loop-type operation, set to None.
@@ -39,14 +42,6 @@ class PicknickBasket:
         # In the beginning not every action will update the state, call self.reset_state to unset the state so that we are not reporting stale information.
         self.state = {}
         self.reset_state()
-
-    def construct(self, config_yaml_location, module_data_folder):
-        """Load config, paths, etc"""
-
-        # load config into pb
-        self.ConfigManager.LoadIncludedFiles()
-        self.compile_dynamic_inclusions()
-        self.ConfigManager.load_embedded_titles_plugin()
 
     def reset_state(self):
         self.state["action"] = "Unknown"
@@ -71,23 +66,6 @@ class PicknickBasket:
             self.paths["obsidian_entrypoint"] = self.paths["obsidian_folder"].joinpath(self.paths["rel_obsidian_entrypoint"])
         else:
             raise Exception(f"path update reason {reason} unknown")
-
-    def compile_dynamic_inclusions(self):
-        # This is a set of javascript/css files to be loaded into the header based on config choices.
-        dynamic_inclusions = ""
-        try:
-            dynamic_inclusions += "\n".join(self.gc("html_custom_inclusions")) + "\n"
-        except:
-            None
-        self.dynamic_inclusions = dynamic_inclusions
-
-        # This is a set of javascript/css files to be loaded into the footer based on config choices.
-        dynamic_footer_inclusions = ""
-        try:
-            dynamic_footer_inclusions += "\n".join(self.gc("html_custom_footer_inclusions")) + "\n"
-        except:
-            None
-        self.dynamic_footer_inclusions = dynamic_footer_inclusions
 
     def gc(self, path: str, cached=False):
         if cached:

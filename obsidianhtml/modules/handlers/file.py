@@ -3,6 +3,8 @@ import json
 import yaml
 import inspect
 
+from pathlib import Path
+
 from ..lib import hash_wrap
 
 """
@@ -42,7 +44,9 @@ class File:
                 )
 
         # record reading the file
-        self.module.read_files.add(self.resource_rel_path)
+        # temporary: while integrate methods exist: don't report reads for the integrate save method
+        if inspect.stack()[1][3] not in ("integrate_save",):
+            self.module.read_files.add(self.resource_rel_path)
 
         if not os.path.isfile(self.path):
             if not self.allow_absent:
@@ -67,6 +71,9 @@ class File:
 
         # record writing to the file
         self.module.written_files.add(self.resource_rel_path)
+
+        # ensure folder exists
+        Path(self.path).parent.mkdir(parents=True, exist_ok=True)
 
         # write file
         with open(self.path, "w", encoding=self.encoding) as f:

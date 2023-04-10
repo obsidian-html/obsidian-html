@@ -22,7 +22,6 @@ class Config:
         - Setting missing values / Checking for illegal configuration
         """
         self.pb = pb
-        self.plugin_settings = {}
 
     # DITCH
     def resolve_deprecations(self, base_dict, update_dict):
@@ -84,69 +83,8 @@ class Config:
     def ShowIcon(self, feature_name):
         return self.pb.gc(f"toggles/features/{feature_name}/enabled") and self.pb.gc(f"toggles/features/{feature_name}/styling/show_icon")
 
-    def LoadIncludedFiles(self):
-        # MOVE: html_templater module
-        # Get html template code.
-        if self.pb.gc("toggles/compile_html", cached=True):
-            # Every note will become a html page, where the body comes from the note's markdown,
-            # and the wrapper code from this template.
-            try:
-                with open(Path(self.pb.gc("html_template_path_str")).resolve()) as f:
-                    html_template = f.read()
-            except:
-                layout = self.pb.gc("toggles/features/styling/layout")
-                html_template = OpenIncludedFile(f"html/layouts/template_{layout}.html")
 
-            if "{content}" not in html_template:
-                raise Exception(
-                    "The provided html template does not contain the string `{content}`. This will break its intended use as a template."
-                )
-                exit(1)
 
-            self.pb.html_template = html_template
-
-        # MOVE: load_graph module
-        if self.pb.gc("toggles/features/graph/enabled", cached=True):
-            # Get graph template
-            self.pb.graph_template = OpenIncludedFile("graph/graph_template.html")
-
-            # Get graph full page template
-            self.pb.graph_full_page_template = OpenIncludedFile("graph/graph_full_page.html")
-
-            # Get grapher template code
-            self.pb.graphers = []
-            for grapher in self.pb.gc("toggles/features/graph/templates", cached=True):
-                gid = grapher["id"]
-
-                # get contents of the file
-                if grapher["path"].startswith("builtin<"):
-                    grapher["contents"] = OpenIncludedFile(f"graph/default_grapher_{gid}.js")
-                else:
-                    try:
-                        with open(Path(grapher["path"]).resolve()) as f:
-                            grapher["contents"] = f.read()
-                    except:
-                        raise Exception(f"Could not open user provided grapher file with path {grapher['path']}")
-
-                self.pb.graphers.append(grapher)
-
-    def load_embedded_titles_plugin(self):
-        """
-        There are two options for embedded titles: the recent built-in system, or the older embedded titles plugin.
-        """
-        pb = self.pb
-
-        # Do nothing if embedded_note_titles are not globally enabled
-        if not pb.gc("toggles/features/embedded_note_titles/enabled", cached=True):
-            pb.ConfigManager.capabilities_needed["embedded_note_titles"] = False
-            if pb.gc("toggles/verbose_printout", cached=True):
-                print("\t" * (1), "html: embedded note titles are disabled in config")
-            return
-        else:
-            pb.ConfigManager.capabilities_needed["embedded_note_titles"] = True
-            self.plugin_settings["embedded_note_titles"] = {}
-            if pb.gc("toggles/verbose_printout", cached=True):
-                print("\t" * (1), "html: embedded note titles are enabled in config")
 
     def check_required_values_filled_in(self, config, path="", match_str="<REQUIRED_INPUT>"):
         def rec(cfgobj, config, path="", match_str="<REQUIRED_INPUT>"):

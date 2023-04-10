@@ -69,6 +69,20 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
 
             self.resources[resource_rel_path]["history"].append(hist)
 
+        for record in module.stored_keys.log:
+            resource_rel_path = record["resource_rel_path"]
+
+            # create resourcelisting
+            action = "overwrite"
+            if resource_rel_path not in self.resources.keys():
+                self.resources[resource_rel_path] = self.new_resource_listing(state=resource_state)
+                action = "store"
+
+            hist = self.new_resource_history_listing(module_name=module.module_name, action=action, result=module_result)
+            hist["datetime"] = record["datetime"]
+
+            self.resources[resource_rel_path]["history"].append(hist)
+
         for record in module.read_files.log:
             resource_rel_path = record["resource_rel_path"]
 
@@ -91,10 +105,39 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
 
             self.resources[resource_rel_path]["history"].append(hist)
 
+        for record in module.retrieved_keys.log:
+            resource_rel_path = record["resource_rel_path"]
+
+            if resource_rel_path not in self.resources.keys():
+                print(
+                    format_logrule(
+                        verbosity="ERROR",
+                        source="resource_logger.run()",
+                        message=(
+                            f"Resource retrieved but not yet written: {resource_rel_path} (according to history).",
+                            f"This points to a bug/misconfiguration in module {module.module_name} ({module.module_class_name}).",
+                            "(Or the module that writes that file has this meta module blacklisted).",
+                        ),
+                    )
+                )
+                self.resources[resource_rel_path] = self.new_resource_listing(state="error")
+
+            hist = self.new_resource_history_listing(module_name=module.module_name, action="retrieve", result="succeeded")
+            hist["datetime"] = record["datetime"]
+
+            self.resources[resource_rel_path]["history"].append(hist)
+
     def finalize(self):
         self.setup()
 
-        verb = {"alter": "altered", "create": "created", "read": "read"}
+        verb = {
+            "alter": "altered", 
+            "create": "created", 
+            "read": "read",
+            "store": "stored",
+            "overwrite": "overwritten",
+            "retrieve": "retrieved",
+        }
         output = []
         output.append("Resource log:\n-------------")
         output.append("(arguments.yml, config.yml, and user_config.yml created by setup module)\n")

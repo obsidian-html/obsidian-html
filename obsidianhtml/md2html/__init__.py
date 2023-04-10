@@ -267,15 +267,15 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # HTML Tweaks
     # [??] Embedded note titles integration
     # ------------------------------------------------------------------
-    if pb.ConfigManager.capabilities_needed["embedded_note_titles"]:
+    if pb.capabilities_needed["embedded_note_titles"]:
         if "obs.html.tags" in fo.md.metadata.keys() and "dont_add_embedded_title" in fo.md.metadata["obs.html.tags"]:
             pass
         else:
             title = node["name"]
 
             # overwrite node name (titleMetadataField)
-            if "titleMetadataField" in pb.ConfigManager.plugin_settings["embedded_note_titles"].keys():
-                title_key = pb.ConfigManager.plugin_settings["embedded_note_titles"]["titleMetadataField"]
+            if "titleMetadataField" in pb.plugin_settings["embedded_note_titles"].keys():
+                title_key = pb.plugin_settings["embedded_note_titles"]["titleMetadataField"]
                 if title_key in node["metadata"].keys():
                     title = node["metadata"][title_key]
 
@@ -292,8 +292,8 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
 
             # hideOnMetadataField
             if (
-                "hideOnMetadataField" in pb.ConfigManager.plugin_settings["embedded_note_titles"].keys()
-                and pb.ConfigManager.plugin_settings["embedded_note_titles"]["hideOnMetadataField"]
+                "hideOnMetadataField" in pb.plugin_settings["embedded_note_titles"].keys()
+                and pb.plugin_settings["embedded_note_titles"]["hideOnMetadataField"]
             ):
                 if "embedded-title" in node["metadata"].keys() and node["metadata"]["embedded-title"] is False:
                     hide = True

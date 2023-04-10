@@ -53,18 +53,15 @@ def ConvertVault(config_yaml_location=""):
         "instantiated_modules": instantiated_modules,
         "pb": pb,
     }
-    
+
     module_controller.run_module(module_name="process_config", **defaults)
     module_controller.run_module(module_name="load_paths", **defaults)  # INTEGRATION. Previously: `self.set_paths()`
     module_controller.run_module(module_name="html_templater", persistent=True, **defaults)
-    module_controller.run_module(module_name="html_templater", persistent=True, **defaults)
-
+    module_controller.run_module(module_name="load_graphers", persistent=True, **defaults)
     module_controller.run_module(
         module_name="resource_logger", method="finalize", persistent=True, **defaults
     )  # INTEGRATION. Previously: `self.set_paths()`
 
-    exit()
-    pb.construct(config_file_path, module_data_folder)  # INTEGRATION.
 
     # Setup filesystem
     # ---------------------------------------------------------
@@ -416,7 +413,7 @@ def convert_markdown_to_html(pb):
         with open(op, "w", encoding="utf-8") as f:
             f.write(html)
 
-    if pb.ConfigManager.capabilities_needed["graph_data"]:
+    if pb.capabilities_needed["graph_data"]:
         # add crosslinks to graph data
         pb.index.network_tree.AddCrosslinks()
 
@@ -425,7 +422,7 @@ def convert_markdown_to_html(pb):
         with open(pb.paths["html_output_folder"].joinpath("obs.html").joinpath("data/graph.json"), "w", encoding="utf-8") as f:
             f.write(pb.index.network_tree.OutputJson())
 
-    if pb.ConfigManager.capabilities_needed["search_data"]:
+    if pb.capabilities_needed["search_data"]:
         # Compress search json and write to static folder
         gzip_path = pb.paths["html_output_folder"].joinpath("obs.html").joinpath("data/search.json.gzip")
         gzip_path.parent.mkdir(parents=True, exist_ok=True)

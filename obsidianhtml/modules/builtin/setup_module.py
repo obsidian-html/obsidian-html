@@ -147,6 +147,8 @@ class SetupModule(ObsidianHtmlModule):
         # print cached lines now that we know what to print and what not
         self.printout_cache()
 
+        self.print("INFO", f'Mod folder path: {self.module_data_folder}')
+
         # return module data folder so that the rest of the program knows where to find the info.
         return self.module_data_folder
 

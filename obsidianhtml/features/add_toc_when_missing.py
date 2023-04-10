@@ -39,7 +39,7 @@ def add_toc_when_missing(pb, page, md_metadata):
         return output
     else:
         # test if embedded titles are disabled
-        et_cap_enabled = pb.ConfigManager.capabilities_needed["embedded_note_titles"]
+        et_cap_enabled = pb.capabilities_needed["embedded_note_titles"]
         et_disabled_in_note = "obs.html.tags" in md_metadata.keys() and "dont_add_embedded_title" in md_metadata["obs.html.tags"]
         embedded_titles_disabled = et_cap_enabled and not et_disabled_in_note
 

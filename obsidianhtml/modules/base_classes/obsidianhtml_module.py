@@ -1,6 +1,7 @@
 import os
 import yaml
 import json
+import inspect
 
 from abc import ABC, abstractmethod
 from functools import cache
@@ -11,7 +12,7 @@ from ..lib import verbose_enough, hash_wrap
 from .. import handlers
 
 
-class FileAccessLog:
+class ResourceAccessLog:
     def __init__(self):
         self.log = []
 
@@ -44,8 +45,10 @@ class ObsidianHtmlModule(ABC):
         self._stash = {}  # see self.stash()
 
         # records
-        self.written_files = FileAccessLog()
-        self.read_files = FileAccessLog()
+        self.written_files = ResourceAccessLog()
+        self.read_files = ResourceAccessLog()
+        self.stored_keys = ResourceAccessLog()
+        self.retrieved_keys = ResourceAccessLog()
 
     @property
     @abstractmethod
@@ -144,12 +147,24 @@ class ObsidianHtmlModule(ABC):
         """Saves the value under the key for later use in the module"""
         if overwrite is False and key in self._stash:
             raise Exception(f"Module Validity Error: Value {value} is stored twice, without overwrite being set to true.")
+        
+        # log
+        if self.persistent:
+            resource_name = self.module_name+'('+self.module_class_name+')/'+key
+            self.stored_keys.add(resource_name)
 
+        # apply
         self._stash[key] = value
         return value
 
     def retrieve(self, key):
         """Retrievs stored value from the internal stash"""
+        # log
+        if self.persistent and inspect.stack()[1][3] not in ("integrate_save",):
+            resource_name = self.module_name+'('+self.module_class_name+')/'+key
+            self.retrieved_keys.add(resource_name)
+
+        # return
         return self._stash[key]
 
     def allow_post_module(self, meta_module):
