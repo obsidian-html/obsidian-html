@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from ..base_classes import ObsidianHtmlModule
+from ..lib import format_logrule
 
 
 class ResourceLoggerMetaModule(ObsidianHtmlModule):
@@ -29,9 +30,14 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
 
     def setup(self):
         if not hasattr(self, "resources"):
-            self.resources = {}
+            # create with the paths already created by setup_module (this module cannot run post-modules like this one)
+            self.resources = {
+                "arguments.yml": self.new_resource_listing(state="present"),
+                "config.yml": self.new_resource_listing(state="present"),
+                "user_config.yml": self.new_resource_listing(state="present"),
+            }
 
-    def run(self, module, result):
+    def run(self, module, run_module_result):
         # ensure self.resources exists
         self.setup()
 
@@ -39,24 +45,15 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
         if module.module_class_name == self.module_class_name:
             return
 
+        # get output from run_module_result
+        output = run_module_result.get_output()
+
         # Update resource listing
         resource_state = "present"
         module_result = "succeeded"
-        if result is not None:
+        if output is not None:
             resource_state = "failed"
             module_result = "failed"
-
-        for record in module.read_files.log:
-            resource_rel_path = record["resource_rel_path"]
-
-            if resource_rel_path not in self.resources.keys():
-                print(f"ERROR: Resource read but not yet written: {resource_rel_path} according to history. This points to a bug.")
-                self.resources[resource_rel_path] = self.new_resource_listing(state="error")
-
-            hist = self.new_resource_history_listing(module_name=module.module_name, action="read", result="succeeded")
-            hist["datetime"] = record["datetime"]
-
-            self.resources[resource_rel_path]["history"].append(hist)
 
         for record in module.written_files.log:
             resource_rel_path = record["resource_rel_path"]
@@ -68,6 +65,28 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
                 action = "create"
 
             hist = self.new_resource_history_listing(module_name=module.module_name, action=action, result=module_result)
+            hist["datetime"] = record["datetime"]
+
+            self.resources[resource_rel_path]["history"].append(hist)
+
+        for record in module.read_files.log:
+            resource_rel_path = record["resource_rel_path"]
+
+            if resource_rel_path not in self.resources.keys():
+                print(
+                    format_logrule(
+                        verbosity="ERROR",
+                        source="resource_logger.run()",
+                        message=(
+                            f"Resource read but not yet written: {resource_rel_path} (according to history).",
+                            f"This points to a bug/misconfiguration in module {module.module_name} ({module.module_class_name}).",
+                            "(Or the module that writes that file has this meta module blacklisted).",
+                        ),
+                    )
+                )
+                self.resources[resource_rel_path] = self.new_resource_listing(state="error")
+
+            hist = self.new_resource_history_listing(module_name=module.module_name, action="read", result="succeeded")
             hist["datetime"] = record["datetime"]
 
             self.resources[resource_rel_path]["history"].append(hist)
@@ -110,3 +129,11 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
         if meta_module.module_class_name == self.module_class_name:
             return False
         return True
+
+    def integrate_load(self, pb):
+        """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
+        pass
+
+    def integrate_save(self, pb):
+        """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
+        pass

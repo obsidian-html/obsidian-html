@@ -76,11 +76,11 @@ class ObsidianHtmlModule(ABC):
 
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
-        raise Exception("integrate_load not implemented")
+        raise Exception(f"integrate_load not implemented for module class {self.module_class_name}")
 
     def integrate_save(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
-        raise Exception("integrate_save not implemented")
+        raise Exception(f"integrate_save not implemented for module class {self.module_class_name}")
 
     @property
     @cache

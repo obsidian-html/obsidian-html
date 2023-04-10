@@ -1,5 +1,4 @@
-"""This file contains all the code necessary to run a single module ad-hoc, in the most general case.
-For functions to handle running a list of modules, or custom wrappers for the run_module function, see module_runner.py"""
+"""This file contains all the code necessary to run a module."""
 
 import yaml
 
@@ -45,32 +44,31 @@ def run_module(
     module=None,
     module_data_folder=None,
     module_class_name=None,
-    meta_modules_post=None,
     method="run",
+    meta_modules_post=None,
+    instantiated_modules=None,
+    persistent=None,
     module_source="built-in",
     pb=None,
-    verbosity=None,
+    verbosity="error",
 ):
-    if module is None:
-        # Either needs to be set
-        if module_name is None:
-            raise Exception("Neither module nor module_name is set. Cannot load module.")
 
-        # integrate with "old" pb control flow: get module_data_folder from pb, if passed in
-        if pb is not None:
-            if module_data_folder is None:
-                if pb.module_data_folder is None:
-                    module_data_folder = pb.gc("module_data_folder")
-                else:
-                    module_data_folder = pb.module_data_folder
+    # INSTANTIATE MODULE
+    # ==================================================
+    module = get_module(
+        module=module,
+        module_name=module_name,
+        module_class_name=module_class_name,
+        module_source=module_source,
+        persistent=persistent,
+        instantiated_modules=instantiated_modules,
+        module_data_folder=module_data_folder,
+        verbosity=verbosity,
+        pb=pb,
+    )
 
-        # set default verbosity level
-        if verbosity is None:
-            verbosity = "error"
-
-        # instantiate module
-        module_class = get_module_class(module_name, module_class_name, module_source)
-        module = module_class(module_data_folder=module_data_folder, module_name=module_name)
+    # RUN MODULE
+    # ==================================================
 
     # integrate with "old" pb control flow: read out pb and create files in module data folder
     if pb is not None:
@@ -85,11 +83,152 @@ def run_module(
     func = getattr(module, method)
     result = func()  # to be implemented by the module
 
+    # convert basic result to run_module_result() type to manage different module outputs in an organized fashion
+    result = run_module_result(module=module, output=result)
+
     # integrate with "old" pb control flow: read out created files in module data folder and write to pb
     if pb is not None:
         module.integrate_save(pb)
 
-    return run_module_result(module=module, output=result)
+    # RUN POST-MODULES
+    # ==================================================
+    run_post_modules(
+        meta_modules_post,
+        module,
+        module_run_result=result,
+        instantiated_modules=instantiated_modules,
+        module_data_folder=module_data_folder,
+        verbosity=verbosity,
+    )
+
+    return result
+
+
+def get_module(
+    module=None,
+    module_name=None,
+    module_class_name=None,
+    module_data_folder=None,
+    module_source="built-in",
+    persistent=None,
+    instantiated_modules=None,
+    pb=None,
+    verbosity=None,
+):
+    """Convenience function. Will either return the module from instantiated_modules, if present and the module is persistent,
+    or it will call upon instantiate_module() to instantiate the module for us."""
+
+    if module is not None:
+        return module
+    
+    # Either module_name or module needs to be set
+    if module_name is None:
+        raise Exception("Neither module nor module_name is set. Cannot load module.")
+
+    # integrate with "old" pb control flow: get module_data_folder from pb, if passed in
+    # if pb is not None:
+    #     if module_data_folder is None:
+    #         if pb.module_data_folder is None:
+    #             module_data_folder = pb.gc("module_data_folder")
+    #         else:
+    #             module_data_folder = pb.module_data_folder
+
+    # instantiate module
+    module_class = get_module_class(module_name, module_class_name, module_source)
+    module = instantiate_module(
+        module_class=module_class,
+        module_name=module_name,
+        instantiated_modules=instantiated_modules,
+        persistent=persistent,
+        module_data_folder=module_data_folder,
+        verbosity=verbosity,
+    )
+
+    return module
+
+
+def run_post_modules(
+    meta_modules_post,
+    module_obj,
+    module_run_result,
+    instantiated_modules,
+    module_data_folder,
+    verbosity,
+):
+
+    if meta_modules_post is None:
+        return None
+
+    for listing in meta_modules_post:
+        # instantiate module
+        meta_module_obj = instantiate_module(
+            module_class=listing["module"],
+            module_name=listing["name"],
+            persistent=listing["persistent"],
+            instantiated_modules=instantiated_modules,
+            module_data_folder=module_data_folder,
+            verbosity=verbosity,
+            level=1,
+        )
+
+        # don't run if blacklisted
+        if not module_obj.allow_post_module(meta_module_obj):
+            if verbose_enough("debug", verbosity):
+                print(
+                    f'[ {"DEBUG":^5} ] * module.controller.run_post_module ::',
+                    f"SKIPPED running post-module [{listing['name']}]; blacklisted by module [{module_obj.__class__.__name__}]",
+                )
+            continue
+
+        # run method
+        method = listing["method"]
+        if verbose_enough("debug", verbosity):
+            print(
+                f'[ {"DEBUG":^5} ] * module.controller.run_post_module ::',
+                f"{listing['name']}.{method}()",
+            )
+        result = getattr(meta_module_obj, method)(module=module_obj, run_module_result=module_run_result)
+
+
+def instantiate_module(
+    module_class,
+    module_name,
+    instantiated_modules,
+    module_data_folder,
+    persistent=None,
+    verbosity="deprecation",
+    level=0,
+):
+    """This function instantiates modules, and stores the resulting object, so that it can be retrieved when persistence is enabled on the module"""
+    module_obj = None
+
+    # REUSE
+    # ---
+    if instantiated_modules is not None:
+        if persistent == True and module_class.__name__ in instantiated_modules:
+            if verbose_enough("debug", verbosity):
+                print(
+                    f'[ {"DEBUG":^5} ] {"* "*level}module.controller.instantiate_module :: reuse of persistent module:',
+                    module_name,
+                )
+
+            return instantiated_modules[module_class.__name__]
+            
+    # CREATE
+    # ---
+    if verbose_enough("debug", verbosity):
+        print(
+            f'[ {"DEBUG":^5} ] {"* "*level}module.controller.instantiate_module :: instantiation of module: ',
+            module_name,
+        )
+    module_obj = module_class(module_data_folder=module_data_folder, module_name=module_name)
+
+    # STORE 
+    # ---
+    if instantiated_modules is not None:
+        instantiated_modules[module_class.__name__] = module_obj
+
+    return module_obj
 
 
 def load_module_itenary(module_data_folder):
@@ -131,3 +270,23 @@ def load_module_itenary(module_data_folder):
         hydrate_module_list(mod)
 
     return (module_cfg["modules"], module_cfg["meta_modules_post"])
+
+
+def run_module_setup(pb=None):
+    """Runs the setup module, which creates the module data folder, and places the arguments.yml and config.yml files there.
+    Normally, modules don't return anything, if they do, that means they failed. In this special case we need to get the module data folder back.
+    """
+
+    result = run_module(module_name="setup_module", module_data_folder="/tmp", pb=pb)
+
+    # Now that the setup_module is done running, we quickly get the verbosity value from it so that we can print the logging.
+    # (Normally we'd use result.get_module(), but the setup_module is not meant to be persistent, so this method would give either None
+    # or an error)
+    module = result._module
+    if verbose_enough("info", module.verbosity):
+        print(
+            f'[ {"INFO":^5} ] module.runner.run_module_setup() ::',
+            "setup_module.run() (finished running)",
+        )
+
+    return result

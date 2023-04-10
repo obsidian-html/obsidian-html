@@ -25,7 +25,6 @@ from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view,
 from ..compiler.Templating import ExportStaticFiles
 
 from ..modules import controller as module_controller
-from ..modules import module_runner
 
 
 def ConvertVault(config_yaml_location=""):
@@ -36,22 +35,46 @@ def ConvertVault(config_yaml_location=""):
     # Bootstrap module system
     # The first module will always have to be run, and we need info back, so this is a bit of a weird one as far as modules are concerned
     # ----------------------------------------------------------
-    module_data_folder = module_runner.run_module_setup(pb=pb).output
+    module_data_folder = module_controller.run_module_setup(pb=pb).output
     config_file_path = module_data_folder + "/config.yml"
     with open(config_file_path, "r") as f:
         cfg = yaml.safe_load(f.read())
         verbosity = cfg["verbosity"]
 
     modules, meta_modules_post = module_controller.load_module_itenary(module_data_folder)
+    instantiated_modules = {}
 
     # Run modules
     # ----------------------------------------------------------
     module_controller.run_module(
-        module_name="process_config", pb=pb, module_data_folder=module_data_folder, verbosity=verbosity, meta_modules_post=meta_modules_post
+        module_name="process_config",
+        module_data_folder=module_data_folder,
+        verbosity=verbosity,
+        meta_modules_post=meta_modules_post,
+        instantiated_modules=instantiated_modules,
+        pb=pb,
     )
+
     module_controller.run_module(
-        module_name="load_paths", pb=pb, module_data_folder=module_data_folder, verbosity=verbosity, meta_modules_post=meta_modules_post
+        module_name="load_paths",
+        module_data_folder=module_data_folder,
+        verbosity=verbosity,
+        meta_modules_post=meta_modules_post,
+        instantiated_modules=instantiated_modules,
+        pb=pb,
     )  # INTEGRATION. Previously: `self.set_paths()`
+
+    module_controller.run_module(
+        module_name="resource_logger",
+        method="finalize",
+        persistent=True,
+        module_data_folder=module_data_folder,
+        verbosity=verbosity,
+        meta_modules_post=meta_modules_post,
+        instantiated_modules=instantiated_modules,
+        pb=pb,
+    )  # INTEGRATION. Previously: `self.set_paths()`
+
 
     pb.construct(config_file_path, module_data_folder)  # INTEGRATION.
 
