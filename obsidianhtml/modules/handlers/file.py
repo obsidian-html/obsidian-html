@@ -30,17 +30,25 @@ class File:
 
     def read(self):
         # check whether module reports reading this input (or has already written it)
-        if self.is_module_file and self.resource_rel_path not in self.module.requires and self.resource_rel_path not in self.module.written_files.listing():
+        if (
+            self.is_module_file
+            and self.resource_rel_path not in self.module.requires
+            and self.resource_rel_path not in self.module.written_files.listing()
+        ):
             # temporary: while integrate methods exist: don't do checks for the integrate methods
             if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
-                raise Exception(f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires.")
+                raise Exception(
+                    f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires."
+                )
 
         # record reading the file
         self.module.read_files.add(self.resource_rel_path)
 
         if not os.path.isfile(self.path):
             if not self.allow_absent:
-                raise Exception(f"File read error: Tried to read non-existent resource {path}. Use allow_absent=True if empty string should be returned.")
+                raise Exception(
+                    f"File read error: Tried to read non-existent resource {path}. Use allow_absent=True if empty string should be returned."
+                )
             else:
                 self.contents = ""
         with open(self.path, "r", encoding=self.encoding) as f:
@@ -53,7 +61,9 @@ class File:
         if self.is_module_file and self.resource_rel_path not in self.module.provides:
             # temporary: while integrate methods exist: don't do checks for the integrate methods
             if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
-                raise Exception(f"ModuleMisConfiguration: Module {self.module.module_name} writes to {self.resource_rel_path} but this is not reported in self.provides.")
+                raise Exception(
+                    f"ModuleMisConfiguration: Module {self.module.module_name} writes to {self.resource_rel_path} but this is not reported in self.provides."
+                )
 
         # record writing to the file
         self.module.written_files.add(self.resource_rel_path)

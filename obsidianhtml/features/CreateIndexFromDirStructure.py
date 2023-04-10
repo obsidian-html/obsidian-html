@@ -284,9 +284,15 @@ class CreateIndexFromDirStructure:
                         + f'<button id="folder-{self.uid}" class="dir-button folder_note ``css-folder-note-active-{folder_note_rel_path_str}``" href="{url}" onclick="{onclick}">{fnpf}{tree["name"]}</button>\n'
                     )
                 else:
-                    html += "\t" * tab_level + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
+                    html += (
+                        "\t" * tab_level
+                        + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
+                    )
 
-                html += "\t" * tab_level + f'<div id="folder-container-{self.uid}" class="dir-container requires_js ``css-dir-active-{folder_id}``" path="{path}">\n'
+                html += (
+                    "\t" * tab_level
+                    + f'<div id="folder-container-{self.uid}" class="dir-container requires_js ``css-dir-active-{folder_id}``" path="{path}">\n'
+                )
 
             tab_level += 1
             self.uid += 1
@@ -317,7 +323,10 @@ class CreateIndexFromDirStructure:
                     if self.pb.gc("toggles/external_blank"):
                         external_blank_html = 'target="_blank" '
 
-                html += "\t" * tab_level + f'<li><a class="``css-file-active-{file_id}``" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
+                html += (
+                    "\t" * tab_level
+                    + f'<li><a class="``css-file-active-{file_id}``" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
+                )
 
             tab_level -= 1
             html += "\t" * tab_level + "</ul>\n"
@@ -355,7 +364,14 @@ class CreateIndexFromDirStructure:
 
             self.html += f"\n{graph_template}\n"
 
-        html = PopulateTemplate(pb, "none", pb.dynamic_inclusions, pb.html_template, content=self.html, container_wrapper_class_list=["single_tab_page-left-aligned"])
+        html = PopulateTemplate(
+            pb,
+            "none",
+            pb.dynamic_inclusions,
+            pb.html_template,
+            content=self.html,
+            container_wrapper_class_list=["single_tab_page-left-aligned"],
+        )
 
         html = (
             html.replace("{pinnedNode}", "dirtree")

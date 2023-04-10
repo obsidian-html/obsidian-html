@@ -73,7 +73,9 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # Add page to search file
     # ------------------------------------------------------------------
     if pb.gc("toggles/features/search/enabled", cached=True):
-        pb.search.AddPage(filename=page_path.stem, content=md.page, metadata=md.metadata, url=node["url"], rtr_url=node["rtr_url"], title=node["name"])
+        pb.search.AddPage(
+            filename=page_path.stem, content=md.page, metadata=md.metadata, url=node["url"], rtr_url=node["rtr_url"], title=node["name"]
+        )
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
@@ -106,7 +108,13 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
                 path_key = "note"
                 if not pb.gc("toggles/compile_md", cached=True):
                     path_key = "markdown"
-                print("\t" * (log_level + 1), "File " + str(link.url) + " not located, so not copied. @ " + pb.state["current_fo"].path[path_key]["file_absolute_path"].as_posix())
+                print(
+                    "\t" * (log_level + 1),
+                    "File "
+                    + str(link.url)
+                    + " not located, so not copied. @ "
+                    + pb.state["current_fo"].path[path_key]["file_absolute_path"].as_posix(),
+                )
         elif not link.fo.metadata["is_note"]:
             link.fo.copy_file("mth")
 
@@ -275,11 +283,18 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
             hide = False
             if pb.gc("toggles/features/embedded_note_titles/hide_on_h1"):
                 header_dict, root_element = convert_markdown_to_header_tree(md.page)
-                if len(root_element["content"]) > 0 and isinstance(root_element["content"][0], dict) and root_element["content"][0]["level"] == 1:
+                if (
+                    len(root_element["content"]) > 0
+                    and isinstance(root_element["content"][0], dict)
+                    and root_element["content"][0]["level"] == 1
+                ):
                     hide = True
 
             # hideOnMetadataField
-            if "hideOnMetadataField" in pb.ConfigManager.plugin_settings["embedded_note_titles"].keys() and pb.ConfigManager.plugin_settings["embedded_note_titles"]["hideOnMetadataField"]:
+            if (
+                "hideOnMetadataField" in pb.ConfigManager.plugin_settings["embedded_note_titles"].keys()
+                and pb.ConfigManager.plugin_settings["embedded_note_titles"]["hideOnMetadataField"]
+            ):
                 if "embedded-title" in node["metadata"].keys() and node["metadata"]["embedded-title"] is False:
                     hide = True
 
@@ -313,7 +328,9 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         html_body = html_body.replace(safe_str, new_str)
 
     # [15] Tag not created links with a class so they can be decorated differently
-    html_body = html_body.replace(f'<a href="{html_url_prefix}/not_created.html">', f'<a href="{html_url_prefix}/not_created.html" class="nonexistent-link">')
+    html_body = html_body.replace(
+        f'<a href="{html_url_prefix}/not_created.html">', f'<a href="{html_url_prefix}/not_created.html" class="nonexistent-link">'
+    )
 
     html_body += '\n<div class="note-footer">\n'
 

@@ -55,7 +55,11 @@ def ExportStaticFiles(pb):
         copy_file_list.append(["js/obsidian_tabs_footer.js", "obsidian_tabs_footer.js"])
 
     # create master.css file
-    css_files_list += [[f'html/layouts/{pb.gc("_css_file")}', "main.css"], ["html/themes/theme-obsidian.css", "theme-obsidian.css"], ["html/css/global_overwrites.css", "global_overwrites.css"]]
+    css_files_list += [
+        [f'html/layouts/{pb.gc("_css_file")}', "main.css"],
+        ["html/themes/theme-obsidian.css", "theme-obsidian.css"],
+        ["html/css/global_overwrites.css", "global_overwrites.css"],
+    ]
     css = ""
     for filepath, _ in css_files_list:
         css += "\n\n" + OpenIncludedFile(filepath)
@@ -122,7 +126,10 @@ def ExportStaticFiles(pb):
             f.write(contents)
 
     # copy binary files to dst (byte copy, static_folder)
-    copy_file_list_byte = [["html/fonts/SourceCodePro-Regular.ttf", "SourceCodePro-Regular.ttf"], ["html/fonts/Roboto-Regular.ttf", "Roboto-Regular.ttf"]]
+    copy_file_list_byte = [
+        ["html/fonts/SourceCodePro-Regular.ttf", "SourceCodePro-Regular.ttf"],
+        ["html/fonts/Roboto-Regular.ttf", "Roboto-Regular.ttf"],
+    ]
     for file_name in copy_file_list_byte:
         c = OpenIncludedFileBinary(file_name[0])
         with open(static_folder.joinpath(file_name[1]), "wb") as f:
@@ -161,7 +168,9 @@ def ExportStaticFiles(pb):
             dynamic_imports += f"import * as grapher_{grapher['id']} from './graphers/{grapher['id']}.js';\n"
 
             # add to grapher list
-            grapher_list.append("{'id': '" + grapher["id"] + "', 'name': '" + grapher["name"] + "', 'module': grapher_" + grapher["id"] + "}")
+            grapher_list.append(
+                "{'id': '" + grapher["id"] + "', 'name': '" + grapher["name"] + "', 'module': grapher_" + grapher["id"] + "}"
+            )
             grapher_hash.append("'" + grapher["id"] + "': " + grapher_list[-1])
 
         dynamic_imports += "\n"
@@ -191,7 +200,17 @@ def ExportStaticFiles(pb):
             f.write(graph_js)
 
 
-def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_url_prefix=None, title="", dynamic_includes=None, container_wrapper_class_list=None):
+def PopulateTemplate(
+    pb,
+    node_id,
+    dynamic_inclusions,
+    template,
+    content,
+    html_url_prefix=None,
+    title="",
+    dynamic_includes=None,
+    container_wrapper_class_list=None,
+):
     # Cache
     if html_url_prefix is None:
         html_url_prefix = pb.gc("html_url_prefix")
@@ -246,10 +265,14 @@ def PopulateTemplate(pb, node_id, dynamic_inclusions, template, content, html_ur
     footer_js_inclusions = ""
 
     if pb.gc("toggles/features/styling/layout", cached=True) == "documentation":
-        footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/load_dirtree_footer.js" type="text/javascript"></script>' + "\n"
+        footer_js_inclusions += (
+            f'<script src="{html_url_prefix}/obs.html/static/load_dirtree_footer.js" type="text/javascript"></script>' + "\n"
+        )
 
     if pb.gc("toggles/features/styling/layout", cached=True) == "tabs":
-        footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/obsidian_tabs_footer.js" type="text/javascript"></script>' + "\n"
+        footer_js_inclusions += (
+            f'<script src="{html_url_prefix}/obs.html/static/obsidian_tabs_footer.js" type="text/javascript"></script>' + "\n"
+        )
 
     # Include toggled components
     if pb.ConfigManager.ShowIcon("rss"):

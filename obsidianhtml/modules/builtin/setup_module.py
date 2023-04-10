@@ -64,7 +64,9 @@ class SetupModule(ObsidianHtmlModule):
             for i, v in enumerate(sys.argv):
                 if v == "-i":
                     if len(sys.argv) < (i + 2):
-                        self.cached_print("error", "No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.")
+                        self.cached_print(
+                            "error", "No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input."
+                        )
                         self.printout_cache(force=True)
                         exit(1)
                     return sys.argv[i + 1]
@@ -105,7 +107,10 @@ class SetupModule(ObsidianHtmlModule):
             self.cached_print("info", f"No config provided, using config at {input_yml_path_str} (Default config path)")
             return input_yml_path_str
 
-        self.cached_print("error", "No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.")
+        self.cached_print(
+            "error",
+            "No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.",
+        )
         self.printout_cache(force=True)
         exit(1)
 

@@ -16,7 +16,9 @@ def ServeDir(port=8888, directory="./"):
             for i, v in enumerate(sys.argv):
                 if v == "--directory":
                     if len(sys.argv) < (i + 2):
-                        print("No directory path given for serve.\n  Use `obsidianhtml serve --directory /target/path/to/html/folder` to provide input.")
+                        print(
+                            "No directory path given for serve.\n  Use `obsidianhtml serve --directory /target/path/to/html/folder` to provide input."
+                        )
                         exit(1)
                     directory = sys.argv[i + 1]
 
@@ -50,7 +52,10 @@ def ServeDir(port=8888, directory="./"):
     )
 
     # start server
-    print(f"OBSHTML: Started webserver at http://localhost:{port}/ hosting from {Path(directory).resolve().as_posix()} (Ctrl+C to exit)", flush=True)
+    print(
+        f"OBSHTML: Started webserver at http://localhost:{port}/ hosting from {Path(directory).resolve().as_posix()} (Ctrl+C to exit)",
+        flush=True,
+    )
     httpd = socketserver.TCPServer(("", int(port)), Handler)
 
     with ExitStack() as stack:

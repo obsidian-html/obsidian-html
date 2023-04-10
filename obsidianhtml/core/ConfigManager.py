@@ -30,7 +30,6 @@ class Config:
         if "exclude_subfolders" in update_dict.keys() and isinstance(update_dict["exclude_subfolders"], list):
             self.pb.config["exclude_glob"] = self.pb.config["exclude_subfolders"]
 
-
     def verbose(self):
         return self.pb.config["toggles"]["verbose_printout"]
 
@@ -99,7 +98,9 @@ class Config:
                 html_template = OpenIncludedFile(f"html/layouts/template_{layout}.html")
 
             if "{content}" not in html_template:
-                raise Exception("The provided html template does not contain the string `{content}`. This will break its intended use as a template.")
+                raise Exception(
+                    "The provided html template does not contain the string `{content}`. This will break its intended use as a template."
+                )
                 exit(1)
 
             self.pb.html_template = html_template
@@ -198,7 +199,9 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
         # in general, we don't expect types to change
         if type(base_dict[k]) != type(v):
             if check_leaf(key_path, base_dict[k]):
-                raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
+                raise Exception(
+                    f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}'
+                )
 
         # dict match -> recurse
         if isinstance(base_dict[k], dict) and isinstance(v, dict):
@@ -252,7 +255,9 @@ def find_user_config_yaml_path(config_yaml_location) -> T.OSAbsolutePosx:
             print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
 
     if input_yml_path_str == "":
-        print("No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.")
+        print(
+            "No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input."
+        )
         exit(1)
 
     return input_yml_path_str

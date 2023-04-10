@@ -6,6 +6,7 @@ import yaml
 from .controller import get_module_class, run_module
 from .lib import verbose_enough
 
+
 def run_module_setup(pb=None):
     """Runs the setup module, which creates the module data folder, and places the arguments.yml and config.yml files there.
     Normally, modules don't return anything, if they do, that means they failed. In this special case we need to get the module data folder back.
@@ -17,13 +18,14 @@ def run_module_setup(pb=None):
     # (Normally we'd use result.get_module(), but the setup_module is not meant to be persistent, so this method would give either None
     # or an error)
     module = result._module
-    if verbose_enough('info', module.verbosity):
+    if verbose_enough("info", module.verbosity):
         print(
             f'[ {"INFO":^5} ] module.runner.run_module_setup() ::',
             "setup_module.run() (finished running)",
         )
 
     return result
+
 
 def run_modules(modules, meta_modules_post, module_data_folder, verbosity):
     instantiated_modules = {}

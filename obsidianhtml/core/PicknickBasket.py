@@ -40,8 +40,6 @@ class PicknickBasket:
         self.state = {}
         self.reset_state()
 
-
-
     def construct(self, config_yaml_location, module_data_folder):
         """Load config, paths, etc"""
 

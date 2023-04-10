@@ -4,7 +4,13 @@ from pathlib import Path
 import tempfile
 
 from ..lib import print_global_help_and_exit
-from ..lib import FindVaultByEntrypoint, OpenIncludedFile, YamlIndentDumper, get_obshtml_appdir_folder_path, get_default_appdir_config_yaml_path
+from ..lib import (
+    FindVaultByEntrypoint,
+    OpenIncludedFile,
+    YamlIndentDumper,
+    get_obshtml_appdir_folder_path,
+    get_default_appdir_config_yaml_path,
+)
 
 from .ConvertVault import ConvertVault
 
@@ -130,14 +136,18 @@ def Run():
         if output_folder_path_str:
             output_folder_path = Path(output_folder_path_str).resolve()
             output_folder_path_as_posix = output_folder_path.as_posix()
-            print(f"INFO: Internal config var was set. (provided by user through commandline):\n\t[internal] output_folder_path: {output_folder_path_as_posix} ")
+            print(
+                f"INFO: Internal config var was set. (provided by user through commandline):\n\t[internal] output_folder_path: {output_folder_path_as_posix} "
+            )
         else:
             print("INFO: Creating tempdir")
             with tempfile.TemporaryDirectory(prefix="obshtml_") as tempdir_path:
                 output_folder_path = Path(tempdir_path).resolve()
                 output_folder_path_as_posix = output_folder_path.as_posix()
                 print("INFO: Created temporary directory", output_folder_path_as_posix)
-                print(f"INFO: Internal config var was set. (provided by user through commandline):\n\t[internal] output_folder_path: {output_folder_path_as_posix} ")
+                print(
+                    f"INFO: Internal config var was set. (provided by user through commandline):\n\t[internal] output_folder_path: {output_folder_path_as_posix} "
+                )
 
     # set md_folder_path
     md_folder_path = None
@@ -211,7 +221,9 @@ def Run():
             outs, errs = webserver_process.communicate(timeout=1)
         except subprocess.TimeoutExpired:
             pass
-        if webserver_process.returncode is None:  # no return code means that the process is still running, any serious error will have caused the process to quit.
+        if (
+            webserver_process.returncode is None
+        ):  # no return code means that the process is still running, any serious error will have caused the process to quit.
             print(f"\nOpen your webbrowser and navigate to http://localhost:8888{html_url_prefix}/ to view your website")
             input("Press enter to stop hosting website and exit obsidianhtml run.\n\n")
 
@@ -223,7 +235,9 @@ def CleanFolder(folder_path, clean_toggle):
             print(f"INFO: Output folder path ({folder_path_as_posix}) already exists, removing (due to --clean being set)")
             print(f"shutil.rmtree('{folder_path_as_posix}')")
         else:
-            print(f"ERROR: Set output folder path ({folder_path_as_posix}) already exists, canceling run.\n\tUse --clean to allow obsidianhtml to remove this directory for you")
+            print(
+                f"ERROR: Set output folder path ({folder_path_as_posix}) already exists, canceling run.\n\tUse --clean to allow obsidianhtml to remove this directory for you"
+            )
             print_global_help_and_exit(1)
     else:
         # folder_path.mkdir(parents=True, exist_ok=True)

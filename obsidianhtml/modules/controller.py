@@ -26,7 +26,6 @@ class run_module_result:
 
         self.module_is_persistent = module.persistent
 
-
     def get_module(self, optional=False):
         if self.module_is_persistent is False:
             if optional:
@@ -41,7 +40,17 @@ class run_module_result:
         return self.output
 
 
-def run_module(module_name=None, module=None, module_data_folder=None, module_class_name=None, meta_modules_post=None, method="run", module_source="built-in", pb=None, verbosity=None):
+def run_module(
+    module_name=None,
+    module=None,
+    module_data_folder=None,
+    module_class_name=None,
+    meta_modules_post=None,
+    method="run",
+    module_source="built-in",
+    pb=None,
+    verbosity=None,
+):
     if module is None:
         # Either needs to be set
         if module_name is None:
@@ -86,7 +95,7 @@ def run_module(module_name=None, module=None, module_data_folder=None, module_cl
 def load_module_itenary(module_data_folder):
     """This function takes the compiled config.yml path and generates all module lists used for the module system."""
 
-    config_file_path = module_data_folder + '/config.yml'
+    config_file_path = module_data_folder + "/config.yml"
     with open(config_file_path, "r") as f:
         module_cfg = yaml.safe_load(f.read())
 

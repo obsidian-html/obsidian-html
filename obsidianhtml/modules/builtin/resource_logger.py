@@ -72,7 +72,6 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
 
             self.resources[resource_rel_path]["history"].append(hist)
 
-
     def finalize(self):
         self.setup()
 
@@ -105,7 +104,6 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
         if self.verbose_enough("debug", self.verbosity):
             output = ["writing to `log.resources`:\n"] + output + [""]
             self.print("DEBUG", "\n".join(output), force=True)
-
 
     def allow_post_module(self, meta_module):
         """Return True if post module is allowed to run after this one, else return False"""

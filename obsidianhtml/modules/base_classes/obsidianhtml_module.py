@@ -11,18 +11,21 @@ from ..lib import verbose_enough, hash_wrap
 from .. import handlers
 
 
-class FileAccessLog():
+class FileAccessLog:
     def __init__(self):
         self.log = []
 
     def add(self, resource_rel_path):
-        self.log.append({
-            "datetime": datetime.now().isoformat(),
-            "resource_rel_path": resource_rel_path,
-        })
+        self.log.append(
+            {
+                "datetime": datetime.now().isoformat(),
+                "resource_rel_path": resource_rel_path,
+            }
+        )
 
     def listing(self):
         return [x["resource_rel_path"] for x in self.log]
+
 
 class ObsidianHtmlModule(ABC):
     def __init__(self, module_data_folder, module_name, persistent=None):
@@ -140,9 +143,7 @@ class ObsidianHtmlModule(ABC):
     def store(self, key, value, overwrite=False):
         """Saves the value under the key for later use in the module"""
         if overwrite is False and key in self._stash:
-            raise Exception(
-                f"Module Validity Error: Value {value} is stored twice, without overwrite being set to true."
-            )
+            raise Exception(f"Module Validity Error: Value {value} is stored twice, without overwrite being set to true.")
 
         self._stash[key] = value
         return value
@@ -190,9 +191,7 @@ class ObsidianHtmlModule(ABC):
             )
             for val in self.alters:
                 if val not in allowed_alters_values:
-                    log_error(
-                        f"Module Validity Error: value {val} in self.alters is not allowed. Allowed values: {allowed_alters_values}"
-                    )
+                    log_error(f"Module Validity Error: value {val} in self.alters is not allowed. Allowed values: {allowed_alters_values}")
 
         if failed:
             raise Exception("\n- " + "\n- ".join(errors))
