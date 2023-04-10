@@ -46,36 +46,24 @@ def ConvertVault(config_yaml_location=""):
 
     # Run modules
     # ----------------------------------------------------------
-    module_controller.run_module(
-        module_name="process_config",
-        module_data_folder=module_data_folder,
-        verbosity=verbosity,
-        meta_modules_post=meta_modules_post,
-        instantiated_modules=instantiated_modules,
-        pb=pb,
-    )
+    defaults = {
+        "module_data_folder": module_data_folder,
+        "verbosity": verbosity,
+        "meta_modules_post": meta_modules_post,
+        "instantiated_modules": instantiated_modules,
+        "pb": pb,
+    }
+    
+    module_controller.run_module(module_name="process_config", **defaults)
+    module_controller.run_module(module_name="load_paths", **defaults)  # INTEGRATION. Previously: `self.set_paths()`
+    module_controller.run_module(module_name="html_templater", persistent=True, **defaults)
+    module_controller.run_module(module_name="html_templater", persistent=True, **defaults)
 
     module_controller.run_module(
-        module_name="load_paths",
-        module_data_folder=module_data_folder,
-        verbosity=verbosity,
-        meta_modules_post=meta_modules_post,
-        instantiated_modules=instantiated_modules,
-        pb=pb,
+        module_name="resource_logger", method="finalize", persistent=True, **defaults
     )  # INTEGRATION. Previously: `self.set_paths()`
 
-    module_controller.run_module(
-        module_name="resource_logger",
-        method="finalize",
-        persistent=True,
-        module_data_folder=module_data_folder,
-        verbosity=verbosity,
-        meta_modules_post=meta_modules_post,
-        instantiated_modules=instantiated_modules,
-        pb=pb,
-    )  # INTEGRATION. Previously: `self.set_paths()`
-
-
+    exit()
     pb.construct(config_file_path, module_data_folder)  # INTEGRATION.
 
     # Setup filesystem

@@ -52,10 +52,9 @@ def run_module(
     pb=None,
     verbosity="error",
 ):
-
     # INSTANTIATE MODULE
     # ==================================================
-    module = get_module(
+    module, module_class = get_module(
         module=module,
         module_name=module_name,
         module_class_name=module_class_name,
@@ -64,12 +63,10 @@ def run_module(
         instantiated_modules=instantiated_modules,
         module_data_folder=module_data_folder,
         verbosity=verbosity,
-        pb=pb,
     )
 
     # RUN MODULE
     # ==================================================
-
     # integrate with "old" pb control flow: read out pb and create files in module data folder
     if pb is not None:
         module.integrate_load(pb)  # to be implemented by the module
@@ -104,49 +101,6 @@ def run_module(
     return result
 
 
-def get_module(
-    module=None,
-    module_name=None,
-    module_class_name=None,
-    module_data_folder=None,
-    module_source="built-in",
-    persistent=None,
-    instantiated_modules=None,
-    pb=None,
-    verbosity=None,
-):
-    """Convenience function. Will either return the module from instantiated_modules, if present and the module is persistent,
-    or it will call upon instantiate_module() to instantiate the module for us."""
-
-    if module is not None:
-        return module
-    
-    # Either module_name or module needs to be set
-    if module_name is None:
-        raise Exception("Neither module nor module_name is set. Cannot load module.")
-
-    # integrate with "old" pb control flow: get module_data_folder from pb, if passed in
-    # if pb is not None:
-    #     if module_data_folder is None:
-    #         if pb.module_data_folder is None:
-    #             module_data_folder = pb.gc("module_data_folder")
-    #         else:
-    #             module_data_folder = pb.module_data_folder
-
-    # instantiate module
-    module_class = get_module_class(module_name, module_class_name, module_source)
-    module = instantiate_module(
-        module_class=module_class,
-        module_name=module_name,
-        instantiated_modules=instantiated_modules,
-        persistent=persistent,
-        module_data_folder=module_data_folder,
-        verbosity=verbosity,
-    )
-
-    return module
-
-
 def run_post_modules(
     meta_modules_post,
     module_obj,
@@ -155,7 +109,6 @@ def run_post_modules(
     module_data_folder,
     verbosity,
 ):
-
     if meta_modules_post is None:
         return None
 
@@ -190,6 +143,40 @@ def run_post_modules(
         result = getattr(meta_module_obj, method)(module=module_obj, run_module_result=module_run_result)
 
 
+def get_module(
+    module=None,
+    module_name=None,
+    module_class_name=None,
+    module_data_folder=None,
+    module_source="built-in",
+    persistent=None,
+    instantiated_modules=None,
+    verbosity=None,
+):
+    """Convenience function. Will either return the module from instantiated_modules, if present and the module is persistent,
+    or it will call upon instantiate_module() to instantiate the module for us."""
+
+    if module is not None:
+        return module
+
+    # Either module_name or module needs to be set
+    if module_name is None:
+        raise Exception("Neither module nor module_name is set. Cannot load module.")
+
+    # instantiate module
+    module_class = get_module_class(module_name, module_class_name, module_source)
+    module = instantiate_module(
+        module_class=module_class,
+        module_name=module_name,
+        instantiated_modules=instantiated_modules,
+        persistent=persistent,
+        module_data_folder=module_data_folder,
+        verbosity=verbosity,
+    )
+
+    return module, module_class
+
+
 def instantiate_module(
     module_class,
     module_name,
@@ -199,7 +186,8 @@ def instantiate_module(
     verbosity="deprecation",
     level=0,
 ):
-    """This function instantiates modules, and stores the resulting object, so that it can be retrieved when persistence is enabled on the module"""
+    """This function instantiates modules, and stores the resulting object, so that it can be retrieved when persistence is enabled on the module. This
+    function also stores the instantiated modules when persistence is set to true."""
     module_obj = None
 
     # REUSE
@@ -213,7 +201,7 @@ def instantiate_module(
                 )
 
             return instantiated_modules[module_class.__name__]
-            
+
     # CREATE
     # ---
     if verbose_enough("debug", verbosity):
@@ -221,11 +209,11 @@ def instantiate_module(
             f'[ {"DEBUG":^5} ] {"* "*level}module.controller.instantiate_module :: instantiation of module: ',
             module_name,
         )
-    module_obj = module_class(module_data_folder=module_data_folder, module_name=module_name)
+    module_obj = module_class(module_data_folder=module_data_folder, module_name=module_name, persistent=persistent)
 
-    # STORE 
+    # STORE
     # ---
-    if instantiated_modules is not None:
+    if instantiated_modules is not None and module_obj.persistent == True:
         instantiated_modules[module_class.__name__] = module_obj
 
     return module_obj
