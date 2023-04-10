@@ -131,8 +131,8 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
         self.setup()
 
         verb = {
-            "alter": "altered", 
-            "create": "created", 
+            "alter": "altered",
+            "create": "created",
             "read": "read",
             "store": "stored",
             "overwrite": "overwritten",

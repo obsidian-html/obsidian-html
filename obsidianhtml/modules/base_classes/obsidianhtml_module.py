@@ -147,10 +147,10 @@ class ObsidianHtmlModule(ABC):
         """Saves the value under the key for later use in the module"""
         if overwrite is False and key in self._stash:
             raise Exception(f"Module Validity Error: Value {value} is stored twice, without overwrite being set to true.")
-        
+
         # log
         if self.persistent:
-            resource_name = self.module_name+'('+self.module_class_name+')/'+key
+            resource_name = self.module_name + "(" + self.module_class_name + ")/" + key
             self.stored_keys.add(resource_name)
 
         # apply
@@ -161,7 +161,7 @@ class ObsidianHtmlModule(ABC):
         """Retrievs stored value from the internal stash"""
         # log
         if self.persistent and inspect.stack()[1][3] not in ("integrate_save",):
-            resource_name = self.module_name+'('+self.module_class_name+')/'+key
+            resource_name = self.module_name + "(" + self.module_class_name + ")/" + key
             self.retrieved_keys.add(resource_name)
 
         # return

@@ -55,20 +55,21 @@ def ConvertVault(config_yaml_location=""):
     }
 
     module_controller.run_module(module_name="process_config", **defaults)
-    module_controller.run_module(module_name="load_paths", **defaults)  # INTEGRATION. Previously: `self.set_paths()`
+    module_controller.run_module(module_name="load_paths", **defaults)
     module_controller.run_module(module_name="html_templater", persistent=True, **defaults)
     module_controller.run_module(module_name="load_graphers", persistent=True, **defaults)
-    module_controller.run_module(
-        module_name="resource_logger", method="finalize", persistent=True, **defaults
-    )  # INTEGRATION. Previously: `self.set_paths()`
+    module_controller.run_module(module_name="copy_vault_to_tempdirectory", persistent=True, **defaults)
+    module_controller.run_module(module_name="resource_logger", method="finalize", persistent=True, **defaults)
+
+    print(pb.paths["original_obsidian_entrypoint"], "--->", pb.paths["obsidian_entrypoint"])
 
 
     # Setup filesystem
     # ---------------------------------------------------------
-    tmpdir = Actor.Optional.copy_vault_to_tempdir(
-        pb
-    )  # isort: skip DO NOT REMOVE reference "tmpdir ="  or the folder will be immediately removed!
-    retain_reference(tmpdir)
+    # tmpdir = Actor.Optional.copy_vault_to_tempdir(
+    #     pb
+    # )  # isort: skip DO NOT REMOVE reference "tmpdir ="  or the folder will be immediately removed!
+    # retain_reference(tmpdir)
 
     Actor.Optional.remove_previous_obsidianhtml_output(pb)
     Actor.create_obsidianhtml_output_folders(pb)

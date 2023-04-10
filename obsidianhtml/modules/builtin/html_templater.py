@@ -20,11 +20,13 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
 
     @property
     def provides(self):
-        return tuple([
-            "html/note.template.html",
-            "html/dynamic_inclusions.html",
-            "html/dynamic_footer_inclusions.html",
-        ])
+        return tuple(
+            [
+                "html/note.template.html",
+                "html/dynamic_inclusions.html",
+                "html/dynamic_footer_inclusions.html",
+            ]
+        )
 
     @property
     def alters(self):
@@ -59,7 +61,7 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
         self.modfile("html/note.template.html", html_template).write()
         self.store("html_template", html_template)
 
-    def compile_dynamic_inclusions(self):             
+    def compile_dynamic_inclusions(self):
         # This is a set of javascript/css files to be loaded into the header based on config choices.
         dynamic_inclusions = ""
         try:
@@ -89,4 +91,3 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
         pb.html_template = self.retrieve("html_template")
         pb.dynamic_inclusions = self.retrieve("dynamic_inclusions")
         pb.dynamic_footer_inclusions = self.retrieve("dynamic_footer_inclusions")
-

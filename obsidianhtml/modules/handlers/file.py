@@ -116,4 +116,6 @@ class File:
 
 class to_json_encoder(json.JSONEncoder):
     def default(self, o):
+        if isinstance(o, Path):
+            return o.resolve().as_posix()
         return o.__name__

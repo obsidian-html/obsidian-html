@@ -83,7 +83,6 @@ class ProcessConfigModule(ObsidianHtmlModule):
 
         return capabilities_needed
 
-
     def run(self):
         config = self.config
 

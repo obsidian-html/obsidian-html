@@ -6,18 +6,6 @@ from . import builtin
 from .lib import verbose_enough
 
 
-def get_module_class(module_name, module_class_name, module_source):
-    # try getting the module based on the name, in case of builtin modules
-    # this saves dumb typing
-    if module_source == "built-in":
-        if module_name in builtin.builtin_module_aliases.keys():
-            return builtin.builtin_module_aliases[module_name]
-        else:
-            return getattr(builtin, module_class_name)
-    else:
-        raise Exception("external modules not yet implemented")
-
-
 class run_module_result:
     def __init__(self, module, output):
         self.output = output
@@ -69,7 +57,7 @@ def run_module(
     # ==================================================
     # integrate with "old" pb control flow: read out pb and create files in module data folder
     if pb is not None:
-        module.integrate_load(pb)  # to be implemented by the module
+        module.integrate_load(pb)
 
     # run method
     if verbose_enough("info", verbosity):
@@ -77,8 +65,8 @@ def run_module(
             f'[ {"INFO":^5} ] module.controller.run_module() ::',
             f"{module.module_name}.{method}()",
         )
-    func = getattr(module, method)
-    result = func()  # to be implemented by the module
+    module_dot_method = getattr(module, method)
+    result = module_dot_method()
 
     # convert basic result to run_module_result() type to manage different module outputs in an organized fashion
     result = run_module_result(module=module, output=result)
@@ -175,6 +163,23 @@ def get_module(
     )
 
     return module, module_class
+
+
+def get_module_class(module_name, module_class_name, module_source):
+    # try getting the module based on the name, in case of builtin modules
+    # this saves dumb typing
+    if module_source == "built-in":
+        if module_name in builtin.builtin_module_aliases.keys():
+            return builtin.builtin_module_aliases[module_name]
+        elif module_class_name in builtin.builtin_module_aliases.keys():
+            return builtin.builtin_module_aliases[module_class_name]
+        else:
+            raise Exception(
+                f'Could not find match for module {module_name} ({module_class_name}) in the modules/builtin directory. ' + \
+                'Is the module class imported in modules/builtin/__init__.py ?'
+            )
+    else:
+        raise Exception("external modules not yet implemented")
 
 
 def instantiate_module(

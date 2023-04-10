@@ -16,11 +16,13 @@ class LoadGrapherModule(ObsidianHtmlModule):
 
     @property
     def provides(self):
-        return tuple([
-            "html/graph.template.html",
-            "html/graph_full_page.template.html",
-            "graphers.json",
-        ])
+        return tuple(
+            [
+                "html/graph.template.html",
+                "html/graph_full_page.template.html",
+                "graphers.json",
+            ]
+        )
 
     @property
     def alters(self):
@@ -65,9 +67,6 @@ class LoadGrapherModule(ObsidianHtmlModule):
         self.modfile("graphers.json", graphers).to_json().write()
         self.store("graphers", graphers)
 
-
-
-
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
         pass
@@ -77,5 +76,5 @@ class LoadGrapherModule(ObsidianHtmlModule):
         pb.graph_template = self.retrieve("graph_template")
         pb.graph_full_page_template = self.retrieve("graph_full_page_template")
 
-        #pb.graphers = self.retrieve("graphers")
-        pb.graphers = self.modfile("graphers.json").read().from_json() # read from file to test json conversion issues
+        # pb.graphers = self.retrieve("graphers")
+        pb.graphers = self.modfile("graphers.json").read().from_json()  # read from file to test json conversion issues

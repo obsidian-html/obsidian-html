@@ -15,12 +15,6 @@ class Config:
     pb = None
 
     def __init__(self, pb):
-        """
-        This init function will do three steps:
-        - Merging default config with user config
-        - Check that all required values are filled in, all user provided settings are known in default config
-        - Setting missing values / Checking for illegal configuration
-        """
         self.pb = pb
 
     # DITCH
@@ -31,9 +25,6 @@ class Config:
 
     def verbose(self):
         return self.pb.config["toggles"]["verbose_printout"]
-
-    def disable_feature(self, feature_key_name):
-        self.pb.config["toggles"]["features"][feature_key_name]["enabled"] = False
 
     @cache
     def _feature_is_enabled_cached(self, feature_key_name):
@@ -82,78 +73,6 @@ class Config:
     @cache
     def ShowIcon(self, feature_name):
         return self.pb.gc(f"toggles/features/{feature_name}/enabled") and self.pb.gc(f"toggles/features/{feature_name}/styling/show_icon")
-
-
-
-
-    def check_required_values_filled_in(self, config, path="", match_str="<REQUIRED_INPUT>"):
-        def rec(cfgobj, config, path="", match_str="<REQUIRED_INPUT>"):
-            helptext = "\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n"
-
-            for k, v in config.items():
-                key_path = "/".join(x for x in (path, k) if x != "")
-
-                if isinstance(v, dict):
-                    rec(cfgobj, config[k], path=key_path)
-
-                if v == match_str:
-                    if check_required_value_is_required(cfgobj, key_path):
-                        raise Exception(f'\n\tKey "{key_path}" is required. {helptext}')
-                    else:
-                        config[k] = ""
-
-        rec(self, config, path, match_str)
-
-
-def check_required_value_is_required(cfgobj, key_path):
-    if key_path == "obsidian_entrypoint_path_str":
-        return cfgobj.get_config("toggles/compile_md")
-    return True
-
-
-def MergeDictRecurse(base_dict, update_dict, path=""):
-    helptext = "\n\nTip: Run obsidianhtml -gc to see all configurable keys and their default values.\n"
-
-    def check_leaf(key_path, val):
-        if val == "<REMOVED>":
-            raise Exception(
-                f"\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information."
-            )
-        elif val == "<DEPRECATED>":
-            print(
-                f"DEPRECATION WARNING: The setting {key_path} is deprecated. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information."
-            )
-            return False
-        return True
-
-    for k, v in update_dict.items():
-        key_path = "/".join(x for x in (path, k) if x != "")
-
-        # every configured key should be known in base config, otherwise this might suggest a typo/other error
-        if k not in base_dict.keys():
-            raise Exception(f'\n\tThe configured key "{key_path}" is unknown. Check for typos/indentation. {helptext}')
-
-        # don't overwrite a dict in the base config with a string, or something else
-        # in general, we don't expect types to change
-        if type(base_dict[k]) != type(v):
-            if check_leaf(key_path, base_dict[k]):
-                raise Exception(
-                    f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}'
-                )
-
-        # dict match -> recurse
-        if isinstance(base_dict[k], dict) and isinstance(v, dict):
-            base_dict[k] = MergeDictRecurse(base_dict[k], update_dict[k], path=key_path)
-            continue
-
-        # other cases -> copy over
-        if isinstance(update_dict[k], list):
-            base_dict[k] = v.copy()
-        else:
-            check_leaf(key_path, base_dict[k])
-            base_dict[k] = v
-
-    return base_dict.copy()
 
 
 def find_user_config_yaml_path(config_yaml_location) -> T.OSAbsolutePosx:

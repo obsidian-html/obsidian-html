@@ -32,9 +32,7 @@ class PicknickBasket:
         self.search = SearchHead()
         self.FileFinder = FileFinder()
         self.ConfigManager = Config(self)
-        self.plugin_settings = {
-            "embedded_note_titles": {} # <- does nothing at the moment, should be factored out
-        } 
+        self.plugin_settings = {"embedded_note_titles": {}}  # <- does nothing at the moment, should be factored out
 
         # State should be updated whenever we start a new type of operation.
         # When doing an operation by looping through notes, set loop_type to 'note', for links within a note 'note_link', if not in a loop-type operation, set to None.
@@ -56,16 +54,16 @@ class PicknickBasket:
         for key in kwargs.keys():
             self.state[key] = kwargs[key]
 
-    def update_paths(self, reason, **kwargs):
-        # If for any reason the paths need to be updated, this is the function to do it through
-        if reason == "using_tmpdir":
-            if "tmpdir" not in kwargs:
-                raise Exception("tmpdir kwarg expected when updating paths because of using tmpdir!")
-            # update paths
-            self.paths["obsidian_folder"] = Path(kwargs.get("tmpdir").name).resolve()
-            self.paths["obsidian_entrypoint"] = self.paths["obsidian_folder"].joinpath(self.paths["rel_obsidian_entrypoint"])
-        else:
-            raise Exception(f"path update reason {reason} unknown")
+    # def update_paths(self, reason, **kwargs):
+    #     # If for any reason the paths need to be updated, this is the function to do it through
+    #     if reason == "using_tmpdir":
+    #         if "tmpdir" not in kwargs:
+    #             raise Exception("tmpdir kwarg expected when updating paths because of using tmpdir!")
+    #         # update paths
+    #         self.paths["obsidian_folder"] = Path(kwargs.get("tmpdir").name).resolve()
+    #         self.paths["obsidian_entrypoint"] = self.paths["obsidian_folder"].joinpath(self.paths["rel_obsidian_entrypoint"])
+    #     else:
+    #         raise Exception(f"path update reason {reason} unknown")
 
     def gc(self, path: str, cached=False):
         if cached:

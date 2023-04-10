@@ -259,3 +259,48 @@ def expect_list(var):
     if var is None:
         return list()
     return list(var)
+
+
+def MergeDictRecurse(base_dict, update_dict, path=""):
+    helptext = "\n\nTip: Run \`obsidianhtml export default-config\` to see all configurable keys and their default values.\n"
+
+    def check_leaf(key_path, val):
+        if val == "<REMOVED>":
+            raise Exception(
+                f"\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information."
+            )
+        elif val == "<DEPRECATED>":
+            print(
+                f"DEPRECATION WARNING: The setting {key_path} is deprecated. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information."
+            )
+            return False
+        return True
+
+    for k, v in update_dict.items():
+        key_path = "/".join(x for x in (path, k) if x != "")
+
+        # every configured key should be known in base config, otherwise this might suggest a typo/other error
+        if k not in base_dict.keys():
+            raise Exception(f'\n\tThe configured key "{key_path}" is unknown. Check for typos/indentation. {helptext}')
+
+        # don't overwrite a dict in the base config with a string, or something else
+        # in general, we don't expect types to change
+        if type(base_dict[k]) != type(v):
+            if check_leaf(key_path, base_dict[k]):
+                raise Exception(
+                    f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}'
+                )
+
+        # dict match -> recurse
+        if isinstance(base_dict[k], dict) and isinstance(v, dict):
+            base_dict[k] = MergeDictRecurse(base_dict[k], update_dict[k], path=key_path)
+            continue
+
+        # other cases -> copy over
+        if isinstance(update_dict[k], list):
+            base_dict[k] = v.copy()
+        else:
+            check_leaf(key_path, base_dict[k])
+            base_dict[k] = v
+
+    return base_dict.copy()

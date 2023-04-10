@@ -8,6 +8,7 @@ from .cleanup_temp_files import CleanupTempFilesModule
 from .resource_logger import ResourceLoggerMetaModule
 from .html_templater import HtmlTemplaterModule
 from .load_graphers import LoadGrapherModule
+from .copy_vault_to_tempdirectory import VaultCopyModule
 
 builtin_module_aliases = {
     "setup_module": SetupModule,
@@ -18,4 +19,5 @@ builtin_module_aliases = {
     "resource_logger": ResourceLoggerMetaModule,
     "html_templater": HtmlTemplaterModule,
     "load_graphers": LoadGrapherModule,
+    "copy_vault_to_tempdirectory": VaultCopyModule,
 }

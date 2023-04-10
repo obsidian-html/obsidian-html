@@ -3,6 +3,7 @@ import json
 verbosity_ranks = {
     "quiet": 0,
     "error": 10,
+    "warning": 15,
     "deprecation": 20,
     "info": 30,
     "debug": 100,
