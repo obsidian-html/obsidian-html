@@ -351,6 +351,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # ------------------------------------------------------------------
     html = PopulateTemplate(pb, node["id"], pb.dynamic_inclusions, pb.html_template, content=html_body)
 
+    html = html.replace("{node_name}", node["name"])
     html = html.replace("{pinnedNode}", node["id"]).replace("{html_url_prefix}", html_url_prefix).replace("{page_depth}", str(page_depth))
     # [?] Documentation styling: Navbar
     # ------------------------------------------------------------------
