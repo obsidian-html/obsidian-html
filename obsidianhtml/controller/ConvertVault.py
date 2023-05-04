@@ -156,6 +156,8 @@ def convert_markdown_to_html(pb):
         i = 0
         l = len(unparsed)
         for fo in unparsed:
+            if not fo.publish:
+                continue
             i += 1
             if pb.gc("toggles/verbose_printout", cached=True) is True:
                 print(f"\t\t{i}/{l} - " + str(fo.path["markdown"]["file_absolute_path"]))
@@ -464,8 +466,9 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo: "FileObject", pb, log_level
     dst_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Write markdown to file
-    with open(dst_path, "w", encoding="utf-8") as f:
-        f.write(md.page)
+    if fo.publish:
+        with open(dst_path, "w", encoding="utf-8") as f:
+            f.write(md.page)
 
     # Recurse for every link in the current page
     # ------------------------------------------------------------------

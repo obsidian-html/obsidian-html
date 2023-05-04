@@ -58,6 +58,7 @@ exclude_glob:
   - "/.DS_Store"
   - "/.git"
 
+publish_meta_required: False
 
 # Deprecated for exclude_glob
 exclude_subfolders: '<DEPRECATED>'

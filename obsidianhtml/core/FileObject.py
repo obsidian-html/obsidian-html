@@ -48,6 +48,7 @@ class FileObject:
 
     def __init__(self, pb):
         self.pb = pb
+        self.publish = False
 
         self.path = {}
         self.link = {}
@@ -59,6 +60,11 @@ class FileObject:
 
     def load_markdown_page(self, input_type):
         self.md = MarkdownPage(self, input_type)
+
+        if not self.pb.gc("publish_meta_required") or \
+                'publish' in self.md.metadata and self.md.metadata['publish'] == True:
+            self.publish = True
+
         return self.md
 
     def fullpath(self, output):

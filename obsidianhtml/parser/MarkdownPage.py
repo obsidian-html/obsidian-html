@@ -417,6 +417,9 @@ class MarkdownPage:
                 rel_path_str = res["rtr_path_str"]
                 fo = res["fo"]
 
+                if fo and not fo.publish:
+                    rel_path_str = False
+
                 if rel_path_str is False:
                     link = "/not_created.md"
                 else:
