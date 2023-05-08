@@ -325,10 +325,6 @@ td:nth-child(2n) {
     border-right: 1px dotted rgb(var(--table-border-color-rgb), 0.3);
 }
 
-td:first-child {
-    min-width: max-content;
-}
-
 th:first-child,
 td:first-child {
     padding-left: 0rem;
