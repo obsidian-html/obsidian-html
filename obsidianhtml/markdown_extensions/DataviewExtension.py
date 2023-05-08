@@ -15,7 +15,10 @@ GLOBAL_DATAVIEW_ELEMENTS = None
 
 class DataviewExtension(Extension):
     def __init__(self, **kwargs):
-        self.config = {"note_path": ["not set", "Path to the note relative to the vault"], "dataview_export_folder": ["not set", "Absolute path to the dataview export folder"]}
+        self.config = {
+            "note_path": ["not set", "Path to the note relative to the vault"],
+            "dataview_export_folder": ["not set", "Absolute path to the dataview export folder"],
+        }
         super(DataviewExtension, self).__init__(**kwargs)
 
     """ Add source code hilighting to markdown codeblocks. """

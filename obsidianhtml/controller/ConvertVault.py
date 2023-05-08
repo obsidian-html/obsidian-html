@@ -1,6 +1,7 @@
 import sys
 import frontmatter
 import gzip
+import yaml
 
 import regex as re  # regex string finding/replacing
 
@@ -23,24 +24,52 @@ from ..features import post_processing
 from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view, create_foldable_tag_lists, recurseTagList
 from ..compiler.Templating import ExportStaticFiles
 
+from ..modules import controller as module_controller
+
 
 def ConvertVault(config_yaml_location=""):
     # Set config
     # ---------------------------------------------------------
     pb = PicknickBasket()
 
-    # Set verbosity (overwrite config)
-    for i, v in enumerate(sys.argv):
-        if v == "-v":
-            pb.verbose = True
-            break
+    # Bootstrap module system
+    # The first module will always have to be run, and we need info back, so this is a bit of a weird one as far as modules are concerned
+    # ----------------------------------------------------------
+    module_data_folder = module_controller.run_module_setup(pb=pb).output
+    config_file_path = module_data_folder + "/config.yml"
+    with open(config_file_path, "r") as f:
+        cfg = yaml.safe_load(f.read())
+        verbosity = cfg["verbosity"]
 
-    pb.construct(config_yaml_location)
+    modules, meta_modules_post = module_controller.load_module_itenary(module_data_folder)
+    instantiated_modules = {}
+
+    # Run modules
+    # ----------------------------------------------------------
+    defaults = {
+        "module_data_folder": module_data_folder,
+        "verbosity": verbosity,
+        "meta_modules_post": meta_modules_post,
+        "instantiated_modules": instantiated_modules,
+        "pb": pb,
+    }
+
+    module_controller.run_module(module_name="process_config", **defaults)
+    module_controller.run_module(module_name="load_paths", **defaults)
+    module_controller.run_module(module_name="html_templater", persistent=True, **defaults)
+    module_controller.run_module(module_name="load_graphers", persistent=True, **defaults)
+    module_controller.run_module(module_name="copy_vault_to_tempdirectory", persistent=True, **defaults)
+    module_controller.run_module(module_name="resource_logger", method="finalize", persistent=True, **defaults)
+
+    print(pb.paths["original_obsidian_entrypoint"], "--->", pb.paths["obsidian_entrypoint"])
+
 
     # Setup filesystem
     # ---------------------------------------------------------
-    tmpdir = Actor.Optional.copy_vault_to_tempdir(pb)  # isort: skip DO NOT REMOVE reference "tmpdir ="  or the folder will be immediately removed!
-    retain_reference(tmpdir)
+    # tmpdir = Actor.Optional.copy_vault_to_tempdir(
+    #     pb
+    # )  # isort: skip DO NOT REMOVE reference "tmpdir ="  or the folder will be immediately removed!
+    # retain_reference(tmpdir)
 
     Actor.Optional.remove_previous_obsidianhtml_output(pb)
     Actor.create_obsidianhtml_output_folders(pb)
@@ -90,14 +119,20 @@ def convert_obsidian_notes_to_markdown(pb):
 
         # Start conversion
         entrypoint_file_object = pb.index.files[rel_entry_path_str]
-        pb.init_state(action="n2m", loop_type="note", current_fo=entrypoint_file_object, subroutine="crawl_obsidian_notes_and_convert_to_markdown")
+        pb.init_state(
+            action="n2m", loop_type="note", current_fo=entrypoint_file_object, subroutine="crawl_obsidian_notes_and_convert_to_markdown"
+        )
         crawl_obsidian_notes_and_convert_to_markdown(entrypoint_file_object, pb)
         pb.reset_state()
 
         # also do the tags page if it is not the index, otherwise this page will never be hit
-        if pb.gc("toggles/features/create_index_from_tags/enabled") and not pb.gc("toggles/features/create_index_from_tags/use_as_homepage"):
+        if pb.gc("toggles/features/create_index_from_tags/enabled") and not pb.gc(
+            "toggles/features/create_index_from_tags/use_as_homepage"
+        ):
             entrypoint_file_object = pb.index.files[pb.gc("toggles/features/create_index_from_tags/rel_output_path")]
-            pb.init_state(action="n2m", loop_type="note", current_fo=entrypoint_file_object, subroutine="crawl_obsidian_notes_and_convert_to_markdown")
+            pb.init_state(
+                action="n2m", loop_type="note", current_fo=entrypoint_file_object, subroutine="crawl_obsidian_notes_and_convert_to_markdown"
+            )
             crawl_obsidian_notes_and_convert_to_markdown(entrypoint_file_object, pb)
             pb.reset_state()
 
@@ -111,7 +146,9 @@ def convert_obsidian_notes_to_markdown(pb):
                 i += 1
                 if pb.gc("toggles/verbose_printout", cached=True) is True:
                     print(f"\t\t{i}/{l} - " + str(fo.path["note"]["file_absolute_path"]))
-                pb.init_state(action="n2m_process_all", loop_type="note", current_fo=fo, subroutine="crawl_obsidian_notes_and_convert_to_markdown")
+                pb.init_state(
+                    action="n2m_process_all", loop_type="note", current_fo=fo, subroutine="crawl_obsidian_notes_and_convert_to_markdown"
+                )
                 crawl_obsidian_notes_and_convert_to_markdown(fo, pb, log_level=2)
                 pb.reset_state()
             print("\t< FEATURE: PROCESS ALL: Done")
@@ -138,14 +175,18 @@ def convert_markdown_to_html(pb):
     # -----------------------------------------------------------
     # Start conversion from the entrypoint
     entrypoint_file_object = pb.index.files[rel_entry_path_str]
-    pb.init_state(action="m2h", loop_type="md_note", current_fo=entrypoint_file_object, subroutine="crawl_markdown_notes_and_convert_to_html")
+    pb.init_state(
+        action="m2h", loop_type="md_note", current_fo=entrypoint_file_object, subroutine="crawl_markdown_notes_and_convert_to_html"
+    )
     crawl_markdown_notes_and_convert_to_html(entrypoint_file_object, pb)
     pb.reset_state()
 
     # also do the tags page if it is not the index, otherwise this page will never be hit
     if pb.gc("toggles/features/create_index_from_tags/enabled") and not pb.gc("toggles/features/create_index_from_tags/use_as_homepage"):
         entrypoint_file_object = pb.index.files[pb.gc("toggles/features/create_index_from_tags/rel_output_path")]
-        pb.init_state(action="m2h", loop_type="md_note", current_fo=entrypoint_file_object, subroutine="crawl_markdown_notes_and_convert_to_html")
+        pb.init_state(
+            action="m2h", loop_type="md_note", current_fo=entrypoint_file_object, subroutine="crawl_markdown_notes_and_convert_to_html"
+        )
         crawl_markdown_notes_and_convert_to_html(entrypoint_file_object, pb, capture_in_jar="tags_page_html")
         pb.reset_state()
 
@@ -160,7 +201,9 @@ def convert_markdown_to_html(pb):
             if pb.gc("toggles/verbose_printout", cached=True) is True:
                 print(f"\t\t{i}/{l} - " + str(fo.path["markdown"]["file_absolute_path"]))
 
-            pb.init_state(action="m2h_process_all", loop_type="md_note", current_fo=fo, subroutine="crawl_markdown_notes_and_convert_to_html")
+            pb.init_state(
+                action="m2h_process_all", loop_type="md_note", current_fo=fo, subroutine="crawl_markdown_notes_and_convert_to_html"
+            )
             crawl_markdown_notes_and_convert_to_html(fo, pb, log_level=2)
             pb.reset_state()
 
@@ -301,7 +344,11 @@ def convert_markdown_to_html(pb):
                 # compile html output
                 output = ""
                 if qual == "list":
-                    output = '<div class="query"><ul>\n\t' + "\n\t".join([f'<li><a href="/{x["path"]}">{x["title"]}</a></li>' for x in res]) + "\n</ul></div>"
+                    output = (
+                        '<div class="query"><ul>\n\t'
+                        + "\n\t".join([f'<li><a href="/{x["path"]}">{x["title"]}</a></li>' for x in res])
+                        + "\n</ul></div>"
+                    )
 
                 else:
                     output = '<div class="query">'
@@ -367,7 +414,7 @@ def convert_markdown_to_html(pb):
         with open(op, "w", encoding="utf-8") as f:
             f.write(html)
 
-    if pb.config.capabilities_needed["graph_data"]:
+    if pb.capabilities_needed["graph_data"]:
         # add crosslinks to graph data
         pb.index.network_tree.AddCrosslinks()
 
@@ -376,7 +423,7 @@ def convert_markdown_to_html(pb):
         with open(pb.paths["html_output_folder"].joinpath("obs.html").joinpath("data/graph.json"), "w", encoding="utf-8") as f:
             f.write(pb.index.network_tree.OutputJson())
 
-    if pb.config.capabilities_needed["search_data"]:
+    if pb.capabilities_needed["search_data"]:
         # Compress search json and write to static folder
         gzip_path = pb.paths["html_output_folder"].joinpath("obs.html").joinpath("data/search.json.gzip")
         gzip_path.parent.mkdir(parents=True, exist_ok=True)
@@ -492,7 +539,10 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo: "FileObject", pb, log_level
 
         # Convert the note that is linked to
         if pb.gc("toggles/verbose_printout", cached=True):
-            print("\t" * log_level, f"found link {link_fo.path['note']['file_absolute_path']} (through parent {fo.path['note']['file_absolute_path']})")
+            print(
+                "\t" * log_level,
+                f"found link {link_fo.path['note']['file_absolute_path']} (through parent {fo.path['note']['file_absolute_path']})",
+            )
 
         pb.init_state(action="n2m", loop_type="note", current_fo=link_fo, subroutine="crawl_obsidian_notes_and_convert_to_markdown")
         crawl_obsidian_notes_and_convert_to_markdown(link_fo, pb, log_level=log_level, iteration=iteration)
@@ -515,7 +565,9 @@ def crawl_markdown_notes_and_convert_to_html(fo: "FileObject", pb, backlink_node
 
         # Convert the note that is linked to
         if pb.gc("toggles/verbose_printout", cached=True):
-            print("\t" * (log_level + 1), f"html: initiating conversion for {link_fo.fullpath('markdown')} (parent {fo.fullpath('markdown')})")
+            print(
+                "\t" * (log_level + 1), f"html: initiating conversion for {link_fo.fullpath('markdown')} (parent {fo.fullpath('markdown')})"
+            )
 
         pb.init_state(action="m2h", loop_type="md_note", current_fo=link_fo, subroutine="crawl_markdown_notes_and_convert_to_html")
         crawl_markdown_notes_and_convert_to_html(link_fo, pb, backlink_node=node, log_level=log_level)
@@ -532,7 +584,9 @@ def run_post_processing(pb):
             post_processing.convert_markdown_output(
                 pb.paths["md_folder"],
                 convert_function=post_processing.obs_callout_to_markdown_callout,
-                arg_dict={"strict_line_breaks": (not pb.gc("toggles/strict_line_breaks"))},  # don't add line breaks if we already add them, because they will double up
+                arg_dict={
+                    "strict_line_breaks": (not pb.gc("toggles/strict_line_breaks"))
+                },  # don't add line breaks if we already add them, because they will double up
             )
         else:
             raise Exception(f"Unknown processing module of {module['module']}")

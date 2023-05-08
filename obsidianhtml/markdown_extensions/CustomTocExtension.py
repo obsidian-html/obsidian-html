@@ -280,7 +280,13 @@ class TocTreeprocessor(Treeprocessor):
                     el.attrib["id"] = unique(self.slugify(innertext, self.sep), used_ids)
 
                 if int(el.tag[-1]) >= self.toc_top and int(el.tag[-1]) <= self.toc_bottom:
-                    toc_tokens.append({"level": int(el.tag[-1]), "id": el.attrib["id"], "name": stashedHTML2text(code_escape(el.attrib.get("data-toc-label", text)), self.md, strip_entities=False)})
+                    toc_tokens.append(
+                        {
+                            "level": int(el.tag[-1]),
+                            "id": el.attrib["id"],
+                            "name": stashedHTML2text(code_escape(el.attrib.get("data-toc-label", text)), self.md, strip_entities=False),
+                        }
+                    )
 
                 # Remove the data-toc-label attribute as it is no longer needed
                 if "data-toc-label" in el.attrib:
@@ -309,7 +315,10 @@ class CustomTocExtension(Extension):
 
     def __init__(self, **kwargs):
         self.config = {
-            "marker": ["[TOC]", "Text to find and replace with Table of Contents - " 'Set to an empty string to disable. Defaults to "[TOC]"'],
+            "marker": [
+                "[TOC]",
+                "Text to find and replace with Table of Contents - " 'Set to an empty string to disable. Defaults to "[TOC]"',
+            ],
             "title": ["", "Title to insert into TOC <div> - " "Defaults to an empty string"],
             "toc_class": ["toc", "CSS class(es) used for the link. " 'Defaults to "toclink"'],
             "anchorlink": [False, "True if header should be a self link - " "Defaults to False"],

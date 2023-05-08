@@ -141,7 +141,11 @@ class InstallerApi:
     def CheckGithubUsername(self, username):
         r = requests.get(f"https://github.com/{username}")
         if r.status_code == 404:
-            return {"message": "Username was not found. Tip: the username is not your email address, nor the whole http://github.com/<username> url.", "code": 405, "data": {}}
+            return {
+                "message": "Username was not found. Tip: the username is not your email address, nor the whole http://github.com/<username> url.",
+                "code": 405,
+                "data": {},
+            }
 
         # check if repo already exists
         repo_exists = True
@@ -153,7 +157,11 @@ class InstallerApi:
         if r.status_code == 404:
             repo_exists = False
 
-        return {"message": "Success", "code": 200, "data": {"username": username, "repo_name": repo_name, "repo_url": repo_url, "repo_exists": repo_exists}}
+        return {
+            "message": "Success",
+            "code": 200,
+            "data": {"username": username, "repo_name": repo_name, "repo_url": repo_url, "repo_exists": repo_exists},
+        }
         # raise Exception(f'test exception {username}')
 
     def CheckGit(self):
@@ -241,7 +249,9 @@ class InstallerApi:
                 response["data"]["ready"] = True
                 self.ledger.set_value("gitpages_configured", True)
             else:
-                response["message"] = f"A folder already exists at {repo_folder_path_str}, but it is not a git repo (hidden .git folder is missing)."
+                response[
+                    "message"
+                ] = f"A folder already exists at {repo_folder_path_str}, but it is not a git repo (hidden .git folder is missing)."
                 response["message"] += "Delete or move this folder, or pick a different clone path in the previous step before you continue"
                 response["code"] = 405
 
@@ -263,7 +273,9 @@ class InstallerApi:
 
             if url == f"{self.repo_url}.git":
                 response["code"] = 200
-                response["message"] += " Repo found in the expected location with the expected url. Skipping cloning step, as this is the desired state for this step."
+                response[
+                    "message"
+                ] += " Repo found in the expected location with the expected url. Skipping cloning step, as this is the desired state for this step."
                 response["data"] = {"ready": True}
                 return response
 
