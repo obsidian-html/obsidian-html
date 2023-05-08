@@ -163,6 +163,7 @@ class TestHtmlPrefixMode(ModeTemplate):
         ('copy_vault_to_tempdir_method', 'shutil')
     ]
 
+
     def test_A__test_self(self):
         "Tests working of the test structure"
         self.self_check()
