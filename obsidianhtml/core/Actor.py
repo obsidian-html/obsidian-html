@@ -18,8 +18,7 @@ class Optional:
             # Copy over vault to tempdir
             tmpdir = CreateTemporaryCopy(source_folder_path=pb.paths["obsidian_folder"], pb=pb)
             pb.update_paths(reason="using_tmpdir", tmpdir=tmpdir)
-
-            return tmpdir  # return so that the folder is not instantly deleted!
+            pb.jars["tmpdir"] = tmpdir  # store so that the reference remains in memory and the folder is not instantly deleted!
 
     @staticmethod
     def remove_previous_obsidianhtml_output(pb) -> T.SystemChange:

@@ -34,7 +34,10 @@ class FootnoteExtension(Extension):
             "UNIQUE_IDS": [False, "Avoid name collisions across " "multiple calls to reset()."],
             "BACKLINK_TEXT": ["&#8617;", "The text string that links from the footnote " "to the reader's place."],
             "SUPERSCRIPT_TEXT": ["{}", "The text string that links from the reader's place " "to the footnote."],
-            "BACKLINK_TITLE": ["Jump back to footnote %d in the text", "The text string used for the title HTML attribute " "of the backlink. %d will be replaced by the " "footnote number."],
+            "BACKLINK_TITLE": [
+                "Jump back to footnote %d in the text",
+                "The text string used for the title HTML attribute " "of the backlink. %d will be replaced by the " "footnote number.",
+            ],
             "SEPARATOR": [":", "Footnote separator."],
         }
         super().__init__(**kwargs)

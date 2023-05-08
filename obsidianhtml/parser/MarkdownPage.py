@@ -149,7 +149,9 @@ class MarkdownPage:
         for tag in self.get_tags():
             # test is str
             if not isinstance(tag, str):
-                raise MalformedTags(f"Tag {tag} in frontmatter of \"{self.src_path}\" is of type {type(tag)}, but should be a string. (Items under 'tags:' can not include a ':' on its line).")
+                raise MalformedTags(
+                    f"Tag {tag} in frontmatter of \"{self.src_path}\" is of type {type(tag)}, but should be a string. (Items under 'tags:' can not include a ':' on its line)."
+                )
 
             # add tag in correct place in the tagtree
             ctagtree = tagtree
@@ -182,7 +184,15 @@ class MarkdownPage:
         return video_template.replace("{url}", relative_path_corrected).replace("{mime_type}", mime_type)
 
     def GetAudioHTML(self, file_name, relative_path_corrected, suffix):
-        mime_type_lut = {"mp3": "audio/mpeg", "webm": "audio/webm", "m4a": "audio/mp4", "wav": "audio/x-wav", "ogg": "audio/ogg", "3gp": "video/3gpp", "flac": "audio/flac"}
+        mime_type_lut = {
+            "mp3": "audio/mpeg",
+            "webm": "audio/webm",
+            "m4a": "audio/mp4",
+            "wav": "audio/x-wav",
+            "ogg": "audio/ogg",
+            "3gp": "video/3gpp",
+            "flac": "audio/flac",
+        }
         if suffix not in mime_type_lut:
             mime_type = ""
         else:
@@ -196,9 +206,15 @@ class MarkdownPage:
 
     def GetImageHTML(self, relative_path_corrected, width, alt):
         image_template = OpenIncludedFile("html/templates/image_template.html")
-        return image_template.replace("{relative_path}", urllib.parse.quote(relative_path_corrected)).replace("{width}", width).replace("{alt}", alt)
+        return (
+            image_template.replace("{relative_path}", urllib.parse.quote(relative_path_corrected))
+            .replace("{width}", width)
+            .replace("{alt}", alt)
+        )
 
-    def ConvertObsidianPageToMarkdownPage(self, origin: "FileObject" = None, include_depth=0, includer_page_depth=None, remove_block_references=True):
+    def ConvertObsidianPageToMarkdownPage(
+        self, origin: "FileObject" = None, include_depth=0, includer_page_depth=None, remove_block_references=True
+    ):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
 
         # -- Set origin (calling page), this will always be self.fo unless origin is passed in
@@ -271,7 +287,9 @@ class MarkdownPage:
                     if "://" in link:
                         print("\t\t\t<continued> The link seems to be external (contains ://)")
                     else:
-                        print(f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
+                        print(
+                            f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}"
+                        )
                 continue
 
             # Get shorthand info
@@ -306,7 +324,9 @@ class MarkdownPage:
                     if "://" in link:
                         print("\t\t\t<continued> The link seems to be external (contains ://)")
                     else:
-                        print(f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
+                        print(
+                            f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}"
+                        )
                 continue
 
             # Get shorthand info
@@ -489,13 +509,17 @@ class MarkdownPage:
 
             file_object.path["note"]["file_absolute_path"]
             if not file_object.is_valid_note("note"):
-                self.page = self.page.replace(matched_link, f"> **obsidian-html error:** Error including file or not a markdown file {link}.")
+                self.page = self.page.replace(
+                    matched_link, f"> **obsidian-html error:** Error including file or not a markdown file {link}."
+                )
                 continue
 
             # Get code
             # included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
             included_page = file_object.load_markdown_page("note")
-            included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth, remove_block_references=False)
+            included_page.ConvertObsidianPageToMarkdownPage(
+                origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth, remove_block_references=False
+            )
 
             # Get subsection of code if header is present
             if header != "":

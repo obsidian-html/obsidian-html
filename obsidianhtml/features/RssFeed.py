@@ -237,7 +237,9 @@ class RssFeed:
                         try:
                             publish_date = datetime.strptime(publish_date, fs)
                         except ValueError:
-                            raise Exception(f"Don't know how to parse date string. Found date '{publish_date}' does not match format_string '{fs}'.")
+                            raise Exception(
+                                f"Don't know how to parse date string. Found date '{publish_date}' does not match format_string '{fs}'."
+                            )
                     else:
                         raise Exception("Don't know how to parse date string. Iso_formatted is false and format_string is empty.")
 
@@ -249,7 +251,14 @@ class RssFeed:
             # link
             link = self.host + path.relative_to(self.html_folder).as_posix()
 
-            lut = {"title": title, "link": link.replace(" ", "%20"), "description": description, "publish_date": publish_date_str, "guid": link, "enclosure": ""}
+            lut = {
+                "title": title,
+                "link": link.replace(" ", "%20"),
+                "description": description,
+                "publish_date": publish_date_str,
+                "guid": link,
+                "enclosure": "",
+            }
             rss_item = self.rss_item_template
             for key, value in lut.items():
                 rss_item = rss_item.replace("{" + key + "}", escape(value))

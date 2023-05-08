@@ -121,7 +121,9 @@ def CompileTagPageMarkdown(pb):
         if method in ("creation_time", "modified_time"):
             # created time is not really accessible under Linux, we might add a case for OSX
             if method == "creation_time" and platform.system() != "Windows" and platform.system() != "Darwin":
-                raise Exception(f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.')
+                raise Exception(
+                    f'Sort method of "create_time" under toggles/features/create_index_from_tags/sort/method is not available under {platform.system()}, only Windows.'
+                )
             sort_value = fo.metadata[method]
 
         if verbose(pb):
@@ -138,7 +140,13 @@ def CompileTagPageMarkdown(pb):
                 continue
 
             index_dict[t].append(
-                {"file_key": k, "node_id": node_id, "md_rel_path_str": fo.path["markdown"]["file_relative_path"].as_posix(), "graph_name": node_name, "sort_value": sort_value}  # depr?
+                {
+                    "file_key": k,
+                    "node_id": node_id,
+                    "md_rel_path_str": fo.path["markdown"]["file_relative_path"].as_posix(),
+                    "graph_name": node_name,
+                    "sort_value": sort_value,
+                }  # depr?
             )
 
     if len(_files.keys()) == 0:

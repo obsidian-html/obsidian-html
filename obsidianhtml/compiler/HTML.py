@@ -25,7 +25,9 @@ def compile_navbar_links(pb) -> T.PBChange:
             if l["type"] == "external":
                 el = f'<a class="navbar-link" href="{link}" title="{l["name"]}">{l["name"]}</a>'
             else:
-                raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
+                raise Exception(
+                    f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)"
+                )
 
         # internal links
         if not el:
@@ -51,7 +53,9 @@ def create_folder_navigation_view(pb) -> T.WriteExportFile:
     print(f"\t> COMPILING INDEX FROM DIR STRUCTURE ({op})")
     # Create dirtree to be viewed on its own
     if pb.gc("toggles/relative_path_html", cached=True):
-        html_url_prefix = pb.sc(path="html_url_prefix", value=get_rel_html_url_prefix(pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path")))
+        html_url_prefix = pb.sc(
+            path="html_url_prefix", value=get_rel_html_url_prefix(pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path"))
+        )
         print(html_url_prefix)
     pb.EnsureTreeObj()
     pb.treeobj.rel_output_path = pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path")
@@ -117,12 +121,21 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Compile html
     extension_configs = {"codehilite": {"linenums": False}, "pymdownx.arithmatex": {"generic": True}}
 
-    html_body = markdown.markdown(md, extensions=["extra", "codehilite", "obs_toc", "mermaid", "callout", "pymdownx.arithmatex"], extension_configs=extension_configs)
+    html_body = markdown.markdown(
+        md, extensions=["extra", "codehilite", "obs_toc", "mermaid", "callout", "pymdownx.arithmatex"], extension_configs=extension_configs
+    )
 
     di = '<link rel="stylesheet" href="' + html_url_prefix + '/obs.html/static/taglist.css" />'
 
     html = PopulateTemplate(
-        pb, "none", pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html_body, dynamic_includes=di, container_wrapper_class_list=["single_tab_page-left-aligned"]
+        pb,
+        "none",
+        pb.dynamic_inclusions,
+        pb.html_template,
+        html_url_prefix=html_url_prefix,
+        content=html_body,
+        dynamic_includes=di,
+        container_wrapper_class_list=["single_tab_page-left-aligned"],
     )
 
     html = html.replace("{pinnedNode}", "tagspage")
@@ -168,7 +181,13 @@ def create_foldable_tag_lists_html(pb, strip_tags=None):
                 continue
 
             # get subtags
-            subtags += rec_tag_tree_foldable(tag_tree=tag_tree["subtags"][key], name=key, id=(str(id) + str(subid)), path="/".join(list(filter(None, [path, name]))), strip_tags=strip_tags)
+            subtags += rec_tag_tree_foldable(
+                tag_tree=tag_tree["subtags"][key],
+                name=key,
+                id=(str(id) + str(subid)),
+                path="/".join(list(filter(None, [path, name]))),
+                strip_tags=strip_tags,
+            )
             subid += 1
 
         header = ""
@@ -205,7 +224,15 @@ def create_foldable_tag_lists(pb):
 
     # compile html
     html = create_foldable_tag_lists_html(pb)
-    html = PopulateTemplate(pb, "none", pb.dynamic_inclusions, pb.html_template, html_url_prefix=html_url_prefix, content=html, container_wrapper_class_list=["single_tab_page-left-aligned"])
+    html = PopulateTemplate(
+        pb,
+        "none",
+        pb.dynamic_inclusions,
+        pb.html_template,
+        html_url_prefix=html_url_prefix,
+        content=html,
+        container_wrapper_class_list=["single_tab_page-left-aligned"],
+    )
     html = html.replace("{pinnedNode}", "tagspage")
     html = html.replace("{{navbar_links}}", "\n".join(pb.navbar_links))
     html = html.replace("{left_pane}", "").replace("{right_pane}", "")

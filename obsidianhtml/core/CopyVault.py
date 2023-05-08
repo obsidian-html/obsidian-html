@@ -31,12 +31,16 @@ def CreateTemporaryCopy(source_folder_path, pb):
         if is_installed("rsync"):
             copy_method = "rsync"
         else:
-            print("WARNING: copy_vault_to_tempdir_method was set to rsync, but rsync is not present on the system. Defaulting to shutil copy method.")
+            print(
+                "WARNING: copy_vault_to_tempdir_method was set to rsync, but rsync is not present on the system. Defaulting to shutil copy method."
+            )
             copy_method = "shutil"
 
     # Call copytree function (rsync)
     if copy_method == "rsync":
-        copy_tree_rsync(source_folder_path.as_posix(), tmpdir.name, exclude=pb.gc("exclude_glob"), verbose=pb.gc("copy_vault_to_tempdir_follow_copy"))
+        copy_tree_rsync(
+            source_folder_path.as_posix(), tmpdir.name, exclude=pb.gc("exclude_glob"), verbose=pb.gc("copy_vault_to_tempdir_follow_copy")
+        )
 
     # Fetch invalid settings
     elif copy_method not in ["shutil", "shutil_walk"]:
