@@ -9,6 +9,7 @@ from .resource_logger import ResourceLoggerMetaModule
 from .html_templater import HtmlTemplaterModule
 from .load_graphers import LoadGrapherModule
 from .copy_vault_to_tempdirectory import VaultCopyModule
+from .prepare_output_folders import PrepareOutputFoldersModule
 
 builtin_module_aliases = {
     "setup_module": SetupModule,
@@ -20,4 +21,5 @@ builtin_module_aliases = {
     "html_templater": HtmlTemplaterModule,
     "load_graphers": LoadGrapherModule,
     "copy_vault_to_tempdirectory": VaultCopyModule,
+    "prepare_output_folders": PrepareOutputFoldersModule,
 }

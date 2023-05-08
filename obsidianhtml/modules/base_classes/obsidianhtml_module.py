@@ -52,6 +52,41 @@ class ObsidianHtmlModule(ABC):
         self.stored_keys = ResourceAccessLog()
         self.retrieved_keys = ResourceAccessLog()
 
+        # module config
+        self.mod_config = {}
+        self.define_mod_config_defaults()
+        self.try_load_mod_config()
+
+    @property
+    def nametag(self):
+        return f'{self.module_name} ({self.module_class_name})'
+
+    def define_mod_config_defaults(self):
+        pass
+
+    def try_load_mod_config(self):
+        cfg = self.modfile("config.yml", allow_absent=True).read(sneak=True).from_yaml()
+        
+        if cfg is None:
+            return
+
+        if self.module_name not in cfg["module_config"].keys():
+            return
+
+        mcfg = cfg["module_config"][self.module_name]
+        if not isinstance(mcfg, dict):
+            raise Exception(f'Expected type dict for config key module_config/{self.module_name}, but got {type(mcfg)}.')
+        
+        for key, item in mcfg.items():
+            if key not in self.mod_config:
+                raise Exception(f'Module config key "{key}" is unknown to module {self.nametag})')
+            self.mod_config[key]["value"] = item["value"]
+
+    def value_of(self, mod_config_key):
+        if mod_config_key not in self.mod_config:
+            raise Exception(f'Value of module config with key {mod_config_key} requested, but not set, in module {self.nametag}')
+        return self.mod_config[mod_config_key]["value"]
+
     @property
     @abstractmethod
     def requires(self):

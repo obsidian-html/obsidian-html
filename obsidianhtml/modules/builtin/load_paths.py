@@ -79,9 +79,6 @@ class LoadPathsModule(ObsidianHtmlModule):
         paths["original_obsidian_entrypoint"] = paths["obsidian_entrypoint"] # use only for lookups!
         paths["dataview_export_folder"] = paths["obsidian_folder"].joinpath(gc("toggles/features/dataview/folder"))
 
-        if gc("toggles/extended_logging", cached=True):
-            paths["log_output_folder"] = Path(gc("log_output_folder_path_str")).resolve()
-
         # Deduce relative paths
         if gc("toggles/compile_md", cached=True):
             paths["rel_obsidian_entrypoint"] = paths["obsidian_entrypoint"].relative_to(paths["obsidian_folder"])
