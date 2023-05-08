@@ -46,7 +46,7 @@ def convert_vault(USE_PIP_INSTALL):
     # Convert files
     print(f"OBSIDIAN-HTML: converting ci/test_vault ({config_file_path.as_posix()})")
     if USE_PIP_INSTALL:
-        subprocess.call(['obsidianhtml', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
+        subprocess.call(['obsidianhtml', 'convert', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
     else:
         subprocess.call(['python', '-m', 'obsidianhtml', 'convert', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
 

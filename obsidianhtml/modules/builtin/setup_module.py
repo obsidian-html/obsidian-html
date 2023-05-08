@@ -141,7 +141,7 @@ class SetupModule(ObsidianHtmlModule):
         self.set_module_data_folder_path(config["module_data_folder"])
 
         # ensure module data folder exists
-        Path(self.module_data_folder).mkdir(exist_ok=True)
+        Path(self.module_data_folder).mkdir(parents=True, exist_ok=True)
 
         # write config files to module data folder - now we have access to info such as verbosity
         self.modfile("config.yml", config).to_yaml().write()
