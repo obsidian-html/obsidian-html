@@ -91,6 +91,11 @@ meta_modules_post:
   - name: resource_logger
     persistent: True
 
+# Will create an extra file under module_data_folder/versions/<guid> with timestamp and module name
+# for each module file written with the self.modfile(...).write() method.
+# Used for debugging purposes.
+keep_module_file_versions: False
+
 # use the name of the module as a key in the dict below
 # for configuration settings, consult the spec of the module in question
 module_config:

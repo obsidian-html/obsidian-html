@@ -4,6 +4,7 @@ import yaml
 import inspect
 
 from pathlib import Path
+from datetime import datetime
 
 from ..lib import hash_wrap
 
@@ -83,6 +84,22 @@ class File:
         # write file
         with open(self.path, "w", encoding=self.encoding) as f:
             f.write(self.contents)
+
+        if self.module.gc("keep_module_file_versions"):
+            # determine folder to create the versioned file in
+            with open(self.module.module_data_folder + "/guid.txt", "r") as f:
+                guid = f.read()
+            version_files_folder = Path(self.module.module_data_folder).joinpath(f"versions/{guid}")
+
+            # edit file name to include timestamp and module name
+            version_path = version_files_folder.joinpath(Path(self.path).relative_to(self.module.module_data_folder))
+            version_path = version_path.parent.joinpath(datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z') + "_" + self.module.module_name + "__" +version_path.name)
+            version_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # write versioned file
+            with open(version_path, "w", encoding=self.encoding) as f:
+                f.write(self.contents)
+
 
     # --- read contents
     def text(self):

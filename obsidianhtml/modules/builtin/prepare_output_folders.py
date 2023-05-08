@@ -20,7 +20,7 @@ class PrepareOutputFoldersModule(ObsidianHtmlModule):
 
     @property
     def requires(self):
-        return tuple(["config.yml", "paths.json"])
+        return tuple(["config.yml", "paths.json", "guid.txt"])
 
     @property
     def provides(self):
@@ -60,6 +60,15 @@ class PrepareOutputFoldersModule(ObsidianHtmlModule):
                 shutil.rmtree(paths["md_folder"])
             if paths["html_output_folder"].exists():
                 shutil.rmtree(paths["html_output_folder"])
+
+        # always clean the module_data_folder/versions folder
+        guid = self.modfile("guid.txt").read().text()
+        versions_folder = Path(self.module_data_folder).joinpath('versions')
+        if versions_folder.exists():
+            for subdir in [x for x in os.listdir(versions_folder) if x != guid]:
+                shutil.rmtree(versions_folder.joinpath(subdir))
+            if os.listdir(versions_folder) == []:
+                versions_folder.rmdir()
 
         # fail if the folders are not empty
         def is_empty(path):
