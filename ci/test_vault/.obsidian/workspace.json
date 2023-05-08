@@ -47,7 +47,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "filtering/home.md",
+                "file": "entrypoint.md",
                 "mode": "source",
                 "source": false
               }
@@ -124,7 +124,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "filtering/home.md",
+                "file": "entrypoint.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -141,10 +141,20 @@
     "direction": "horizontal",
     "width": 300
   },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "markdown-importer:Open format converter": false
+    }
+  },
   "active": "dfa41df239e4968c",
   "lastOpenFiles": [
-    "filtering/neutral/neutral.md",
     "filtering/home.md",
+    "filtering/neutral/neutral.md",
     "filtering/excl/excluded.md",
     "md_links/name (with pars and spaces).png",
     "md_links/md_links_parentheses.md",
