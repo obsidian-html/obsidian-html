@@ -308,7 +308,7 @@ class TestAFiltering2(ModeTemplate):
     testcase_custom_config_values = [
         ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'), 
         ('included_folders', ['filtering']),
-        ('exclude_subfolders', ['/filtering/excl', '*.pdf']),
+        ('exclude_glob', ['/filtering/excl', '*.pdf']),
         ('copy_vault_to_tempdir', False),
     ]
     def test_include_folder(self):

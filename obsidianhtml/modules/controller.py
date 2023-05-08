@@ -59,6 +59,13 @@ def run_module(
     if pb is not None:
         module.integrate_load(pb)
 
+    # check if method should be run, otherwise, cancel further execution
+    # - note that module.integrate_load is always run, as this might provide information required
+    #   by module.accept() to determine if the module should run or not.
+    accept = getattr(module, "accept")
+    if accept(module_data_folder) == False:
+        return None
+
     # run method
     if verbose_enough("info", verbosity):
         print(

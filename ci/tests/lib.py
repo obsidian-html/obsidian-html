@@ -48,7 +48,7 @@ def convert_vault(USE_PIP_INSTALL):
     if USE_PIP_INSTALL:
         subprocess.call(['obsidianhtml', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
     else:
-        subprocess.call(['python', '-m', 'obsidianhtml', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
+        subprocess.call(['python', '-m', 'obsidianhtml', 'convert', '-i', config_file_path.as_posix()])#, stdout=subprocess.DEVNULL)    
 
 def cleanup_temp_dir():
     paths = get_paths()
@@ -113,8 +113,6 @@ def get_default_config():
                         rec(d[key])
     rec(config)
 
-
-
     return config
 
 def customize_default_config(items, write_to_tmp_config=True):
@@ -149,6 +147,24 @@ def customize_default_config(items, write_to_tmp_config=True):
     # Merge with defaults
     base = get_default_config()
     output = MergeDictRecurse(base, custom)
+
+    # Clean out deprecated keys
+    def rec(d):
+        if isinstance(d, list):
+            for item in d:
+                rec(item)
+        if isinstance(d, dict):
+            finished = False
+            while finished == False:
+                finished = True
+                for key in d.keys():
+                    if isinstance(d[key], str) and d[key] in ['<DEPRECATED>']:
+                        d.pop(key)
+                        finished = False
+                        break
+                    else:
+                        rec(d[key])
+    rec(output)
 
     # Write output to file
     if write_to_tmp_config:
@@ -221,7 +237,7 @@ class ModeTemplate(unittest.TestCase):
     def self_check(self):
         self.scribe('(self check) config dict should have been fetched')
         config = self.testcase_config
-        self.assertIn('obsidian_folder_path_str', config.keys())
+        self.assertIn('obsidian_entrypoint_path_str', config.keys())
     
     # Standard tests
     # -------------------------------

@@ -37,6 +37,10 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
                 "user_config.yml": self.new_resource_listing(state="present"),
             }
 
+    def accept(self, module_data_folder):
+        """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
+        return
+        
     def run(self, module, run_module_result):
         # ensure self.resources exists
         self.setup()

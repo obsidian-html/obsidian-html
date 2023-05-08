@@ -61,6 +61,10 @@ class LoadPathsModule(ObsidianHtmlModule):
             exit(1)
         return entrypoint
 
+    def accept(self, module_data_folder):
+        """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
+        return
+
     def run(self):
         gc = self.gc
 
@@ -72,6 +76,7 @@ class LoadPathsModule(ObsidianHtmlModule):
             "html_output_folder": Path(gc("html_output_folder_path_str")).resolve(),
         }
         paths["original_obsidian_folder"] = paths["obsidian_folder"]  # use only for lookups!
+        paths["original_obsidian_entrypoint"] = paths["obsidian_entrypoint"] # use only for lookups!
         paths["dataview_export_folder"] = paths["obsidian_folder"].joinpath(gc("toggles/features/dataview/folder"))
 
         if gc("toggles/extended_logging", cached=True):

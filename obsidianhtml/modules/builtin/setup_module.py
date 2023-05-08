@@ -114,6 +114,10 @@ class SetupModule(ObsidianHtmlModule):
         self.printout_cache(force=True)
         exit(1)
 
+    def accept(self, module_data_folder=None):
+        """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
+        return
+
     # --- main function
     def run(self):
         # parse sys.argv and create arguments dict
