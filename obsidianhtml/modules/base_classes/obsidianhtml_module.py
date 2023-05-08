@@ -37,6 +37,8 @@ class ObsidianHtmlModule(ABC):
         self.test_module_validity()
 
         self.persistent = persistent
+        self.states = {}
+        self.states["cancelled_run"] = False
 
         # shortcuts
         self.verbose_enough = verbose_enough
@@ -67,6 +69,11 @@ class ObsidianHtmlModule(ABC):
     def alters(self):
         """List of strings denoting which targets are altered by this module"""
         pass
+
+    @abstractmethod
+    def accept(self, module_data_folder):
+        """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
+        return
 
     @abstractmethod
     def run(self, module_data_folder):

@@ -83,6 +83,10 @@ class ProcessConfigModule(ObsidianHtmlModule):
 
         return capabilities_needed
 
+    def accept(self, module_data_folder):
+        """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
+        return
+
     def run(self):
         config = self.config
 

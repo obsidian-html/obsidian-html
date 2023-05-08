@@ -32,6 +32,10 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
     def alters(self):
         return tuple()
 
+    def accept(self, module_data_folder):
+        """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
+        return
+
     def run(self):
         self.get_html_template()
         self.compile_dynamic_inclusions()

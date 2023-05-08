@@ -42,6 +42,13 @@ class VaultCopyModule(ObsidianHtmlModule):
         pb.paths["original_obsidian_folder"] = paths["original_obsidian_folder"]
         pb.paths["original_obsidian_entrypoint"] = paths["original_obsidian_entrypoint"]
 
+    def accept(self, module_data_folder):
+        """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
+        if not self.gc("copy_vault_to_tempdir"):
+            return False
+        if not self.gc("toggles/compile_md"):
+            return False
+
     def run(self):
         if not self.gc("copy_vault_to_tempdir"):
             return
@@ -201,7 +208,7 @@ class VaultCopyModule(ObsidianHtmlModule):
                         # otherwise let the copy occurs. copy2 will raise an error
                         copy_function(srcname, dstname)
                 elif os.path.isdir(srcname):
-                    self.copytree_shutil(srcname, dstname, symlinks, ignore, copy_function, follow_copy=follow_copy)
+                    self.copytree_shutil(srcname, dstname, symlinks, follow_copy=follow_copy, ignore=ignore, copy_function=copy_function, ignore_dangling_symlinks=ignore_dangling_symlinks)
                 else:
                     # Will raise a SpecialFileError for unsupported file types
                     copy_function(srcname, dstname)
@@ -221,7 +228,7 @@ class VaultCopyModule(ObsidianHtmlModule):
             else:
                 errors.extend((src, dst, str(why), "copystat error"))
         if errors:
-            raise Exception(errors)
+            raise Exception("".join(errors))
 
 
     def copytree_shutil_walk(self, src, dst, symlinks=False, follow_copy=False, ignore=None, copy_function=shutil.copy, ignore_dangling_symlinks=False):
