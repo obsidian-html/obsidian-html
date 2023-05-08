@@ -60,9 +60,6 @@ class Index:
         if pb.gc("toggles/verbose_printout", cached=True):
             print("< CREATING FILE TREE: Done")
 
-        if pb.gc("toggles/extended_logging", cached=True):
-            WriteFileLog(pb.index.files, pb.paths["log_output_folder"].joinpath("files.md"), include_processed=False)
-
     def convert_file_to_file_object_and_add_to_file_tree(self, path, root, excluded_folders, pb):
         if path.is_dir():
             return

@@ -238,7 +238,7 @@ def load_module_itenary(module_data_folder):
     with open(config_file_path, "r") as f:
         module_cfg = yaml.safe_load(f.read())
 
-    def hydrate_module_list(mod):
+    def hydrate_module_listing(mod):
         # fill in defaults
         if "type" not in mod.keys():
             mod["type"] = "built-in"
@@ -264,12 +264,19 @@ def load_module_itenary(module_data_folder):
             module_source=mod["type"],
         )
 
-    for mod in module_cfg["modules"]:
-        hydrate_module_list(mod)
-    for mod in module_cfg["meta_modules_post"]:
-        hydrate_module_list(mod)
+    for phase in module_cfg["module_list"].keys():
+        for mod in module_cfg["module_list"][phase]:
+            hydrate_module_listing(mod)
 
-    return (module_cfg["modules"], module_cfg["meta_modules_post"])
+    for mod in module_cfg["meta_modules_post"]:
+        hydrate_module_listing(mod)
+
+    # for mod in module_cfg["modules"]:
+    #     hydrate_module_list(mod)
+    # for mod in module_cfg["meta_modules_post"]:
+    #     hydrate_module_list(mod)
+
+    return (module_cfg["module_list"], module_cfg["meta_modules_post"])
 
 
 def run_module_setup(pb=None):

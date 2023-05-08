@@ -19,11 +19,6 @@ obsidian_entrypoint_path_str: '<REQUIRED_INPUT>'
 # Use full path or relative path, but don't use ~/
 md_folder_path_str:  'output/md'
 
-module_data_folder: 'output/mod'
-verbosity: error #info
-meta_modules_post: []
-modules: []
-
 # Markdown entrypoint path
 # This has to be md_folder_path_str + '/index.md' when toggles/compile_md == True
 # This can be an absolute or a relative path (relative to the working directory when calling obsidianhtml)
@@ -35,10 +30,81 @@ md_entrypoint_path_str: 'output/md/index.md'
 # Use full path or relative path, but don't use ~/
 html_output_folder_path_str: 'output/html'
 
-# If extended logging is enabled under toggles/extended_logging
-# Extra information is written to this folder
-log_output_folder_path_str: 'output/log'
+module_data_folder: 'output/mod'
 
+##########################################################################
+#                               GLOBAL                                   #
+##########################################################################
+verbosity: error #info
+
+##########################################################################
+#                              MODULES                                   #
+##########################################################################
+module_list:
+  preparation:
+    - name: process_config
+      description: Merges the user config with default config and runs checks.
+
+    - name: load_paths
+      description: Determine all paths of interest based on input.
+
+    - name: html_templater
+      description: Prepare and export templates used to create html output.
+      persistent: True
+
+    - name: load_graphers
+      persistent: True
+
+    - name: copy_vault_to_tempdirectory
+      description: 
+        - Copy vault to temporary directory, so that we can edit the obsidian notes themselves safely.
+        - Must be persistent!
+      persistent: True
+
+    - name: prepare_output_folders
+      description: 
+        - Ensures the output folders are created
+        - Optionally removes previous output if it exists in the target directories
+
+    - name: resource_logger
+      description:
+        - Creates the log of which module resources were accessed by which module
+        - Requires persistent meta_module of the same name to work!
+      persistent: True
+      method: finalize
+
+  # indexing:
+  #   - name: get_file_list
+  #     description: 
+  #       - Basic file listing based on include_folder/exclude_glob combination
+  #       - Further filtering can be done in further modules
+
+  #   - name: hydrate_file_list
+  #     description:
+  #       - Read and parse the selected files, then create a FileObject for each
+
+  convert_note_to_markdown: []
+  convert_markdown_to_html: []
+  post_conversion: []
+
+meta_modules_post:
+  - name: resource_logger
+    persistent: True
+
+# use the name of the module as a key in the dict below
+# for configuration settings, consult the spec of the module in question
+module_config:
+  prepare_output_folders:
+    clean_existing: 
+      description: Files that exist in the output folders are deleted.
+      value: True
+    fail_on_existing: 
+      description: 
+        - Exit with error if output folders are not empty.
+        - Does nothing if clean_existing = True!
+      value: False
+    
+  
 ##########################################################################
 #                              OPERATIONS                                #
 ##########################################################################
@@ -182,9 +248,6 @@ toggles:
   verbose_printout: False # deprecated for verbose
 
   debug_filetree_keys: False
-
-  # Write extra information to log_output_folder_path_str
-  extended_logging: False
 
   # This option should be False for Obsidian->Md, but can be True when compile_md == False
   # Setting it to True will cause an error when two files with the same file name are found anywhere in the input folder

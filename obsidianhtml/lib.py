@@ -263,6 +263,9 @@ def expect_list(var):
 
 def MergeDictRecurse(base_dict, update_dict, path=""):
     helptext = "\n\nTip: Run \`obsidianhtml export default-config\` to see all configurable keys and their default values.\n"
+    
+    # these dicts are freeform, and thus should not be checked
+    excluded_key_paths = ["module_config"]
 
     def check_leaf(key_path, val):
         if val == "<REMOVED>":
@@ -293,7 +296,10 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
 
         # dict match -> recurse
         if isinstance(base_dict[k], dict) and isinstance(v, dict):
-            base_dict[k] = MergeDictRecurse(base_dict[k], update_dict[k], path=key_path)
+            if key_path in excluded_key_paths:
+                base_dict[k] = update_dict[k].copy()
+            else:
+                base_dict[k] = MergeDictRecurse(base_dict[k], update_dict[k], path=key_path)
             continue
 
         # other cases -> copy over

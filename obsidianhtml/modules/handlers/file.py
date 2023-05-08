@@ -28,12 +28,13 @@ class File:
         self.module = module
         # self.via_integration = via_integration # don't do provides/requires check if read/write is done in the integration step
 
-        self.allow_absent = False
+        self.allow_absent = allow_absent
 
-    def read(self):
+    def read(self, sneak=False):
         # check whether module reports reading this input (or has already written it)
         if (
             self.is_module_file
+            and sneak == False
             and self.resource_rel_path not in self.module.requires
             and self.resource_rel_path not in self.module.written_files.listing()
         ):
@@ -45,16 +46,20 @@ class File:
 
         # record reading the file
         # temporary: while integrate methods exist: don't report reads for the integrate save method
-        if inspect.stack()[1][3] not in ("integrate_save",):
+        if sneak == False and inspect.stack()[1][3] not in ("integrate_save",):
             self.module.read_files.add(self.resource_rel_path)
 
+        # Handle file not existing
         if not os.path.isfile(self.path):
             if not self.allow_absent:
                 raise Exception(
-                    f"File read error: Tried to read non-existent resource {path}. Use allow_absent=True if empty string should be returned."
+                    f"File read error: Tried to read non-existent resource {self.path}. Use allow_absent=True if empty string should be returned."
                 )
             else:
                 self.contents = ""
+                return self
+
+        # open file contents
         with open(self.path, "r", encoding=self.encoding) as f:
             self.contents = f.read()
 

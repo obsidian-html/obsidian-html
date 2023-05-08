@@ -20,35 +20,4 @@ class Optional:
             pb.update_paths(reason="using_tmpdir", tmpdir=tmpdir)
             pb.jars["tmpdir"] = tmpdir  # store so that the reference remains in memory and the folder is not instantly deleted!
 
-    @staticmethod
-    def remove_previous_obsidianhtml_output(pb) -> T.SystemChange:
-        """Cleanup the result of the previous run (md and html folders)"""
 
-        if pb.gc("toggles/no_clean", cached=True) is False:
-            print("> CLEARING OUTPUT FOLDERS")
-            if pb.gc("toggles/compile_md", cached=True):
-                if pb.paths["md_folder"].exists():
-                    shutil.rmtree(pb.paths["md_folder"])
-
-            if pb.paths["html_output_folder"].exists():
-                shutil.rmtree(pb.paths["html_output_folder"])
-
-
-def create_obsidianhtml_output_folders(pb) -> T.SystemChange:
-    """We need to ensure that the folders that we write our markdown and html to exist."""
-
-    if pb.gc("toggles/compile_md", cached=True) or pb.gc("toggles/compile_html", cached=True):
-        print("> CREATING OUTPUT FOLDERS")
-
-    # create markdown output folder
-    if pb.gc("toggles/compile_md", cached=True):
-        pb.paths["md_folder"].mkdir(parents=True, exist_ok=True)
-
-    # create html output folders
-    if pb.gc("toggles/compile_html", cached=True):
-        pb.paths["html_output_folder"].mkdir(parents=True, exist_ok=True)
-
-    # create logging output folders
-    if pb.gc("toggles/extended_logging", cached=True):
-        pb.paths["log_output_folder"].mkdir(parents=True, exist_ok=True)
-        pb.paths["log_output_folder"] = pb.paths["log_output_folder"].resolve()

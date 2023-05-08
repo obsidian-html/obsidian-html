@@ -41,7 +41,7 @@ def ConvertVault(config_yaml_location=""):
         cfg = yaml.safe_load(f.read())
         verbosity = cfg["verbosity"]
 
-    modules, meta_modules_post = module_controller.load_module_itenary(module_data_folder)
+    module_list, meta_modules_post = module_controller.load_module_itenary(module_data_folder)
     instantiated_modules = {}
 
     # Run modules
@@ -54,26 +54,15 @@ def ConvertVault(config_yaml_location=""):
         "pb": pb,
     }
 
-    module_controller.run_module(module_name="process_config", **defaults)
-    module_controller.run_module(module_name="load_paths", **defaults)
-    module_controller.run_module(module_name="html_templater", persistent=True, **defaults)
-    module_controller.run_module(module_name="load_graphers", persistent=True, **defaults)
-    module_controller.run_module(module_name="copy_vault_to_tempdirectory", persistent=True, **defaults)
-    module_controller.run_module(module_name="resource_logger", method="finalize", persistent=True, **defaults)
+    for m in module_list["preparation"]:
+        module_controller.run_module(
+            module_name=m["name"], 
+            method=m["method"], 
+            persistent=m["persistent"],
+            **defaults
+        )
 
-    print(pb.paths["original_obsidian_entrypoint"], "--->", pb.paths["obsidian_entrypoint"])
-
-
-    # Setup filesystem
-    # ---------------------------------------------------------
-    # tmpdir = Actor.Optional.copy_vault_to_tempdir(
-    #     pb
-    # )  # isort: skip DO NOT REMOVE reference "tmpdir ="  or the folder will be immediately removed!
-    # retain_reference(tmpdir)
-
-    Actor.Optional.remove_previous_obsidianhtml_output(pb)
-    Actor.create_obsidianhtml_output_folders(pb)
-
+ 
     # Load input files into file tree
     # ---------------------------------------------------------
     Index(pb)
@@ -153,9 +142,6 @@ def convert_obsidian_notes_to_markdown(pb):
                 pb.reset_state()
             print("\t< FEATURE: PROCESS ALL: Done")
 
-    if pb.gc("toggles/extended_logging", cached=True):
-        WriteFileLog(pb.index.files, pb.paths["log_output_folder"].joinpath("files_ntm.md"), include_processed=True)
-
 
 def convert_markdown_to_html(pb):
     if not pb.gc("toggles/compile_html", cached=True):
@@ -208,9 +194,6 @@ def convert_markdown_to_html(pb):
             pb.reset_state()
 
         print("\t< FEATURE: PROCESS ALL: Done")
-
-    if pb.gc("toggles/extended_logging", cached=True):
-        WriteFileLog(pb.index.files, pb.paths["log_output_folder"].joinpath("files_mth.md"), include_processed=True)
 
     # [??] Second pass
     # ------------------------------------------
