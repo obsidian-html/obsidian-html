@@ -14,6 +14,7 @@ self.print commands will be cached until we know the verbosity, and then printed
 import sys
 import os
 import yaml
+import uuid
 
 from pathlib import Path
 
@@ -32,7 +33,7 @@ class SetupModule(ObsidianHtmlModule):
 
     @property
     def provides(self):
-        return tuple(["config.yml", "user_config.yml", "arguments.yml"])
+        return tuple(["config.yml", "user_config.yml", "arguments.yml", "guid.txt"])
 
     @property
     def alters(self):
@@ -142,6 +143,11 @@ class SetupModule(ObsidianHtmlModule):
 
         # ensure module data folder exists
         Path(self.module_data_folder).mkdir(parents=True, exist_ok=True)
+
+        # write guid.txt, this contains the guid for this run, which can be used to target 
+        # files created by a previous run
+        with open(self.module_data_folder+"/guid.txt", "w") as f:
+            f.write(str(uuid.uuid4()))
 
         # write config files to module data folder - now we have access to info such as verbosity
         self.modfile("config.yml", config).to_yaml().write()

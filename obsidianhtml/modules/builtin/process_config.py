@@ -88,7 +88,7 @@ class ProcessConfigModule(ObsidianHtmlModule):
         return
 
     def run(self):
-        config = self.config
+        config = self.config.unwrap()
 
         # check if config is valid
         self.check_required_values_filled_in(config)

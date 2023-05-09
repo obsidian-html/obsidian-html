@@ -66,16 +66,21 @@ class VaultCopyModule(ObsidianHtmlModule):
         for key, value in paths.items():
             paths[key] = Path(value)
 
-        # Create tmpdir and edit paths
+        # Create tmpdir
         tmpdir = self.create_temporary_directory()
+
+        # Update paths to use new tmpdir
+        self.print("DEBUG", "Overwriting paths: obsidian_folder, obsidian_entrypoint, input_folder")
 
         paths["original_obsidian_folder"] = paths["obsidian_folder"]
         paths["original_obsidian_entrypoint"] = paths["obsidian_entrypoint"]
 
-        self.print("DEBUG", "Overwriting paths: obsidian_folder, obsidian_entrypoint")
-
         paths["obsidian_folder"] = Path(tmpdir.name).resolve()
         paths["obsidian_entrypoint"] = paths["obsidian_folder"].joinpath(paths["rel_obsidian_entrypoint"])
+
+        if self.gc("toggles/compile_md"):
+            paths["input_folder"] = paths["obsidian_folder"]
+            paths["entrypoint"] = paths["obsidian_entrypoint"]
 
         self.store("paths", paths)
         self.modfile("paths.json", paths).to_json().write()

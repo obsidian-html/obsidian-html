@@ -54,7 +54,7 @@ def ConvertVault(config_yaml_location=""):
         "pb": pb,
     }
 
-    for m in module_list["preparation"]:
+    def run_module(m):
         module_controller.run_module(
             module_name=m["name"], 
             method=m["method"], 
@@ -62,7 +62,13 @@ def ConvertVault(config_yaml_location=""):
             **defaults
         )
 
- 
+    for module_listing in module_list["preparation"]:
+        run_module(module_listing)
+    # for module_listing in module_list["indexing"]:
+    #     run_module(module_listing)
+    for module_listing in module_list["finalize"]:
+        run_module(module_listing)
+
     # Load input files into file tree
     # ---------------------------------------------------------
     Index(pb)

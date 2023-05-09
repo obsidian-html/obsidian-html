@@ -4,6 +4,7 @@ import yaml
 import inspect
 
 from pathlib import Path
+from datetime import datetime
 
 from ..lib import hash_wrap
 
@@ -38,11 +39,18 @@ class File:
             and self.resource_rel_path not in self.module.requires
             and self.resource_rel_path not in self.module.written_files.listing()
         ):
-            # temporary: while integrate methods exist: don't do checks for the integrate methods
-            if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
-                raise Exception(
-                    f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires."
-                )
+            # excempted methods from requirement to report reading/writing
+            stack = inspect.stack()
+            if stack[1][3] not in ("integrate_save", "integrate_load"):
+                if len(stack) > 3 and stack[3][3] in ["write", "print"]:
+                    pass
+                else:
+                    if len(stack) > 3:
+                        print(stack[3][3])
+                        
+                    raise Exception(
+                        f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires."
+                    )
 
         # record reading the file
         # temporary: while integrate methods exist: don't report reads for the integrate save method
@@ -83,6 +91,22 @@ class File:
         # write file
         with open(self.path, "w", encoding=self.encoding) as f:
             f.write(self.contents)
+
+        if self.module.gc("keep_module_file_versions"):
+            # determine folder to create the versioned file in
+            with open(self.module.module_data_folder + "/guid.txt", "r") as f:
+                guid = f.read()
+            version_files_folder = Path(self.module.module_data_folder).joinpath(f"versions/{guid}")
+
+            # edit file name to include timestamp and module name
+            version_path = version_files_folder.joinpath(Path(self.path).relative_to(self.module.module_data_folder))
+            version_path = version_path.parent.joinpath(datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z') + "_" + self.module.module_name + "__" +version_path.name)
+            version_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # write versioned file
+            with open(version_path, "w", encoding=self.encoding) as f:
+                f.write(self.contents)
+
 
     # --- read contents
     def text(self):

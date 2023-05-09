@@ -35,6 +35,7 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
                 "arguments.yml": self.new_resource_listing(state="present"),
                 "config.yml": self.new_resource_listing(state="present"),
                 "user_config.yml": self.new_resource_listing(state="present"),
+                "guid.txt": self.new_resource_listing(state="present"),
             }
 
     def accept(self, module_data_folder):

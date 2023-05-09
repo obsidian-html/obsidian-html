@@ -73,23 +73,42 @@ module_list:
       persistent: True
       method: finalize
 
-  # indexing:
-  #   - name: get_file_list
-  #     description: 
-  #       - Basic file listing based on include_folder/exclude_glob combination
-  #       - Further filtering can be done in further modules
+    - name: get_file_list
+      description: 
+        - Basic file listing based on include_folder/exclude_glob combination
+        - Further filtering can be done in further modules
+
+    - name: parse_metadata
+      description:
+        - Gets the metadata of each markdown file, and stores it under metadata/<rel_filepath>.json
+
+    - name: filter_on_metadata
+      description:
+        - Filter out markdown files that do not comply to certain metadata requirements
 
   #   - name: hydrate_file_list
   #     description:
-  #       - Read and parse the selected files, then create a FileObject for each
+  #       - Read and parse the selected files, then create a dict with info such as rel_path, full_path, html_rel_path, etc
 
   convert_note_to_markdown: []
   convert_markdown_to_html: []
-  post_conversion: []
+
+  finalize:
+    - name: resource_logger
+      description:
+        - Creates the log of which module resources were accessed by which module
+        - Requires persistent meta_module of the same name to work!
+      persistent: True
+      method: finalize
 
 meta_modules_post:
   - name: resource_logger
     persistent: True
+
+# Will create an extra file under module_data_folder/versions/<guid> with timestamp and module name
+# for each module file written with the self.modfile(...).write() method.
+# Used for debugging purposes.
+keep_module_file_versions: False
 
 # use the name of the module as a key in the dict below
 # for configuration settings, consult the spec of the module in question
