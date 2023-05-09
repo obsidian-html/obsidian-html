@@ -46,14 +46,15 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
             ],
         }
         self.mod_config["exclude_on"] = {
-            "value": [
-                [
-                    {"tagged": "type/automation"}
-                ],
-            ],
+            "value": [],
             "description": [
                 "Works the same as 'include_on', but in reverse.",
                 "Include_on results in an 'excluded_files' list, as does this setting. Both lists are summed.",
+            ],
+            "example_value": [
+                [
+                    {"tagged": "type/automation"}
+                ],
             ],
 
         }
