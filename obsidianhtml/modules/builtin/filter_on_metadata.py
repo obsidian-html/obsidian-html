@@ -12,10 +12,9 @@ from ..base_classes import ObsidianHtmlModule
 
 class FilterOnMetadataModule(ObsidianHtmlModule):
     """
-    This module will try to read the metadata of each markdown file in the `index/files.json` list.
-    If this succeeds it will check whether the required keys are present/absent
-    Any files that do not have the required keys/have keys that should be absent will be filtered out.
-    You can configure whether failure to load the metadata should lead to the file being filtered out or not.
+    This module will load index/metadata.json, which contains a metadata record for each markdown file in the vault (after crude filtering).
+    It will then test each file's metadata against the include_on and exclude_on rules, compiling an excluded_files list.
+    The files index/files.json and index/markdown_files.json are then updated so that the items in excluded_files are removed from them.
     """
 
     @property
