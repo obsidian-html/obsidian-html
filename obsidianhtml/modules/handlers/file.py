@@ -39,11 +39,18 @@ class File:
             and self.resource_rel_path not in self.module.requires
             and self.resource_rel_path not in self.module.written_files.listing()
         ):
-            # temporary: while integrate methods exist: don't do checks for the integrate methods
-            if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
-                raise Exception(
-                    f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires."
-                )
+            # excempted methods from requirement to report reading/writing
+            stack = inspect.stack()
+            if stack[1][3] not in ("integrate_save", "integrate_load"):
+                if len(stack) > 3 and stack[3][3] in ["write", "print"]:
+                    pass
+                else:
+                    if len(stack) > 3:
+                        print(stack[3][3])
+                        
+                    raise Exception(
+                        f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires."
+                    )
 
         # record reading the file
         # temporary: while integrate methods exist: don't report reads for the integrate save method

@@ -84,6 +84,14 @@ class LoadPathsModule(ObsidianHtmlModule):
             paths["rel_obsidian_entrypoint"] = paths["obsidian_entrypoint"].relative_to(paths["obsidian_folder"])
         paths["rel_md_entrypoint_path"] = paths["md_entrypoint"].relative_to(paths["md_folder"])
 
+        # set input folder / entrypoint
+        if gc("toggles/compile_md"):
+            paths["input_folder"] = paths["obsidian_folder"]
+            paths["entrypoint"] = paths["obsidian_entrypoint"]
+        else:
+            paths["input_folder"] = paths["md_folder"]
+            paths["entrypoint"] = paths["md_entrypoint"]
+
         # Convert to posix string for exporting
         for key in paths.keys():
             paths[key] = paths[key].as_posix()
