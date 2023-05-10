@@ -100,7 +100,6 @@ class GetFileListModule(ObsidianHtmlModule):
 
         # check that the entrypoint file is not being filtered out
         if paths["entrypoint"].as_posix() not in selected_files:
-            print(selected_files[0])
             self.print('ERROR', f'You have configured {self.nametag} to filter out {paths["entrypoint"]}, which is your entrypoint. Correct this and run again.')
             exit(1)
 

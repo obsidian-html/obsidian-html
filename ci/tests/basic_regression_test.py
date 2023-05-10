@@ -296,7 +296,7 @@ class TestAFiltering1(ModeTemplate):
     testcase_name = "FilteringTests"
     testcase_custom_config_values = [
         ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'), 
-        ('included_folders', ['filtering']),
+        ('module_config/get_file_list/include_glob/value', ['filtering/**/*']),
         ('copy_vault_to_tempdir', False),
     ]
     def test_include_folder(self):
@@ -307,12 +307,13 @@ class TestAFiltering1(ModeTemplate):
 class TestAFiltering2(ModeTemplate):
     testcase_name = "FilteringTests"
     testcase_custom_config_values = [
-        ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'), 
-        ('included_folders', ['filtering']),
-        ('exclude_glob', ['/filtering/excl', '*.pdf']),
+        ('obsidian_entrypoint_path_str', 'ci/test_vault/filtering/home.md'),
+        ('module_config/get_file_list/include_glob/value', ['filtering/**/*']),
+        ('module_config/get_file_list/exclude_glob/value', ['*.pdf','/filtering/excl/**/*']),
         ('copy_vault_to_tempdir', False),
     ]
     def test_include_folder(self):
+        print(yaml.dump(self.testcase_config))
         self.scribe('Exclude folder')
         issues, actual_files = check_md_output('md/filtering', ['neutral'])
         self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{actual_files}\n{yaml.dump(issues)}")

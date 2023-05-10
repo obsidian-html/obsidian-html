@@ -110,18 +110,29 @@ meta_modules_post:
 # Used for debugging purposes.
 keep_module_file_versions: False
 
-# use the name of the module as a key in the dict below
-# for configuration settings, consult the spec of the module in question
-module_config:
-  prepare_output_folders:
-    clean_existing: 
-      description: Files that exist in the output folders are deleted.
-      value: True
-    fail_on_existing: 
-      description: 
-        - Exit with error if output folders are not empty.
-        - Does nothing if clean_existing = True!
-      value: False
+# Use the name of the module as a key in the dict below
+# For accurate configuration settings, consult the spec of the module in question.
+# Defaults of the modules are shown in the commented blocks
+module_config: {}
+  # get_file_list:
+  #   include_glob:
+  #     value: '*'
+  #   exclude_glob:
+  #     value: 
+  #       - ".obsidian/**/*"
+  #       - ".trash/**/*",
+  #       - ".DS_Store/**/*",
+  #       - ".git/**/*",
+
+  # prepare_output_folders:
+  #   clean_existing: 
+  #     description: Files that exist in the output folders are deleted.
+  #     value: True
+  #   fail_on_existing: 
+  #     description: 
+  #       - Exit with error if output folders are not empty.
+  #       - Does nothing if clean_existing = True!
+  #     value: False
     
   
 ##########################################################################
