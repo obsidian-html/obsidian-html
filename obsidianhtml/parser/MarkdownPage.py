@@ -469,10 +469,15 @@ class MarkdownPage:
         # -- [8] Insert markdown links for bare http(s) links (those without the [name](link) format).
         # Cannot start with [, (, nor "
         # match 'http://* ' or 'https://* ' (end match by whitespace)
-        for matched_link in re.findall(r"(?<![\[\(\"])(https*:\/\/.[^\s|]*)", self.page):
+        matched_links = re.findall(r"(?<![\[\(\"])(https*:\/\/.[^\s|]*)", self.page)
+        
+        # sort from longest to shortest to avoid links with the same base being partly overwritten
+        matched_links.sort(reverse=True, key=lambda e: len(e))
+
+        for matched_link in matched_links:
             new_md_link = f"[{matched_link}]({matched_link})"
             safe_link = re.escape(matched_link)
-            self.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, self.page)
+            self.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, self.page) 
 
         # -- [9] Remove inline tags, like #ThisIsATag
         # Inline tags are # connected to text (so no whitespace nor another #)

@@ -1,6 +1,7 @@
 import os
 import yaml
 import frontmatter
+import regex as re
 
 from pathlib import Path
 
@@ -12,7 +13,8 @@ from ..base_classes import ObsidianHtmlModule
 
 class ParseMetadataModule(ObsidianHtmlModule):
     """
-    This module will load all the files in index/markdown_files.json and load the metadata, which is written to index/metadata.json
+    This module will load all the files in index/markdown_files.json and load the metadata and inline tags, which are combined
+    and the result is written to index/metadata.json
     """
 
     @property
@@ -50,8 +52,11 @@ class ParseMetadataModule(ObsidianHtmlModule):
 
     def get_frontmatter(self, file_path):
         with open(file_path, encoding="utf-8") as f:
-            metadata, _ = frontmatter.parse(f.read())
-        return self.sanatize_frontmatter(metadata)
+            metadata, page = frontmatter.parse(f.read())
+        return self.sanatize_frontmatter(metadata), page
+
+    def get_inline_tags(self, page):
+        return [x[1:].replace(".", "") for x in re.findall(r"(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]
 
     def run(self):
         # get input
@@ -61,7 +66,10 @@ class ParseMetadataModule(ObsidianHtmlModule):
         # handle files
         output = {}
         for file in files:
-            metadata= self.get_frontmatter(file)
+            metadata, page = self.get_frontmatter(file)
+            inline_tags = self.get_inline_tags(page)
+            metadata["tags"] = list(set(metadata["tags"] + inline_tags))
+    
             rel_path = Path(file).relative_to(paths["input_folder"]).as_posix()
             output[rel_path] = metadata
 
