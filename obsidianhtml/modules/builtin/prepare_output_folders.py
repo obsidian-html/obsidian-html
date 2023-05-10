@@ -31,16 +31,16 @@ class PrepareOutputFoldersModule(ObsidianHtmlModule):
         return tuple(["md_misc", "html_misc"])
 
     def define_mod_config_defaults(self):
-        self.mod_config["fail_on_existing"] = {
-            "value": False,
-            "description": "Exit with error if output folders are not empty."
-        }
         self.mod_config["clean_existing"] = {
             "value": True,
             "description": [
                 "Files that exist in the output folders are deleted.",
                 "Does nothing if clean_existing = True!"
             ]
+        }
+        self.mod_config["fail_on_existing"] = {
+            "value": False,
+            "description": "Exit with error if output folders are not empty."
         }
 
     def accept(self, module_data_folder):

@@ -4,7 +4,7 @@ import yaml
 import inspect
 
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, date
 
 from ..lib import hash_wrap
 
@@ -144,7 +144,9 @@ class File:
 
 
 class to_json_encoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, Path):
-            return o.resolve().as_posix()
-        return o.__name__
+    def default(self, obj):
+        if isinstance(obj, Path):
+            return obj.resolve().as_posix()
+        if isinstance(obj, (date, datetime)):
+            return obj.isoformat()
+        return obj.__name__
