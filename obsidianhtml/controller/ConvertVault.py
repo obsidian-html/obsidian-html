@@ -59,6 +59,8 @@ def ConvertVault(config_yaml_location=""):
             module_name=m["name"], 
             method=m["method"], 
             persistent=m["persistent"],
+            module_source=m["file"],
+            module_class_name=m["module_class"],
             **defaults
         )
 

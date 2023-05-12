@@ -1,0 +1,5 @@
+obsidianhtml version {version}
+Usage: obsidianhtml <command> [arguments...] [command options] [global options]
+Available commands: convert, config, export, serve, help
+
+Run `obsidianhtml help` for more information

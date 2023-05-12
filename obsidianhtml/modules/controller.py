@@ -1,6 +1,9 @@
 """This file contains all the code necessary to run a module."""
-
+import sys
 import yaml
+import importlib
+
+from pathlib import Path
 
 from . import builtin
 from .lib import verbose_enough
@@ -36,7 +39,7 @@ def run_module(
     meta_modules_post=None,
     instantiated_modules=None,
     persistent=None,
-    module_source="built-in",
+    module_source=None,
     pb=None,
     verbosity="error",
 ):
@@ -143,7 +146,7 @@ def get_module(
     module_name=None,
     module_class_name=None,
     module_data_folder=None,
-    module_source="built-in",
+    module_source=None,
     persistent=None,
     instantiated_modules=None,
     verbosity=None,
@@ -175,7 +178,7 @@ def get_module(
 def get_module_class(module_name, module_class_name, module_source):
     # try getting the module based on the name, in case of builtin modules
     # this saves dumb typing
-    if module_source == "built-in":
+    if module_source == None:
         if module_name in builtin.builtin_module_aliases.keys():
             return builtin.builtin_module_aliases[module_name]
         elif module_class_name in builtin.builtin_module_aliases.keys():
@@ -186,7 +189,15 @@ def get_module_class(module_name, module_class_name, module_source):
                 'Is the module class imported in modules/builtin/__init__.py ?'
             )
     else:
-        raise Exception("external modules not yet implemented")
+        # get module from file
+        module_path = Path(module_source)
+        sys.path.insert(1, module_path.parent.as_posix())
+        module_module = importlib.import_module(module_path.stem, package=None) 
+
+        if module_class_name is None:
+            return getattr(module_module, "export_module_class")()
+        else:
+            return getattr(module_module, module_class_name) 
 
 
 def instantiate_module(
@@ -240,8 +251,11 @@ def load_module_itenary(module_data_folder):
 
     def hydrate_module_listing(mod):
         # fill in defaults
-        if "type" not in mod.keys():
-            mod["type"] = "built-in"
+        mod["type"] = "built-in"
+        if "file" in mod.keys():
+            mod["type"] = "external"
+        else:
+            mod["file"] = None
         if "method" not in mod.keys():
             mod["method"] = "run"
         if "persistent" not in mod.keys():
@@ -254,14 +268,14 @@ def load_module_itenary(module_data_folder):
             mod["post_modules_blacklist"] = []
         if "pre_modules_blacklist" not in mod.keys():
             mod["pre_modules_blacklist"] = []
-        if "module" not in mod.keys():
-            mod["module"] = None
+        if "module_class" not in mod.keys():
+            mod["module_class"] = None
 
         # get actual class instead of string
         mod["module"] = get_module_class(
             module_name=mod["name"],
-            module_class_name=mod["module"],
-            module_source=mod["type"],
+            module_class_name=mod["module_class"],
+            module_source=mod["file"],
         )
 
     for phase in module_cfg["module_list"].keys():

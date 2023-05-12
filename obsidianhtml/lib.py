@@ -1,4 +1,5 @@
-import os  #
+import os
+import sys
 import re  # regex string finding/replacing
 import yaml
 import json
@@ -24,10 +25,10 @@ class MalformedTags(Exception):
     pass
 
 
-def print_global_help_and_exit(exitCode: int):
+def print_global_help_and_exit(exitCode: int, help_file="help_texts/help_text"):
     print()
     version = OpenIncludedFile("version")
-    print(OpenIncludedFile("help_texts/help_text").replace("{version}", version))
+    print(OpenIncludedFile(help_file).replace("{version}", version))
     exit(exitCode)
 
 
@@ -195,7 +196,7 @@ def fetch_str(command):
     return output.decode("ascii").replace("\\n", "\n").strip()
 
 
-def FindVaultByEntrypoint(entrypoint_path):
+def find_vault_folder_by_entrypoint(entrypoint_path):
     """Starts at the entrypoint and returns the first parent that contains a '.obsidian' folder"""
     vault_found = False
 
@@ -310,3 +311,89 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
             base_dict[k] = v
 
     return base_dict.copy()
+
+def formatted_print(level, msg):
+    lines = msg.split("\n")
+    print(f"[{level.upper():^7}] * {lines[0]}")
+    if len(lines) == 1:
+        return
+    for line in lines[1:]:
+        print(f"{'':^9}   {line}")
+
+# --- parse commandline
+def get_arguments_dict():
+    def determine_command():
+        if len(sys.argv) < 2:
+            formatted_print("ERROR", "400: You did not pass in a command. If you want to convert your vault, run `obsidianhtml convert [arguments]`")
+            return ["short_help"]
+
+        if "-h" in sys.argv or "--help" in sys.argv or "help" in sys.argv:
+            return ["help"]
+        
+        command = []
+        for i, v in enumerate(sys.argv[1:]):
+            if v[0] == '-':
+                break
+            command.append(v)
+
+        if len(command) == 0:
+            formatted_print("ERROR", "400: You did not pass in a command. If you want to convert your vault, run `obsidianhtml convert [arguments]`")
+            return ["short_help"]
+
+        return command
+
+
+    def determine_config_path():
+        for i, v in enumerate(sys.argv):
+            if v == "-i":
+                if len(sys.argv) < (i + 2):
+                    formatted_print(
+                        "error", "No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input."
+                    )
+                    exit(1)
+                return sys.argv[i + 1]
+        return ""
+
+    def determine_verbose_overwrite():
+        for i, v in enumerate(sys.argv):
+            if v == "-v":
+                return True
+        return False
+
+    def collect_literals():
+        literals = {}
+        valued_args = ["-i", "-f"]
+        non_valued_args = ["-v"]
+        for i, v in enumerate(sys.argv):
+            if v in valued_args:
+                literals[v] = None
+                if len(sys.argv) >= (i + 2):
+                    literals[v] = sys.argv[i + 1]
+                continue
+            if v in non_valued_args:
+                literals[v] = None
+                continue
+        return literals
+
+    def collect_dynamic_arguments(arguments):
+        for i, v in enumerate(sys.argv):
+            if v.startswith("--"):
+                key = v[2:]
+                if key in arguments.keys():
+                    raise Exception(f'400: Trying to set existing {key} in arguments dict (value provided through "{v}"). This is not allowed.')
+                if len(sys.argv) >= (i + 2):
+                    value = sys.argv[i + 1]
+                    if value.startswith("--"):
+                        formatted_print("ERROR", f'400: Trying to set variable "{key}" to value "{value}".\nVariable values cannot start with "--".')
+                        exit(1)
+                    arguments[key] = sys.argv[i + 1]
+
+    arguments = {}
+    arguments["command"] = determine_command()
+    arguments["config_path"] = determine_config_path()
+    arguments["literals"] = collect_literals()
+    collect_dynamic_arguments(arguments)
+
+    if determine_verbose_overwrite():
+        arguments["verbose"] = True
+    return arguments

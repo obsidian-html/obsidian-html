@@ -1,0 +1,20 @@
+Usage: obsidianhtml config <command> [arguments...]
+
+Commands:
+    list                List all configured configs
+    
+    info                Show info such as the config list file location
+
+    set                 Add/alter a configuration
+        Command options:
+            --alias     Name of the configuration listing
+            --file      Path to the configuration file
+
+    delete              Delete a configuration
+        Command options:
+            --alias     Name of the configuration listing to delete
+
+    rename              Rename a configuration
+        Command options:
+            --old       Name of the configuration listing to rename
+            --new       New name

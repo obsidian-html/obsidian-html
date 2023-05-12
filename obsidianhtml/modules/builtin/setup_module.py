@@ -13,13 +13,16 @@ self.print commands will be cached until we know the verbosity, and then printed
 
 import sys
 import os
+import json
 import yaml
 import uuid
+import shutil
 
 from pathlib import Path
 
 from ..base_classes import ObsidianHtmlModule
-from ...lib import OpenIncludedFile, MergeDictRecurse
+from ...lib import OpenIncludedFile, MergeDictRecurse, get_arguments_dict
+from ...controller.Config import get_config_by_alias
 
 
 class SetupModule(ObsidianHtmlModule):
@@ -50,44 +53,18 @@ class SetupModule(ObsidianHtmlModule):
             for level, msg in self.print_cache:
                 self.print(level, msg, force=force)
 
-    # --- parse commandline
-    def get_arguments_dict(self):
-        def determine_command():
-            if "-h" in sys.argv or "--help" in sys.argv or "help" in sys.argv:
-                return "help"
-
-            if len(sys.argv) < 2 or sys.argv[1][0] == "-":
-                raise Exception("You did not pass in a command. If you want to convert your vault, run `obsidianhtml convert [arguments]`")
-
-            return sys.argv[1]
-
-        def determine_config_path():
-            for i, v in enumerate(sys.argv):
-                if v == "-i":
-                    if len(sys.argv) < (i + 2):
-                        self.cached_print(
-                            "error", "No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input."
-                        )
-                        self.printout_cache(force=True)
-                        exit(1)
-                    return sys.argv[i + 1]
-            return ""
-
-        def determine_verbose_overwrite():
-            for i, v in enumerate(sys.argv):
-                if v == "-v":
-                    return True
-            return False
-
-        arguments = {}
-        arguments["command"] = determine_command()
-        arguments["config_path"] = determine_config_path()
-        if determine_verbose_overwrite():
-            arguments["verbose"] = True
-        return arguments
-
     # --- get user config file path
     def get_user_config_path(self, arguments):
+        # see if command is ["convert", "<alias>"]
+        if "command" in arguments and isinstance(arguments["command"], list) and len(arguments["command"]) == 2:
+            alias = arguments["command"][1]
+            config_listing = get_config_by_alias(alias)
+            if config_listing is None:
+                exit(1)
+                
+            self.cached_print("INFO", f'Using config file: {config_listing["file"]}')
+            return config_listing["file"]
+
         # try path that was given via sys.argv:
         if os.path.isfile(arguments["config_path"]):
             return arguments["config_path"]
@@ -108,12 +85,8 @@ class SetupModule(ObsidianHtmlModule):
             self.cached_print("info", f"No config provided, using config at {input_yml_path_str} (Default config path)")
             return input_yml_path_str
 
-        self.cached_print(
-            "error",
-            "No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.",
-        )
-        self.printout_cache(force=True)
-        exit(1)
+        # no valid config found, caller should handle this
+        return None
 
     def accept(self, module_data_folder=None):
         """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
@@ -122,13 +95,40 @@ class SetupModule(ObsidianHtmlModule):
     # --- main function
     def run(self):
         # parse sys.argv and create arguments dict
-        arguments = self.store("arguments", self.get_arguments_dict())
+        arguments = get_arguments_dict()
 
-        # get path to user_config
-        user_config_path = self.get_user_config_path(arguments)
+        # get path to user_config (if exists, otherwise None)
+        arguments["config_path"] = self.get_user_config_path(arguments)
+
+        # entrypoint provided, build/edit user_config
+        if "-f" in arguments["literals"].keys():
+            from .apply_cmdline_arguments import ApplyCommandlineArgumentsModule
+            from ..controller import instantiate_module
+
+            apply_cmdline_arguments_module = instantiate_module(
+                module_class=ApplyCommandlineArgumentsModule,
+                module_name="apply_cmdline_arguments",
+                instantiated_modules=None,
+                persistent=False,
+                module_data_folder=None,
+                verbosity="info",
+            )
+            arguments["config_path"] = apply_cmdline_arguments_module.run(arguments)
+
+        else:
+            if arguments["config_path"] is None:
+                self.cached_print(
+                    "ERROR",
+                    "400: No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.",
+                )
+                self.printout_cache(force=True)
+                exit(1)
+
+        self.store("arguments", arguments)
+
 
         # get contents of the user config, default_config, and merge them to derive the final config file
-        with open(user_config_path, "r") as f:
+        with open(arguments["config_path"], "r") as f:
             user_config_yaml = f.read()
         user_config = yaml.safe_load(user_config_yaml)
 
@@ -142,7 +142,10 @@ class SetupModule(ObsidianHtmlModule):
         self.set_module_data_folder_path(config["module_data_folder"])
 
         # ensure module data folder exists
-        Path(self.module_data_folder).mkdir(parents=True, exist_ok=True)
+        module_data_folder = Path(self.module_data_folder)
+        if module_data_folder.exists():
+            shutil.rmtree(module_data_folder)
+        module_data_folder.mkdir(parents=True, exist_ok=True)
 
         # write guid.txt, this contains the guid for this run, which can be used to target 
         # files created by a previous run
@@ -156,8 +159,6 @@ class SetupModule(ObsidianHtmlModule):
 
         # print cached lines now that we know what to print and what not
         self.printout_cache()
-
-        self.print("INFO", f"Mod folder path: {self.module_data_folder}")
 
         # return module data folder so that the rest of the program knows where to find the info.
         return self.module_data_folder
