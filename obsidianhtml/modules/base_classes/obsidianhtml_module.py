@@ -9,6 +9,7 @@ from pathlib import Path
 from datetime import datetime
 
 from ..lib import verbose_enough, hash_wrap
+from ...lib import formatted_print
 from .. import handlers
 
 
@@ -30,6 +31,10 @@ class ResourceAccessLog:
 
 class ObsidianHtmlModule(ABC):
     def __init__(self, module_data_folder, module_name, persistent=None):
+        # overwrites
+        self.__verbosity__overwrite__ = None
+
+        # set values
         self.set_module_data_folder_path(module_data_folder)
 
         self.module_class_name = self.__class__.__name__
@@ -55,7 +60,8 @@ class ObsidianHtmlModule(ABC):
         # module config
         self.mod_config = {}
         self.define_mod_config_defaults()
-        self.try_load_mod_config()
+        if self.module_data_folder is not None:
+            self.try_load_mod_config()
 
     @property
     def nametag(self):
@@ -79,7 +85,7 @@ class ObsidianHtmlModule(ABC):
         
         for key, item in mcfg.items():
             if key not in self.mod_config:
-                raise Exception(f'Module config key "{key}" is unknown to module {self.nametag})')
+                raise Exception(f'Module config key "{key}" is unknown to module {self.nametag}')
             self.mod_config[key]["value"] = item["value"]
 
     def value_of(self, mod_config_key):
@@ -153,6 +159,8 @@ class ObsidianHtmlModule(ABC):
     @property
     @cache
     def verbosity(self):
+        if self.__verbosity__overwrite__ is not None:
+            return self.__verbosity__overwrite__
         return self.config["verbosity"]
 
     def path(self, rel_path_str_posix):
@@ -183,7 +191,7 @@ class ObsidianHtmlModule(ABC):
         if not force and not verbose_enough(level, self.verbosity):
             return
 
-        print(f"[{level.upper():^7}] * {msg}")
+        formatted_print(level, msg)
 
     def store(self, key, value, overwrite=False):
         """Saves the value under the key for later use in the module"""
@@ -215,6 +223,9 @@ class ObsidianHtmlModule(ABC):
 
     def set_module_data_folder_path(self, module_data_folder_path):
         """Ensures that the module_data_folder is not prefixed with a '/'"""
+        if module_data_folder_path is None:
+            self.module_data_folder = module_data_folder_path
+            return
         if module_data_folder_path[-1] == "/":
             self.module_data_folder = module_data_folder_path[:-1]
         else:

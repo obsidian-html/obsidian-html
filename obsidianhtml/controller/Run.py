@@ -5,7 +5,7 @@ import tempfile
 
 from ..lib import print_global_help_and_exit
 from ..lib import (
-    FindVaultByEntrypoint,
+    find_vault_folder_by_entrypoint,
     OpenIncludedFile,
     YamlIndentDumper,
     get_obshtml_appdir_folder_path,
@@ -95,8 +95,8 @@ def Run():
             config["obsidian_entrypoint_path_str"] = entrypoint_abs_path_posix
             print_set_var(config, "obsidian_entrypoint_path_str", reason="provided by user through config file", category="info")
 
-    # find vault folder based on entrypoint
-    result = FindVaultByEntrypoint(config["obsidian_entrypoint_path_str"])
+    # find vault folder based on entrypoint 
+    result = find_vault_folder_by_entrypoint(config["obsidian_entrypoint_path_str"])
     if result:
         config["obsidian_folder_path_str"] = result
         print_set_var(config, "obsidian_folder_path_str", reason="deduced", category="info")

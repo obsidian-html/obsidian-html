@@ -1,12 +1,13 @@
 import sys
 
-from .lib import print_global_help_and_exit
+from .lib import print_global_help_and_exit, get_arguments_dict, formatted_print
 from .lib import OpenIncludedFile, GetIncludedResourcePath, fetch_str
 
 from .controller.ConvertVault import ConvertVault
 from .controller.Run import Run
 from .controller.Export import RunExport
 from .controller.Serve import ServeDir
+from .controller.Config import Config
 from .features.EmbeddedSearch import CliEmbeddedSearch
 
 
@@ -19,20 +20,19 @@ def main():
     # Commands
     # ---------------------------------------------------------
     # Set default command
-    if len(sys.argv) < 2 or sys.argv[1][0] == "-":
-        print("You did not pass in a command. If you want to convert your vault, run `obsidianhtml convert [arguments]`")
-        print_global_help_and_exit(1)
+    args = get_arguments_dict()
 
-    command = sys.argv[1]
+    command = args["command"]
+    main_command = command[0]
 
     # Execute command
-    if command == "convert":
+    if main_command == "convert":
         ConvertVault()
-    elif command == "run":
-        Run()
-    elif command == "export":
+    elif main_command == "config":
+        Config()
+    elif main_command == "export":
         RunExport()
-    elif command == "version":
+    elif main_command == "version":
         short_hash = None
         try:
             git_folder_path = GetIncludedResourcePath("").parent.parent.joinpath(".git")
@@ -46,12 +46,16 @@ def main():
         else:
             print(version)
         exit()
-    elif command == "serve":
+    elif main_command == "serve":
         ServeDir()
         exit()
-    elif command == "search":
+    elif main_command == "search":
         CliEmbeddedSearch()
         exit()
+    elif main_command == "help":
+        print_global_help_and_exit(0)
+    elif main_command == "short_help":
+        print_global_help_and_exit(1, "help_texts/short_help_text")
     else:
-        print(f'Command "{command}" is unknown')
-        print_global_help_and_exit(1)
+        formatted_print('ERROR', f'Command "{main_command}" is unknown')
+        print_global_help_and_exit(1, "help_texts/short_help_text")

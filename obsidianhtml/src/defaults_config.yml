@@ -35,13 +35,16 @@ module_data_folder: 'output/mod'
 ##########################################################################
 #                               GLOBAL                                   #
 ##########################################################################
-verbosity: error #info
+verbosity: info # debug, info, error
 
 ##########################################################################
 #                              MODULES                                   #
 ##########################################################################
 module_list:
   preparation:
+    # - name: set_subfolder
+    #   description: Overwrites html_url_prefix and related settings if --subfolder <value> is provided in the commandline
+
     - name: process_config
       description: Merges the user config with default config and runs checks.
 
@@ -65,13 +68,6 @@ module_list:
       description: 
         - Ensures the output folders are created
         - Optionally removes previous output if it exists in the target directories
-
-    - name: resource_logger
-      description:
-        - Creates the log of which module resources were accessed by which module
-        - Requires persistent meta_module of the same name to work!
-      persistent: True
-      method: finalize
 
     - name: get_file_list
       description: 
@@ -134,6 +130,9 @@ module_config: {}
   #       - Does nothing if clean_existing = True!
   #     value: False
     
+  # filter_on_metadata:
+  #   include_on: [[]] # include every note
+  #   exclude_on: [[]] # exclude no note
   
 ##########################################################################
 #                              OPERATIONS                                #

@@ -1,5 +1,5 @@
 from ..base_classes import ObsidianHtmlModule
-from ...lib import FindVaultByEntrypoint
+from ...lib import find_vault_folder_by_entrypoint
 
 import yaml
 from pathlib import Path
@@ -29,8 +29,8 @@ class LoadPathsModule(ObsidianHtmlModule):
             return ""
 
         # Use user provided obsidian_folder_path_str
-        if "obsidian_folder_path_str" in self.config and self.config["obsidian_folder_path_str"] != "<DEPRECATED>":
-            result = FindVaultByEntrypoint(self.config["obsidian_folder_path_str"])
+        if "obsidian_folder_path_str" in self.config and self.config["obsidian_folder_path_str"] not in  ["", "<DEPRECATED>"]:
+            result = find_vault_folder_by_entrypoint(self.config["obsidian_folder_path_str"])
             # check that entrypoint is located inside an obsidian vault
             if result:
                 if Path(result) != Path(self.config["obsidian_folder_path_str"]).resolve():
@@ -43,7 +43,7 @@ class LoadPathsModule(ObsidianHtmlModule):
             return self.check_entrypoint_exists(result)
 
         # Determine obsidian_folder_path_str from obsidian_entrypoint_path_str
-        result = FindVaultByEntrypoint(self.config["obsidian_entrypoint_path_str"])
+        result = find_vault_folder_by_entrypoint(self.config["obsidian_entrypoint_path_str"])
         if result:
             return self.check_entrypoint_exists(result)
         else:
