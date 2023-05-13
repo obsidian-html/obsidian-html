@@ -297,6 +297,9 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
     for k, v in update_dict.items():
         key_path = "/".join(x for x in (path, k) if x != "")
 
+        # these dicts are freeform, and thus should not be checked
+        excluded_key_paths = ["module_config"]
+
         # every configured key should be known in base config, otherwise this might suggest a typo/other error
         if k not in base_dict.keys():
             raise Exception(f'\n\tThe configured key "{key_path}" is unknown. Check for typos/indentation. {helptext}')
@@ -309,7 +312,10 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
 
         # dict match -> recurse
         if isinstance(base_dict[k], dict) and isinstance(v, dict):
-            base_dict[k] = MergeDictRecurse(base_dict[k], update_dict[k], path=key_path)
+            if key_path in excluded_key_paths:
+                base_dict[k] = update_dict[k].copy()
+            else:
+                base_dict[k] = MergeDictRecurse(base_dict[k], update_dict[k], path=key_path)
             continue
 
         # other cases -> copy over

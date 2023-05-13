@@ -129,31 +129,6 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         safe_link = re.escape("](" + ol + ")")
         md.page = re.sub(safe_link, new_link, md.page)
 
-    # [4] Handle local image links (copy them over to output)
-    # ------------------------------------------------------------------
-    for link in re.findall(r"\!\[.*?\]\((.*?)\)", md.page):
-        if link.strip() == "":
-            continue
-
-        l = urllib.parse.unquote(link)
-        if l[0] == "/":
-            l = l.replace("/", "", 1)
-
-        # Only handle local image files (images located in the root folder)
-        # Doublecheck, who knows what some weird '../../folder/..' does...
-        rel_path_str, link_fo = pb.FileFinder.FindFile(l, pb)
-        if rel_path_str is False:
-            if pb.gc("toggles/warn_on_skipped_image", cached=True):
-                warnings.warn(f"Image {l} treated as external and not imported in html")
-            continue
-
-        # Copy src to dst
-        link_fo.copy_file("mth")
-
-        # [11.2] Adjust image link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = "![](" + urllib.parse.quote(link_fo.get_link("html", origin=fo)) + ")"
-        safe_link = r"\!\[.*\]\(" + re.escape(link) + r"\)"
-        md.page = re.sub(safe_link, new_link, md.page)
 
     # [?] Handle local source tag-links (copy them over to output)
     # ------------------------------------------------------------------
