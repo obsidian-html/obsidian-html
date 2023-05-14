@@ -155,7 +155,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         lo.copy_file("mth")
 
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = '<source src="' + urllib.parse.quote(lo.get_link("html", origin=fo)) + '"'
+        new_link = '<source src="' + urllib.parse.quote(lo.get_link("html", origin=fo, encode_special=False)) + '"'
         safe_link = r'<source src="' + re.escape(link) + r'"'
         md.page = re.sub(safe_link, new_link, md.page)
 
@@ -184,7 +184,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
             lo.copy_file("mth")
 
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = template.replace("{link}", urllib.parse.quote(lo.get_link("html", origin=fo)))
+        new_link = template.replace("{link}", urllib.parse.quote(lo.get_link("html", origin=fo, encode_special=False)))
         safe_link = re.escape(tag)
         md.page = re.sub(safe_link, new_link, md.page)
 
@@ -205,7 +205,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         lo.copy_file("mth")
 
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
-        new_link = '<embed src="' + urllib.parse.quote(lo.get_link("html", origin=fo)) + '"'
+        new_link = '<embed src="' + urllib.parse.quote(lo.get_link("html", origin=fo, encode_special=False)) + '"'
         safe_link = r'<embed src="' + re.escape(link) + r'"'
         md.page = re.sub(safe_link, new_link, md.page)
 
