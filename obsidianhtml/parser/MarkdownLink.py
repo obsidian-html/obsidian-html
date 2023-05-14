@@ -70,6 +70,9 @@ class MarkdownLink:
             self.query_delimiter = "#"
             return
         if len(url.split("?")) > 1:
+            # if url ends with .md, the ? is not a query identifier
+            if url.endswith(".md"):
+                return
             self.url = url.split("?")[0]
             self.query = url.split("?", 1)[1]
             self.query_delimiter = "?"
