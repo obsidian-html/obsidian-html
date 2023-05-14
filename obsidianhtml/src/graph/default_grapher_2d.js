@@ -115,8 +115,22 @@ function initGraph(args) {
                 g.actions['right_click'](args)
             })
         
-        setTimeout( () => g.graph.zoomToFit(1000, rem(3), function(n){return zoom_select(n, args)}), 1000 );
+        setTimeout( () => g.graph.zoomToFit(1000, rem(3), function(n){return initGraphDone(n, args)}), 1000 );
     });
+}
+
+function initGraphDone(n, args){
+    // show help text
+    let button = document.getElementById('B'+args['uid'])
+    if (button.innerHTML == 'Hide Graph'){
+        document.getElementById('graph-instructions').classList.add('fadein');
+    }
+    else {
+        document.getElementById('graph-instructions').classList.remove('fadein');
+    } 
+
+    // zoom toward current node
+    zoom_select(n, args)
 }
 
 // HELPER FUNCTIONS

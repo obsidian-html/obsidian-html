@@ -85,4 +85,26 @@ text {
 .graph_header_div_svg {
     width: 1.3rem;
 }
+
+#graph-instructions {
+    width: 100%;
+    text-align: right;
+    color: var(--bg-accent2);
+    position: relative;
+    top: -1.4rem;
+    font-family: monospace;
+    font-size: small;
+    right: 1rem;
+    opacity: 0;
+}
+
+.fadein {
+    animation: fadeIn 1s;
+    animation-fill-mode: forwards;
+}
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
 /*  ----------------------------------------- /GRAPHS ------------------------------------------------ */
