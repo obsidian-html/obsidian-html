@@ -303,6 +303,7 @@ class CreateIndexFromDirStructure:
                     continue
 
                 rel_path = f["rel_path"][1:]
+                rel_path = rel_path.replace("?", "%3F")
                 file_id = self.html_url_prefix + f["rel_path"]
                 name = set_file_name(f, tab_level)
 
