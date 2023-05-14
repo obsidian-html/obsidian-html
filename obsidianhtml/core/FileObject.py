@@ -203,10 +203,19 @@ class FileObject:
     def _get_depth(self, rel_path):
         return rel_path.as_posix().count("/")
 
-    def get_link(self, link_type, origin: "FileObject" = None, origin_rel_dst_path_str=None):
+    def get_link(self, link_type, origin: "FileObject" = None, origin_rel_dst_path_str=None, encode_special=True):
         link = self._get_link(link_type, origin, origin_rel_dst_path_str)
+
         if self.pb.gc("toggles/slugify_html_links", cached=True) and link_type == "html":
             return slugify_path(link)
+
+        # when doing a manual url_encode on the entire link returned by this function,
+        # be sure to set encode_special=False to avoid double encoding
+        if encode_special:
+            # escape question mark
+            if link_type == "html":
+                link = link.replace("?", "%3F")
+
         return link
 
     def _get_link(self, link_type, origin: "FileObject" = None, origin_rel_dst_path_str=None):

@@ -131,7 +131,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
             query_part = ""
             if link.query != "":
                 query_part = link.query_delimiter + link.query
-            new_link = f']({urllib.parse.quote(link.fo.get_link("html", origin=fo))}{query_part})'
+            new_link = f']({urllib.parse.quote(link.fo.get_link("html", origin=fo, encode_special=False))}{query_part})'
 
         # Update link
         safe_link = re.escape("](" + ol + ")")
