@@ -95,13 +95,14 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     # Compile markdown from tagtree
     # ---------------------------------------------------------
-    md = ""
+    md = f"\n# {tagpath[:-1]}\n"
+
     # Handle subtags
     if len(tagtree["subtags"].keys()) > 0:
         if level == 0:
-            md += "# Tags\n"
+            md += "## Tags\n"
         else:
-            md += "# Subtags\n"
+            md += "## Subtags\n"
 
         for key in tagtree["subtags"].keys():
             # Point of recursion
@@ -110,7 +111,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
 
     # Handle notes
     if len(tagtree["notes"]) > 0:
-        md += "\n# Notes\n"
+        md += "\n## Notes\n"
         for note_tuple in tagtree["notes"]:
             fo, url = note_tuple
             note_name = fo.md.GetNodeName()  # note_url.split('/')[-1].replace(".html", "")
