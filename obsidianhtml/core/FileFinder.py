@@ -20,6 +20,9 @@ class FileFinder:
         output["header"] = ""  # the last part in 'link#header'
         output["alias"] = ""
 
+        if link is None:
+            return output
+
         # split folder/note#chapter|alias into ('folder/note#chapter', 'alias')
         parts = link.split("|")
         link = parts[0]
@@ -31,6 +34,9 @@ class FileFinder:
         link = parts[0]
         if len(parts) > 1:
             output["header"] = "#".join(parts[1:])
+
+        if link == "":
+            return output
 
         # Find file. Values will be False when file is not found.
         output["rtr_path_str"], output["fo"] = self._FindFile(link, html_url_prefix, force_filename_to_lowercase)
