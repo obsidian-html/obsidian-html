@@ -272,6 +272,7 @@ class CreateIndexFromDirStructure:
 
                 # test if the folder being processed in this loop has an existing folder note
                 has_folder_note, note_abs_path = self.check_has_folder_note(tree["path"])
+                
                 folder_note_rel_path_str = "-"
                 if has_folder_note:
                     folder_note_rel_path_str = self.html_url_prefix + note_abs_path.as_posix().replace(self.root_str, "", 1)
@@ -309,6 +310,7 @@ class CreateIndexFromDirStructure:
                     continue
 
                 rel_path = f["rel_path"][1:]
+                rel_path = rel_path.replace("?", "%3F")
                 file_id = self.html_url_prefix + f["rel_path"]
                 name = set_file_name(f, tab_level)
 

@@ -224,6 +224,9 @@ def PopulateTemplate(
     template = template.replace("{toggle_right_pane_text}", f"Toggle {get_content_name_by_pane_id(pb, 'right_pane')} Pane")
 
     # Header inclusions
+    # make sure passed in inclusions are last in the list
+    dynamic_inclusions_tail = dynamic_inclusions
+    dynamic_inclusions = ""
     dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/obsidian_core.js"></script>' + "\n"
     dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/encoding.js"></script>' + "\n"
     dynamic_inclusions += '<link rel="stylesheet" href="' + html_url_prefix + '/obs.html/static/master.css" />' + "\n"
@@ -257,6 +260,8 @@ def PopulateTemplate(
 
     if pb.capabilities_needed["directory_tree"]:
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/dirtree.js"></script>' + "\n"
+
+    dynamic_inclusions += dynamic_inclusions_tail + '\n'
 
     if dynamic_includes is not None:
         dynamic_inclusions += dynamic_includes

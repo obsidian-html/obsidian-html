@@ -246,7 +246,7 @@ def convert_markdown_to_html(pb):
             continue
         node_id = m.group(0)
         node = pb.index.network_tree.node_lookup[node_id]
-        html = re.sub("\{_obsidian_html_node_id_pattern_:" + node_id + "}", "", html)
+        html = re.sub("\{_obsidian_html_node_id_pattern_:" + re.escape(node_id) + "}", "", html)
 
         # Get tags
         tags = md2html.get_tags(node)
