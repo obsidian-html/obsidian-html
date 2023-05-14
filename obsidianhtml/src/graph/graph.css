@@ -96,6 +96,7 @@ text {
     font-size: small;
     right: 1rem;
     opacity: 0;
+    text-shadow: #090909 2px 1px 2px;
 }
 
 .fadein {
