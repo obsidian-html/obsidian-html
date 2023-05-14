@@ -63,7 +63,9 @@
                     </button>
                 </div>
                     <div id="Agraph_full_page" class="graph_div_full"></div>
-
+                    <div id="graph-instructions fadein">
+                        Left-click: follow link, Right-click: select node, Scroll: zoom
+                    </div>
             </div>
                         
             
@@ -92,16 +94,7 @@
                     console.log('hi openlink')
                     return window.ObsHtmlGraph.graph_open_link_normal(args)()
                 }
-                window.ObsHtmlGraph.default_actions['left_click'] = function (args){
-                    console.log('hi leftclick')
-                    let g = window.ObsHtmlGraph.graphs[args.uid];
-                    return g.actions['select_node'](args);
-                }
-                window.ObsHtmlGraph.default_actions['right_click'] = function (args){
-                    console.log('hi rightclick')
-                    let g = window.ObsHtmlGraph.graphs[args.uid];
-                    return g.actions['open_link'](args);
-                }
+
 
                 // Get node id from the page where we clicked on the icon for the fullpage graph
                 const urlParams = new URLSearchParams(window.location.search);

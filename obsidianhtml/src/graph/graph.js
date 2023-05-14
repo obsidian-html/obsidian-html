@@ -142,6 +142,7 @@ function run(button, ntid, pinned_node)
     if (button.innerHTML == 'Hide Graph'){
         button.innerHTML = 'Show Graph';
         cont.style.display = "none";
+        document.getElementById('graph-instructions').classList.remove('fadein');
         remove_graph(uid, cont, true);
         return;
     }
@@ -152,7 +153,9 @@ function run(button, ntid, pinned_node)
     // Init graph
     if (!graphs[uid].active){
         enable_graph(uid)
-    } 
+    } else {
+        document.getElementById('graph-instructions').classList.add('fadein');
+    }
 }
 
 function enable_graph(uid){
