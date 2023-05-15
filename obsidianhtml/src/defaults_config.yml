@@ -373,3 +373,5 @@ toggles:
     post_processing: []
     # post_processing:
     #   - module: md_markdown_callouts
+
+module_config: {}
