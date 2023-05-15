@@ -86,7 +86,7 @@ text {
     width: 1.3rem;
 }
 
-#graph-instructions {
+.graph-instructions {
     width: 100%;
     text-align: right;
     color: var(--bg-accent2);

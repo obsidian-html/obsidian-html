@@ -333,6 +333,11 @@ function SetContainer(container) {
         graph_type_button[0].id = graph_type_button[0].id.replace('{level}', container.level)
     }
 
+    let graph_instructions = container.querySelectorAll(".graph-instructions");
+    if (graph_instructions.length == 1) {
+        graph_instructions[0].id = graph_instructions[0].id.replace('{level}', container.level)
+    }
+
     if (window.ObsHtmlGraph){
         window.ObsHtmlGraph.arm_page(container)
     }

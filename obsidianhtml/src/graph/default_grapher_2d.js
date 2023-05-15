@@ -123,10 +123,10 @@ function initGraphDone(n, args){
     // show help text
     let button = document.getElementById('B'+args['uid'])
     if (button.innerHTML == 'Hide Graph'){
-        document.getElementById('graph-instructions').classList.add('fadein');
+        document.getElementById('D'+args['uid']).classList.add('fadein');
     }
     else {
-        document.getElementById('graph-instructions').classList.remove('fadein');
+        document.getElementById('D'+args['uid']).classList.remove('fadein');
     } 
 
     // zoom toward current node
