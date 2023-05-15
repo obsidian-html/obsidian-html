@@ -86,6 +86,8 @@ def convert_markdown_to_header_tree(code):
 
     for i, line in enumerate(lines):
         if len(line) < 2 or line[0] != "#":
+            if len(current_element["content"]) == 0 and len(line.strip()) == 0:
+                continue
             current_element["content"].append(line)
             continue
 
