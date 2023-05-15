@@ -7,6 +7,9 @@ var toc_pane_div = "{toc_pane_div}";
 var dir_index_pane_div = "{dir_index_pane_div}";
 var html_url_prefix = "{html_url_prefix}";
 var CONFIGURED_HTML_URL_PREFIX = "{configured_html_url_prefix}";
+var CONFIG_ONLY_SHOW_FOR_MULTIPLE_HEADERS = {only_show_for_multiple_headers};
+var CONFIG_CLOSE_RIGHT_PANE_IF_EMPTY = {close_right_pane_if_empty};
+var CONFIG_CLOSE_LEFT_PANE_IF_EMPTY = {close_left_pane_if_empty};
 var RELATIVE_PATHS = {relative_paths};
 var documentation_mode = {documentation_mode};
 var tab_mode = !no_tab_mode;
@@ -251,7 +254,7 @@ function LoadTableOfContents(container_div)
     let collection = container_div.getElementsByClassName('toc')
     if (collection.length > 0) {
         let toc = collection[0];
-        if (toc.getElementsByTagName('li').length > 1) {
+        if (!CONFIG_ONLY_SHOW_FOR_MULTIPLE_HEADERS || toc.getElementsByTagName('li').length > 1) {
 
             if (toc_pane_div && no_tab_mode) {
                 let tpd = document.getElementById(toc_pane_div);
@@ -272,13 +275,35 @@ function LoadTableOfContents(container_div)
 }
 
 function SetSidePanes() {
-    let lp = document.getElementById('left_pane_content');
+    let lp = document.getElementById('left_pane');
+    let lpc = document.getElementById('left_pane_content');
     if (lp){
-        SetContainer(lp)
+        if (CONFIG_CLOSE_LEFT_PANE_IF_EMPTY){
+            CloseSidePaneIfEmpty(lp, lpc);
+        }
     }
-    let rp = document.getElementById('right_pane_content');
+    if (lpc){
+        SetContainer(lpc)
+    }
+
+    let rp = document.getElementById('right_pane');
+    let rpc = document.getElementById('right_pane_content');
     if (rp){
-        SetContainer(rp)
+        if (CONFIG_CLOSE_RIGHT_PANE_IF_EMPTY){
+            CloseSidePaneIfEmpty(rp, rpc);
+        }
+    }
+    if (rpc){
+        SetContainer(rpc)
+    }
+}
+
+function CloseSidePaneIfEmpty(pane_div, pane_content_div) {
+    if (!pane_content_div){
+        pane_div.classList.remove("active");
+    } 
+    if (pane_content_div && pane_content_div.innerHTML.trim() == ""){
+        pane_div.classList.remove("active");
     }
 }
 
@@ -347,7 +372,6 @@ function SetContainer(container) {
 function SetHeaders(container) {
     let content = container.getElementsByClassName('content')
     let els = container.childNodes;
-    console.log(content)
     if (content.length > 0){
         content = content[0]
         els = content.childNodes;

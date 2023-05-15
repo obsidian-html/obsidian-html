@@ -242,40 +242,40 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # HTML Tweaks
     # [??] Embedded note titles integration
     # ------------------------------------------------------------------
-    if pb.capabilities_needed["embedded_note_titles"]:
-        if "obs.html.tags" in fo.md.metadata.keys() and "dont_add_embedded_title" in fo.md.metadata["obs.html.tags"]:
-            pass
-        else:
-            title = node["name"]
+    # if pb.capabilities_needed["embedded_note_titles"]:
+    #     if "obs.html.tags" in fo.md.metadata.keys() and "dont_add_embedded_title" in fo.md.metadata["obs.html.tags"]:
+    #         pass
+    #     else:
+    #         title = node["name"]
 
-            # overwrite node name (titleMetadataField)
-            if "titleMetadataField" in pb.plugin_settings["embedded_note_titles"].keys():
-                title_key = pb.plugin_settings["embedded_note_titles"]["titleMetadataField"]
-                if title_key in node["metadata"].keys():
-                    title = node["metadata"][title_key]
+    #         # overwrite node name (titleMetadataField)
+    #         if "titleMetadataField" in pb.plugin_settings["embedded_note_titles"].keys():
+    #             title_key = pb.plugin_settings["embedded_note_titles"]["titleMetadataField"]
+    #             if title_key in node["metadata"].keys():
+    #                 title = node["metadata"][title_key]
 
-            # hide if h1 is present
-            hide = False
-            if pb.gc("toggles/features/embedded_note_titles/hide_on_h1"):
-                header_dict, root_element = convert_markdown_to_header_tree(md.page)
-                if (
-                    len(root_element["content"]) > 0
-                    and isinstance(root_element["content"][0], dict)
-                    and root_element["content"][0]["level"] == 1
-                ):
-                    hide = True
+    #         # hide if h1 is present
+    #         hide = False
+    #         if pb.gc("toggles/features/embedded_note_titles/hide_on_h1"):
+    #             header_dict, root_element = convert_markdown_to_header_tree(md.page)
+    #             if (
+    #                 len(root_element["content"]) > 0
+    #                 and isinstance(root_element["content"][0], dict)
+    #                 and root_element["content"][0]["level"] == 1
+    #             ):
+    #                 hide = True
 
-            # hideOnMetadataField
-            if (
-                "hideOnMetadataField" in pb.plugin_settings["embedded_note_titles"].keys()
-                and pb.plugin_settings["embedded_note_titles"]["hideOnMetadataField"]
-            ):
-                if "embedded-title" in node["metadata"].keys() and node["metadata"]["embedded-title"] is False:
-                    hide = True
+    #         # hideOnMetadataField
+    #         if (
+    #             "hideOnMetadataField" in pb.plugin_settings["embedded_note_titles"].keys()
+    #             and pb.plugin_settings["embedded_note_titles"]["hideOnMetadataField"]
+    #         ):
+    #             if "embedded-title" in node["metadata"].keys() and node["metadata"]["embedded-title"] is False:
+    #                 hide = True
 
-            # add embedded title
-            if not hide:
-                html_body = f"<embeddedtitle>{title}</embeddedtitle>\n" + html_body
+    #         # add embedded title
+    #         if not hide:
+    #             html_body = f"<embeddedtitle>{title}</embeddedtitle>\n" + html_body
 
     # ------------------------------------------------------------------
     # [14] Tag external/anchor links with a class so they can be decorated differently

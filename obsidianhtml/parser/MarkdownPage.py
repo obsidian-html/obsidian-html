@@ -263,6 +263,11 @@ class MarkdownPage:
         # -- [?] Remove whitespace in front of header hashtags
         self.page = re.sub("(^\ [\ ]*)(?=#)", "", self.page, flags=re.MULTILINE)
 
+        # [??] Embedded note titles integration
+        # ------------------------------------------------------------------
+        self.page = note2md.add_embedded_title(self.pb, self.page, self.metadata, self.GetNodeName())
+
+
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
         self.page = note2md.obs_img_to_md_img(self.pb, self.page)
