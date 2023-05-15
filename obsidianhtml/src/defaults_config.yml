@@ -463,10 +463,12 @@ toggles:
 
     table_of_contents:
       add_toc_when_missing: False          # add "[TOC]" (Table of Contents) when missing
+      only_show_for_multiple_headers: True # if there is only one header, don't show the TOC
 
     side_pane:              # only valid for documentation layout
       left_pane:
         enabled: True
+        close_if_empty: False
         width: 16rem
         contents: dir_tree  # <toc, tag_tree, dir_tree, html_page> relevant features should be enabled and configured see docs
         content_args:       
@@ -478,6 +480,7 @@ toggles:
             
       right_pane:
         enabled: True
+        close_if_empty: True
         width: 16rem
         contents: toc       # <toc, tag_tree, dir_tree, html_page> relevant features should be enabled and configured see docs
         content_args:       # used for html_page
