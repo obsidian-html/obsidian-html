@@ -4,7 +4,7 @@ from pathlib import Path
 import frontmatter  # remove yaml frontmatter from md files
 import urllib.parse  # convert link characters like %
 
-from ..lib import slugify, MalformedTags, OpenIncludedFile
+from ..lib import slugify, MalformedTags, OpenIncludedFile, bisect
 from .. import note2md
 from ..core import FileObject
 
@@ -414,22 +414,10 @@ class MarkdownPage:
         # This is any string in between [[ and ]], e.g. [[My Note]]
         md_links = re.findall("(?<=\[\[).+?(?=\])", self.page)
         for matched_link in md_links:
-            # A link in Obsidian can have the format 'filename|alias'
-            # If a link does not have an alias, the link name will function as the alias.
-            parts = matched_link.split("|")
-            filename = parts[0].split("/")[-1]
-
-            # Set alias i.e. [alias](link)
-            alias = parts[0]
-            if len(parts) > 1:
-                alias = parts[1]
-
-            # Split #Chapter
-            hashpart = ""
-            parts = filename.split("#")
-            if len(parts) > 1:
-                filename = parts[0]
-                hashpart = parts[1]
+            
+            rest, alias = bisect(matched_link, "|")
+            simple_path, hashpart = bisect(rest, "#", squash_tail=True) # hashpart can have more than 1 #!
+            filename = simple_path.split("/")[-1]
 
             # Case: hashpart exists, filename is empty --> anchor link
             is_anchor = False

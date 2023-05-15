@@ -397,3 +397,31 @@ def get_arguments_dict():
     if determine_verbose_overwrite():
         arguments["verbose"] = True
     return arguments
+
+def bisect(input, separator, squash_tail=False):
+    """ Will split a string into exactly two parts: (rest, value)
+        - If split returns a list with a single element, no value was found (value = ""), input string is returned as rest.
+        - If the split creates more than 2 values, an error will occur, unless squash_tail is set to True
+          - Add a comment to the function call why squash_tail is necessary, as this setting can cause headaches!
+    """
+    
+    if input == "":
+        return "", ""
+
+    parts = input.split(separator)
+
+    if len(parts) == 1:
+        rest = parts[0]
+        value = ""
+        return rest, value
+    if len(parts) == 2:
+        rest = parts[0]
+        value = parts[1]
+        return rest, value
+
+    if squash_tail:
+        rest = parts.pop(0)
+        value = separator.join(parts)
+        return rest, value
+
+    raise Exception(f'500: Bisect resulted in {len(parts)} parts where 1 or 2 were expected. Input: "{input}", separator: "{separator}", parts: {parts}')

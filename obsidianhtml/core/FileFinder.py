@@ -1,5 +1,7 @@
 from functools import cache
 
+from ..lib import bisect
+
 
 class FileFinder:
     def __init__(self):
@@ -15,37 +17,32 @@ class FileFinder:
         # then link=folder/note, alias=alias, header=chapter
         # the link will be converted to a path that is relative to the root dir.
         output = {}
-        output["rtr_path_str"] = ""  # rtr=relative to root
+        output["rtr_path_str"] = False  # rtr=relative to root
         output["fo"] = False  # file object of type FileObject
         output["header"] = ""  # the last part in 'link#header'
         output["alias"] = ""
 
-        if link is None:
-            return output
+        # 1. split on | --> rest, alias
+        # 2. split on # --> rest, anchor
+        # 3. split on / --> rest, filename
+        rest, alias = bisect(link, "|")
+        simple_path, anchor = bisect(rest, "#", squash_tail=True) # anchor can have multiple # inside of it!
+        filename = simple_path.split("/")[-1]
 
-        # split folder/note#chapter|alias into ('folder/note#chapter', 'alias')
-        parts = link.split("|")
-        link = parts[0]
-        if len(parts) > 1:
-            output["alias"] = parts[1]
+        output["alias"] = alias
+        output["header"] = anchor
 
-        # split folder/note#chapter into ('folder/note', 'chapter')
-        parts = link.split("#")
-        link = parts[0]
-        if len(parts) > 1:
-            output["header"] = "#".join(parts[1:])
-
-        if link == "":
+        if link is None or simple_path == "":
             return output
 
         # Find file. Values will be False when file is not found.
-        output["rtr_path_str"], output["fo"] = self._FindFile(link, html_url_prefix, force_filename_to_lowercase)
+        output["rtr_path_str"], output["fo"] = self._FindFile(simple_path, html_url_prefix, force_filename_to_lowercase)
 
-        if output["fo"] is False and link.startswith("/"):
-            output["rtr_path_str"], output["fo"] = self._FindFile(link[1:], html_url_prefix, force_filename_to_lowercase)
+        if output["fo"] is False and simple_path.startswith("/"):
+            output["rtr_path_str"], output["fo"] = self._FindFile(simple_path[1:], html_url_prefix, force_filename_to_lowercase)
 
-        if output["fo"] is False and not link.startswith("/"):
-            output["rtr_path_str"], output["fo"] = self._FindFile("/" + link, html_url_prefix, force_filename_to_lowercase)
+        if output["fo"] is False and not simple_path.startswith("/"):
+            output["rtr_path_str"], output["fo"] = self._FindFile("/" + simple_path, html_url_prefix, force_filename_to_lowercase)
 
         return output
 
