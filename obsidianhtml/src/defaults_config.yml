@@ -331,6 +331,7 @@ toggles:
       enabled: True
     mermaid_diagrams:
       enabled: True
+      strip_special_chars: False
     callouts:
       enabled: True
     math_latex:
