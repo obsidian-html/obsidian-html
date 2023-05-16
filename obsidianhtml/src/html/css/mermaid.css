@@ -79,10 +79,10 @@ div.mermaid .messageLine1
     fill: #333 !important;
     stroke: #333 !important;
 }
-div.mermaid .messageText
+.mermaid .messageText
 {
     fill: #333;
-    stroke: none;
+    stroke: none !important;
 }
 div.mermaid .labelBox
 {
