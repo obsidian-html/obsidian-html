@@ -978,5 +978,9 @@ audio {
     margin-left: 4px;
 }
 
-
+.smiles_canvas {
+    background-color: rgb(5, 11, 21);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
 /*  ----------------------------------------- /GLOBAL ------------------------------------------------ */

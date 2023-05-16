@@ -327,6 +327,12 @@ toggles:
       styling:
         show_icon: True
 
+    smiles:
+      enabled: False
+      theme: dark       # dark, light, oldschool, oldschool-dark, solarized, solarized-dark, matrix, github, carbon, cyberpunk, gruvbox, gruvbox-dark
+      width: "100%"       # XXX%, XXXpx, XXX 
+      height: "300px"     # XXX%, XXXpx, XXX
+
     code_highlight:
       enabled: True
     mermaid_diagrams:

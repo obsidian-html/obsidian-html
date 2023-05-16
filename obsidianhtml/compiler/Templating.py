@@ -13,7 +13,7 @@ def ExportStaticFiles(pb):
         ["rss/rss.svg", "rss.svg"],
         ["index_from_dir_structure/dirtree.svg", "dirtree.svg"],
         ["js/obsidian_core.js", "obsidian_core.js"],
-        ["html/css/mermaid.css", "mermaid.css"],
+        ["smiles/smiles.js", "smiles.js"],
         ["js/encoding.js", "encoding.js"],
         ["index_from_dir_structure/dirtree.js", "dirtree.js"],
     ]
@@ -31,6 +31,9 @@ def ExportStaticFiles(pb):
         copy_file_list.append(["imported/mermaid.9.0.1.min.js", "mermaid.9.0.1.min.js"])
         copy_file_list.append(["imported/mermaid.9.0.1.min.js.map", "mermaid.9.0.1.min.js.map"])
         copy_file_list.append(["html/css/mermaid.css", "mermaid.css"])
+
+    if pb.ConfigManager.feature_is_enabled("smiles", cached=True):
+        copy_file_list.append(["smiles/smiles.js", "smiles.js"])
 
     if pb.ConfigManager.feature_is_enabled("code_highlight", cached=True):
         css_files_list.append(["html/css/codehilite.css", "codehilite.css"])
@@ -125,6 +128,14 @@ def ExportStaticFiles(pb):
                 .replace("__left_pane_active_width__", pb.gc("toggles/features/side_pane/left_pane/width", cached=True))
                 .replace("__right_pane_active_width__", pb.gc("toggles/features/side_pane/right_pane/width", cached=True))
             )
+
+        if file_name in ("smiles.js",):
+            contents = (
+                contents.replace("{smiles_theme}", pb.gc("toggles/features/smiles/theme", cached=True))
+                .replace("{smiles_width}", pb.gc("toggles/features/smiles/width", cached=True))
+                .replace("{smiles_height}", pb.gc("toggles/features/smiles/height", cached=True))
+            )
+
         # Write to dest
         with open(dst_path, "w", encoding="utf-8") as f:
             f.write(contents)
@@ -234,6 +245,11 @@ def PopulateTemplate(
     dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/obsidian_core.js"></script>' + "\n"
     dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/encoding.js"></script>' + "\n"
     dynamic_inclusions += '<link rel="stylesheet" href="' + html_url_prefix + '/obs.html/static/master.css" />' + "\n"
+
+
+    if pb.ConfigManager.feature_is_enabled("smiles", cached=True):
+        dynamic_inclusions += '<script src="https://unpkg.com/smiles-drawer@2.0.3/dist/smiles-drawer.min.js"></script>'
+        dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/smiles.js"></script>' + "\n"
 
     if pb.ConfigManager.feature_is_enabled("callouts", cached=True):
         pass
