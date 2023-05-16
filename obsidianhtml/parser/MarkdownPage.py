@@ -128,6 +128,23 @@ class MarkdownPage:
         for i, value in enumerate(self.latexblocks):
             self.page = self.page.replace(f"%%%latexblock-placeholder-{i}%%%", f"$${value}$$")
 
+    def strip_svgs(self):
+        self.svgs = []
+        i = 0
+        for matched_block in re.findall(r"<svg[\s\S]*?</svg>", self.page):
+            new_link = "---obsidian_html_svg_block_"+str(i)
+            self.svgs.append(matched_block)
+            i += 1
+
+            safe_link = re.escape(matched_block)
+            self.page = re.sub(safe_link, new_link, self.page)
+
+        return self.svgs
+
+    def restore_svgs(self):
+        for i, v in enumerate(self.svgs):
+            self.page = self.page.replace("---obsidian_html_svg_block_"+str(i), v)
+
     def add_tag(self, tag):
         if "tags" not in self.metadata:
             self.metadata["tags"] = []
@@ -489,6 +506,9 @@ class MarkdownPage:
             safe_link = re.escape(matched_link)
             self.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, self.page) 
 
+        # --- strip svg, we don't want to find "tags" in there
+        self.strip_svgs()
+
         # -- [9] Remove inline tags, like #ThisIsATag
         # Inline tags are # connected to text (so no whitespace nor another #)
         for matched_link in get_inline_tags(self.page):
@@ -502,6 +522,9 @@ class MarkdownPage:
 
             safe_str = "#" + re.escape(matched_link) + r"(?=[^\w/\-])"
             self.page = re.sub(safe_str, new_md_str, self.page)
+
+        # --- restore svg, we don't want to find "tags" in there
+        self.restore_svgs()
 
         # -- [10] Add code inclusions
         for matched_link in re.findall(r'(\<inclusion href="[^"]*" />)', self.page, re.MULTILINE):
