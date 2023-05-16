@@ -5,8 +5,8 @@ var smiles_height = "{smiles_height}";
 var smilesOptions = {
     scale: 0,
     shortBondLength: 0.8,
-    bondLength: 10,
-    bondSpacing: 5.1000000000000005,
+    bondLength: 15,
+    bondSpacing: 1.8,
     width: 500,   // updated elsewhere before use
     height: 500,  // updated elsewhere before use
     atomVisualization: 'default',
