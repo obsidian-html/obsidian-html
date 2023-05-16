@@ -433,6 +433,9 @@ class MarkdownPage:
             simple_path, hashpart = bisect(rest, "#", squash_tail=True) # hashpart can have more than 1 #!
             filename = simple_path.split("/")[-1]
 
+            if alias == "":
+                alias = filename
+
             # Case: hashpart exists, filename is empty --> anchor link
             is_anchor = False
             if hashpart != "" and filename == "":
