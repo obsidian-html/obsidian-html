@@ -17,8 +17,10 @@ import re
 import string
 
 
-def strip_notprintable(myStr):
-    return "".join(filter(lambda x: x in string.printable, myStr))
+def strip_notprintable(myStr, strip_special_chars):
+    if not strip_special_chars:
+        return myStr
+    return "".join(filter(lambda x: x in string.printable, myStr)).strip()
 
 
 MermaidRegex = re.compile(r"^(?P<mermaid_sign>[\~\`]){3}[\ \t]*[Mm]ermaid[\ \t]*$")
@@ -28,12 +30,16 @@ MermaidRegex = re.compile(r"^(?P<mermaid_sign>[\~\`]){3}[\ \t]*[Mm]ermaid[\ \t]*
 
 
 class MermaidExtension(Extension):
-    """Add source code hilighting to markdown codeblocks."""
+    def __init__(self, **kwargs):
+        self.config = {
+            "strip_special_chars": [True, "Whether to strip all non-printable characters from mermaid code."],
+        }
+        super(MermaidExtension, self).__init__(**kwargs)
 
     def extendMarkdown(self, md):
         """Add HilitePostprocessor to Markdown instance."""
         # Insert a preprocessor before ReferencePreprocessor
-        md.preprocessors.register(MermaidPreprocessor(md), "MermaidExtension", 35)
+        md.preprocessors.register(MermaidPreprocessor(self, md), "MermaidExtension", 35)
 
         md.registerExtension(self)
 
@@ -43,6 +49,10 @@ def makeExtension(**kwargs):  # pragma: no cover
 
 
 class MermaidPreprocessor(Preprocessor):
+    def __init__(self, extension, md=None):
+        self.md = md
+        self.extension = extension
+
     def run(self, lines):
         new_lines = []
         mermaid_sign = ""
@@ -76,7 +86,7 @@ class MermaidPreprocessor(Preprocessor):
                 new_lines.append("")
                 m_end = None
             elif in_mermaid_code:
-                new_lines.append(strip_notprintable(line).strip())
+                new_lines.append(strip_notprintable(line, self.extension.getConfig("strip_special_chars")))
             else:
                 new_lines.append(line)
 

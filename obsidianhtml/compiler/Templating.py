@@ -13,6 +13,7 @@ def ExportStaticFiles(pb):
         ["rss/rss.svg", "rss.svg"],
         ["index_from_dir_structure/dirtree.svg", "dirtree.svg"],
         ["js/obsidian_core.js", "obsidian_core.js"],
+        ["html/css/mermaid.css", "mermaid.css"],
         ["js/encoding.js", "encoding.js"],
         ["index_from_dir_structure/dirtree.js", "dirtree.js"],
     ]
@@ -247,7 +248,7 @@ def PopulateTemplate(
 
     if pb.ConfigManager.feature_is_enabled("mermaid_diagrams", cached=True):
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/mermaid.9.0.1.min.js"></script>' + "\n"
-        # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
+        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
 
     if pb.ConfigManager.feature_is_enabled("math_latex", cached=True):
         # dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/tex-chtml.js"></script>' + "\n"

@@ -394,12 +394,17 @@ def pythonmarkdown_convert_md_to_html(pb, page, rel_dst_path):
         FormattingExtension(),
         "codehilite",
         CustomTocExtension(),
-        MermaidExtension(),
         CallOutExtension(),
         "pymdownx.arithmatex",
     ]
 
     extension_configs = {"codehilite": {"linenums": False}, "pymdownx.arithmatex": {"generic": True}}
+
+
+
+    if pb.gc("toggles/features/mermaid_diagrams/enabled"):
+        strip_special_chars = pb.gc("toggles/features/mermaid_diagrams/strip_special_chars")
+        extensions.append(MermaidExtension(strip_special_chars=strip_special_chars))
 
     if pb.gc("toggles/features/dataview/enabled"):
         extensions.append("dataview")
