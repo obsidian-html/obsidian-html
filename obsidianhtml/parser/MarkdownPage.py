@@ -249,12 +249,16 @@ class MarkdownPage:
         prev_is_list_line = False
         for i, line in enumerate(self.page.split("\n")):
             current_is_list_line = False
+            current_is_newline = False
             clean_line = line.strip()
             if len(clean_line) == 0:
                 current_is_list_line = False
+                current_is_newline = True
             elif clean_line[0] == "-":
                 current_is_list_line = True
             if current_is_list_line and (prev_is_list_line is False):
+                buffer += "\n"
+            if (current_is_list_line is False) and (current_is_newline is False) and prev_is_list_line:
                 buffer += "\n"
             buffer += "\n" + line
             prev_is_list_line = current_is_list_line
