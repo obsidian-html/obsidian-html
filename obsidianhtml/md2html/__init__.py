@@ -89,6 +89,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     proper_links = re.findall(r"(?<=\]\()[^\s\]]+?(?=\))", md.page)
     for l in proper_links:
         ol = l
+
         l = urllib.parse.unquote(l)
 
         # There is currently no way to match links containing parentheses, AND not matching the last ) in a link like ([test](link))
@@ -97,6 +98,21 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
 
         # Init link
         link = MarkdownLink(pb, l, page_path, paths["md_folder"])
+
+        # Download buttons
+        parts = ol.split("|")
+        if len(parts) > 1 and parts[-1] == "_obsidian_html_download_button_":
+            link_name = parts[0]
+            if link.fo is None:
+                new_link = f"> **obsidian-html error:** Error creating download button for link {link_name}."
+            else:
+                link.fo.copy_file("mth")
+                link_url = urllib.parse.quote(link.fo.get_link("html", origin=fo, encode_special=False))
+                new_link = f'<a class="download-button" target="_blank" download="" href="{link_url}"><span class="file-embed-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-file"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>{link_name}</a>'
+            
+            safe_link = "\[[^\]]+?\]\(" + re.escape(ol) + "\)"
+            md.page = re.sub(safe_link, new_link, md.page)
+            continue
 
         # Don't process in the following cases (link empty or // in the link)
         if link.isValid is False or link.isExternal is True:

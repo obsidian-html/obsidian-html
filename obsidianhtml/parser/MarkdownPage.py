@@ -516,16 +516,17 @@ class MarkdownPage:
                 continue
 
             self.links.append(file_object)
+            link_path = file_object.get_link("markdown", origin=origin)
 
             if include_depth > 3:
-                link_path = file_object.get_link("markdown", origin=origin)
                 self.page = self.page.replace(matched_link, f"[{link}]({link_path}).")
                 continue
 
-            file_object.path["note"]["file_absolute_path"]
             if not file_object.is_valid_note("note"):
+                # make download button
+                file_object.copy_file("ntm")
                 self.page = self.page.replace(
-                    matched_link, f"> **obsidian-html error:** Error including file or not a markdown file {link}."
+                    matched_link, f'[{link_path}]({link}|_obsidian_html_download_button_)'
                 )
                 continue
 
