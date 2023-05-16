@@ -245,23 +245,33 @@ class MarkdownPage:
         self.page = re.sub(r"\\\|", "|", self.page, flags=re.MULTILINE)
 
         # -- [2] Add newline between paragraph and lists
+        def is_list_line(line):
+            line = line.strip()
+            # dash list items
+            if line.startswith("- "):
+                return True
+            # asterisk list items
+            if line.startswith("* "):
+                return True
+            return False
+
         buffer = ""
         prev_is_list_line = False
+        prev_is_newline = False
         for i, line in enumerate(self.page.split("\n")):
-            current_is_list_line = False
-            current_is_newline = False
-            clean_line = line.strip()
-            if len(clean_line) == 0:
-                current_is_list_line = False
-                current_is_newline = True
-            elif clean_line[0] == "-":
-                current_is_list_line = True
-            if current_is_list_line and (prev_is_list_line is False):
+            current_is_list_line = is_list_line(line)
+            current_is_newline = (len(line.strip()) == 0)
+            if current_is_list_line and (prev_is_list_line is False) and (prev_is_newline is False):
+                # newline before list
                 buffer += "\n"
             if (current_is_list_line is False) and (current_is_newline is False) and prev_is_list_line:
+                # newline after list
                 buffer += "\n"
+            # add current line
             buffer += "\n" + line
+            # move data
             prev_is_list_line = current_is_list_line
+            prev_is_newline = current_is_newline
         self.page = buffer
 
         # -- [?] Remove whitespace in front of header hashtags
