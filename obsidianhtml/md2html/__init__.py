@@ -243,6 +243,10 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         safe_link = re.escape(l)
         md.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, md.page)
 
+    # strip svg, as python-markdown corrupts these
+    # ------------------------------------------------------------------
+    svgs = md.strip_svgs()
+
     # [1] Restore codeblocks/-lines
     # ------------------------------------------------------------------
     md.RestoreCodeSections()
@@ -251,6 +255,11 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # ------------------------------------------------------------------
     html_body = md2html.pythonmarkdown_convert_md_to_html(pb, md.page, rel_dst_path)
     html_body = f'<div class="content">{html_body}</div>'
+
+    # restore svg, as python-markdown corrupts these
+    # ------------------------------------------------------------------
+    for i, v in enumerate(svgs):
+        html_body = html_body.replace("---obsidian_html_svg_block_"+str(i), v)
 
     if capture_in_jar:
         pb.jars[capture_in_jar] = html_body
@@ -415,8 +424,6 @@ def pythonmarkdown_convert_md_to_html(pb, page, rel_dst_path):
     ]
 
     extension_configs = {"codehilite": {"linenums": False}, "pymdownx.arithmatex": {"generic": True}}
-
-
 
     if pb.gc("toggles/features/mermaid_diagrams/enabled"):
         strip_special_chars = pb.gc("toggles/features/mermaid_diagrams/strip_special_chars")
