@@ -66,11 +66,16 @@ class ParseMetadataModule(ObsidianHtmlModule):
         # handle files
         output = {}
         for file in files:
-            metadata, page = self.get_frontmatter(file)
-            inline_tags = self.get_inline_tags(page)
-            metadata["tags"] = list(set(metadata["tags"] + inline_tags))
-    
             rel_path = Path(file).relative_to(paths["input_folder"]).as_posix()
+            metadata = {}
+            metadata["tags"] = []
+            try:
+                metadata, page = self.get_frontmatter(file)
+                inline_tags = self.get_inline_tags(page)
+                metadata["tags"] = list(set(metadata["tags"] + inline_tags))
+            except Exception as e:
+                self.print('ERROR', f'failed to parse metadata in file: {file}. Error: {e}. \n\n(Ignoring this error is not supported as metadata will be read elsewhere. Review yaml frontmatter and edit it to resolve the issue).')
+                exit(1)
             output[rel_path] = metadata
 
         self.modfile("index/metadata.json", output).to_json().write()
