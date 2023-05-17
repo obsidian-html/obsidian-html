@@ -19,6 +19,26 @@ class SearchHead:
         }
         self.data.append(p)
 
+    def AddFile(self, gc, fo):
+        """Used to be able to find files as well as notes"""
+        if not (gc("toggles/features/search/enabled", cached=True) and gc("toggles/features/search/add_files", cached=True)):
+            return
+
+        rtr_url = fo.path["html"]["file_relative_path"].as_posix()
+        url = fo.get_link("html")
+        filename = fo.path["html"]["file_relative_path"].name
+        p = {
+            "file": filename,
+            "path": rtr_url,
+            "title": filename,
+            "url": url,
+            "rtr_url": rtr_url,
+            "content": filename,
+            "tags": filename,
+        }
+        if p not in self.data:
+            self.data.append(p)
+
     def OutputJson(self):
         """the search.json"""
         return json.dumps(self.data)
@@ -71,3 +91,4 @@ def GetTags(metadata):
     if "tags" in metadata.keys():
         return " ".join(metadata["tags"])
     return ""
+
