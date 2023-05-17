@@ -92,6 +92,8 @@ class LoadPathsModule(ObsidianHtmlModule):
             paths["input_folder"] = paths["md_folder"]
             paths["entrypoint"] = paths["md_entrypoint"]
 
+        paths["original_input_folder"] = paths["input_folder"]
+
         # Convert to posix string for exporting
         for key in paths.keys():
             paths[key] = paths[key].as_posix()
