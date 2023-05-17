@@ -74,7 +74,8 @@ class ParseMetadataModule(ObsidianHtmlModule):
                 inline_tags = self.get_inline_tags(page)
                 metadata["tags"] = list(set(metadata["tags"] + inline_tags))
             except Exception as e:
-                self.print('ERROR', f'failed to parse metadata in file: {file}. Error: {e}. \n\n(Ignoring this error is not supported as metadata will be read elsewhere. Review yaml frontmatter and edit it to resolve the issue).')
+                og_path = Path(paths["original_input_folder"]).joinpath(rel_path).as_posix()
+                self.print('ERROR', f'failed to parse metadata in file: {og_path}.\nError: {e}. \n(Ignoring this error is not supported as metadata will be read elsewhere. Review yaml frontmatter and edit it to resolve the issue).')
                 exit(1)
             output[rel_path] = metadata
 

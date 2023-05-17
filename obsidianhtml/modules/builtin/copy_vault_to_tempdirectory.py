@@ -79,6 +79,7 @@ class VaultCopyModule(ObsidianHtmlModule):
         paths["obsidian_entrypoint"] = paths["obsidian_folder"].joinpath(paths["rel_obsidian_entrypoint"])
 
         if self.gc("toggles/compile_md"):
+            paths["original_input_folder"] = paths["original_obsidian_folder"]
             paths["input_folder"] = paths["obsidian_folder"]
             paths["entrypoint"] = paths["obsidian_entrypoint"]
 
