@@ -45,7 +45,7 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
 
         # write empty file that we promised to provide and exit, if html is not compiled
         if gc("toggles/compile_html") == False:
-            self.modfile("note.template.html", "").write()
+            self.modfile("html/note.template.html", "").write()
             return
 
         html_template = ""
