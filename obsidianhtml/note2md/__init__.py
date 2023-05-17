@@ -19,8 +19,9 @@ def obs_img_to_md_img(pb, page):
 
         # Obsidian page inclusions use the same tag...
         # Skip if we don't match image suffixes. Inclusions are handled at the end.
-        link = matched_link.split("|")[0].split("#")[0]
-        if len(link.split(".")) == 1 or link.split(".")[-1].lower() not in pb.gc("included_file_suffixes", cached=True):
+        link = matched_link.split("|")[0]
+        link_without_hashtag = link.split("#")[0]
+        if len(link.split(".")) == 1 or link_without_hashtag.split(".")[-1].lower() not in pb.gc("included_file_suffixes", cached=True):
             new_link = f'<inclusion href="{link}" />'
 
         safe_link = re.escape("![[" + matched_link + "]]")
