@@ -108,6 +108,9 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
             else:
                 link.fo.copy_file("mth")
                 link_url = urllib.parse.quote(link.fo.get_link("html", origin=fo, encode_special=False))
+                
+                pb.search.AddFile(pb.gc, link.fo)
+
                 new_link = f'<a class="download-button" target="_blank" download="" href="{link_url}"><span class="file-embed-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-file"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>{link_name}</a>'
             
             safe_link = "\[[^\]]+?\]\(" + re.escape(ol) + "\)"
@@ -133,6 +136,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
                 )
         elif not link.fo.metadata["is_note"]:
             link.fo.copy_file("mth")
+            pb.search.AddFile(pb.gc, link.fo)
 
         # [13] Link to a custom 404 page when linked to a not-created note
         if link.name == "not_created.md":
@@ -169,6 +173,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
 
         # Copy src to dst
         lo.copy_file("mth")
+        pb.search.AddFile(pb.gc, lo)
 
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
         new_link = '<source src="' + urllib.parse.quote(lo.get_link("html", origin=fo, encode_special=False)) + '"'
@@ -199,6 +204,8 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         if lo.path["markdown"]["file_absolute_path"].exists():
             lo.copy_file("mth")
 
+            pb.search.AddFile(pb.gc, lo)
+
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
         new_link = template.replace("{link}", urllib.parse.quote(lo.get_link("html", origin=fo, encode_special=False)))
         safe_link = re.escape(tag)
@@ -219,6 +226,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
 
         # Copy src to dst
         lo.copy_file("mth")
+        pb.search.AddFile(pb.gc, lo)
 
         # [11.2] Adjust video link in page to new dst folder (when the link is to a file in our root folder)
         new_link = '<embed src="' + urllib.parse.quote(lo.get_link("html", origin=fo, encode_special=False)) + '"'
