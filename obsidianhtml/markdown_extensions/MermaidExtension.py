@@ -39,7 +39,7 @@ class MermaidExtension(Extension):
     def extendMarkdown(self, md):
         """Add HilitePostprocessor to Markdown instance."""
         # Insert a preprocessor before ReferencePreprocessor
-        md.preprocessors.register(MermaidPreprocessor(self, md), "MermaidExtension", 35)
+        md.preprocessors.register(MermaidPreprocessor(self, md), "MermaidExtension", 34)
 
         md.registerExtension(self)
 
