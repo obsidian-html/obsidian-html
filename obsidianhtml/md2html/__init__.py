@@ -100,7 +100,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         link = MarkdownLink(pb, l, page_path, paths["md_folder"])
 
         # Download buttons
-        parts = ol.split("|")
+        parts = l.split("|")
         if len(parts) > 1 and parts[-1] == "_obsidian_html_download_button_":
             link_name = parts[0]
             if link.fo is None:

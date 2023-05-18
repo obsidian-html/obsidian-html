@@ -551,7 +551,7 @@ class MarkdownPage:
                 # make download button
                 file_object.copy_file("ntm")
                 self.page = self.page.replace(
-                    matched_link, f'[{link_path}]({link}|_obsidian_html_download_button_)'
+                    matched_link, f'[{link_path}]({urllib.parse.quote(link)}|_obsidian_html_download_button_)'
                 )
                 continue
 
