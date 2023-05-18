@@ -28,9 +28,11 @@ def ExportStaticFiles(pb):
         # copy_file_list.append(['graph/default_grapher_3d.js', 'default_grapher_3d.js'])
 
     if pb.ConfigManager.feature_is_enabled("mermaid_diagrams", cached=True):
-        copy_file_list.append(["imported/mermaid.9.0.1.min.js", "mermaid.9.0.1.min.js"])
-        copy_file_list.append(["imported/mermaid.9.0.1.min.js.map", "mermaid.9.0.1.min.js.map"])
-        copy_file_list.append(["html/css/mermaid.css", "mermaid.css"])
+        pass
+        # copy_file_list.append(["imported/mermaid.9.0.1.min.js", "mermaid.9.0.1.min.js"])
+        # copy_file_list.append(["imported/mermaid.9.0.1.min.js.map", "mermaid.9.0.1.min.js.map"])
+        # copy_file_list.append(["html/css/mermaid.css", "mermaid.css"])
+
 
     if pb.ConfigManager.feature_is_enabled("smiles", cached=True):
         copy_file_list.append(["smiles/smiles.js", "smiles.js"])
@@ -263,8 +265,10 @@ def PopulateTemplate(
     # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/codehilite.css" />' + "\n"
 
     if pb.ConfigManager.feature_is_enabled("mermaid_diagrams", cached=True):
-        dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/mermaid.9.0.1.min.js"></script>' + "\n"
-        dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
+        # dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/mermaid.9.0.1.min.js"></script>' + "\n"
+        # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
+        dynamic_inclusions += OpenIncludedFile("mermaid/init_mermaid.html") + "\n"
+
 
     if pb.ConfigManager.feature_is_enabled("math_latex", cached=True):
         # dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/tex-chtml.js"></script>' + "\n"

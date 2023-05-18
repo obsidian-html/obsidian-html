@@ -321,9 +321,9 @@ function SetContainer(container) {
     SetHeaders(container);
 
     // Load mermaid code
-    if (mermaid_enabled){
-        mermaid.init()
-    }
+    // if (mermaid_enabled){
+    //     mermaid.init()
+    // }
 
     // callout divs are created with class 'active' to have them folded open by default
     // when js is enabled (in this case) this class is removed so the callouts are folded closed until clicked on
