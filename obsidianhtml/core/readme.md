@@ -3,7 +3,6 @@
 # Objects
 The main code is organised like this:
 
-- Actor: Something needs to be done on the OS? The Actor does the acting
 - Config: Takes user input to load a config yaml into a list of settings
 - Index: Reads the input folder and processes it into a list of Nodes
 - Node: Represents a "page", be it the original obsidian note, a markdown note, or the html page.

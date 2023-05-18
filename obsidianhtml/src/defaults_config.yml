@@ -58,17 +58,6 @@ module_list:
     - name: load_graphers
       persistent: True
 
-    - name: copy_vault_to_tempdirectory
-      description: 
-        - Copy vault to temporary directory, so that we can edit the obsidian notes themselves safely.
-        - Must be persistent!
-      persistent: True
-
-    - name: prepare_output_folders
-      description: 
-        - Ensures the output folders are created
-        - Optionally removes previous output if it exists in the target directories
-
     - name: get_file_list
       description: 
         - Basic file listing based on include_folder/exclude_glob combination
@@ -81,6 +70,17 @@ module_list:
     - name: filter_on_metadata
       description:
         - Filter out markdown files that do not comply to certain metadata requirements
+
+    - name: copy_vault_to_tempdirectory
+      description: 
+        - Copy vault to temporary directory, so that we can edit the obsidian notes themselves safely.
+        - Must be persistent!
+      persistent: True
+
+    - name: prepare_output_folders
+      description: 
+        - Ensures the output folders are created
+        - Optionally removes previous output if it exists in the target directories
 
   #   - name: hydrate_file_list
   #     description:

@@ -10,7 +10,6 @@ from .. import md2html
 from ..lib import CreateStaticFilesFolders, WriteFileLog, simpleHash, get_html_url_prefix, retain_reference
 
 from ..compiler.Templating import PopulateTemplate
-from ..core import Actor
 from ..core.PicknickBasket import PicknickBasket
 from ..core.FileObject import FileObject
 from ..core.Index import Index

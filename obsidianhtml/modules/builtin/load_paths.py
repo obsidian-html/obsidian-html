@@ -1,8 +1,10 @@
+import yaml
+
+from pathlib import Path
+from appdirs import AppDirs
+
 from ..base_classes import ObsidianHtmlModule
 from ...lib import find_vault_folder_by_entrypoint
-
-import yaml
-from pathlib import Path
 
 
 class LoadPathsModule(ObsidianHtmlModule):
@@ -74,6 +76,7 @@ class LoadPathsModule(ObsidianHtmlModule):
             "obsidian_entrypoint": Path(gc("obsidian_entrypoint_path_str")).resolve(),
             "md_entrypoint": Path(gc("md_entrypoint_path_str")).resolve(),
             "html_output_folder": Path(gc("html_output_folder_path_str")).resolve(),
+            "appdir": Path(AppDirs("obsidianhtml", "obsidianhtml").user_config_dir)
         }
         paths["original_obsidian_folder"] = paths["obsidian_folder"]  # use only for lookups!
         paths["original_obsidian_entrypoint"] = paths["obsidian_entrypoint"] # use only for lookups!
