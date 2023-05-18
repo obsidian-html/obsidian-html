@@ -1,4 +1,5 @@
 from __future__ import annotations
+import string
 import regex as re  # regex string finding/replacing
 from pathlib import Path
 import frontmatter  # remove yaml frontmatter from md files
@@ -476,14 +477,15 @@ class MarkdownPage:
 
                 if hashpart != "":
                     hashpart = hashpart.replace(" ", "-").lower()
-                    newlink += f"#{hashpart}"
+                    hashpart = make_valid_hashpart(hashpart)
+                    newlink += '#' + hashpart
             else:
                 if hashpart[0] == "^":
                     # blockid blocklink
                     newlink = "#" + hashpart.replace("^", "__")
                 else:
                     # normal anchor
-                    newlink = "#" + slugify(hashpart)
+                    newlink = '#' + make_valid_hashpart(slugify(hashpart))
                     alias = hashpart
 
             # Replace Obsidian link with proper markdown link
@@ -595,3 +597,17 @@ class MarkdownPage:
 
 def get_inline_tags(page):
     return [x[1:].replace(".", "") for x in re.findall(r"(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]
+
+def make_valid_hashpart(hashpart):
+    """
+    This operation aims to solve the "Failed to execute 'querySelector' on 'Element': <> is not a valid selector." 
+    By adding "h_" to the beginning if the hashpart does not start with a letter.
+    Be sure to also have this be applied in: obsidianhtml/markdown_extensions/CustomTocExtension.py ! (search for el.attrib["id"])
+    """
+    if hashpart == "":
+        return hashpart
+
+    if hashpart[0] in string.ascii_letters:
+        return hashpart
+
+    return 'h_' + hashpart
