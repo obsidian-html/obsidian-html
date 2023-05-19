@@ -424,7 +424,6 @@ def pythonmarkdown_convert_md_to_html(pb, page, rel_dst_path):
         "fenced_code",
         "tables",
         "md_in_html",
-        FootnoteExtension(),
         FormattingExtension(),
         "codehilite",
         CustomTocExtension(),
@@ -433,6 +432,9 @@ def pythonmarkdown_convert_md_to_html(pb, page, rel_dst_path):
     ]
 
     extension_configs = {"codehilite": {"linenums": False}, "pymdownx.arithmatex": {"generic": True}}
+
+    if pb.gc("toggles/features/footnote_md_extension/enabled"):
+        extensions.append(FootnoteExtension())
 
     if pb.gc("toggles/features/mermaid_diagrams/enabled"):
         strip_special_chars = pb.gc("toggles/features/mermaid_diagrams/strip_special_chars")

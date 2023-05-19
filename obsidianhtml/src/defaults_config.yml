@@ -498,6 +498,5 @@ toggles:
           strip_sub_divs:
             - '.toc'
 
-    post_processing: []
-    # post_processing:
-    #   - module: md_markdown_callouts
+    footnote_md_extension:
+      enabled: True
