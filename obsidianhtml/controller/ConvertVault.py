@@ -485,7 +485,7 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo: "FileObject", pb, log_level
         return
 
     if pb.gc("toggles/stdout_current_file", cached=True):
-        print(fo.path["note"]["file_absolute_path"])
+        print(fo.path["note"]["file_absolute_path"].as_posix().encode('cp1252', errors='ignore'))
 
     # Convert note to markdown
     # ------------------------------------------------------------------
@@ -549,7 +549,7 @@ def crawl_markdown_notes_and_convert_to_html(fo: "FileObject", pb, backlink_node
     """This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page."""
 
     if pb.gc("toggles/stdout_current_file", cached=True):
-        print(fo.path["markdown"]["file_absolute_path"])
+        print(fo.path["markdown"]["file_absolute_path"].as_posix().encode('cp1252', errors='ignore'))
 
     # Convert and export page, and collect links to other markdown pages found in the page.
     # ------------------------------------------------------------------
