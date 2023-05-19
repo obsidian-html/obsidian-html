@@ -127,13 +127,14 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
                 path_key = "note"
                 if not pb.gc("toggles/compile_md", cached=True):
                     path_key = "markdown"
-                print(
-                    "\t" * (log_level + 1),
-                    "File "
-                    + str(link.url)
-                    + " not located, so not copied. @ "
-                    + pb.state["current_fo"].path[path_key]["file_absolute_path"].as_posix(),
-                )
+                if pb.gc("toggles/warn_on_skipped_file", cached=True):
+                    print(
+                        "\t" * (log_level + 1),
+                        "File "
+                        + str(link.url)
+                        + " not located, so not copied. @ "
+                        + pb.state["current_fo"].path[path_key]["file_absolute_path"].as_posix(),
+                    )
         elif not link.fo.metadata["is_note"]:
             link.fo.copy_file("mth")
             pb.search.AddFile(pb.gc, link.fo)
@@ -423,7 +424,6 @@ def pythonmarkdown_convert_md_to_html(pb, page, rel_dst_path):
         "fenced_code",
         "tables",
         "md_in_html",
-        FootnoteExtension(),
         FormattingExtension(),
         "codehilite",
         CustomTocExtension(),
@@ -432,6 +432,9 @@ def pythonmarkdown_convert_md_to_html(pb, page, rel_dst_path):
     ]
 
     extension_configs = {"codehilite": {"linenums": False}, "pymdownx.arithmatex": {"generic": True}}
+
+    if pb.gc("toggles/features/footnote_md_extension/enabled"):
+        extensions.append(FootnoteExtension())
 
     if pb.gc("toggles/features/mermaid_diagrams/enabled"):
         strip_special_chars = pb.gc("toggles/features/mermaid_diagrams/strip_special_chars")

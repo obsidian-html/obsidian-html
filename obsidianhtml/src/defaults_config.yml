@@ -285,6 +285,7 @@ toggles:
   # Sometimes linked images that should be local (based on the path) cannot be found.
   # Toggle this to False to disable warnings if that happens.
   warn_on_skipped_image: True
+  warn_on_skipped_file: True
 
   # This will skip emptying output folders, if you want to implement this yourself
   no_clean: False
@@ -497,6 +498,5 @@ toggles:
           strip_sub_divs:
             - '.toc'
 
-    post_processing: []
-    # post_processing:
-    #   - module: md_markdown_callouts
+    footnote_md_extension:
+      enabled: True
