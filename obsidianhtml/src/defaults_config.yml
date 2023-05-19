@@ -250,6 +250,8 @@ file_exports: []
 #                    OPTIONAL BEHAVIOR / FEATURES                        #
 ##########################################################################
 toggles:
+  stdout_current_file: False
+  
   # Opt-in/-out of Obsidian->Md conversion, set to False when using proper markdown as input
   compile_md: True
 
@@ -500,3 +502,7 @@ toggles:
 
     footnote_md_extension:
       enabled: True
+
+    post_processing: []
+    # post_processing:
+    #   - module: md_markdown_callouts
