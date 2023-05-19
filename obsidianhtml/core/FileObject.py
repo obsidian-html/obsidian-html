@@ -10,7 +10,7 @@ import shutil  # used to remove a non-empty directory, copy files
 from pathlib import Path
 
 from ..parser.MarkdownPage import MarkdownPage
-from ..lib import get_rel_html_url_prefix, slugify_path
+from ..lib import get_rel_html_url_prefix, slugify_path, formatted_print
 
 """
 This object class helps us with keeping track of all the paths.
@@ -271,6 +271,11 @@ class FileObject:
         elif mode == "mth":
             src_file_path = self.path["markdown"]["file_absolute_path"]
             dst_file_path = self.path["html"]["file_absolute_path"]
+
+        if not src_file_path.exists():
+            if self.pb.gc("toggles/warn_on_skipped_file", cached=True):
+                formatted_print("ERROR", f'copying  {src_file_path} to {dst_file_path}, file not found.')
+                return
 
         link_mode = self.pb.gc("copy_output_file_method", cached=True)
         resolve_links = self.pb.gc("resolve_output_file_links", cached=True)
