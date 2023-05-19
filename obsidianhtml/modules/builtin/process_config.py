@@ -97,6 +97,18 @@ class ProcessConfigModule(ObsidianHtmlModule):
         arguments = self.modfile("arguments.yml").read().from_yaml()
         self.overwrite_values(config, arguments)
 
+        # check that entrypoint exists
+        if config["toggles"]["compile_md"]:
+            entrypoint = Path(config["obsidian_entrypoint_path_str"])
+            if not entrypoint.exists():
+                self.print("ERROR", f"The entrypoint that you configured does not seem to exist. \nCheck that the file {entrypoint} exists before you continue.")
+                exit(1)
+        else:
+            entrypoint = Path(config["md_entrypoint_path_str"])
+            if not entrypoint.exists():
+                self.print("ERROR", f"The entrypoint that you configured does not seem to exist. \nCheck that the file {entrypoint} exists before you continue.")
+                exit(1)
+
         # Export config
         self.modfile("config.yml", config).to_yaml().write()
 
