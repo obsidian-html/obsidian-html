@@ -310,7 +310,10 @@ class MarkdownPage:
             parts = tag.split('src="')
             iparts = parts[1].split('"', 1)
             link = iparts[0]
-            template = parts[0] + 'src="{link}"' + iparts[1]
+
+            template = parts[0] + 'src="{link}"'
+            if len(iparts) > 1:
+                template = template + iparts[1]
 
             unquoted_link = urllib.parse.unquote(link)
             if "://" in unquoted_link:
