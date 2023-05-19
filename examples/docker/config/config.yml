@@ -1,0 +1,16 @@
+# Make sure the first part is always "/input/"
+# If you want to get Blog/cats.md from your vault, configure "/input/Blog/cats.md"
+#obsidian_entrypoint_path_str: '/input/Blog/Cats.md'
+obsidian_entrypoint_path_str: '<REQUIRED_INPUT>'
+
+# Do not change these, configure the output folder in the docker command instead
+md_folder_path_str:  '/output/md'
+md_entrypoint_path_str: '/output/md/index.md'
+html_output_folder_path_str: '/output/html'
+module_data_folder: '/output/mod'
+
+# ==============================================
+#                  CUSTOM CONFIG
+# ==============================================
+verbosity: debug
+# <add your custom config keys here>

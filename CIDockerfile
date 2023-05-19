@@ -14,4 +14,4 @@ COPY . /obsidian-html
 WORKDIR /obsidian-html
 RUN pip install --upgrade pip && pip install .
 RUN python ci/tests/basic_regression_test.py
-CMD ["obsidianhtml", "convert", "-i", "/config/config.yml"]
+#RUN cd /obsidian-html && python ci/tests/selenium_tests.py   
