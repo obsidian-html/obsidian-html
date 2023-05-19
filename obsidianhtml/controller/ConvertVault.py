@@ -418,9 +418,11 @@ def convert_markdown_to_html(pb):
         gzip_path = pb.paths["html_output_folder"].joinpath("obs.html").joinpath("data/search.json.gzip")
         gzip_path.parent.mkdir(parents=True, exist_ok=True)
         gzip_content = pb.search.OutputJson()
+        #pb.gzip_hash = simpleHash(gzip_content.decode("utf-8"))
         pb.gzip_hash = simpleHash(gzip_content)
 
         with gzip.open(gzip_path, "wb", compresslevel=5) as f:
+            #f.write(gzip_content)
             f.write(gzip_content.encode("utf-8"))
 
     # Add Extra stuff to the output directories
@@ -482,6 +484,9 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo: "FileObject", pb, log_level
     if not fo.metadata["is_parsable_note"]:
         return
 
+    if pb.gc("toggles/stdout_current_file", cached=True):
+        print(fo.path["note"]["file_absolute_path"])
+
     # Convert note to markdown
     # ------------------------------------------------------------------
     # Create an object that handles a lot of the logic of parsing the page paths, content, etc
@@ -542,6 +547,9 @@ def crawl_obsidian_notes_and_convert_to_markdown(fo: "FileObject", pb, log_level
 # @extra_info()
 def crawl_markdown_notes_and_convert_to_html(fo: "FileObject", pb, backlink_node=None, log_level=1, capture_in_jar=False):
     """This functions converts a markdown page to an html file and calls itself on any local markdown links it finds in the page."""
+
+    if pb.gc("toggles/stdout_current_file", cached=True):
+        print(fo.path["markdown"]["file_absolute_path"])
 
     # Convert and export page, and collect links to other markdown pages found in the page.
     # ------------------------------------------------------------------
