@@ -275,7 +275,7 @@ class FileObject:
         if not src_file_path.exists():
             if self.pb.gc("toggles/warn_on_skipped_file", cached=True):
                 formatted_print("ERROR", f'copying  {src_file_path} to {dst_file_path}, file not found.')
-                return
+            return
 
         link_mode = self.pb.gc("copy_output_file_method", cached=True)
         resolve_links = self.pb.gc("resolve_output_file_links", cached=True)
