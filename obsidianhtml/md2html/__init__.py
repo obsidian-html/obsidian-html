@@ -192,7 +192,9 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         parts = tag.split('src="')
         iparts = parts[1].split('"', 1)
         link = iparts[0]
-        template = parts[0] + 'src="{link}"' + iparts[1]
+        template = parts[0] + 'src="{link}"'
+        if len(iparts) > 1:
+            template = template + iparts[1]
 
         l = urllib.parse.unquote(link)
         if "://" in l:
