@@ -22,6 +22,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     output location, converts the md to html, writes the html content to the output directory, returns all the links to other markdown pages found
     in the page.
     """
+
     # Unpack picknick basket so we don't have to type too much.
     paths = pb.paths  # Paths of interest, such as the output and input folders
     files = pb.index.files  # Hashtable of all files found in the obsidian vault
@@ -59,13 +60,15 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
             for incl in md.metadata["obs.html.data"]["inclusion_references"]:
                 inc_md = files[incl].load_markdown_page("markdown")
                 pb.index.network_tree.add_file_object_to_node_list(files[incl], backlink_node, link_type="inclusion")
-                inc_md.fo.processed_mth = False
                 md.links.append(inc_md.fo)
 
     # Skip further processing if processing has happened already for this file
     # ------------------------------------------------------------------
     if fo.processed_mth is True:
         return ([], [])
+
+    # Set file to processed
+    fo.processed_mth = True
 
     if pb.gc("toggles/verbose_printout", cached=True):
         print("\t" * log_level, f"html: converting {page_path.as_posix()}")
@@ -393,9 +396,6 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # Write html
     with open(html_dst_path_posix, "w", encoding="utf-8") as f:
         f.write(html)
-
-    # Set file to processed
-    fo.processed_mth = True
 
     # Return links to crawl through linked notes
     # ------------------------------------------------------------------
