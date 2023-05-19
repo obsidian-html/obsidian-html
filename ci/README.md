@@ -20,7 +20,7 @@ Then open one of the notebooks
 ## Run tests via docker
 
 ```sh
-docker build -t obsidian-html-test .; docker image rm obsidian-html-test
+docker build -t obsidian-html-test -f CIDockerfile .; docker image rm obsidian-html-test
 ```
 
 
