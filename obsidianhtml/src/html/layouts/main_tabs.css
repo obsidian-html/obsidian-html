@@ -105,10 +105,10 @@
 
     h2 {
         font-size: 14pt;
-        border-bottom: 1px dotted #777070;
-        font-weight: 600;
+        border-bottom: 1px dotted #7770706e;
         padding-bottom: 0.2rem;
         margin-top: 2rem;
+        font-weight: 300;
     }
     h2 + p {
         margin-top: 0rem;

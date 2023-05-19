@@ -113,8 +113,6 @@
 .theme-obs-dark #homelink:visited,
 .theme-obs-dark #homelink:link,
 .theme-obs-dark #homelink:hover {
-    margin-left: 2rem;
-    margin-right: 0.5rem;
     background-color: unset;
     color: var(--homelink-color);
     width: 14rem;
