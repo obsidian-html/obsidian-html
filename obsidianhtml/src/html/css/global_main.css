@@ -690,9 +690,11 @@ h2+p {
 .anchor {
     visibility: hidden;
     float: left;
-    padding-right: 4px;
-    margin-left: -20px;
+    margin-left: -24px;
     line-height: 1;
+    position: relative;
+    left: 0.3rem;
+    top: 0.3rem;
 }
 
 .anchor svg {
@@ -741,7 +743,8 @@ li {
 
 .dir-container.active {
     display: block;
-    margin-bottom: 1rem;
+    border-left: 1px solid var(--bg-accent3);
+    margin-left: 0.4rem;
 }
 
 .dir-button {
@@ -792,25 +795,15 @@ li {
 .dir-list li a.active:link,
 .dir-list li a.active:hover {
     color: rgba(var(--code-hightlight-color), 1.0);
-    font-weight: bold;
 }
-.dir-button.folder_note.active {
+.dir-button.folder_note.current {
     color: rgba(var(--code-hightlight-color), 1.0);
-    font-weight: bold;
 }
 
 .dir-container ul.dir-list {
     margin-top: 2rem;
-}
-
-.dir-container ul.dir-list {
-    margin-left: -0.5rem;
-    padding-left: 1rem;
-    border-left: 1px solid var(--bg-accent3);
     margin-top: 0rem;
 }
-
-
 
 
 .fn_pf {
@@ -1024,9 +1017,6 @@ a.inline-tag:hover {
 .tag-list li a.active:visited,
 .tag-list li a.active:link,
 .tag-list li a.active:hover {
-    font-weight: bold;
-}
-.dir-button.folder_note.active {
     font-weight: bold;
 }
 ul.tag-list {
