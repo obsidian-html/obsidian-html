@@ -277,4 +277,15 @@ blockquote {
     border: 0px;
 }
 
+.theme-obs-dark .checklist-item .unchecked {
+    opacity: 0.5;
+}
+
+.theme-obs-light .checklist-item .checked {
+    background-color: #828282;
+    color: white;
+}
+
+
+
 /*  ----------------------------------------- /THEME ------------------------------------------------ */

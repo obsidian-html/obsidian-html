@@ -1020,4 +1020,31 @@ a.download-button:link,
 a.download-button:visited {
     text-decoration: none;
 }
+
+.checklist-item {
+    list-style: none;
+}
+
+.checklist-item .checked {
+    display: inline-block;
+    background-color: var(--color-accent2);
+    color: var(--callout-color);
+    padding-left: 0.25rem;
+    padding-right: 0.15rem;
+    border-radius: 0.2rem;
+    line-height: 1.0rem;
+    font-size: 0.7rem;
+    margin-right: 0.6rem;
+}
+
+.checklist-item .unchecked {
+    display: inline-block;
+    margin-right: 0.6rem;
+}
+
+li ul {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
 /*  ----------------------------------------- /GLOBAL ------------------------------------------------ */
