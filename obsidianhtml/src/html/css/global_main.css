@@ -236,9 +236,12 @@ blockquote p {
 .left_pane ul,
 .right_pane ul {
     list-style: none;
+    font-size: 11pt;
+}
+
+.right_pane ul {
     padding-left: 1.5rem;
     margin-top: 0.3rem;
-    font-size: 11pt;
 }
 
 .left_pane li,
@@ -750,16 +753,20 @@ li {
     margin-bottom: 0.3rem;
     font-family: 'Roboto-Regular';
     color: var(--dir-tree-color);
-    font-weight: bold;
     text-align: left;
+    line-height: 1.5rem;
 }
+
+.octicon {
+    margin-right: 0.5rem;
+    fill: var(--bg-accent2);
+  }
 
 .dir-button:first-child {
     margin-top: 0.4rem;
 }
 
 .dir-list {
-    margin-top: 0.2rem;
     padding-left: 0.2rem;
     margin-bottom: 0.2rem;
 }
@@ -767,6 +774,7 @@ li {
 .dir-list li {
     list-style-type: none;
     font-size: 11pt;
+    line-height: 1.5rem;
 }
 
 .dir-list li a:visited,
@@ -790,19 +798,76 @@ li {
     color: rgba(var(--code-hightlight-color), 1.0);
     font-weight: bold;
 }
-ul.dir-list {
-    margin-left: 0px;
-    padding-left: 0px;
+
+.dir-container ul.dir-list {
+    margin-top: 2rem;
 }
+
+.dir-container ul.dir-list {
+    margin-left: -0.5rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--bg-accent3);
+    margin-top: 0rem;
+}
+
+
 
 
 .fn_pf {
-    display: inline list-item;
-    list-style: disclosure-closed;
-    margin-left: -0.8rem;
-    color: var(--marker-color);
+    display: inline;
+    margin-left: -1.2rem;
+    color: whitesmoke;
+    margin-right: 1rem;
+    font-size: 10pt;
+    position: relative;
+    top: 0.1rem;
+}
+.folder_note.active .fn_pf {
+    font-size: 8pt;
+    left: 0.05rem;
+    top: 0.2rem;
+  }
+
+
+.dir-list li .file-icon {
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' aria-hidden='true' focusable='false' role='img' class='octicon octicon-file' viewBox='0 0 16 16' width='16' height='16' style='display: inline-block; user-select: none; vertical-align: text-bottom; overflow: visible;'%3E%3Cpath d='M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z'%3E%3C/path%3E%3C/svg%3E ");
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin-right: 0.5rem;
+    filter: invert(99.8%) brightness(20%);
+    margin-top: 0.25rem;
 }
 
+.dir-button .file-icon {
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' aria-hidden='true' focusable='false' role='img' class='octicon octicon-file-directory-fill' viewBox='0 0 16 16' width='16' height='16' fill='currentColor' style='display: inline-block; user-select: none; vertical-align: text-bottom; overflow: visible;'%3E%3Cpath d='M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75Z'%3E%3C/path%3E%3C/svg%3E ");
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin-right: 0.5rem;
+    filter: invert(99.8%) brightness(30%);
+    margin-bottom: -0.2rem;
+}
+
+.dir-button.active .file-icon {
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' aria-hidden='true' focusable='false' role='img' class='octicon octicon-file-directory-open-fill' viewBox='0 0 16 16' width='16' height='16' fill='currentColor' style='display: inline-block; user-select: none; vertical-align: text-bottom; overflow: visible;'%3E%3Cpath d='M.513 1.513A1.75 1.75 0 0 1 1.75 1h3.5c.55 0 1.07.26 1.4.7l.9 1.2a.25.25 0 0 0 .2.1H13a1 1 0 0 1 1 1v.5H2.75a.75.75 0 0 0 0 1.5h11.978a1 1 0 0 1 .994 1.117L15 13.25A1.75 1.75 0 0 1 13.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75c0-.464.184-.91.513-1.237Z'%3E%3C/path%3E%3C/svg%3E ");
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin-right: 0.5rem;
+    filter: invert(99.8%) brightness(30%);
+    margin-bottom: -0.2rem;
+}
+
+
+
+.dir-list li a {
+    display: block;
+}
+
+.dir-list li {
+    display: flex;
+}
 
 a.inline-tag:visited,
 a.inline-tag:link,

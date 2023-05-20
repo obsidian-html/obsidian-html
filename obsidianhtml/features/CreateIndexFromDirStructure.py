@@ -211,6 +211,7 @@ class CreateIndexFromDirStructure:
         # Get basic html that we will then edit to make it applicable for the current page.
         proto = self.BuildProtoIndex("/")
 
+
         # folder of the current page
         dir_path = self.get_dir(current_page)
 
@@ -241,6 +242,8 @@ class CreateIndexFromDirStructure:
         # remove unused tags
         safe_str = r"``css-folder-note-active-.*?``"
         proto = re.sub(safe_str, "", proto)
+
+
 
         # -- set folder-note-onclick active
         onclick_active = f"``onclick-folder-note-{current_page}``"
@@ -276,18 +279,22 @@ class CreateIndexFromDirStructure:
                 folder_note_rel_path_str = "-"
                 if has_folder_note:
                     folder_note_rel_path_str = self.html_url_prefix + note_abs_path.as_posix().replace(self.root_str, "", 1)
-                    fnpf = '<div class="fn_pf"></div>'
+                    fnpf = '<div class="fn_pf">*</div>'
                     url = self.convert_abs_path_to_url(note_abs_path)
                     onclick = f"``onclick-folder-note-{folder_note_rel_path_str}``"
 
                     html += (
                         "\t" * tab_level
-                        + f'<button id="folder-{self.uid}" class="dir-button folder_note ``css-folder-note-active-{folder_note_rel_path_str}``" href="{url}" onclick="{onclick}">{fnpf}{tree["name"]}</button>\n'
+                        + f'<button id="folder-{self.uid}" class="dir-button folder_note ``css-dir-active-{folder_id}`` ``css-folder-note-active-{folder_note_rel_path_str}``" href="{url}" onclick="{onclick}">'
+                        + f'<div class="file-icon"></div>'
+                        + f'{fnpf}{tree["name"]}</button>\n'
                     )
                 else:
                     html += (
                         "\t" * tab_level
-                        + f'<button id="folder-{self.uid}" class="dir-button" onclick="toggle_dir(this.id)">{tree["name"]}</button>\n'
+                        + f'<button id="folder-{self.uid}" class="dir-button ``css-dir-active-{folder_id}``" onclick="toggle_dir(this.id)">'
+                        + f'<div class="file-icon"></div>'
+                        + f'{tree["name"]}</button>\n'
                     )
 
                 html += (
@@ -327,7 +334,7 @@ class CreateIndexFromDirStructure:
 
                 html += (
                     "\t" * tab_level
-                    + f'<li><a class="``css-file-active-{file_id}``" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
+                    + f'<li><div class="file-icon"></div><a class="``css-file-active-{file_id}``" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
                 )
 
             tab_level -= 1
