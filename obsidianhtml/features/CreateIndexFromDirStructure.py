@@ -237,7 +237,7 @@ class CreateIndexFromDirStructure:
 
         # -- set folder-note-active
         folder_note_active = f"``css-folder-note-active-{current_page}``"
-        proto = proto.replace(folder_note_active, "active")
+        proto = proto.replace(folder_note_active, "active current")
 
         # remove unused tags
         safe_str = r"``css-folder-note-active-.*?``"
