@@ -363,6 +363,8 @@ function SetContainer(container) {
         graph_instructions[0].id = graph_instructions[0].id.replace('{level}', container.level)
     }
 
+    style_checklist(container);
+
     if (window.ObsHtmlGraph){
         window.ObsHtmlGraph.arm_page(container)
     }
@@ -568,4 +570,25 @@ function toggle_callout(el){
     cl_toggle(el, 'inactive')
 }
 
+function style_checklist(element){
+    let li_items = element.querySelectorAll("li");
+    for (let i=0; i<li_items.length;i++){
+        let li = li_items[i];
 
+        // apply on subitems, otherwise these may be overwritten
+        let sub_li_items = li.querySelectorAll("li");
+        if (sub_li_items.length > 0){
+            style_checklist(li);
+        }
+
+        // style list
+        if (li.innerHTML.slice(0, 3) == "[ ]"){
+            li.innerHTML = li.innerHTML.replace("[ ]", '<div class="unchecked">⬜</div>');
+            li.classList.add("checklist-item");
+        }
+        else if (li.innerHTML.slice(0, 3) == "[x]"){
+            li.innerHTML = li.innerHTML.replace("[x]", '<div class="checked">✔</div>');
+            li.classList.add("checklist-item");
+        }
+    }
+}

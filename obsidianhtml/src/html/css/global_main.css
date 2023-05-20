@@ -1,4 +1,20 @@
 /*  ----------------------------------------- GLOBAL ------------------------------------------------ */
+@import url('https://fonts.googleapis.com/css?family=Poppins:400');
+@import url('https://fonts.googleapis.com/css?family=Poppins:200');
+
+@font-face {
+    font-family: 'SourceCodePro-Regular';
+    src: url('{html_url_prefix}/obs.html/static/SourceCodePro-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: monospace;
+}
+
+@font-face {
+    font-family: 'Roboto-Regular';
+    src: url('{html_url_prefix}/obs.html/static/Roboto-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 
 * {
     text-rendering: optimizeLegibility;
@@ -38,6 +54,7 @@ body {
 }
 
 .header {
+    font-family: 'Poppins', sans-serif;
     padding-bottom: 1rem;
 }
 .header.minimal-header {
@@ -49,19 +66,7 @@ body {
     cursor: pointer;
 }
 
-@font-face {
-    font-family: 'SourceCodePro-Regular';
-    src: url('{html_url_prefix}/obs.html/static/SourceCodePro-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: monospace;
-}
 
-@font-face {
-    font-family: 'Roboto-Regular';
-    src: url('{html_url_prefix}/obs.html/static/Roboto-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
 
 
 /* ----------------------------------------      Core      ---------------------------------------- */
@@ -430,7 +435,8 @@ a.navbar-link:hover {
 .icon-tray {
     height: 1.6rem;
     margin-top: -0.1rem;
-    display: flex
+    display: flex;
+    margin-left: 1rem;
 }
 
 
@@ -479,11 +485,20 @@ a.navbar-link:hover {
 
 
 /* --------------------------------------- Fixes -------------------------------------------------- */
+#navbar {
+    margin-left: 2rem;
+}
+#homelink {
+    margin-left: 1.5rem;
+    margin-right: 1.7rem;
+    font-size: 12pt;
+}
 
 .container #homelink {
     background-color: unset;
     padding: unset;
     margin: unset;
+
 }
 
 .icon-tray div {
@@ -537,7 +552,6 @@ a.navbar-link:hover {
 
 h3 {
     font-size: 13pt;
-    font-weight: 500;
     border-bottom: 1px dashed var(--bg-accent3);
     padding: 2px;
     margin-bottom: 0.5rem;
@@ -615,6 +629,9 @@ h3+p {
     .right_pane_toggle_nav {
         display: block;
     }
+    #navbar {
+        margin-left: auto;
+    }
 }
 
 h1,
@@ -624,6 +641,7 @@ h4,
 h5,
 embeddedtitle {
     scroll-margin-top: 8rem;
+    font-weight: 400;
 }
 
 .header {
@@ -643,7 +661,6 @@ embeddedtitle {
     margin-top: 0px;
     margin-bottom: 16px;
     color: inherit;
-    font-weight: 600;
     padding-bottom: 0.2rem;
 }
 
@@ -653,8 +670,7 @@ h1:not(:first-of-type) {
 
 h2 {
     font-size: 14pt;
-    border-bottom: 1px dotted #777070;
-    font-weight: 600;
+    border-bottom: 1px dotted #7770706e;
     padding-bottom: 0.2rem;
     margin-top: 2rem;
 }
@@ -1004,4 +1020,31 @@ a.download-button:link,
 a.download-button:visited {
     text-decoration: none;
 }
+
+.checklist-item {
+    list-style: none;
+}
+
+.checklist-item .checked {
+    display: inline-block;
+    background-color: var(--color-accent2);
+    color: var(--callout-color);
+    padding-left: 0.25rem;
+    padding-right: 0.15rem;
+    border-radius: 0.2rem;
+    line-height: 1.0rem;
+    font-size: 0.7rem;
+    margin-right: 0.6rem;
+}
+
+.checklist-item .unchecked {
+    display: inline-block;
+    margin-right: 0.6rem;
+}
+
+li ul {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
 /*  ----------------------------------------- /GLOBAL ------------------------------------------------ */

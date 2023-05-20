@@ -113,8 +113,6 @@
 .theme-obs-dark #homelink:visited,
 .theme-obs-dark #homelink:link,
 .theme-obs-dark #homelink:hover {
-    margin-left: 2rem;
-    margin-right: 0.5rem;
     background-color: unset;
     color: var(--homelink-color);
     width: 14rem;
@@ -278,5 +276,16 @@ blockquote {
 .theme-obs-dark .match-row.keyword .match  {
     border: 0px;
 }
+
+.theme-obs-dark .checklist-item .unchecked {
+    opacity: 0.5;
+}
+
+.theme-obs-light .checklist-item .checked {
+    background-color: #828282;
+    color: white;
+}
+
+
 
 /*  ----------------------------------------- /THEME ------------------------------------------------ */
