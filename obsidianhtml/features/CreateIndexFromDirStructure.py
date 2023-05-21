@@ -118,16 +118,20 @@ class CreateIndexFromDirStructure:
                 path_key = path.relative_to(self.pb.paths["html_output_folder"]).as_posix().replace(".html", ".md")
                 if self.pb.gc("toggles/force_filename_to_lowercase", cached=True):
                     path_key = path_key.lower()
+
+                fo = None
                 try:  # html might be exported and not have a corresponding note
                     fo = self.pb.index.files[path_key]
                     name = fo.md.GetNodeName()
-                    is_note = fo.metadata["is_note"] 
                 except:
                     try:
                         fo = self.pb.index.aliased_files[path_key]
                         name = fo.md.GetNodeName()
                     except:
                         print(13, path_key)  # , self.pb.index.files.keys())
+                
+                if fo is not None:
+                    is_note = fo.metadata["is_note"] 
 
             # append file
             path_str = path.as_posix()
