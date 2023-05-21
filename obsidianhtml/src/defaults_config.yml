@@ -480,7 +480,7 @@ toggles:
       left_pane:
         enabled: True
         close_if_empty: False
-        width: 16rem
+        width: 20rem
         contents: dir_tree  # <toc, tag_tree, dir_tree, html_page> relevant features should be enabled and configured see docs
         content_args:       
           rel_path: 'index.html'    # used for html_page

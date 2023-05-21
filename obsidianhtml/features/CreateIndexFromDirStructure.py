@@ -113,6 +113,7 @@ class CreateIndexFromDirStructure:
 
             # set name to graph name if is note
             name = path.stem
+            is_note = False
             if path.suffix == ".html":
                 path_key = path.relative_to(self.pb.paths["html_output_folder"]).as_posix().replace(".html", ".md")
                 if self.pb.gc("toggles/force_filename_to_lowercase", cached=True):
@@ -120,6 +121,7 @@ class CreateIndexFromDirStructure:
                 try:  # html might be exported and not have a corresponding note
                     fo = self.pb.index.files[path_key]
                     name = fo.md.GetNodeName()
+                    is_note = fo.metadata["is_note"] 
                 except:
                     try:
                         fo = self.pb.index.aliased_files[path_key]
@@ -130,7 +132,8 @@ class CreateIndexFromDirStructure:
             # append file
             path_str = path.as_posix()
             rel_path_str = path_str.replace(self.root_str, "", 1)
-            tree["files"].append({"name": path.stem, "graph_name": name, "path": path.as_posix(), "rel_path": rel_path_str})
+            
+            tree["files"].append({"name": path.stem, "suffix": path.suffix, "graph_name": name, "path": path.as_posix(), "rel_path": rel_path_str, "is_note": is_note})
 
         return tree
 
@@ -229,17 +232,15 @@ class CreateIndexFromDirStructure:
 
         # -- set active file
         file_css_active = f"``css-file-active-{current_page}``"
-        proto = proto.replace(file_css_active, "active")
+        proto = proto.replace(file_css_active, "active current_page_dirtree")
 
-        # remove unused tags
         safe_str = r"``css-file-active-.*?``"
         proto = re.sub(safe_str, "", proto)
 
         # -- set folder-note-active
         folder_note_active = f"``css-folder-note-active-{current_page}``"
-        proto = proto.replace(folder_note_active, "active current")
+        proto = proto.replace(folder_note_active, "active current_page_dirtree")
 
-        # remove unused tags
         safe_str = r"``css-folder-note-active-.*?``"
         proto = re.sub(safe_str, "", proto)
 
@@ -332,9 +333,14 @@ class CreateIndexFromDirStructure:
                     if self.pb.gc("toggles/external_blank"):
                         external_blank_html = 'target="_blank" '
 
+                non_note_class = ""
+                if not f["is_note"]:
+                    non_note_class = " non-md-file"
+                    name += f["suffix"]
+
                 html += (
                     "\t" * tab_level
-                    + f'<li><div class="file-icon"></div><a class="``css-file-active-{file_id}``" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
+                    + f'<li><div class="file-icon{non_note_class}"></div><a class="``css-file-active-{file_id}``" href="{self.html_url_prefix}/{rel_path}" {external_blank_html} {class_list}>{name}</a></li>\n'
                 )
 
             tab_level -= 1
@@ -348,7 +354,7 @@ class CreateIndexFromDirStructure:
         self.uid = 0
         html = _recurse(self.tree, -1, "" + self.html_url_prefix, current_page)
 
-        return f'<div class="dirtree">{html}</div>'
+        return f'<div id="dirtree">{html}</div>'
 
     def WriteIndex(self):
         output_path = self.root.joinpath(self.rel_output_path).resolve()
