@@ -750,6 +750,7 @@ li {
     display: block;
     border-left: 1px solid var(--bg-accent3);
     margin-left: 0.4rem;
+    margin-bottom: 1rem;
 }
 
 .dir-button {
