@@ -323,7 +323,7 @@ toggles:
       flip_panes: '<DEPRECATED>'                   # switch right and left pane around. (does nothing unless in documentation layout.)
       add_dir_list: True                  # show directory contents in one of the panes (only documentation layout)
       accent_color: '65, 76, 253'
-      loading_bg_color: '255, 255, 255'
+      loading_bg_color: '22, 22, 22'
 
     theme_picker:
       enabled: True
