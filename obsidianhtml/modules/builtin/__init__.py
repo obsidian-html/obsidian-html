@@ -12,6 +12,8 @@ from .copy_vault_to_tempdirectory import VaultCopyModule
 from .prepare_output_folders import PrepareOutputFoldersModule
 from .parse_metadata import ParseMetadataModule
 from .filter_on_metadata import FilterOnMetadataModule
+from .binary import BinaryModule
+from .stop import StopModule
 
 builtin_module_aliases = {
     "setup_module": SetupModule,
@@ -26,4 +28,6 @@ builtin_module_aliases = {
     "prepare_output_folders": PrepareOutputFoldersModule,
     "parse_metadata": ParseMetadataModule,
     "filter_on_metadata": FilterOnMetadataModule,
+    "binary": BinaryModule,
+    "stop": StopModule,
 }

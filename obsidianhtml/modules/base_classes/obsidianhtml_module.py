@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from functools import cache
 from pathlib import Path
 from datetime import datetime
+from subprocess import Popen, PIPE
 
 from ..lib import verbose_enough, hash_wrap
 from ...lib import formatted_print
@@ -41,6 +42,8 @@ class ObsidianHtmlModule(ABC):
         self.module_name = module_name
         self.test_module_validity()
 
+        self.set_instance_id()
+
         self.persistent = persistent
         self.states = {}
         self.states["cancelled_run"] = False
@@ -60,8 +63,12 @@ class ObsidianHtmlModule(ABC):
         # module config
         self.mod_config = {}
         self.define_mod_config_defaults()
-        if self.module_data_folder is not None:
-            self.try_load_mod_config()
+
+
+    def set_instance_id(self):
+        # set id for the instance.
+        # currently only used by binary modules
+        self.instance_id = datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z') + "_" + self.module_class_name + "_" + self.module_name
 
     @property
     def nametag(self):
@@ -71,6 +78,10 @@ class ObsidianHtmlModule(ABC):
         pass
 
     def try_load_mod_config(self):
+        # can't load if this value is not set
+        if self.module_data_folder is None:
+            return
+
         cfg = self.modfile("config.yml", allow_absent=True).read(sneak=True).from_yaml()
         
         if cfg is None:
@@ -224,12 +235,15 @@ class ObsidianHtmlModule(ABC):
     def set_module_data_folder_path(self, module_data_folder_path):
         """Ensures that the module_data_folder is not prefixed with a '/'"""
         if module_data_folder_path is None:
-            self.module_data_folder = module_data_folder_path
+            self.module_data_folder = None
+            self.module_data_folder_abs = None
             return
         if module_data_folder_path[-1] == "/":
             self.module_data_folder = module_data_folder_path[:-1]
         else:
             self.module_data_folder = module_data_folder_path
+
+        self.module_data_folder_abs = Path(self.module_data_folder).resolve().as_posix()
 
     def test_module_validity(self):
         """Tests whether the custom module follows the rules"""
@@ -263,3 +277,46 @@ class ObsidianHtmlModule(ABC):
 
         if failed:
             raise Exception("\n- " + "\n- ".join(errors))
+
+    # BINARY MODULE METHODS
+    # =========================================================================================
+    def set_binary(self, binary_path, method):
+        self.binary_path = binary_path
+        self.binary_run_method = method
+
+    def run_binary(self, args):
+        # compile base command
+        command = [self.binary_path, *args]
+
+        # add unique run id
+        command.append(self.instance_id)
+
+        # create file under instances with run id
+        file_path = Path(self.module_data_folder_abs).joinpath(f"instances/{self.instance_id}.json")
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        data = {
+            "module_name": self.module_name
+        }
+        with open(file_path, "w") as f:
+            f.write(json.dumps(data, indent=2))
+
+        # convert to string for printing debug info
+        command_string = " ".join(command)
+        self.print("debug", f'running: {command_string}')
+
+        # run command
+        p = Popen(command, stdout=PIPE, stderr=PIPE)
+        output, error = p.communicate()
+
+        if (len(error) > 0):
+            print(error.decode())
+
+        if p.returncode != 0:
+            self.print("error", f'binary module action `{command_string}` failed with error: \n\n{error.decode()}')
+
+        try:
+            res = json.loads(output.decode())
+            return res
+        except json.decoder.JSONDecodeError as err:
+            print("Error", f'Failed to parse binary response as JSON:{err}\nOutput:\n{output.decode()}')
+        
