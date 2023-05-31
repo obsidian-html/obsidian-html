@@ -131,8 +131,12 @@ module_config: {}
   #     value: False
     
   # filter_on_metadata:
-  #   include_on: [[]] # include every note
-  #   exclude_on: [[]] # exclude no note
+  #   include_on: 
+  #     description: What metadata to include notes on. Empty list means True by default.
+  #     value: [[]]
+  #   exclude_on: 
+  #     description: What metadata to exclude on. Empty list means False by default
+  #     value: [[]] 
   
 ##########################################################################
 #                              OPERATIONS                                #
