@@ -40,6 +40,7 @@ def run_module(
     instantiated_modules=None,
     persistent=None,
     module_source=None,
+    module_binary=None,
     pb=None,
     verbosity="error",
 ):
@@ -50,6 +51,8 @@ def run_module(
         module_name=module_name,
         module_class_name=module_class_name,
         module_source=module_source,
+        module_binary=module_binary,
+        module_run_method=method,
         persistent=persistent,
         instantiated_modules=instantiated_modules,
         module_data_folder=module_data_folder,
@@ -115,6 +118,8 @@ def run_post_modules(
         meta_module_obj = instantiate_module(
             module_class=listing["module"],
             module_name=listing["name"],
+            module_binary=listing["binary"],
+            module_run_method=listing["method"],
             persistent=listing["persistent"],
             instantiated_modules=instantiated_modules,
             module_data_folder=module_data_folder,
@@ -147,6 +152,8 @@ def get_module(
     module_class_name=None,
     module_data_folder=None,
     module_source=None,
+    module_binary=None,
+    module_run_method="run",
     persistent=None,
     instantiated_modules=None,
     verbosity=None,
@@ -166,6 +173,8 @@ def get_module(
     module = instantiate_module(
         module_class=module_class,
         module_name=module_name,
+        module_binary=module_binary,
+        module_run_method=module_run_method,
         instantiated_modules=instantiated_modules,
         persistent=persistent,
         module_data_folder=module_data_folder,
@@ -203,6 +212,8 @@ def get_module_class(module_name, module_class_name, module_source):
 def instantiate_module(
     module_class,
     module_name,
+    module_binary,
+    module_run_method,
     instantiated_modules,
     module_data_folder,
     persistent=None,
@@ -234,6 +245,11 @@ def instantiate_module(
         )
     module_obj = module_class(module_data_folder=module_data_folder, module_name=module_name, persistent=persistent)
 
+    if module_binary is not None:
+        module_obj.set_binary(module_binary, module_run_method)
+    else:
+        module_obj.try_load_mod_config()
+
     # STORE
     # ---
     if instantiated_modules is not None and module_obj.persistent == True:
@@ -252,10 +268,19 @@ def load_module_itenary(module_data_folder):
     def hydrate_module_listing(mod):
         # fill in defaults
         mod["type"] = "built-in"
+
+        if "binary" in mod.keys():
+            mod["type"] = "binary"
+            mod["module_class"] = "binary"
+        else:
+            mod["binary"] = None
+
         if "file" in mod.keys():
             mod["type"] = "external"
         else:
             mod["file"] = None
+
+
         if "method" not in mod.keys():
             mod["method"] = "run"
         if "persistent" not in mod.keys():
@@ -275,7 +300,7 @@ def load_module_itenary(module_data_folder):
         mod["module"] = get_module_class(
             module_name=mod["name"],
             module_class_name=mod["module_class"],
-            module_source=mod["file"],
+            module_source=mod["file"]
         )
 
     for phase in module_cfg["module_list"].keys():

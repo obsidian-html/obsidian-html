@@ -9,8 +9,25 @@ Make sure to install Docker before following the instructions below
 
 - https://docs.docker.com/get-docker/
 
+
+### On Windows
+For Windows, you can choose Docker Desktop for Windows.
+
+After the installation is done, open Docker Desktop, and accept the agreement, this will start the Docker daemon.
+
+After that is done, open a **new** Powershell window. (Not Powershell ISE!)
+
+Run `docker` in Powershell to test that the application is registered and working.
+
 ## Instructions
 ``` bash
+cd ~
+mkdir git
+cd git
+
+# if you are behind a proxy, first set:
+# git config --global http.proxy http://proxyUsername:proxyPassword@proxy.server.com:port
+
 # clone this project and move into it
 git clone https://github.com/obsidian-html/obsidian-html.git
 cd obsidian-html
@@ -23,6 +40,7 @@ cd examples/docker
 
 # open ./config/config.yml and configure it
 # set at least obsidian_entrypoint_path_str
+# (On Windows, use an application other than vim)
 vim ./config/config.yml
 
 # set config
@@ -30,6 +48,7 @@ VAULT_PATH="/home/dorus/git/example_vault/vault"
 OUTPUT_PATH="/tmp/output"
 
 # make sure output folder exists on our system
+# (On Windows, -p will be ignored, you will get an error if the folder already exists, this is fine)
 mkdir -p $OUTPUT_PATH
 
 # run container

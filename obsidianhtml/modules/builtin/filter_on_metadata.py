@@ -89,7 +89,7 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
         return False
 
     def test_exclude(self, rel_path, metadata, exclude_on):
-        if len(exclude_on) == 0:
+        if len(exclude_on) == 1 and len(exclude_on[0]) == 0:
             return False
         
         for and_list in exclude_on:
@@ -114,7 +114,7 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
 
         include_on = self.value_of("include_on")
         exclude_on = self.value_of("exclude_on")
-        
+
         # judge each file
         exclude_list = []
         for file in md_files:

@@ -131,8 +131,12 @@ module_config: {}
   #     value: False
     
   # filter_on_metadata:
-  #   include_on: [[]] # include every note
-  #   exclude_on: [[]] # exclude no note
+  #   include_on: 
+  #     description: What metadata to include notes on. Empty list means True by default.
+  #     value: [[]]
+  #   exclude_on: 
+  #     description: What metadata to exclude on. Empty list means False by default
+  #     value: [[]] 
   
 ##########################################################################
 #                              OPERATIONS                                #
@@ -323,7 +327,7 @@ toggles:
       flip_panes: '<DEPRECATED>'                   # switch right and left pane around. (does nothing unless in documentation layout.)
       add_dir_list: True                  # show directory contents in one of the panes (only documentation layout)
       accent_color: '65, 76, 253'
-      loading_bg_color: '255, 255, 255'
+      loading_bg_color: '22, 22, 22'
 
     theme_picker:
       enabled: True
