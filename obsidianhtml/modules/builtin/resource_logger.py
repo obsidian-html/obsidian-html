@@ -12,7 +12,7 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
 
     @staticmethod
     def requires():
-        return tuple(["config.yml", "log.resources"])
+        return tuple(["config.yml"])
 
     @staticmethod
     def provides():

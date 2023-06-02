@@ -32,16 +32,23 @@ def ConvertVault(config_yaml_location=""):
     pb = PicknickBasket()
 
     # Bootstrap module system
-    # The first module will always have to be run, and we need info back, so this is a bit of a weird one as far as modules are concerned
     # ----------------------------------------------------------
-    module_data_folder = module_controller.run_module_setup(pb=pb).output
+    module_result, setup_module = module_controller.run_module_setup(pb=pb)
+    module_data_folder = module_result.output
     config_file_path = module_data_folder + "/config.yml"
     with open(config_file_path, "r") as f:
         cfg = yaml.safe_load(f.read())
         verbosity = cfg["verbosity"]
 
+    # The first module will always have to be run, and we need info back, so this is a bit of a weird one as far as modules are concerned
     module_list, meta_modules_post = module_controller.load_module_itenary(module_data_folder)
     instantiated_modules = {}
+
+    # compile list of which module provides/requires which modfile
+    all_module_listings = module_list.copy()
+    all_module_listings["meta_modules"] = meta_modules_post
+    setup_module.compile_modfile_lookups(all_module_listings)
+
 
     # Run modules
     # ----------------------------------------------------------

@@ -36,7 +36,7 @@ class SetupModule(ObsidianHtmlModule):
 
     @staticmethod
     def provides():
-        return tuple(["config.yml", "user_config.yml", "arguments.yml", "guid.txt"])
+        return tuple(["config.yml", "user_config.yml", "arguments.yml", "guid.txt", "modfile_dependencies.json"])
 
     @staticmethod
     def alters():
@@ -162,6 +162,101 @@ class SetupModule(ObsidianHtmlModule):
 
         # return module data folder so that the rest of the program knows where to find the info.
         return self.module_data_folder
+
+    def compile_modfile_lookups(self, module_list):
+        def add_to(d, key, kind, val):
+            if key not in d.keys():
+                d[key] = {"provided_by": [], "required_by": [], "altered_by": []}
+            if val not in d[key][kind]:
+                d[key][kind].append(val)
+
+        def parse_module_for_modfiles(module_overview_section, modfile_overview, module_class, key, binary_path=None):
+            provides = None
+            if binary_path is not None:
+                provides = module_class.provides(binary_path=binary_path)
+            else:
+                provides = module_class.provides()
+
+            requires = None
+            if binary_path is not None:
+                requires = module_class.requires(binary_path=binary_path)
+            else:
+                requires = module_class.requires()
+
+
+            for f in provides:
+                kind = "provided_by"
+                if f in requires:
+                    kind = "altered_by"
+                add_to(modfile_overview, f, kind, val=key)
+
+            for f in requires:
+                kind = "required_by"
+                add_to(modfile_overview, f, kind, val=key)
+                if f in provides:
+                    kind = "altered_by"
+                    add_to(modfile_overview, f, kind, val=key)
+                
+            module_overview_section[key] = {"provides" : list(provides)}
+
+        # go through all the listed modules
+        module_overview = {}
+        modfile_overview = {}
+        configured_module_classes = []
+
+        for phase in module_list.keys():
+            # output
+            module_overview[phase] = {}
+
+            # loop through module listings (ml)
+            modules = module_list[phase]
+            for ml in modules:
+                # set key to module name tag
+                module_class = ml["module"]
+                key = f'{ml["name"]} ({module_class.__name__})'
+                binary_path = ml["binary"]
+                module_overview_section = module_overview[phase]
+
+                parse_module_for_modfiles(
+                    module_overview_section, modfile_overview, 
+                    module_class=module_class, key=key, binary_path=binary_path
+                )
+
+                configured_module_classes.append(module_class)
+
+        # we could also have a user that removes a lot of modules, or doesn't have the most recent one's
+        # in their list yet, we want to notify them of the available built-in modules
+        from . import builtin_module_aliases
+        module_overview["<internal>"] = {}
+        module_overview["<available-builtin>"] = {}
+
+        # first add the setup module, which is always executed, and is not configurable
+
+        module_class = builtin_module_aliases["setup_module"]
+        key = f'setup_module (SetupModule)'
+        parse_module_for_modfiles(
+            module_overview["<internal>"], modfile_overview, 
+            module_class=module_class, key=key
+        )
+
+        for key, module_class in builtin_module_aliases.items():
+            if module_class in configured_module_classes:
+                continue
+            if key in ["setup_module", "binary", "apply_cmdline_arguments"]:
+                continue
+
+            key = f'{key} ({module_class.__name__}) [not configured]'
+            parse_module_for_modfiles(
+                module_overview["<available-builtin>"], modfile_overview, 
+                module_class=module_class, key=key
+            )
+
+        # print(yaml.dump(modfile_overview))
+        # print(yaml.dump(module_overview))
+
+        self.modfile("modfile_dependencies.json", modfile_overview).to_json().write()
+
+
 
     def integrate_load(self, pb):
         pass

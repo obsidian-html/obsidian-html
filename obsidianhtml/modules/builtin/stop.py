@@ -4,11 +4,11 @@ from ..base_classes import ObsidianHtmlModule
 class StopModule(ObsidianHtmlModule):
     @staticmethod
     def requires():
-        return tuple(["config.yml"])
+        return tuple()
 
     @staticmethod
     def provides():
-        return tuple(["paths.json"])
+        return tuple()
 
     @staticmethod
     def alters():

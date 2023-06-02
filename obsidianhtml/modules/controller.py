@@ -344,4 +344,4 @@ def run_module_setup(pb=None):
             "setup_module.run() (finished running)",
         )
 
-    return result
+    return result, module

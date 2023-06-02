@@ -13,7 +13,7 @@ class CleanupTempFilesModule(ObsidianHtmlModule):
 
     @staticmethod
     def provides():
-        return tuple(["config.yml"])
+        return tuple()
 
     @staticmethod
     def alters():
