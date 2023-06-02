@@ -10,6 +10,7 @@ from pathlib import Path
 from ..base_classes import ObsidianHtmlModule
 from ...lib import is_installed, pushd, should_ignore
 
+
 class VaultCopyModule(ObsidianHtmlModule):
     """Creates a temporary folder and copies the user's vault to that folder.
     This is so that we don't mess anything up in the user's vault.
@@ -17,16 +18,16 @@ class VaultCopyModule(ObsidianHtmlModule):
     when the function ends.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["config.yml", "paths.json", "index/files.json"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["paths.json", "index/files.json"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def integrate_load(self, pb):
@@ -48,6 +49,17 @@ class VaultCopyModule(ObsidianHtmlModule):
             return False
         if not self.gc("toggles/compile_md"):
             return False
+
+        self.check_prerequisites()
+
+    def check_prerequisites(self):
+        if not self.modfile("index/files.json").exists():
+            self.print(
+                "error", 
+                "This module requires index/files.json to exist, but it does not\nThis is typically provided by the built-in get_file_list module.\n" +
+                f"Make sure that it is run before this one ({self.nametag})"
+            )
+            exit(1)
 
     def run(self):
         if not self.gc("copy_vault_to_tempdir"):
