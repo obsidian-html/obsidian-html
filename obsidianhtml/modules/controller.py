@@ -254,7 +254,9 @@ def instantiate_module(
 
     if module_binary is not None:
         module_obj.set_binary(module_binary, module_run_method)
+        module_obj.test_module_validity()
     else:
+        module_obj.test_module_validity()
         module_obj.try_load_mod_config()
 
     # STORE

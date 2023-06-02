@@ -1,21 +1,36 @@
 import json
 from pathlib import Path
 
-from ..base_classes import ObsidianHtmlModule
+from ..base_classes import ObsidianHtmlModule, run_binary
 
 class BinaryModule(ObsidianHtmlModule):
     """Used to run any binary as a module"""
     @staticmethod
-    def requires():
-        return tuple(["config.yml"])
+    def requires(**kwargs):
+        if "binary_path" not in kwargs.keys():
+            raise Exception("cannot run static method requires on BinaryModule without binary_path kwarg")
+        binary_path = kwargs["binary_path"]
+
+        res = run_binary([binary_path, "requires"])
+        return tuple(res)
 
     @staticmethod
-    def provides():
-        return tuple(["paths.json"])
+    def provides(**kwargs):
+        if "binary_path" not in kwargs.keys():
+            raise Exception("cannot run static method provides on BinaryModule without binary_path kwarg")
+        binary_path = kwargs["binary_path"]
+
+        res = run_binary([binary_path, "provides"])
+        return tuple(res)
 
     @staticmethod
-    def alters():
-        return tuple()
+    def alters(**kwargs):
+        if "binary_path" not in kwargs.keys():
+            raise Exception("cannot run static method alters on BinaryModule without binary_path kwarg")
+        binary_path = kwargs["binary_path"]
+
+        res = run_binary([binary_path, "alters"])
+        return tuple(res)
         
     def accept(self, module_data_folder):
         """ Returns True if module should be run, otherwise false"""
