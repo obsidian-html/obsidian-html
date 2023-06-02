@@ -34,13 +34,13 @@ class ObsidianHtmlModule(ABC):
     def __init__(self, module_data_folder, module_name, persistent=None):
         # overwrites
         self.__verbosity__overwrite__ = None
+        self.is_binary = False
 
         # set values
         self.set_module_data_folder_path(module_data_folder)
 
         self.module_class_name = self.__class__.__name__
         self.module_name = module_name
-        self.test_module_validity()
 
         self.set_instance_id()
 
@@ -104,23 +104,39 @@ class ObsidianHtmlModule(ABC):
             raise Exception(f'Value of module config with key {mod_config_key} requested, but not set, in module {self.nametag}')
         return self.mod_config[mod_config_key]["value"]
 
-    @property
+    @staticmethod
     @abstractmethod
-    def requires(self):
+    def requires(**kwargs):
         """List of the relative paths of module output files that are used as input to this module"""
         pass
 
-    @property
+    @staticmethod
     @abstractmethod
-    def provides(self):
+    def provides(**kwargs):
         """List of the relative paths of module output files that are created/altered by this module"""
         pass
 
-    @property
+    @staticmethod
     @abstractmethod
-    def alters(self):
+    def alters(**kwargs):
         """List of strings denoting which targets are altered by this module"""
         pass
+
+    # wrappers to make static method available within module
+    def requires_files(self):
+        if self.is_binary:
+            return self.__class__.requires(binary_path=self.binary_path)
+        return self.__class__.requires()
+
+    def provides_files(self):
+        if self.is_binary:
+            return self.__class__.provides(binary_path=self.binary_path)
+        return self.__class__.provides()
+
+    def alters_files(self):
+        if self.is_binary:
+            return self.__class__.alters(binary_path=self.binary_path)
+        return self.__class__.alters()
 
     @abstractmethod
     def accept(self, module_data_folder):
@@ -256,11 +272,15 @@ class ObsidianHtmlModule(ABC):
             errors.append(message)
 
         # property types should be correct
-        if not isinstance(self.requires, tuple):
+        requires = self.requires_files()
+        provides = self.provides_files()
+        alters = self.alters_files()
+
+        if not isinstance(requires, tuple):
             log_error("Module Validity Error: self.requires() should return a tuple")
-        if not isinstance(self.provides, tuple):
+        if not isinstance(provides, tuple):
             log_error("Module Validity Error: self.provides() should return a tuple")
-        if not isinstance(self.alters, tuple):
+        if not isinstance(alters, tuple):
             log_error("Module Validity Error: self.alters() should return a tuple")
         else:
             allowed_alters_values = (
@@ -271,16 +291,17 @@ class ObsidianHtmlModule(ABC):
                 "html_misc",
                 "vault_misc",
             )
-            for val in self.alters:
+            for val in alters:
                 if val not in allowed_alters_values:
                     log_error(f"Module Validity Error: value {val} in self.alters is not allowed. Allowed values: {allowed_alters_values}")
 
         if failed:
-            raise Exception("\n- " + "\n- ".join(errors))
+            raise Exception(f"{self.nametag}\n- " + "\n- ".join(errors))
 
     # BINARY MODULE METHODS
     # =========================================================================================
     def set_binary(self, binary_path, method):
+        self.is_binary = True
         self.binary_path = binary_path
         self.binary_run_method = method
 
@@ -300,19 +321,19 @@ class ObsidianHtmlModule(ABC):
         with open(file_path, "w") as f:
             f.write(json.dumps(data, indent=2))
 
-        # convert to string for printing debug info
-        command_string = " ".join(command)
-        self.print("debug", f'running: {command_string}')
+        self.print("debug", f'running: {" ".join(command)}')
+        return run_binary(command)
 
-        # run command
-        p = Popen(command, stdout=PIPE, stderr=PIPE)
+
+def run_binary(command_list):
+
+        p = Popen(command_list, stdout=PIPE, stderr=PIPE)
         output, error = p.communicate()
 
         if (len(error) > 0):
             print(error.decode())
-
         if p.returncode != 0:
-            self.print("error", f'binary module action `{command_string}` failed with error: \n\n{error.decode()}')
+            self.print("error", f'binary module action `{" ".join(command)}` failed with error: \n\n{error.decode()}')
 
         try:
             res = json.loads(output.decode())

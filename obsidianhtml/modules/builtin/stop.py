@@ -2,16 +2,16 @@
 from ..base_classes import ObsidianHtmlModule
 
 class StopModule(ObsidianHtmlModule):
-    @property
-    def requires(self):
-        return tuple(["config.yml"])
+    @staticmethod
+    def requires():
+        return tuple()
 
-    @property
-    def provides(self):
-        return tuple(["paths.json"])
+    @staticmethod
+    def provides():
+        return tuple()
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def integrate_load(self, pb):

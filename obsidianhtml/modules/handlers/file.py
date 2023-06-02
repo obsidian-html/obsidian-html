@@ -36,7 +36,7 @@ class File:
         if (
             self.is_module_file
             and sneak == False
-            and self.resource_rel_path not in self.module.requires
+            and self.resource_rel_path not in self.module.requires_files()
             and self.resource_rel_path not in self.module.written_files.listing()
         ):
             # excempted methods from requirement to report reading/writing
@@ -75,7 +75,7 @@ class File:
 
     def write(self):
         # check whether module reports writing this output
-        if self.is_module_file and self.resource_rel_path not in self.module.provides:
+        if self.is_module_file and self.resource_rel_path not in self.module.provides_files():
             # temporary: while integrate methods exist: don't do checks for the integrate methods
             if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
                 raise Exception(
@@ -107,6 +107,8 @@ class File:
             with open(version_path, "w", encoding=self.encoding) as f:
                 f.write(self.contents)
 
+    def exists(self):
+        return os.path.isfile(self.path)
 
     # --- read contents
     def text(self):

@@ -21,16 +21,16 @@ class ApplyCommandlineArgumentsModule(ObsidianHtmlModule):
       --subdir <subdir> will set: html_url_prefix, html_output_folder_path_str
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple([])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple([])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def accept(self, module_data_folder):

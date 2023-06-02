@@ -7,16 +7,16 @@ class CleanupTempFilesModule(ObsidianHtmlModule):
     This module will remove all temporary files after we are done running.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple()
 
-    @property
-    def provides(self):
-        return tuple(["config.yml"])
+    @staticmethod
+    def provides():
+        return tuple()
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def allow_post_module(self, meta_module):

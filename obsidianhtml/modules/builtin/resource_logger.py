@@ -10,16 +10,16 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
     This module keeps track of the resource states, and logs them to `log.resources`
     """
 
-    @property
-    def requires(self):
-        return tuple(["config.yml", "log.resources"])
+    @staticmethod
+    def requires():
+        return tuple(["config.yml"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["log.resources"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def new_resource_listing(self, state):

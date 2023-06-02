@@ -1,1 +1,1 @@
-from .obsidianhtml_module import ObsidianHtmlModule
+from .obsidianhtml_module import ObsidianHtmlModule, run_binary

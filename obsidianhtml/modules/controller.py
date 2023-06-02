@@ -79,7 +79,14 @@ def run_module(
             f"{module.module_name}.{method}()",
         )
     module_dot_method = getattr(module, method)
+
+    # import time
+    # start_time = time.perf_counter ()
+
     result = module_dot_method()
+
+    # end_time = time.perf_counter ()
+    # print(end_time - start_time, "seconds")
 
     # convert basic result to run_module_result() type to manage different module outputs in an organized fashion
     result = run_module_result(module=module, output=result)
@@ -247,7 +254,9 @@ def instantiate_module(
 
     if module_binary is not None:
         module_obj.set_binary(module_binary, module_run_method)
+        module_obj.test_module_validity()
     else:
+        module_obj.test_module_validity()
         module_obj.try_load_mod_config()
 
     # STORE
@@ -335,4 +344,4 @@ def run_module_setup(pb=None):
             "setup_module.run() (finished running)",
         )
 
-    return result
+    return result, module

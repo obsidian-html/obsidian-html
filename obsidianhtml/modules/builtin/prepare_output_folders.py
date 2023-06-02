@@ -18,16 +18,16 @@ class PrepareOutputFoldersModule(ObsidianHtmlModule):
     It will also create the aliased_files.yml file, which contains references to files by an alias.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["config.yml", "paths.json", "guid.txt"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple()
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple(["md_misc", "html_misc"])
 
     def define_mod_config_defaults(self):

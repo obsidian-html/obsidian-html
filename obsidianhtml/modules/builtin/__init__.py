@@ -1,6 +1,7 @@
 from ..base_classes.obsidianhtml_module import ObsidianHtmlModule
 
 from .setup_module import SetupModule
+from .apply_cmdline_arguments import ApplyCommandlineArgumentsModule
 from .process_config import ProcessConfigModule
 from .load_paths import LoadPathsModule
 from .get_file_list import GetFileListModule
@@ -20,7 +21,7 @@ builtin_module_aliases = {
     "process_config": ProcessConfigModule,
     "load_paths": LoadPathsModule,
     "get_file_list": GetFileListModule,
-    "cleanup_temp_files": CleanupTempFilesModule,
+    # "cleanup_temp_files": CleanupTempFilesModule,
     "resource_logger": ResourceLoggerMetaModule,
     "html_templater": HtmlTemplaterModule,
     "load_graphers": LoadGrapherModule,
@@ -30,4 +31,6 @@ builtin_module_aliases = {
     "filter_on_metadata": FilterOnMetadataModule,
     "binary": BinaryModule,
     "stop": StopModule,
+    "apply_cmdline_arguments": ApplyCommandlineArgumentsModule,
 }
+
