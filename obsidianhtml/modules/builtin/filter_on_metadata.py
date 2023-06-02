@@ -17,16 +17,16 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
     The files index/files.json and index/markdown_files.json are then updated so that the items in excluded_files are removed from them.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["index/markdown_files.json", "index/files.json", "index/metadata.json", "paths.json"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["index/files.json", "index/markdown_files.json", "excluded_files_by_metadata.json",])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def define_mod_config_defaults(self):

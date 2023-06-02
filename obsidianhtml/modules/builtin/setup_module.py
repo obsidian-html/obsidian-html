@@ -30,16 +30,16 @@ class SetupModule(ObsidianHtmlModule):
     This module will create the arguments.yml file based on the given sysargs.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple()
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["config.yml", "user_config.yml", "arguments.yml", "guid.txt"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def cached_print(self, level, msg):

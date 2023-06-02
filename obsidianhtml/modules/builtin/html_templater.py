@@ -14,12 +14,12 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
       disk for every note.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["config.yml"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(
             [
                 "html/note.template.html",
@@ -28,8 +28,8 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
             ]
         )
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def accept(self, module_data_folder):

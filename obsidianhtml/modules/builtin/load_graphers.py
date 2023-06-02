@@ -10,12 +10,12 @@ class LoadGrapherModule(ObsidianHtmlModule):
     To be refactored. It's not nice how the html template and graph template are now dependent on eachother.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["config.yml"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(
             [
                 "html/graph.template.html",
@@ -24,8 +24,8 @@ class LoadGrapherModule(ObsidianHtmlModule):
             ]
         )
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def accept(self, module_data_folder):

@@ -10,16 +10,16 @@ class ProcessConfigModule(ObsidianHtmlModule):
     and derrive values from the config to make decision making easier later on.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["config.yml", "arguments.yml"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["config.yml", "capabilities.json"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     # --- check user config

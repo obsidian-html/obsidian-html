@@ -5,16 +5,16 @@ from ..base_classes import ObsidianHtmlModule
 
 class BinaryModule(ObsidianHtmlModule):
     """Used to run any binary as a module"""
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["config.yml"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["paths.json"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
         
     def accept(self, module_data_folder):

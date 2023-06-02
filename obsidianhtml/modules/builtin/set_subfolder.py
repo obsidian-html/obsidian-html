@@ -18,16 +18,16 @@ class SetSubfolderModule(ObsidianHtmlModule):
     This module replaces any html_url_prefix settings when `--subfolder <subfolder>` is configured on the commandline
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["config.yml", "arguments.yml"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["config.yml"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def integrate_load(self, pb):

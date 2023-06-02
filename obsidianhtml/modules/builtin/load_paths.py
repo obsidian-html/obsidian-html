@@ -13,16 +13,16 @@ class LoadPathsModule(ObsidianHtmlModule):
     Paths are all encoded as posix strings. Paths are absolute unless prefixed with _rel
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["config.yml"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["paths.json"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     # REFACTOR

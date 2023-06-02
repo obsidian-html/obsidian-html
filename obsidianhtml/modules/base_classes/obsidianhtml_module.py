@@ -104,23 +104,31 @@ class ObsidianHtmlModule(ABC):
             raise Exception(f'Value of module config with key {mod_config_key} requested, but not set, in module {self.nametag}')
         return self.mod_config[mod_config_key]["value"]
 
-    @property
+    @staticmethod
     @abstractmethod
-    def requires(self):
+    def requires():
         """List of the relative paths of module output files that are used as input to this module"""
         pass
 
-    @property
+    @staticmethod
     @abstractmethod
-    def provides(self):
+    def provides():
         """List of the relative paths of module output files that are created/altered by this module"""
         pass
 
-    @property
+    @staticmethod
     @abstractmethod
-    def alters(self):
+    def alters():
         """List of strings denoting which targets are altered by this module"""
         pass
+
+    # wrappers to make static method available within module
+    def requires_files(self):
+        return self.__class__.requires()
+    def provides_files(self):
+        return self.__class__.provides()
+    def alters_files(self):
+        return self.__class__.alters()
 
     @abstractmethod
     def accept(self, module_data_folder):
@@ -256,11 +264,11 @@ class ObsidianHtmlModule(ABC):
             errors.append(message)
 
         # property types should be correct
-        if not isinstance(self.requires, tuple):
+        if not isinstance(self.requires_files(), tuple):
             log_error("Module Validity Error: self.requires() should return a tuple")
-        if not isinstance(self.provides, tuple):
+        if not isinstance(self.provides_files(), tuple):
             log_error("Module Validity Error: self.provides() should return a tuple")
-        if not isinstance(self.alters, tuple):
+        if not isinstance(self.alters_files(), tuple):
             log_error("Module Validity Error: self.alters() should return a tuple")
         else:
             allowed_alters_values = (
@@ -271,12 +279,12 @@ class ObsidianHtmlModule(ABC):
                 "html_misc",
                 "vault_misc",
             )
-            for val in self.alters:
+            for val in self.alters_files():
                 if val not in allowed_alters_values:
                     log_error(f"Module Validity Error: value {val} in self.alters is not allowed. Allowed values: {allowed_alters_values}")
 
         if failed:
-            raise Exception("\n- " + "\n- ".join(errors))
+            raise Exception(f"{self.nametag}\n- " + "\n- ".join(errors))
 
     # BINARY MODULE METHODS
     # =========================================================================================

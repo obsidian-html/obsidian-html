@@ -17,16 +17,16 @@ class ParseMetadataModule(ObsidianHtmlModule):
     and the result is written to index/metadata.json
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["paths.json", "index/markdown_files.json"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["index/metadata.json"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def accept(self, module_data_folder):

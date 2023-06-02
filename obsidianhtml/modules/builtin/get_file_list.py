@@ -19,16 +19,16 @@ class GetFileListModule(ObsidianHtmlModule):
     Once that list exists, the exluded file (by excluded_glob) will be filtered out.
     """
 
-    @property
-    def requires(self):
+    @staticmethod
+    def requires():
         return tuple(["paths.json", "config.yml"])
 
-    @property
-    def provides(self):
+    @staticmethod
+    def provides():
         return tuple(["index/files.json", "index/excluded_files.json", "index/markdown_files.json"])
 
-    @property
-    def alters(self):
+    @staticmethod
+    def alters():
         return tuple()
 
     def define_mod_config_defaults(self):
