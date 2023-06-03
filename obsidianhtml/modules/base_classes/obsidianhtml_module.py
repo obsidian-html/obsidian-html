@@ -298,6 +298,18 @@ class ObsidianHtmlModule(ABC):
         if failed:
             raise Exception(f"{self.nametag}\n- " + "\n- ".join(errors))
 
+    def check_required_modfiles_exist(self):
+        """ This method should be called right before accept is called"""
+        for requires in self.requires_files():
+            modfile = self.modfile(requires)
+            if not modfile.exists():
+                self.print("error", 
+                    f"Module {self.nametag} requires {requires} to exist, but it does not.\n" + 
+                    f"Make sure a module is run that provides it, before running {self.nametag}\n" +
+                    f'Note: {modfile.summary("provided_by")}'
+                )
+                exit(1)
+
     # BINARY MODULE METHODS
     # =========================================================================================
     def set_binary(self, binary_path, method):

@@ -110,6 +110,26 @@ class File:
     def exists(self):
         return os.path.isfile(self.path)
 
+    def summary(self, dependency_type):
+        modfile_dependencies = self.module.modfile("modfile_dependencies.json").read(sneak=True).from_json().unwrap()
+        if self.resource_rel_path not in modfile_dependencies.keys():
+            return f'<internal error> could not find {self.resource_rel_path} in modfile_dependencies.json'
+        
+        if dependency_type == "provided_by":
+            provides = modfile_dependencies[self.resource_rel_path][dependency_type]
+            text = f'The modfile {self.resource_rel_path}'
+            if len(provides) == 0:
+                text = f'{text} is not provided by any built-in or configured module.\nPerhaps you have to configure a custom module?'
+                return text
+            else:
+                text = f'{text} is provided by the following modules:'
+                for modname in provides:
+                    text += f'\n  - {modname}'
+                return text
+        else:
+            return f'<internal error> dependency_type of {dependency_type} is not implemented for modfile.summary()'
+            
+        return 
     # --- read contents
     def text(self):
         return self.contents

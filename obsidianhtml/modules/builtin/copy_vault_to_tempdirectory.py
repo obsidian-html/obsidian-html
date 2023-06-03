@@ -50,17 +50,6 @@ class VaultCopyModule(ObsidianHtmlModule):
         if not self.gc("toggles/compile_md"):
             return False
 
-        self.check_prerequisites()
-
-    def check_prerequisites(self):
-        if not self.modfile("index/files.json").exists():
-            self.print(
-                "error", 
-                "This module requires index/files.json to exist, but it does not\nThis is typically provided by the built-in get_file_list module.\n" +
-                f"Make sure that it is run before this one ({self.nametag})"
-            )
-            exit(1)
-
     def run(self):
         if not self.gc("copy_vault_to_tempdir"):
             return
