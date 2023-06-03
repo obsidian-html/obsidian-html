@@ -65,6 +65,9 @@ def run_module(
     if pb is not None:
         module.integrate_load(pb)
 
+    # check that required modfiles are present
+    getattr(module, "check_required_modfiles_exist")()
+
     # check if method should be run, otherwise, cancel further execution
     # - note that module.integrate_load is always run, as this might provide information required
     #   by module.accept() to determine if the module should run or not.
@@ -288,7 +291,6 @@ def load_module_itenary(module_data_folder):
             mod["type"] = "external"
         else:
             mod["file"] = None
-
 
         if "method" not in mod.keys():
             mod["method"] = "run"
