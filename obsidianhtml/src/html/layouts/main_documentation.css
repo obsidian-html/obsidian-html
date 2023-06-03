@@ -80,6 +80,9 @@ span.tag {
         margin-bottom: 0rem;
         margin-top: 1.5rem
     }
+    .container {
+        height: 100vh;
+    }
 }
 
 @media (max-width: 450px) {
