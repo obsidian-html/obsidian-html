@@ -586,6 +586,10 @@ h3+p {
     .header {
         padding-bottom: 0.3rem;
     }
+    #navbar {
+        margin-left: unset;
+        margin: auto;
+    }
     .navbar {
         padding-top: 1rem;
         width: unset;
@@ -636,9 +640,6 @@ h3+p {
     .left_pane_toggle_nav,
     .right_pane_toggle_nav {
         display: block;
-    }
-    #navbar {
-        margin-left: auto;
     }
 }
 

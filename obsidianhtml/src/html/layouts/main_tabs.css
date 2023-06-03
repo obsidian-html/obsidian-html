@@ -249,5 +249,8 @@
             margin-top: 1rem;
             padding-bottom: 0rem;        
         }
+        .container {
+            height: 100vh;
+        }
     }
 

@@ -30,6 +30,7 @@
         height: 0rem;
         margin-top: 1rem;
         max-width: __max_note_width__;
+        max-height: calc(100vh - 10rem);
     }
     #search-results {
         height: calc(100% - 1rem);
@@ -153,6 +154,21 @@
         transform: rotate(0deg);
     }  
 
+    .prompt-instruction {
+        padding-right: 0.3rem;
+        margin-left: -0.7rem;
+    }
+    #search-controls .prompt-instruction button {
+        background-color: rgba(0,0,0,0);
+        border: 1px solid var(--bg-accent3);
+        font-weight: normal;
+        padding: 0.2rem;
+        margin: 0px;
+        cursor: pointer;
+        width: 100%;
+        border-radius: 0.2rem;
+        color: var(--normal-text-color);
+    }
 
     @media (max-width: 602px) {
         #search-slab {
