@@ -60,7 +60,16 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
             resource_state = "failed"
             module_result = "failed"
 
-        for record in module.written_files.log:
+        # get resource logs
+        written_files = []
+        read_files = []
+        if module.is_binary:
+            written_files, read_files = self.get_binary_resource_logs(module)
+        else:
+            written_files = module.written_files.log
+            read_files = module.read_files.log
+
+        for record in written_files:
             resource_rel_path = record["resource_rel_path"]
 
             # create resourcelisting
@@ -88,7 +97,7 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
 
             self.resources[resource_rel_path]["history"].append(hist)
 
-        for record in module.read_files.log:
+        for record in read_files:
             resource_rel_path = record["resource_rel_path"]
 
             if resource_rel_path not in self.resources.keys():
@@ -171,6 +180,43 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
         if self.verbose_enough("debug", self.verbosity):
             output = ["writing to `log.resources`:\n"] + output + [""]
             self.print("DEBUG", "\n".join(output), force=True)
+
+    def get_binary_resource_logs(self, module):
+
+        ral_modfile = self.modfile(f'instances/resources_access/{module.instance_id}.csv')
+        contents = ral_modfile.read(sneak=True).text()
+
+        write_log = []
+        read_log = []
+
+        i = 0
+        for line in contents.split("\n"):
+            i += 1
+            if line.startswith("access_type;"):
+                continue
+            if len(line) == 0:
+                continue
+
+            fields = line.split(";")
+            if len(fields) != 3:
+                self.print("error", f'Unexpected number of fields ({len(fields)} instead of 3) in csv line {i} in file {ral_modfile.path}')
+                continue
+
+            access_type = fields[0].strip()
+            log = {
+                'resource_rel_path': fields[1].strip(),
+                'datetime': fields[2].strip(),
+            }
+
+            if access_type == "read":
+                read_log.append(log)
+            elif access_type == "write":
+                write_log.append(log)
+            else:
+                self.print("error", f'Unexpected access_type {access_type} in csv line {i} in file {ral_modfile.path}. Expected: read or write.')
+                continue
+        
+        return write_log, read_log
 
     def allow_post_module(self, meta_module):
         """Return True if post module is allowed to run after this one, else return False"""
