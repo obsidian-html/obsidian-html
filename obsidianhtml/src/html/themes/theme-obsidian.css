@@ -139,6 +139,7 @@
 .theme-obs-dark .container_filler,
 .theme-obs-light .container_filler {
     border-top: 3px solid var(--divider-color);
+    box-sizing: border-box;
 }
 
 .theme-obs-light .left_pane,
