@@ -543,6 +543,11 @@ function disable(el){
 }
 
 
+function setContentHeight(){
+    const height = document.getElementById('header').offsetHeight;
+    document.getElementById('level-0').style.height = `calc(100vh - ${height}px)`;
+}
+
 // standard
 function cl_toggle_id(id, class_name){
     return cl_toggle(document.getElementById(id), class_name)
@@ -550,9 +555,11 @@ function cl_toggle_id(id, class_name){
 function cl_toggle(el, class_name) {
     if (el.classList.contains(class_name)) {
         el.classList.remove(class_name)
+        setContentHeight()
         return false
     } else {
         el.classList.add(class_name)
+        setContentHeight()
         return true
     }
 }
