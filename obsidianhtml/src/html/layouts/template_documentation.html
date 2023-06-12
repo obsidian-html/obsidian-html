@@ -23,7 +23,7 @@
                 </script>
         </head>
 
-<body class="theme-obs-light">
+<body class="theme-obs-light" onload="onInitial()">
         <div id="antiflash" style="display: none;"></div>
         <script>
                 document.getElementById('antiflash').style.display = 'block';
@@ -45,6 +45,9 @@
         </div>
 
         <script>
+                function onInitial() {
+                        setContentHeight()
+                }
                 function handle_toggle_side_bar(e){
                         let header;
                         let pane; 
