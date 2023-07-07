@@ -1,4 +1,9 @@
+.envrc
+.env_functions/**
+
 **/__pycache__/**
+*__pycache__
+*.ruff_cache
 *.egg-info
 build/*
 

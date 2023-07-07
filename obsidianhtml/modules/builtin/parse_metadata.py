@@ -56,7 +56,7 @@ class ParseMetadataModule(ObsidianHtmlModule):
         return self.sanatize_frontmatter(metadata), page
 
     def get_inline_tags(self, page):
-        return [x[1:].replace(".", "") for x in re.findall(r"(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]
+        return [x[1:].replace(".", "") for x in re.findall(r"(?<!\S)#[\p{L}\p{N}/\-\p{Emoji_Presentation}]*[\p{L}\-_/\p{Emoji_Presentation}][\p{L}\p{N}/\-\p{Emoji_Presentation}]*", page)]
 
     def run(self):
         # get input
