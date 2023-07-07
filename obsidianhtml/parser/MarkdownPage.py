@@ -525,7 +525,7 @@ class MarkdownPage:
 
             self.add_tag(tag)
 
-            safe_str = "#" + re.escape(matched_link) + r"(?=[^\w/\-])"
+            safe_str = "#" + re.escape(matched_link) + r"(?=[^\p{L}\p{N}/\-\p{Emoji_Presentation}]|$)" # avoid head replacement error
             self.page = re.sub(safe_str, new_md_str, self.page)
 
         # --- restore svg, we don't want to find "tags" in there
@@ -599,7 +599,8 @@ class MarkdownPage:
 
 
 def get_inline_tags(page):
-    return [x[1:].replace(".", "") for x in re.findall(r"(?<!\S)#[\w/\-]*[a-zA-Z\-_/][\w/\-]*", page)]
+    tags = [x[1:].replace(".", "") for x in re.findall(r"(?<!\S)#[\p{L}\p{N}/\-\p{Emoji_Presentation}]*[\p{L}\-_/\p{Emoji_Presentation}][\p{L}\p{N}/\-\p{Emoji_Presentation}]*", page)]
+    return tags
 
 def make_valid_hashpart(hashpart):
     """

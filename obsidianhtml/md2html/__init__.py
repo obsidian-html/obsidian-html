@@ -84,7 +84,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # They will be restored at the end
     # ------------------------------------------------------------------
     md.StripCodeSections()
-    md.parse_inline_tags()
+    #md.parse_inline_tags()
 
     # Get all local markdown links.
     # ------------------------------------------------------------------
