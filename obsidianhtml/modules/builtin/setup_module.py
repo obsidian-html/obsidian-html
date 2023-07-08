@@ -61,7 +61,7 @@ class SetupModule(ObsidianHtmlModule):
             config_listing = get_config_by_alias(alias)
             if config_listing is None:
                 exit(1)
-                
+
             self.cached_print("INFO", f'Using config file: {config_listing["file"]}')
             return config_listing["file"]
 
@@ -126,7 +126,6 @@ class SetupModule(ObsidianHtmlModule):
 
         self.store("arguments", arguments)
 
-
         # get contents of the user config, default_config, and merge them to derive the final config file
         with open(arguments["config_path"], "r") as f:
             user_config_yaml = f.read()
@@ -147,9 +146,9 @@ class SetupModule(ObsidianHtmlModule):
             shutil.rmtree(module_data_folder)
         module_data_folder.mkdir(parents=True, exist_ok=True)
 
-        # write guid.txt, this contains the guid for this run, which can be used to target 
+        # write guid.txt, this contains the guid for this run, which can be used to target
         # files created by a previous run
-        with open(self.module_data_folder+"/guid.txt", "w") as f:
+        with open(self.module_data_folder + "/guid.txt", "w") as f:
             f.write(str(uuid.uuid4()))
 
         # write config files to module data folder - now we have access to info such as verbosity
@@ -183,7 +182,6 @@ class SetupModule(ObsidianHtmlModule):
             else:
                 requires = module_class.requires()
 
-
             for f in provides:
                 kind = "provided_by"
                 if f in requires:
@@ -196,8 +194,8 @@ class SetupModule(ObsidianHtmlModule):
                 if f in provides:
                     kind = "altered_by"
                     add_to(modfile_overview, f, kind, val=key)
-                
-            module_overview_section[key] = {"provides" : list(provides)}
+
+            module_overview_section[key] = {"provides": list(provides)}
 
         # go through all the listed modules
         module_overview = {}
@@ -217,27 +215,22 @@ class SetupModule(ObsidianHtmlModule):
                 binary_path = ml["binary"]
                 module_overview_section = module_overview[phase]
 
-                parse_module_for_modfiles(
-                    module_overview_section, modfile_overview, 
-                    module_class=module_class, key=key, binary_path=binary_path
-                )
+                parse_module_for_modfiles(module_overview_section, modfile_overview, module_class=module_class, key=key, binary_path=binary_path)
 
                 configured_module_classes.append(module_class)
 
         # we could also have a user that removes a lot of modules, or doesn't have the most recent one's
         # in their list yet, we want to notify them of the available built-in modules
         from . import builtin_module_aliases
+
         module_overview["<internal>"] = {}
         module_overview["<available-builtin>"] = {}
 
         # first add the setup module, which is always executed, and is not configurable
 
         module_class = builtin_module_aliases["setup_module"]
-        key = f'setup_module (SetupModule)'
-        parse_module_for_modfiles(
-            module_overview["<internal>"], modfile_overview, 
-            module_class=module_class, key=key
-        )
+        key = f"setup_module (SetupModule)"
+        parse_module_for_modfiles(module_overview["<internal>"], modfile_overview, module_class=module_class, key=key)
 
         for key, module_class in builtin_module_aliases.items():
             if module_class in configured_module_classes:
@@ -245,18 +238,13 @@ class SetupModule(ObsidianHtmlModule):
             if key in ["setup_module", "binary", "apply_cmdline_arguments"]:
                 continue
 
-            key = f'{key} ({module_class.__name__}) [not configured]'
-            parse_module_for_modfiles(
-                module_overview["<available-builtin>"], modfile_overview, 
-                module_class=module_class, key=key
-            )
+            key = f"{key} ({module_class.__name__}) [not configured]"
+            parse_module_for_modfiles(module_overview["<available-builtin>"], modfile_overview, module_class=module_class, key=key)
 
         # print(yaml.dump(modfile_overview))
         # print(yaml.dump(module_overview))
 
         self.modfile("modfile_dependencies.json", modfile_overview).to_json().write()
-
-
 
     def integrate_load(self, pb):
         pass

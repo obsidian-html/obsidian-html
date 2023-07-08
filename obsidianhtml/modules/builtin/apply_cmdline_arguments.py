@@ -13,8 +13,9 @@ from ...lib import (
     get_default_appdir_config_yaml_path,
 )
 
+
 class ApplyCommandlineArgumentsModule(ObsidianHtmlModule):
-    """ 
+    """
     Will (over)write config based on commandline arguments:
       -f <obs entrypoint> will set: obsidian_entrypoint_path_str
       -o <output dir> will set: html_output_folder_path_str, module_data_folder, md_folder_path_str
@@ -36,15 +37,15 @@ class ApplyCommandlineArgumentsModule(ObsidianHtmlModule):
     def accept(self, module_data_folder):
         """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
         return
-        
+
     def run(self, arguments):
         self.__verbosity__overwrite__ = "info"
 
         # this module should only be called for the case where an entrypoint is passed in
         if "-f" not in arguments["literals"]:
-            self.print("ERROR", f'500: {self.nametag} was started because -f was supposedly present in arguments, but it is not found inside of the module')
+            self.print("ERROR", f"500: {self.nametag} was started because -f was supposedly present in arguments, but it is not found inside of the module")
             exit(-1)
-        
+
         # get path info
         default_config_save_path = get_default_appdir_config_yaml_path()
         user_config_input_path = arguments["config_path"]
@@ -55,7 +56,7 @@ class ApplyCommandlineArgumentsModule(ObsidianHtmlModule):
         if user_config_input_path is not None:
             with open(user_config_input_path, "r") as f:
                 user_config = yaml.safe_load(f.read())
-            
+
         # set output path for user config
         # (either given input path, or default location)
         if user_config_input_path is None:
@@ -77,7 +78,7 @@ class ApplyCommandlineArgumentsModule(ObsidianHtmlModule):
 
         # remove obsidian_folder_path_str, this is set by the load_paths module
         if "obsidian_folder_path_str" in user_config:
-            del(user_config["obsidian_folder_path_str"])
+            del user_config["obsidian_folder_path_str"]
 
         # write new config
         with open(user_config_output_path, "w") as f:

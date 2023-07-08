@@ -133,7 +133,7 @@ class MarkdownPage:
         self.svgs = []
         i = 0
         for matched_block in re.findall(r"<svg[\s\S]*?</svg>", self.page):
-            new_link = "---obsidian_html_svg_block_"+str(i)
+            new_link = "---obsidian_html_svg_block_" + str(i)
             self.svgs.append(matched_block)
             i += 1
 
@@ -144,7 +144,7 @@ class MarkdownPage:
 
     def restore_svgs(self):
         for i, v in enumerate(self.svgs):
-            self.page = self.page.replace("---obsidian_html_svg_block_"+str(i), v)
+            self.page = self.page.replace("---obsidian_html_svg_block_" + str(i), v)
 
     def add_tag(self, tag):
         if "tags" not in self.metadata:
@@ -167,9 +167,7 @@ class MarkdownPage:
         for tag in self.get_tags():
             # test is str
             if not isinstance(tag, str):
-                raise MalformedTags(
-                    f"Tag {tag} in frontmatter of \"{self.src_path}\" is of type {type(tag)}, but should be a string. (Items under 'tags:' can not include a ':' on its line)."
-                )
+                raise MalformedTags(f"Tag {tag} in frontmatter of \"{self.src_path}\" is of type {type(tag)}, but should be a string. (Items under 'tags:' can not include a ':' on its line).")
 
             # add tag in correct place in the tagtree
             ctagtree = tagtree
@@ -224,15 +222,9 @@ class MarkdownPage:
 
     def GetImageHTML(self, relative_path_corrected, width, alt):
         image_template = OpenIncludedFile("html/templates/image_template.html")
-        return (
-            image_template.replace("{relative_path}", urllib.parse.quote(relative_path_corrected))
-            .replace("{width}", width)
-            .replace("{alt}", alt)
-        )
+        return image_template.replace("{relative_path}", urllib.parse.quote(relative_path_corrected)).replace("{width}", width).replace("{alt}", alt)
 
-    def ConvertObsidianPageToMarkdownPage(
-        self, origin: "FileObject" = None, include_depth=0, includer_page_depth=None, remove_block_references=True
-    ):
+    def ConvertObsidianPageToMarkdownPage(self, origin: "FileObject" = None, include_depth=0, includer_page_depth=None, remove_block_references=True):
         """Full subroutine converting the Obsidian Code to proper markdown. Linked files are copied over to the destination folder."""
 
         # -- Set origin (calling page), this will always be self.fo unless origin is passed in
@@ -278,7 +270,7 @@ class MarkdownPage:
         prev_is_newline = False
         for i, line in enumerate(self.page.split("\n")):
             current_is_list_line = is_list_line(line)
-            current_is_newline = (len(line.strip()) == 0)
+            current_is_newline = len(line.strip()) == 0
             if current_is_list_line and (prev_is_list_line is False) and (prev_is_newline is False):
                 # newline before list
                 buffer += "\n"
@@ -298,7 +290,6 @@ class MarkdownPage:
         # [??] Embedded note titles integration
         # ------------------------------------------------------------------
         self.page = note2md.add_embedded_title(self.pb, self.page, self.metadata, self.GetNodeName())
-
 
         # -- [3] Convert Obsidian type img links to proper md image links
         # Further conversion will be done in the block below
@@ -327,9 +318,7 @@ class MarkdownPage:
                     if "://" in link:
                         print("\t\t\t<continued> The link seems to be external (contains ://)")
                     else:
-                        print(
-                            f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}"
-                        )
+                        print(f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
                 continue
 
             # Get shorthand info
@@ -364,9 +353,7 @@ class MarkdownPage:
                     if "://" in link:
                         print("\t\t\t<continued> The link seems to be external (contains ://)")
                     else:
-                        print(
-                            f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}"
-                        )
+                        print(f"\t\t\t<continued> The link was not found in the file tree. Clean links in the file tree are: {', '.join(self.file_tree.keys())}")
                 continue
 
             # Get shorthand info
@@ -449,9 +436,8 @@ class MarkdownPage:
         # This is any string in between [[ and ]], e.g. [[My Note]]
         md_links = re.findall("(?<=\[\[).+?(?=\])", self.page)
         for matched_link in md_links:
-            
             rest, alias = bisect(matched_link, "|")
-            simple_path, hashpart = bisect(rest, "#", squash_tail=True) # hashpart can have more than 1 #!
+            simple_path, hashpart = bisect(rest, "#", squash_tail=True)  # hashpart can have more than 1 #!
             filename = simple_path.split("/")[-1]
 
             if alias == "":
@@ -481,14 +467,14 @@ class MarkdownPage:
                 if hashpart != "":
                     hashpart = hashpart.replace(" ", "-").lower()
                     hashpart = make_valid_hashpart(hashpart)
-                    newlink += '#' + hashpart
+                    newlink += "#" + hashpart
             else:
                 if hashpart[0] == "^":
                     # blockid blocklink
                     newlink = "#" + hashpart.replace("^", "__")
                 else:
                     # normal anchor
-                    newlink = '#' + make_valid_hashpart(slugify(hashpart))
+                    newlink = "#" + make_valid_hashpart(slugify(hashpart))
                     alias = hashpart
 
             # Replace Obsidian link with proper markdown link
@@ -502,14 +488,14 @@ class MarkdownPage:
         # Cannot start with [, (, nor "
         # match 'http://* ' or 'https://* ' (end match by whitespace)
         matched_links = re.findall(r"(?<![\[\(\"])(https*:\/\/.[^\s|]*)", self.page)
-        
+
         # sort from longest to shortest to avoid links with the same base being partly overwritten
         matched_links.sort(reverse=True, key=lambda e: len(e))
 
         for matched_link in matched_links:
             new_md_link = f"[{matched_link}]({matched_link})"
             safe_link = re.escape(matched_link)
-            self.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, self.page) 
+            self.page = re.sub(f"(?<![\[\(])({safe_link})", new_md_link, self.page)
 
         # --- strip svg, we don't want to find "tags" in there
         self.strip_svgs()
@@ -525,7 +511,7 @@ class MarkdownPage:
 
             self.add_tag(tag)
 
-            safe_str = "#" + re.escape(matched_link) + r"(?=[^\p{L}\p{N}/\-\p{Emoji_Presentation}]|$)" # avoid head replacement error
+            safe_str = "#" + re.escape(matched_link) + r"(?=[^\p{L}\p{N}/\-\p{Emoji_Presentation}]|$)"  # avoid head replacement error
             self.page = re.sub(safe_str, new_md_str, self.page)
 
         # --- restore svg, we don't want to find "tags" in there
@@ -553,17 +539,13 @@ class MarkdownPage:
             if not file_object.is_valid_note("note"):
                 # make download button
                 file_object.copy_file("ntm")
-                self.page = self.page.replace(
-                    matched_link, f'[{link_path}]({urllib.parse.quote(link)}|_obsidian_html_download_button_)'
-                )
+                self.page = self.page.replace(matched_link, f"[{link_path}]({urllib.parse.quote(link)}|_obsidian_html_download_button_)")
                 continue
 
             # Get code
             # included_page = MarkdownPage(self.pb, file_object, 'note', self.file_tree)
             included_page = file_object.load_markdown_page("note")
-            included_page.ConvertObsidianPageToMarkdownPage(
-                origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth, remove_block_references=False
-            )
+            included_page.ConvertObsidianPageToMarkdownPage(origin=self.fo, include_depth=include_depth + 1, includer_page_depth=page_folder_depth, remove_block_references=False)
 
             # Get subsection of code if header is present
             if header != "":
@@ -602,9 +584,10 @@ def get_inline_tags(page):
     tags = [x[1:].replace(".", "") for x in re.findall(r"(?<!\S)#[\p{L}\p{N}/\-\p{Emoji_Presentation}]*[\p{L}\-_/\p{Emoji_Presentation}][\p{L}\p{N}/\-\p{Emoji_Presentation}]*", page)]
     return tags
 
+
 def make_valid_hashpart(hashpart):
     """
-    This operation aims to solve the "Failed to execute 'querySelector' on 'Element': <> is not a valid selector." 
+    This operation aims to solve the "Failed to execute 'querySelector' on 'Element': <> is not a valid selector."
     By adding "h_" to the beginning if the hashpart does not start with a letter.
     Be sure to also have this be applied in: obsidianhtml/markdown_extensions/CustomTocExtension.py ! (search for el.attrib["id"])
     """
@@ -614,4 +597,4 @@ def make_valid_hashpart(hashpart):
     if hashpart[0] in string.ascii_letters:
         return hashpart
 
-    return 'h_' + hashpart
+    return "h_" + hashpart

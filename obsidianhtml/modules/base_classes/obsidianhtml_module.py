@@ -64,15 +64,14 @@ class ObsidianHtmlModule(ABC):
         self.mod_config = {}
         self.define_mod_config_defaults()
 
-
     def set_instance_id(self):
         # set id for the instance.
         # currently only used by binary modules
-        self.instance_id = datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z') + "_" + self.module_class_name + "_" + self.module_name
+        self.instance_id = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z") + "_" + self.module_class_name + "_" + self.module_name
 
     @property
     def nametag(self):
-        return f'{self.module_name} ({self.module_class_name})'
+        return f"{self.module_name} ({self.module_class_name})"
 
     def define_mod_config_defaults(self):
         pass
@@ -83,7 +82,7 @@ class ObsidianHtmlModule(ABC):
             return
 
         cfg = self.modfile("config.yml", allow_absent=True).read(sneak=True).from_yaml()
-        
+
         if cfg is None:
             return
 
@@ -92,8 +91,8 @@ class ObsidianHtmlModule(ABC):
 
         mcfg = cfg["module_config"][self.module_name]
         if not isinstance(mcfg, dict):
-            raise Exception(f'Expected type dict for config key module_config/{self.module_name}, but got {type(mcfg)}.')
-        
+            raise Exception(f"Expected type dict for config key module_config/{self.module_name}, but got {type(mcfg)}.")
+
         for key, item in mcfg.items():
             if key not in self.mod_config:
                 raise Exception(f'Module config key "{key}" is unknown to module {self.nametag}')
@@ -101,7 +100,7 @@ class ObsidianHtmlModule(ABC):
 
     def value_of(self, mod_config_key):
         if mod_config_key not in self.mod_config:
-            raise Exception(f'Value of module config with key {mod_config_key} requested, but not set, in module {self.nametag}')
+            raise Exception(f"Value of module config with key {mod_config_key} requested, but not set, in module {self.nametag}")
         return self.mod_config[mod_config_key]["value"]
 
     @staticmethod
@@ -299,14 +298,15 @@ class ObsidianHtmlModule(ABC):
             raise Exception(f"{self.nametag}\n- " + "\n- ".join(errors))
 
     def check_required_modfiles_exist(self):
-        """ This method should be called right before accept is called"""
+        """This method should be called right before accept is called"""
         for requires in self.requires_files():
             modfile = self.modfile(requires)
             if not modfile.exists():
-                self.print("error", 
-                    f"Module {self.nametag} requires {requires} to exist, but it does not.\n" + 
-                    f"Make sure a module is run that provides it, before running {self.nametag}\n" +
-                    f'Note: {modfile.summary("provided_by")}'
+                self.print(
+                    "error",
+                    f"Module {self.nametag} requires {requires} to exist, but it does not.\n"
+                    + f"Make sure a module is run that provides it, before running {self.nametag}\n"
+                    + f'Note: {modfile.summary("provided_by")}',
                 )
                 exit(1)
 
@@ -327,9 +327,7 @@ class ObsidianHtmlModule(ABC):
         # create file under instances with run id
         file_path = Path(self.module_data_folder_abs).joinpath(f"instances/{self.instance_id}.json")
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        data = {
-            "module_name": self.module_name
-        }
+        data = {"module_name": self.module_name}
         with open(file_path, "w") as f:
             f.write(json.dumps(data, indent=2))
 
@@ -338,18 +336,16 @@ class ObsidianHtmlModule(ABC):
 
 
 def run_binary(command_list):
+    p = Popen(command_list, stdout=PIPE, stderr=PIPE)
+    output, error = p.communicate()
 
-        p = Popen(command_list, stdout=PIPE, stderr=PIPE)
-        output, error = p.communicate()
+    if len(error) > 0:
+        print(error.decode())
+    if p.returncode != 0:
+        self.print("error", f'binary module action `{" ".join(command)}` failed with error: \n\n{error.decode()}')
 
-        if (len(error) > 0):
-            print(error.decode())
-        if p.returncode != 0:
-            self.print("error", f'binary module action `{" ".join(command)}` failed with error: \n\n{error.decode()}')
-
-        try:
-            res = json.loads(output.decode())
-            return res
-        except json.decoder.JSONDecodeError as err:
-            print("Error", f'Failed to parse binary response as JSON:{err}\nOutput:\n{output.decode()}')
-        
+    try:
+        res = json.loads(output.decode())
+        return res
+    except json.decoder.JSONDecodeError as err:
+        print("Error", f"Failed to parse binary response as JSON:{err}\nOutput:\n{output.decode()}")

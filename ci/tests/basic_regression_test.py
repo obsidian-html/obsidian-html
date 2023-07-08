@@ -281,7 +281,7 @@ class TestAFiltering1(ModeTemplate):
     ]
     def test_include_folder(self):
         self.scribe('Only include the included folder')
-        issues, actual_files = check_md_output('md', ['filtering', 'index.md'])
+        issues, actual_files = check_md_output('md', ['not_created.md', 'filtering', 'index.md'])
         self.assertEqual(len(issues), 0, msg=f"Issues found with filtering\n{actual_files}\n{yaml.dump(issues)}")
 
 class TestAFiltering2(ModeTemplate):

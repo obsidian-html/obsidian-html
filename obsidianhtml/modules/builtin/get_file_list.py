@@ -33,12 +33,12 @@ class GetFileListModule(ObsidianHtmlModule):
 
     def define_mod_config_defaults(self):
         self.mod_config["include_glob"] = {
-            "value": '*',
+            "value": "*",
             "description": "Only include the files in the input folder that matches this glob. Default: all.",
             "example_value": [
-                "/Home.md",             # specific file
-                "Blog/**/*",            # any folder with name Blog, and all its contents (recursively)
-                "subfolder/*",          # any file directly under any folder named "subfolder"
+                "/Home.md",  # specific file
+                "Blog/**/*",  # any folder with name Blog, and all its contents (recursively)
+                "subfolder/*",  # any file directly under any folder named "subfolder"
             ],
         }
         self.mod_config["exclude_glob"] = {
@@ -50,13 +50,13 @@ class GetFileListModule(ObsidianHtmlModule):
             ],
             "description": [
                 "After included_glob is applied, excluded_glob is applied to filter out files.",
-            ]
+            ],
         }
 
     def accept(self, module_data_folder):
         """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
         return
-        
+
     def glob_find(self, folder, glob_list):
         # ensure folder is a Path object
         folder = Path(folder)
@@ -66,18 +66,17 @@ class GetFileListModule(ObsidianHtmlModule):
         for glob_line in glob_list:
             # rglob does not support specific file matching. we fix this by allowing the "/file.md" syntax.
             # in this case we use glob instead of rglob
-            if glob_line[0] == '/':
+            if glob_line[0] == "/":
                 glob_line = glob_line[1:]
                 found_files = found_files + [x.as_posix() for x in folder.glob(glob_line)]
             else:
                 found_files = found_files + [x.as_posix() for x in folder.rglob(glob_line)]
-        
+
         # make unique & sort
         found_files = list(set(found_files))
         found_files.sort()
-        
-        return found_files
 
+        return found_files
 
     def run(self):
         # get paths
@@ -87,7 +86,7 @@ class GetFileListModule(ObsidianHtmlModule):
 
         # get all included files from input_folder
         included_files = self.glob_find(paths["input_folder"], self.value_of("include_glob"))
-        
+
         # get all excluded files
         excluded_files = self.glob_find(paths["input_folder"], self.value_of("exclude_glob"))
 
@@ -100,16 +99,15 @@ class GetFileListModule(ObsidianHtmlModule):
 
         # check that the entrypoint file is not being filtered out
         if paths["entrypoint"].as_posix() not in selected_files:
-            self.print('ERROR', f'You have configured {self.nametag} to filter out {paths["entrypoint"]}, which is your entrypoint. Correct this and run again.')
+            self.print("ERROR", f'You have configured {self.nametag} to filter out {paths["entrypoint"]}, which is your entrypoint. Correct this and run again.')
             exit(1)
 
         self.modfile("index/excluded_files.json", excluded_files).to_json().write()
         self.modfile("index/files.json", selected_files).to_json().write()
 
         # get markdown files
-        markdown_files = [x for x in selected_files if x[-3:] == '.md']
+        markdown_files = [x for x in selected_files if x[-3:] == ".md"]
         self.modfile("index/markdown_files.json", markdown_files).to_json().write()
-
 
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""

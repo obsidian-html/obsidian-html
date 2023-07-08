@@ -41,7 +41,7 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
     def accept(self, module_data_folder):
         """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
         return
-        
+
     def run(self, module, run_module_result):
         # ensure self.resources exists
         self.setup()
@@ -182,8 +182,7 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
             self.print("DEBUG", "\n".join(output), force=True)
 
     def get_binary_resource_logs(self, module):
-
-        ral_modfile = self.modfile(f'instances/resources_access/{module.instance_id}.csv')
+        ral_modfile = self.modfile(f"instances/resources_access/{module.instance_id}.csv")
         contents = ral_modfile.read(sneak=True).text()
 
         write_log = []
@@ -199,13 +198,13 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
 
             fields = line.split(";")
             if len(fields) != 3:
-                self.print("error", f'Unexpected number of fields ({len(fields)} instead of 3) in csv line {i} in file {ral_modfile.path}')
+                self.print("error", f"Unexpected number of fields ({len(fields)} instead of 3) in csv line {i} in file {ral_modfile.path}")
                 continue
 
             access_type = fields[0].strip()
             log = {
-                'resource_rel_path': fields[1].strip(),
-                'datetime': fields[2].strip(),
+                "resource_rel_path": fields[1].strip(),
+                "datetime": fields[2].strip(),
             }
 
             if access_type == "read":
@@ -213,9 +212,9 @@ class ResourceLoggerMetaModule(ObsidianHtmlModule):
             elif access_type == "write":
                 write_log.append(log)
             else:
-                self.print("error", f'Unexpected access_type {access_type} in csv line {i} in file {ral_modfile.path}. Expected: read or write.')
+                self.print("error", f"Unexpected access_type {access_type} in csv line {i} in file {ral_modfile.path}. Expected: read or write.")
                 continue
-        
+
         return write_log, read_log
 
     def allow_post_module(self, meta_module):

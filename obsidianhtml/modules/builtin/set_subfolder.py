@@ -13,8 +13,9 @@ from ...lib import (
     get_default_appdir_config_yaml_path,
 )
 
+
 class SetSubfolderModule(ObsidianHtmlModule):
-    """ 
+    """
     This module replaces any html_url_prefix settings when `--subfolder <subfolder>` is configured on the commandline
     """
 
@@ -44,7 +45,7 @@ class SetSubfolderModule(ObsidianHtmlModule):
             self.print("DEBUG", f'Skipped module {self.nametag} because "--subfolder" was not passed in')
             return False
         return True
-        
+
     def run(self):
         arguments = self.modfile("arguments.yml").read().from_yaml()
         subfolder = arguments["subfolder"]
@@ -59,4 +60,3 @@ class SetSubfolderModule(ObsidianHtmlModule):
                 subfolder = subfolder[:-1]
             config["html_url_prefix"] = subfolder
             print_set_var(config, "html_url_prefix", reason="provided by user through commandline", category="info")
-        

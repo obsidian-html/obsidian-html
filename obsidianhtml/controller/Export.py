@@ -49,9 +49,7 @@ def ExportLayout():
 
     # check args
     if layout not in ["documentation", "tabs", "no_tabs", "minimal"]:
-        print(
-            f"Provided layout name of {layout} is unknown.\n  Use `obsidianhtml export layout -l <documentation/tabs/no_tabs/minimal>` to provide input."
-        )
+        print(f"Provided layout name of {layout} is unknown.\n  Use `obsidianhtml export layout -l <documentation/tabs/no_tabs/minimal>` to provide input.")
         print_export_help_and_exit(1)
 
     # Create parent folders

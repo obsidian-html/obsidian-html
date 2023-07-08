@@ -237,9 +237,7 @@ class RssFeed:
                         try:
                             publish_date = datetime.strptime(publish_date, fs)
                         except ValueError:
-                            raise Exception(
-                                f"Don't know how to parse date string. Found date '{publish_date}' does not match format_string '{fs}'."
-                            )
+                            raise Exception(f"Don't know how to parse date string. Found date '{publish_date}' does not match format_string '{fs}'.")
                     else:
                         raise Exception("Don't know how to parse date string. Iso_formatted is false and format_string is empty.")
 

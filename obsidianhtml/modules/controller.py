@@ -203,20 +203,17 @@ def get_module_class(module_name, module_class_name, module_source):
         elif module_class_name in builtin.builtin_module_aliases.keys():
             return builtin.builtin_module_aliases[module_class_name]
         else:
-            raise Exception(
-                f'Could not find match for module {module_name} ({module_class_name}) in the modules/builtin directory. ' + \
-                'Is the module class imported in modules/builtin/__init__.py ?'
-            )
+            raise Exception(f"Could not find match for module {module_name} ({module_class_name}) in the modules/builtin directory. " + "Is the module class imported in modules/builtin/__init__.py ?")
     else:
         # get module from file
         module_path = Path(module_source)
         sys.path.insert(1, module_path.parent.as_posix())
-        module_module = importlib.import_module(module_path.stem, package=None) 
+        module_module = importlib.import_module(module_path.stem, package=None)
 
         if module_class_name is None:
             return getattr(module_module, "export_module_class")()
         else:
-            return getattr(module_module, module_class_name) 
+            return getattr(module_module, module_class_name)
 
 
 def instantiate_module(
@@ -308,11 +305,7 @@ def load_module_itenary(module_data_folder):
             mod["module_class"] = None
 
         # get actual class instead of string
-        mod["module"] = get_module_class(
-            module_name=mod["name"],
-            module_class_name=mod["module_class"],
-            module_source=mod["file"]
-        )
+        mod["module"] = get_module_class(module_name=mod["name"], module_class_name=mod["module_class"], module_source=mod["file"])
 
     for phase in module_cfg["module_list"].keys():
         for mod in module_cfg["module_list"][phase]:

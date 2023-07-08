@@ -41,7 +41,7 @@ class SearchHead:
 
     def OutputJson(self):
         """the search.json"""
-        #return json.dumps(self.data, ensure_ascii=False).encode('utf8')
+        # return json.dumps(self.data, ensure_ascii=False).encode('utf8')
         return json.dumps(self.data)
 
 
@@ -92,4 +92,3 @@ def GetTags(metadata):
     if "tags" in metadata.keys():
         return " ".join(metadata["tags"])
     return ""
-

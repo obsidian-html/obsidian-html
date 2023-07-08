@@ -28,7 +28,7 @@ class CleanupTempFilesModule(ObsidianHtmlModule):
     def accept(self, module_data_folder):
         """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
         return
-        
+
     def run(self):
         for resource in ["log.resources", "config.yml", "arguments.yml", "paths.json"]:
             path = self.path(resource)

@@ -29,6 +29,7 @@ def obs_img_to_md_img(pb, page):
 
     return page
 
+
 def add_embedded_title(pb, page, note_metadata, note_name):
     if not pb.capabilities_needed["embedded_note_titles"]:
         return page
@@ -48,18 +49,11 @@ def add_embedded_title(pb, page, note_metadata, note_name):
     hide = False
     if pb.gc("toggles/features/embedded_note_titles/hide_on_h1"):
         header_dict, root_element = convert_markdown_to_header_tree(page)
-        if (
-            len(root_element["content"]) > 0
-            and isinstance(root_element["content"][0], dict)
-            and root_element["content"][0]["level"] == 1
-        ):
+        if len(root_element["content"]) > 0 and isinstance(root_element["content"][0], dict) and root_element["content"][0]["level"] == 1:
             hide = True
 
     # hideOnMetadataField
-    if (
-        "hideOnMetadataField" in pb.plugin_settings["embedded_note_titles"].keys()
-        and pb.plugin_settings["embedded_note_titles"]["hideOnMetadataField"]
-    ):
+    if "hideOnMetadataField" in pb.plugin_settings["embedded_note_titles"].keys() and pb.plugin_settings["embedded_note_titles"]["hideOnMetadataField"]:
         if "embedded-title" in note_metadata.keys() and note_metadata["embedded-title"] is False:
             hide = True
 

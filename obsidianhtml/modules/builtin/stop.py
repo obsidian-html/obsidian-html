@@ -1,6 +1,7 @@
 """ This module is only used to quit execution. Used for testing only """
 from ..base_classes import ObsidianHtmlModule
 
+
 class StopModule(ObsidianHtmlModule):
     @staticmethod
     def requires():
@@ -24,6 +25,6 @@ class StopModule(ObsidianHtmlModule):
 
     def accept(self, module_data_folder):
         return True
-        
+
     def run(self):
         exit()

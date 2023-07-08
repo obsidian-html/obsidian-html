@@ -1,18 +1,22 @@
 from functools import cache
+import uuid
 
 from ..lib import bisect
 
 
 class FileFinder:
     def __init__(self):
-        pass
+        self.cache_id=1
+
+    def invalidate_cache(self):
+        self.cache_id=uuid.uuid1()
 
     def GetObsidianFilePath(self, link, pb):
         self.files = pb.index.files
-        return self._GetObsidianFilePath(link, pb.gc("html_url_prefix"), pb.gc("toggles/force_filename_to_lowercase", cached=True))
+        return self._GetObsidianFilePath(link, pb.gc("html_url_prefix"), pb.gc("toggles/force_filename_to_lowercase", cached=True), cache_id=self.cache_id)
 
     @cache
-    def _GetObsidianFilePath(self, link, html_url_prefix, force_filename_to_lowercase):
+    def _GetObsidianFilePath(self, link, html_url_prefix, force_filename_to_lowercase, cache_id):
         # a link can look like this: folder/note#chapter|alias
         # then link=folder/note, alias=alias, header=chapter
         # the link will be converted to a path that is relative to the root dir.
@@ -26,7 +30,7 @@ class FileFinder:
         # 2. split on # --> rest, anchor
         # 3. split on / --> rest, filename
         rest, alias = bisect(link, "|")
-        simple_path, anchor = bisect(rest, "#", squash_tail=True) # anchor can have multiple # inside of it!
+        simple_path, anchor = bisect(rest, "#", squash_tail=True)  # anchor can have multiple # inside of it!
         filename = simple_path.split("/")[-1]
 
         output["alias"] = alias
@@ -36,23 +40,23 @@ class FileFinder:
             return output
 
         # Find file. Values will be False when file is not found.
-        output["rtr_path_str"], output["fo"] = self._FindFile(simple_path, html_url_prefix, force_filename_to_lowercase)
+        output["rtr_path_str"], output["fo"] = self._FindFile(simple_path, html_url_prefix, force_filename_to_lowercase, cache_id=self.cache_id)
 
         if output["fo"] is False and simple_path.startswith("/"):
-            output["rtr_path_str"], output["fo"] = self._FindFile(simple_path[1:], html_url_prefix, force_filename_to_lowercase)
+            output["rtr_path_str"], output["fo"] = self._FindFile(simple_path[1:], html_url_prefix, force_filename_to_lowercase, cache_id=self.cache_id)
 
         if output["fo"] is False and not simple_path.startswith("/"):
-            output["rtr_path_str"], output["fo"] = self._FindFile("/" + simple_path, html_url_prefix, force_filename_to_lowercase)
+            output["rtr_path_str"], output["fo"] = self._FindFile("/" + simple_path, html_url_prefix, force_filename_to_lowercase, cache_id=self.cache_id)
 
         return output
 
     # will return (False, False) if not found, (str:url, fo:file_object) when found
     def FindFile(self, link, pb):
         self.files = pb.index.files
-        return self._FindFile(link, pb.gc("html_url_prefix"), pb.gc("toggles/force_filename_to_lowercase", cached=True))
+        return self._FindFile(link, pb.gc("html_url_prefix"), pb.gc("toggles/force_filename_to_lowercase", cached=True), cache_id=self.cache_id)
 
     @cache
-    def _FindFile(self, link, html_url_prefix, force_filename_to_lowercase):
+    def _FindFile(self, link, html_url_prefix, force_filename_to_lowercase, cache_id):
         files = self.files
         olink = link
         search = False
@@ -139,12 +143,12 @@ class FileFinder:
             pass  # print('not found', files.keys())
         return result
 
-    def GetMatches(self, files, link):
+    def GetMatches(self, files, link, cached=True):
         self.files = files
-        return self._GetMatches(link)
+        return self._GetMatches(link, cache_id=self.cache_id)
 
     @cache
-    def _GetMatches(self, link):
+    def _GetMatches(self, link, cache_id):
         files = self.files
         search = False
         prevtrue = False
@@ -178,10 +182,10 @@ class FileFinder:
 
     def GetNodeId(self, pb, link):
         self.files = pb.index.files
-        return self._GetNodeId(link, pb.gc("toggles/force_filename_to_lowercase", cached=True))
+        return self._GetNodeId(link, pb.gc("toggles/force_filename_to_lowercase", cached=True), cache_id=self.cache_id)
 
     @cache
-    def _GetNodeId(self, link, force_filename_to_lowercase):
+    def _GetNodeId(self, link, force_filename_to_lowercase, cache_id):
         files = self.files
 
         # set link to lowercase
@@ -191,6 +195,7 @@ class FileFinder:
 
         node_id = ""
         parts = link.split("/")
+
         for i in range(1, len(parts) + 1):
             if node_id == "":
                 node_id = parts[-i]

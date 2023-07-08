@@ -25,9 +25,7 @@ def compile_navbar_links(pb) -> T.PBChange:
             if l["type"] == "external":
                 el = f'<a class="navbar-link" href="{link}" title="{l["name"]}">{l["name"]}</a>'
             else:
-                raise Exception(
-                    f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)"
-                )
+                raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
 
         # internal links
         if not el:
@@ -53,9 +51,7 @@ def create_folder_navigation_view(pb) -> T.WriteExportFile:
     print(f"\t> COMPILING INDEX FROM DIR STRUCTURE ({op})")
     # Create dirtree to be viewed on its own
     if pb.gc("toggles/relative_path_html", cached=True):
-        html_url_prefix = pb.sc(
-            path="html_url_prefix", value=get_rel_html_url_prefix(pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path"))
-        )
+        html_url_prefix = pb.sc(path="html_url_prefix", value=get_rel_html_url_prefix(pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path")))
         print(html_url_prefix)
     pb.EnsureTreeObj()
     pb.treeobj.rel_output_path = pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path")
@@ -122,9 +118,7 @@ def recurseTagList(tagtree, tagpath, pb, level):
     # Compile html
     extension_configs = {"codehilite": {"linenums": False}, "pymdownx.arithmatex": {"generic": True}}
 
-    html_body = markdown.markdown(
-        md, extensions=["extra", "codehilite", "obs_toc", "mermaid", "callout", "pymdownx.arithmatex"], extension_configs=extension_configs
-    )
+    html_body = markdown.markdown(md, extensions=["extra", "codehilite", "obs_toc", "mermaid", "callout", "pymdownx.arithmatex"], extension_configs=extension_configs)
 
     di = '<link rel="stylesheet" href="' + html_url_prefix + '/obs.html/static/taglist.css" />'
 

@@ -274,26 +274,26 @@ class FileObject:
 
         if not src_file_path.exists():
             if self.pb.gc("toggles/warn_on_skipped_file", cached=True):
-                formatted_print("ERROR", f'copying  {src_file_path} to {dst_file_path}, file not found.')
+                formatted_print("ERROR", f"copying  {src_file_path} to {dst_file_path}, file not found.")
             return
 
         link_mode = self.pb.gc("copy_output_file_method", cached=True)
         resolve_links = self.pb.gc("resolve_output_file_links", cached=True)
-        if link_mode == 'default':
-            link_mode = 'copy'
-        if link_mode != 'copy' and resolve_links:
+        if link_mode == "default":
+            link_mode = "copy"
+        if link_mode != "copy" and resolve_links:
             src_file_path = os.path.realpath(src_file_path)
 
         if self.pb.gc("toggles/verbose_printout", cached=True):
             print(f"{'Copy' if link_mode == 'copy' else 'Link'}ing file (mode={mode}) from {src_file_path} to {dst_file_path}")
 
         dst_file_path.parent.mkdir(parents=True, exist_ok=True)
-        if link_mode == 'copy':
+        if link_mode == "copy":
             shutil.copyfile(src_file_path, dst_file_path)
-        elif link_mode == 'symlink':
+        elif link_mode == "symlink":
             if not os.path.exists(dst_file_path):
                 os.symlink(src_file_path, dst_file_path)
-        elif link_mode == 'hardlink':
+        elif link_mode == "hardlink":
             if not os.path.exists(dst_file_path):
                 os.link(src_file_path, dst_file_path)
         else:

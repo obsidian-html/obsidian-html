@@ -76,15 +76,13 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # Add page to search file
     # ------------------------------------------------------------------
     if pb.gc("toggles/features/search/enabled", cached=True):
-        pb.search.AddPage(
-            filename=page_path.stem, content=md.page, metadata=md.metadata, url=node["url"], rtr_url=node["rtr_url"], title=node["name"]
-        )
+        pb.search.AddPage(filename=page_path.stem, content=md.page, metadata=md.metadata, url=node["url"], rtr_url=node["rtr_url"], title=node["name"])
 
     # [1] Replace code blocks with placeholders so they aren't altered
     # They will be restored at the end
     # ------------------------------------------------------------------
     md.StripCodeSections()
-    #md.parse_inline_tags()
+    # md.parse_inline_tags()
 
     # Get all local markdown links.
     # ------------------------------------------------------------------
@@ -111,11 +109,11 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
             else:
                 link.fo.copy_file("mth")
                 link_url = urllib.parse.quote(link.fo.get_link("html", origin=fo, encode_special=False))
-                
+
                 pb.search.AddFile(pb.gc, link.fo)
 
                 new_link = f'<a class="download-button" target="_blank" download="" href="{link_url}"><span class="file-embed-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-file"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>{link_name}</a>'
-            
+
             safe_link = "\[[^\]]+?\]\(" + re.escape(ol) + "\)"
             md.page = re.sub(safe_link, new_link, md.page)
             continue
@@ -133,10 +131,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
                 if pb.gc("toggles/warn_on_skipped_file", cached=True):
                     print(
                         "\t" * (log_level + 1),
-                        "File "
-                        + str(link.url)
-                        + " not located, so not copied. @ "
-                        + pb.state["current_fo"].path[path_key]["file_absolute_path"].as_posix(),
+                        "File " + str(link.url) + " not located, so not copied. @ " + pb.state["current_fo"].path[path_key]["file_absolute_path"].as_posix(),
                     )
         elif not link.fo.metadata["is_note"]:
             link.fo.copy_file("mth")
@@ -160,7 +155,6 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         # Update link
         safe_link = re.escape("](" + ol + ")")
         md.page = re.sub(safe_link, new_link, md.page)
-
 
     # [?] Handle local source tag-links (copy them over to output)
     # ------------------------------------------------------------------
@@ -273,7 +267,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
     # restore svg, as python-markdown corrupts these
     # ------------------------------------------------------------------
     for i, v in enumerate(svgs):
-        html_body = html_body.replace("---obsidian_html_svg_block_"+str(i), v)
+        html_body = html_body.replace("---obsidian_html_svg_block_" + str(i), v)
 
     if capture_in_jar:
         pb.jars[capture_in_jar] = html_body
@@ -342,9 +336,7 @@ def convert_markdown_page_to_html_and_export(fo: "FileObject", pb, backlink_node
         html_body = html_body.replace(safe_str, new_str)
 
     # [15] Tag not created links with a class so they can be decorated differently
-    html_body = html_body.replace(
-        f'<a href="{html_url_prefix}/not_created.html">', f'<a href="{html_url_prefix}/not_created.html" class="nonexistent-link">'
-    )
+    html_body = html_body.replace(f'<a href="{html_url_prefix}/not_created.html">', f'<a href="{html_url_prefix}/not_created.html" class="nonexistent-link">')
 
     html_body += '\n<div class="note-footer">\n'
 

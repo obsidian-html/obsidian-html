@@ -129,14 +129,14 @@ class CreateIndexFromDirStructure:
                         name = fo.md.GetNodeName()
                     except:
                         print(13, path_key)  # , self.pb.index.files.keys())
-                
+
                 if fo is not None:
-                    is_note = fo.metadata["is_note"] 
+                    is_note = fo.metadata["is_note"]
 
             # append file
             path_str = path.as_posix()
             rel_path_str = path_str.replace(self.root_str, "", 1)
-            
+
             tree["files"].append({"name": path.stem, "suffix": path.suffix, "graph_name": name, "path": path.as_posix(), "rel_path": rel_path_str, "is_note": is_note})
 
         return tree
@@ -218,7 +218,6 @@ class CreateIndexFromDirStructure:
         # Get basic html that we will then edit to make it applicable for the current page.
         proto = self.BuildProtoIndex("/")
 
-
         # folder of the current page
         dir_path = self.get_dir(current_page)
 
@@ -247,8 +246,6 @@ class CreateIndexFromDirStructure:
 
         safe_str = r"``css-folder-note-active-.*?``"
         proto = re.sub(safe_str, "", proto)
-
-
 
         # -- set folder-note-onclick active
         onclick_active = f"``onclick-folder-note-{current_page}``"
@@ -280,7 +277,7 @@ class CreateIndexFromDirStructure:
 
                 # test if the folder being processed in this loop has an existing folder note
                 has_folder_note, note_abs_path = self.check_has_folder_note(tree["path"])
-                
+
                 folder_note_rel_path_str = "-"
                 if has_folder_note:
                     folder_note_rel_path_str = self.html_url_prefix + note_abs_path.as_posix().replace(self.root_str, "", 1)
@@ -302,10 +299,7 @@ class CreateIndexFromDirStructure:
                         + f'{tree["name"]}</button>\n'
                     )
 
-                html += (
-                    "\t" * tab_level
-                    + f'<div id="folder-container-{self.uid}" class="dir-container requires_js ``css-dir-active-{folder_id}``" path="{path}">\n'
-                )
+                html += "\t" * tab_level + f'<div id="folder-container-{self.uid}" class="dir-container requires_js ``css-dir-active-{folder_id}``" path="{path}">\n'
 
             tab_level += 1
             self.uid += 1

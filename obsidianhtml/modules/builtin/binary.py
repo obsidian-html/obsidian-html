@@ -3,8 +3,10 @@ from pathlib import Path
 
 from ..base_classes import ObsidianHtmlModule, run_binary
 
+
 class BinaryModule(ObsidianHtmlModule):
     """Used to run any binary as a module"""
+
     @staticmethod
     def requires(**kwargs):
         if "binary_path" not in kwargs.keys():
@@ -31,10 +33,10 @@ class BinaryModule(ObsidianHtmlModule):
 
         res = run_binary([binary_path, "alters"])
         return tuple(res)
-        
+
     def accept(self, module_data_folder):
-        """ Returns True if module should be run, otherwise false"""
-        #self.print("Debug", f"Running binary module ACCEPT ({self.binary_path})")
+        """Returns True if module should be run, otherwise false"""
+        # self.print("Debug", f"Running binary module ACCEPT ({self.binary_path})")
         res = self.run_binary(["accept", self.module_data_folder_abs])
         return res["result"]
 

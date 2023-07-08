@@ -73,7 +73,7 @@ def html_get(path, output_dict=False, convert=False):
         soup = BeautifulSoup(response.text, 'html.parser', features="html5lib")
 
     if output_dict:
-        return {'soup': soup, 'url': url}
+        return {'soup': soup, 'url': url, 'text': response.text}
     else:
         return soup
 
@@ -229,10 +229,10 @@ class ModeTemplate(unittest.TestCase):
         print(f'{self.testcase_name}:\t > {msg}', flush=True)
 
     def assertPageFound(self, soup, msg=None):
-        self.assertFalse('Error code explanation: HTTPStatus.NOT_FOUND - Nothing matches the given URI.' in soup.text, msg=msg)
+        self.assertFalse('Nothing matches the given URI.' in soup.text, msg=msg)
 
     def assertPageNotFound(self, soup, msg=None):
-        self.assertTrue('Error code explanation: HTTPStatus.NOT_FOUND - Nothing matches the given URI.' in soup.text, msg=msg)
+        self.assertTrue('Nothing matches the given URI.' in soup.text, msg=msg)
 
     def self_check(self):
         self.scribe('(self check) config dict should have been fetched')
