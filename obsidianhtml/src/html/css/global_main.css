@@ -348,7 +348,6 @@ tr:last-child td {
 }
 
 th {
-    text-transform: capitalize;
     border: 0px;
     padding: 0.3rem;
     padding-left: 1rem;
