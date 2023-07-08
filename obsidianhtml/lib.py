@@ -264,7 +264,7 @@ def expect_list(var):
 
 def MergeDictRecurse(base_dict, update_dict, path=""):
     helptext = "\n\nTip: Run \`obsidianhtml export default-config\` to see all configurable keys and their default values.\n"
-    
+
     # these dicts are freeform, and thus should not be checked
     excluded_key_paths = ["module_config"]
 
@@ -291,9 +291,7 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
         # in general, we don't expect types to change
         if type(base_dict[k]) != type(v):
             if check_leaf(key_path, base_dict[k]):
-                raise Exception(
-                    f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}'
-                )
+                raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
 
         # dict match -> recurse
         if isinstance(base_dict[k], dict) and isinstance(v, dict):
@@ -312,6 +310,7 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
 
     return base_dict.copy()
 
+
 def formatted_print(level, msg):
     lines = msg.split("\n")
     print(f"[{level.upper():^7}] * {lines[0]}")
@@ -319,6 +318,7 @@ def formatted_print(level, msg):
         return
     for line in lines[1:]:
         print(f"{'':^9}   {line}")
+
 
 # --- parse commandline
 def get_arguments_dict():
@@ -329,10 +329,10 @@ def get_arguments_dict():
 
         if "-h" in sys.argv or "--help" in sys.argv or "help" in sys.argv:
             return ["help"]
-        
+
         command = []
         for i, v in enumerate(sys.argv[1:]):
-            if v[0] == '-':
+            if v[0] == "-":
                 break
             command.append(v)
 
@@ -342,14 +342,11 @@ def get_arguments_dict():
 
         return command
 
-
     def determine_config_path():
         for i, v in enumerate(sys.argv):
             if v == "-i":
                 if len(sys.argv) < (i + 2):
-                    formatted_print(
-                        "error", "No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input."
-                    )
+                    formatted_print("error", "No config path given.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.")
                     exit(1)
                 return sys.argv[i + 1]
         return ""
@@ -398,13 +395,14 @@ def get_arguments_dict():
         arguments["verbose"] = True
     return arguments
 
+
 def bisect(input, separator, squash_tail=False):
-    """ Will split a string into exactly two parts: (rest, value)
-        - If split returns a list with a single element, no value was found (value = ""), input string is returned as rest.
-        - If the split creates more than 2 values, an error will occur, unless squash_tail is set to True
-          - Add a comment to the function call why squash_tail is necessary, as this setting can cause headaches!
+    """Will split a string into exactly two parts: (rest, value)
+    - If split returns a list with a single element, no value was found (value = ""), input string is returned as rest.
+    - If the split creates more than 2 values, an error will occur, unless squash_tail is set to True
+      - Add a comment to the function call why squash_tail is necessary, as this setting can cause headaches!
     """
-    
+
     if input == "":
         return "", ""
 

@@ -149,16 +149,10 @@ def get_referenced_block(reference, contents, rel_path_str):
     for line in contents.split("\n"):
         if line.strip() == "":
             # return chunk if reference is found
-            if (
-                reference == last_line.strip().rsplit(" ", maxsplit=1)[-1]
-            ):  # reference always has to be seperated by at least 1 space and end with a newline and be on the last line of a paragraph
-                clean_chunk = re.sub(
-                    r"(?<=\s|^)(\^\S*?)(?=$|\n)", "", current_chunk.strip()
-                )  # we want to get a non-empty chunk, the reference itself does not count as "non-empty", so remove this
+            if reference == last_line.strip().rsplit(" ", maxsplit=1)[-1]:  # reference always has to be seperated by at least 1 space and end with a newline and be on the last line of a paragraph
+                clean_chunk = re.sub(r"(?<=\s|^)(\^\S*?)(?=$|\n)", "", current_chunk.strip())  # we want to get a non-empty chunk, the reference itself does not count as "non-empty", so remove this
                 if clean_chunk == "":
-                    clean_chunk = re.sub(
-                        r"(?<=\s|^)(\^\S*?)(?=$|\n)", "", chunks[-1].strip()
-                    )  # current chunk is empty, get last non-empty one and remove the reference from the end
+                    clean_chunk = re.sub(r"(?<=\s|^)(\^\S*?)(?=$|\n)", "", chunks[-1].strip())  # current chunk is empty, get last non-empty one and remove the reference from the end
                 return clean_chunk
 
             # add current_chunk to chunk list as long as it is not empty

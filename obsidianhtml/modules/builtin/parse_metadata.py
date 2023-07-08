@@ -43,7 +43,9 @@ class ParseMetadataModule(ObsidianHtmlModule):
                 elif tags.strip() == "":
                     metadata["tags"] = []
                 else:
-                    metadata["tags"] = [tags,]
+                    metadata["tags"] = [
+                        tags,
+                    ]
             elif tags is None:
                 metadata["tags"] = []
         else:
@@ -75,12 +77,14 @@ class ParseMetadataModule(ObsidianHtmlModule):
                 metadata["tags"] = list(set(metadata["tags"] + inline_tags))
             except Exception as e:
                 og_path = Path(paths["original_input_folder"]).joinpath(rel_path).as_posix()
-                self.print('ERROR', f'failed to parse metadata in file: {og_path}.\nError: {e}. \n(Ignoring this error is not supported as metadata will be read elsewhere. Review yaml frontmatter and edit it to resolve the issue).')
+                self.print(
+                    "ERROR",
+                    f"failed to parse metadata in file: {og_path}.\nError: {e}. \n(Ignoring this error is not supported as metadata will be read elsewhere. Review yaml frontmatter and edit it to resolve the issue).",
+                )
                 exit(1)
             output[rel_path] = metadata
 
         self.modfile("index/metadata.json", output).to_json().write()
-
 
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""

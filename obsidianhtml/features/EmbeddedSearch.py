@@ -239,17 +239,13 @@ def CliEmbeddedSearch():
 
         if v == "-z":
             if len(sys.argv) < (i + 2):
-                print(
-                    "No search data zip path given.\n  Use `obsidianhtml search -z /path/to/obs.html/data/search.json.gzip` to provide input."
-                )
+                print("No search data zip path given.\n  Use `obsidianhtml search -z /path/to/obs.html/data/search.json.gzip` to provide input.")
                 print_global_help_and_exit(1)
             search_json_gzip_path = sys.argv[i + 1]
 
         if v == "-d":
             if len(sys.argv) < (i + 2):
-                print(
-                    "No search data json path given.\n  Use `obsidianhtml search -d /home/user/.config/obsidianhtml/search.json` to provide input."
-                )
+                print("No search data json path given.\n  Use `obsidianhtml search -d /home/user/.config/obsidianhtml/search.json` to provide input.")
                 print_global_help_and_exit(1)
             search_data_path = sys.argv[i + 1]
 
@@ -262,9 +258,7 @@ def CliEmbeddedSearch():
         print(f"Unzipped search.json.gzip to {search_data_path}")
 
     if search_data_path is None:
-        print(
-            "Error: no search data configured. Quitting. Use -d to provide a path to a search.json file, or -z to provide a path to a search.json.gzip file."
-        )
+        print("Error: no search data configured. Quitting. Use -d to provide a path to a search.json file, or -z to provide a path to a search.json.gzip file.")
         print_global_help_and_exit(1)
 
     if query_string is None:

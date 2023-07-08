@@ -112,9 +112,7 @@ def find_user_config_yaml_path(config_yaml_location) -> T.OSAbsolutePosx:
             print(f"No config provided, using config at {input_yml_path_str} (Default config path)")
 
     if input_yml_path_str == "":
-        print(
-            "No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input."
-        )
+        print("No config path given, and none found in default locations.\n  Use `obsidianhtml convert -i /target/path/to/config.yml` to provide input.")
         exit(1)
 
     return input_yml_path_str

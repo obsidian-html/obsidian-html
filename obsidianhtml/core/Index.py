@@ -80,9 +80,7 @@ class Index:
                 # Add to tree
                 self.add_file_object_to_file_tree(fo.path["markdown"]["file_relative_path"].as_posix(), fo)
 
-  
     def add_file_object_to_file_tree(self, rel_path, obj):
         if self.pb.gc("toggles/force_filename_to_lowercase", cached=True):
             rel_path = rel_path.lower()
         self.files[rel_path] = obj
-

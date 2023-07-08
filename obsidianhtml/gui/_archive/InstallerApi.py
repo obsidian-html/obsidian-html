@@ -249,9 +249,7 @@ class InstallerApi:
                 response["data"]["ready"] = True
                 self.ledger.set_value("gitpages_configured", True)
             else:
-                response[
-                    "message"
-                ] = f"A folder already exists at {repo_folder_path_str}, but it is not a git repo (hidden .git folder is missing)."
+                response["message"] = f"A folder already exists at {repo_folder_path_str}, but it is not a git repo (hidden .git folder is missing)."
                 response["message"] += "Delete or move this folder, or pick a different clone path in the previous step before you continue"
                 response["code"] = 405
 
@@ -273,9 +271,7 @@ class InstallerApi:
 
             if url == f"{self.repo_url}.git":
                 response["code"] = 200
-                response[
-                    "message"
-                ] += " Repo found in the expected location with the expected url. Skipping cloning step, as this is the desired state for this step."
+                response["message"] += " Repo found in the expected location with the expected url. Skipping cloning step, as this is the desired state for this step."
                 response["data"] = {"ready": True}
                 return response
 

@@ -280,7 +280,7 @@ class TocTreeprocessor(Treeprocessor):
                     innertext = unescape(stashedHTML2text(text, self.md))
                     el.attrib["id"] = unique(self.slugify(innertext, self.sep), used_ids)
                     if el.attrib["id"][0] not in string.ascii_letters:
-                        el.attrib["id"] = 'h_' + el.attrib["id"]
+                        el.attrib["id"] = "h_" + el.attrib["id"]
 
                 if int(el.tag[-1]) >= self.toc_top and int(el.tag[-1]) <= self.toc_bottom:
                     toc_tokens.append(

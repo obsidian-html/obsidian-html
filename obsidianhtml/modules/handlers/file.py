@@ -33,12 +33,7 @@ class File:
 
     def read(self, sneak=False):
         # check whether module reports reading this input (or has already written it)
-        if (
-            self.is_module_file
-            and sneak == False
-            and self.resource_rel_path not in self.module.requires_files()
-            and self.resource_rel_path not in self.module.written_files.listing()
-        ):
+        if self.is_module_file and sneak == False and self.resource_rel_path not in self.module.requires_files() and self.resource_rel_path not in self.module.written_files.listing():
             # excempted methods from requirement to report reading/writing
             stack = inspect.stack()
             if stack[1][3] not in ("integrate_save", "integrate_load"):
@@ -47,10 +42,8 @@ class File:
                 else:
                     if len(stack) > 3:
                         print(stack[3][3])
-                        
-                    raise Exception(
-                        f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires."
-                    )
+
+                    raise Exception(f"ModuleMisConfiguration: Module {self.module.module_name} reads from {self.resource_rel_path} but this is not reported in self.requires.")
 
         # record reading the file
         # temporary: while integrate methods exist: don't report reads for the integrate save method
@@ -60,9 +53,7 @@ class File:
         # Handle file not existing
         if not os.path.isfile(self.path):
             if not self.allow_absent:
-                raise Exception(
-                    f"File read error: Tried to read non-existent resource {self.path}. Use allow_absent=True if empty string should be returned."
-                )
+                raise Exception(f"File read error: Tried to read non-existent resource {self.path}. Use allow_absent=True if empty string should be returned.")
             else:
                 self.contents = ""
                 return self
@@ -78,9 +69,7 @@ class File:
         if self.is_module_file and self.resource_rel_path not in self.module.provides_files():
             # temporary: while integrate methods exist: don't do checks for the integrate methods
             if inspect.stack()[1][3] not in ("integrate_save", "integrate_load"):
-                raise Exception(
-                    f"ModuleMisConfiguration: Module {self.module.module_name} writes to {self.resource_rel_path} but this is not reported in self.provides."
-                )
+                raise Exception(f"ModuleMisConfiguration: Module {self.module.module_name} writes to {self.resource_rel_path} but this is not reported in self.provides.")
 
         # record writing to the file
         self.module.written_files.add(self.resource_rel_path)
@@ -100,7 +89,7 @@ class File:
 
             # edit file name to include timestamp and module name
             version_path = version_files_folder.joinpath(Path(self.path).relative_to(self.module.module_data_folder))
-            version_path = version_path.parent.joinpath(datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z') + "_" + self.module.module_name + "__" +version_path.name)
+            version_path = version_path.parent.joinpath(datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z") + "_" + self.module.module_name + "__" + version_path.name)
             version_path.parent.mkdir(parents=True, exist_ok=True)
 
             # write versioned file
@@ -113,23 +102,24 @@ class File:
     def summary(self, dependency_type):
         modfile_dependencies = self.module.modfile("modfile_dependencies.json").read(sneak=True).from_json().unwrap()
         if self.resource_rel_path not in modfile_dependencies.keys():
-            return f'<internal error> could not find {self.resource_rel_path} in modfile_dependencies.json'
-        
+            return f"<internal error> could not find {self.resource_rel_path} in modfile_dependencies.json"
+
         if dependency_type == "provided_by":
             provides = modfile_dependencies[self.resource_rel_path][dependency_type]
-            text = f'The modfile {self.resource_rel_path}'
+            text = f"The modfile {self.resource_rel_path}"
             if len(provides) == 0:
-                text = f'{text} is not provided by any built-in or configured module.\nPerhaps you have to configure a custom module?'
+                text = f"{text} is not provided by any built-in or configured module.\nPerhaps you have to configure a custom module?"
                 return text
             else:
-                text = f'{text} is provided by the following modules:'
+                text = f"{text} is provided by the following modules:"
                 for modname in provides:
-                    text += f'\n  - {modname}'
+                    text += f"\n  - {modname}"
                 return text
         else:
-            return f'<internal error> dependency_type of {dependency_type} is not implemented for modfile.summary()'
-            
-        return 
+            return f"<internal error> dependency_type of {dependency_type} is not implemented for modfile.summary()"
+
+        return
+
     # --- read contents
     def text(self):
         return self.contents

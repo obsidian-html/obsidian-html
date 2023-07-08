@@ -57,5 +57,5 @@ def main():
     elif main_command == "short_help":
         print_global_help_and_exit(1, "help_texts/short_help_text")
     else:
-        formatted_print('ERROR', f'Command "{main_command}" is unknown')
+        formatted_print("ERROR", f'Command "{main_command}" is unknown')
         print_global_help_and_exit(1, "help_texts/short_help_text")

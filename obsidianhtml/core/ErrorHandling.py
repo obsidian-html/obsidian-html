@@ -8,11 +8,7 @@ def error_addendum(pb):
 
 
 def format_error_addendum(message):
-    return (
-        "\n\tOBS.HTML EXTRA ERROR INFORMATION:\n\t---------------------------------\n\t"
-        + "\n\t".join([x.strip() for x in message])
-        + "\n\n"
-    )
+    return "\n\tOBS.HTML EXTRA ERROR INFORMATION:\n\t---------------------------------\n\t" + "\n\t".join([x.strip() for x in message]) + "\n\n"
 
 
 def compile_error_addendum(pb):

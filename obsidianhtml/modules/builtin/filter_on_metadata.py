@@ -23,7 +23,13 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
 
     @staticmethod
     def provides():
-        return tuple(["index/files.json", "index/markdown_files.json", "excluded_files_by_metadata.json",])
+        return tuple(
+            [
+                "index/files.json",
+                "index/markdown_files.json",
+                "excluded_files_by_metadata.json",
+            ]
+        )
 
     @staticmethod
     def alters():
@@ -39,9 +45,7 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
                 "The dict elements in the sublists are ANDed together, so every element needs to give true",
             ],
             "example_value": [
-                [
-                    {"tagged": "type/automation"}
-                ],
+                [{"tagged": "type/automation"}],
             ],
         }
         self.mod_config["exclude_on"] = {
@@ -51,30 +55,26 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
                 "Include_on results in an 'excluded_files' list, as does this setting. Both lists are summed.",
             ],
             "example_value": [
-                [
-                    {"tagged": "type/automation"}
-                ],
+                [{"tagged": "type/automation"}],
             ],
-
         }
 
     def accept(self, module_data_folder):
         """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
         return
 
-
     def test_requirement(self, element, metadata):
         if "tagged" in element.keys():
             tag_name = element["tagged"]
-            return (tag_name in metadata["tags"])
+            return tag_name in metadata["tags"]
         else:
-            raise Exception(f'element {element} is not recognized as a valid selector')
+            raise Exception(f"element {element} is not recognized as a valid selector")
         return False
 
     def test_publish(self, rel_path, metadata, include_on):
         if len(include_on) == 0:
             return True
-        
+
         for and_list in include_on:
             publish = True
             for element in and_list:
@@ -91,7 +91,7 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
     def test_exclude(self, rel_path, metadata, exclude_on):
         if len(exclude_on) == 1 and len(exclude_on[0]) == 0:
             return False
-        
+
         for and_list in exclude_on:
             exclude = True
             for element in and_list:
@@ -136,20 +136,19 @@ class FilterOnMetadataModule(ObsidianHtmlModule):
 
         # check that the entrypoint file is not being filtered out
         if paths["entrypoint"] in exclude_list:
-           self.print('ERROR', f'You have configured {self.nametag} to filter out {paths["entrypoint"]}, which is your entrypoint. Correct this and run again.')
-           exit(1)
-        
+            self.print("ERROR", f'You have configured {self.nametag} to filter out {paths["entrypoint"]}, which is your entrypoint. Correct this and run again.')
+            exit(1)
+
         # update file lists
         new_md_files = [x for x in md_files if x not in exclude_list]
         self.modfile("index/markdown_files.json", new_md_files).to_json().write()
-            
+
         files = self.modfile("index/files.json").read().from_json()
         new_files = [x for x in files if (x not in exclude_list)]
         self.modfile("index/files.json", new_files).to_json().write()
 
         # record the files that were excluded
         self.modfile("excluded_files_by_metadata.json", exclude_list).to_json().write()
-        
 
     def integrate_load(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""

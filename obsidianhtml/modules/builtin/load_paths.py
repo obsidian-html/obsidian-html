@@ -31,7 +31,7 @@ class LoadPathsModule(ObsidianHtmlModule):
             return ""
 
         # Use user provided obsidian_folder_path_str
-        if "obsidian_folder_path_str" in self.config and self.config["obsidian_folder_path_str"] not in  ["", "<DEPRECATED>"]:
+        if "obsidian_folder_path_str" in self.config and self.config["obsidian_folder_path_str"] not in ["", "<DEPRECATED>"]:
             result = find_vault_folder_by_entrypoint(self.config["obsidian_folder_path_str"])
             # check that entrypoint is located inside an obsidian vault
             if result:
@@ -76,10 +76,10 @@ class LoadPathsModule(ObsidianHtmlModule):
             "obsidian_entrypoint": Path(gc("obsidian_entrypoint_path_str")).resolve(),
             "md_entrypoint": Path(gc("md_entrypoint_path_str")).resolve(),
             "html_output_folder": Path(gc("html_output_folder_path_str")).resolve(),
-            "appdir": Path(AppDirs("obsidianhtml", "obsidianhtml").user_config_dir)
+            "appdir": Path(AppDirs("obsidianhtml", "obsidianhtml").user_config_dir),
         }
         paths["original_obsidian_folder"] = paths["obsidian_folder"]  # use only for lookups!
-        paths["original_obsidian_entrypoint"] = paths["obsidian_entrypoint"] # use only for lookups!
+        paths["original_obsidian_entrypoint"] = paths["obsidian_entrypoint"]  # use only for lookups!
         paths["dataview_export_folder"] = paths["obsidian_folder"].joinpath(gc("toggles/features/dataview/folder"))
 
         # Deduce relative paths

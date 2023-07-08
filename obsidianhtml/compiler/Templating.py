@@ -33,7 +33,6 @@ def ExportStaticFiles(pb):
         # copy_file_list.append(["imported/mermaid.9.0.1.min.js.map", "mermaid.9.0.1.min.js.map"])
         # copy_file_list.append(["html/css/mermaid.css", "mermaid.css"])
 
-
     if pb.ConfigManager.feature_is_enabled("smiles", cached=True):
         copy_file_list.append(["smiles/smiles.js", "smiles.js"])
 
@@ -185,9 +184,7 @@ def ExportStaticFiles(pb):
             dynamic_imports += f"import * as grapher_{grapher['id']} from './graphers/{grapher['id']}.js';\n"
 
             # add to grapher list
-            grapher_list.append(
-                "{'id': '" + grapher["id"] + "', 'name': '" + grapher["name"] + "', 'module': grapher_" + grapher["id"] + "}"
-            )
+            grapher_list.append("{'id': '" + grapher["id"] + "', 'name': '" + grapher["name"] + "', 'module': grapher_" + grapher["id"] + "}")
             grapher_hash.append("'" + grapher["id"] + "': " + grapher_list[-1])
 
         dynamic_imports += "\n"
@@ -248,7 +245,6 @@ def PopulateTemplate(
     dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/encoding.js"></script>' + "\n"
     dynamic_inclusions += '<link rel="stylesheet" href="' + html_url_prefix + '/obs.html/static/master.css" />' + "\n"
 
-
     if pb.ConfigManager.feature_is_enabled("smiles", cached=True):
         dynamic_inclusions += '<script src="https://unpkg.com/smiles-drawer@2.0.3/dist/smiles-drawer.min.js"></script>'
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/smiles.js"></script>' + "\n"
@@ -269,7 +265,6 @@ def PopulateTemplate(
         # dynamic_inclusions += '<link rel="stylesheet" href="'+html_url_prefix+'/obs.html/static/mermaid.css" />' + "\n"
         dynamic_inclusions += OpenIncludedFile("mermaid/init_mermaid.html") + "\n"
 
-
     if pb.ConfigManager.feature_is_enabled("math_latex", cached=True):
         # dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/tex-chtml.js"></script>' + "\n"
         # dynamic_inclusions += '<script src="'+html_url_prefix+'/obs.html/static/load_mathjax.js"></script>' + "\n"
@@ -285,7 +280,7 @@ def PopulateTemplate(
     if pb.capabilities_needed["directory_tree"]:
         dynamic_inclusions += '<script src="' + html_url_prefix + '/obs.html/static/dirtree.js"></script>' + "\n"
 
-    dynamic_inclusions += dynamic_inclusions_tail + '\n'
+    dynamic_inclusions += dynamic_inclusions_tail + "\n"
 
     if dynamic_includes is not None:
         dynamic_inclusions += dynamic_includes
@@ -294,14 +289,10 @@ def PopulateTemplate(
     footer_js_inclusions = ""
 
     if pb.gc("toggles/features/styling/layout", cached=True) == "documentation":
-        footer_js_inclusions += (
-            f'<script src="{html_url_prefix}/obs.html/static/load_dirtree_footer.js" type="text/javascript"></script>' + "\n"
-        )
+        footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/load_dirtree_footer.js" type="text/javascript"></script>' + "\n"
 
     if pb.gc("toggles/features/styling/layout", cached=True) == "tabs":
-        footer_js_inclusions += (
-            f'<script src="{html_url_prefix}/obs.html/static/obsidian_tabs_footer.js" type="text/javascript"></script>' + "\n"
-        )
+        footer_js_inclusions += f'<script src="{html_url_prefix}/obs.html/static/obsidian_tabs_footer.js" type="text/javascript"></script>' + "\n"
 
     # Include toggled components
     if pb.ConfigManager.ShowIcon("rss"):

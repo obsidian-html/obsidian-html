@@ -26,7 +26,7 @@ class FileFinder:
         # 2. split on # --> rest, anchor
         # 3. split on / --> rest, filename
         rest, alias = bisect(link, "|")
-        simple_path, anchor = bisect(rest, "#", squash_tail=True) # anchor can have multiple # inside of it!
+        simple_path, anchor = bisect(rest, "#", squash_tail=True)  # anchor can have multiple # inside of it!
         filename = simple_path.split("/")[-1]
 
         output["alias"] = alias

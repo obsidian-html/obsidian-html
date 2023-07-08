@@ -57,9 +57,7 @@ class HtmlTemplaterModule(ObsidianHtmlModule):
             html_template = OpenIncludedFile(f"html/layouts/template_{layout}.html")
 
         if "{content}" not in html_template:
-            raise Exception(
-                "The provided html template does not contain the string `{content}`. This will break its intended use as a template."
-            )
+            raise Exception("The provided html template does not contain the string `{content}`. This will break its intended use as a template.")
             return False
 
         self.modfile("html/note.template.html", html_template).write()

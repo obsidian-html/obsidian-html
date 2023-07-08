@@ -87,8 +87,8 @@ class VaultCopyModule(ObsidianHtmlModule):
         # Copy vault from original location to new location
         files = self.modfile("index/files.json").read().from_json()
         new_files = []
-        source_folder_path=paths["original_obsidian_folder"]
-        target_folder_path=paths["obsidian_folder"]
+        source_folder_path = paths["original_obsidian_folder"]
+        target_folder_path = paths["obsidian_folder"]
         for file in files:
             src_path = Path(file)
             rel_path = src_path.relative_to(source_folder_path)
@@ -163,8 +163,6 @@ class VaultCopyModule(ObsidianHtmlModule):
 
     #     self.print("INFO", "COPYING VAULT: Done")
 
-
-
     # def copy_tree_rsync(self, src_dir, dst_dir, exclude, verbose=False):
     #     # Get relative ignore paths
     #     exclude_list = []
@@ -193,7 +191,6 @@ class VaultCopyModule(ObsidianHtmlModule):
     #         self.print("error", "Copy failed %d %s %s" % (p.returncode, output.decode("utf-8").replace("\\n", "\n"), error))
     #     else:
     #         self.print("debug", "Copy succeeded %d %s %s" % (p.returncode, output.decode("utf-8").replace("\\n", "\n"), error))
-
 
     # def copytree_shutil(self, src, dst, symlinks=False, follow_copy=False, ignore=None, copy_function=shutil.copy, ignore_dangling_symlinks=False):
     #     names = os.listdir(src)
@@ -243,7 +240,6 @@ class VaultCopyModule(ObsidianHtmlModule):
     #             errors.extend((src, dst, str(why), "copystat error"))
     #     if errors:
     #         raise Exception("".join(errors))
-
 
     # def copytree_shutil_walk(self, src, dst, symlinks=False, follow_copy=False, ignore=None, copy_function=shutil.copy, ignore_dangling_symlinks=False):
 
