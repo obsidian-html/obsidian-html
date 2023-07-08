@@ -152,14 +152,6 @@ def ExportStaticFiles(pb):
             f.write(c)
 
     # Custom copy
-    c = OpenIncludedFile("html/templates/not_created.html")
-    dst_path = pb.paths["html_output_folder"].joinpath("not_created.html")
-    html_url_prefix = get_html_url_prefix(pb, abs_path_str=dst_path)
-
-    with open(dst_path, "w", encoding="utf-8") as f:
-        html = PopulateTemplate(pb, "none", pb.dynamic_inclusions, pb.html_template, content=c, dynamic_includes="")
-        html = html.replace("{html_url_prefix}", html_url_prefix).replace("{left_pane_content}", "").replace("{right_pane_content}", "")
-        f.write(html)
 
     c = OpenIncludedFileBinary("html/favicon.ico")
     with open(pb.paths["html_output_folder"].joinpath("favicon.ico"), "wb") as f:

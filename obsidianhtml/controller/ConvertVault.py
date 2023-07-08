@@ -7,7 +7,7 @@ import regex as re  # regex string finding/replacing
 
 from .. import md2html
 
-from ..lib import CreateStaticFilesFolders, WriteFileLog, simpleHash, get_html_url_prefix, retain_reference
+from ..lib import CreateStaticFilesFolders, WriteFileLog, simpleHash, get_html_url_prefix, retain_reference, OpenIncludedFile
 
 from ..compiler.Templating import PopulateTemplate
 from ..core.PicknickBasket import PicknickBasket
@@ -157,6 +157,22 @@ def convert_markdown_to_html(pb):
     if pb.gc("toggles/force_filename_to_lowercase", cached=True):
         rel_entry_path_str = rel_entry_path_str.lower()
 
+
+    # add in the not_created page
+    # -----------------------------------------------------------
+    rel_path="not_created.md"
+    abs_path = pb.paths["md_folder"].joinpath(rel_path)
+    contents = OpenIncludedFile("html/templates/not_created.md")
+    with open(abs_path, 'w') as f:
+        f.write(contents)
+
+    fo = FileObject(pb)
+    fo.init_markdown_path(abs_path)
+    fo.compile_metadata(abs_path)
+    pb.index.add_file_object_to_file_tree(rel_path, fo)
+    pb.FileFinder.invalidate_cache()
+
+
     # Conversion: md -> html
     # -----------------------------------------------------------
     # Start conversion from the entrypoint
@@ -165,12 +181,17 @@ def convert_markdown_to_html(pb):
     crawl_markdown_notes_and_convert_to_html(entrypoint_file_object, pb)
     pb.reset_state()
 
-    # also do the tags page if it is not the index, otherwise this page will never be hit
+    # Run other pages that otherwise might not be hit
+    ## tags page
     if pb.gc("toggles/features/create_index_from_tags/enabled") and not pb.gc("toggles/features/create_index_from_tags/use_as_homepage"):
         entrypoint_file_object = pb.index.files[pb.gc("toggles/features/create_index_from_tags/rel_output_path")]
         pb.init_state(action="m2h", loop_type="md_note", current_fo=entrypoint_file_object, subroutine="crawl_markdown_notes_and_convert_to_html")
         crawl_markdown_notes_and_convert_to_html(entrypoint_file_object, pb, capture_in_jar="tags_page_html")
         pb.reset_state()
+
+    ## not_created
+    entrypoint_file_object = pb.index.files["not_created.md"]
+    crawl_markdown_notes_and_convert_to_html(fo, pb)
 
     # Keep going until all other files are processed
     if pb.gc("toggles/process_all") is True:
