@@ -5,9 +5,12 @@ import yaml
 
 import regex as re  # regex string finding/replacing
 
+from urllib.parse import unquote
+from pathlib import Path
+
 from .. import md2html
 
-from ..lib import CreateStaticFilesFolders, WriteFileLog, simpleHash, get_html_url_prefix, retain_reference, OpenIncludedFile
+from ..lib import CreateStaticFilesFolders, WriteFileLog, simpleHash, get_html_url_prefix, retain_reference, OpenIncludedFile, slugify
 
 from ..compiler.Templating import PopulateTemplate
 from ..core.PicknickBasket import PicknickBasket
@@ -228,6 +231,16 @@ def convert_markdown_to_html(pb):
     if pb.gc("toggles/features/embedded_search/enabled", cached=True):
         esearch = EmbeddedSearch(json_data=pb.search.OutputJson())
 
+    # prepare lookup to translate slugified folder names to their original
+    folder_og_name_lut = {}
+    for file in pb.index.files.keys():
+        file_path = pb.index.files[file].path["markdown"]["file_relative_path"]
+        for el in file_path.as_posix().split("/")[:-1]:
+            slug_el = slugify(el)
+            if slug_el not in folder_og_name_lut:
+                print(slug_el, el)
+                folder_og_name_lut[slug_el] = el
+
     print("\t> SECOND PASS HTML")
 
     for fo in pb.index.files.values():
@@ -273,48 +286,63 @@ def convert_markdown_to_html(pb):
         html = md2html.insert_tags_footer(pb, html, tags, fo.md.metadata)
 
         # add breadcrumbs
+        # ------------------------------------------------------------------------
         if pb.gc("toggles/features/breadcrumbs/enabled", cached=True):
-            if node["url"] == "/index.html":
+            html_url_prefix = pb.gc("html_url_prefix", cached=True)
+
+            if node["url"] == f"{html_url_prefix}/index.html":
+                # Don't create breadcrumbs for the homepage
                 snippet = ""
+
             else:
-                html_url_prefix = pb.gc("html_url_prefix", cached=True)
+                # loop through all/links/along/the_way.html
+
+                # set first element to be home
                 parts = [f'<a href="{html_url_prefix}/" style="color: rgb(var(--normal-text-color));">Home</a>']
 
-                previous_url = ""
                 subpaths = node["url"].replace(".html", "").split("/")[1:]
-                match_subpaths = subpaths
 
                 if pb.gc("toggles/force_filename_to_lowercase", cached=True):
-                    match_subpaths = [x.lower() for x in subpaths]
+                    subpaths = [x.lower() for x in subpaths]
 
                 if html_url_prefix:
-                    subpaths = subpaths[1:]
-                    match_subpaths = match_subpaths[1:]
+                    # remove the parts that are part of the prefix
+                    prefix_amount = len(html_url_prefix.split("/")) - 1
+                    subpaths = subpaths[prefix_amount:]
 
-                for i, msubpath in enumerate(match_subpaths):
-                    if i == len(msubpath) - 1:
-                        if node["url"] != previous_url:
-                            parts.append(f'<a href="{node["url"]}" ___COLOR___ >{subpaths[i]}</a>')
-                        continue
+                previous_url = ""
+                for i, subpath in enumerate(subpaths):
+                    subpath = unquote(subpath)
+                    if subpath in pb.index.network_tree.node_lookup:
+                        lnode = pb.index.network_tree.node_lookup[subpath]
+                    elif subpath in pb.index.network_tree.node_lookup_slug:
+                        lnode = pb.index.network_tree.node_lookup_slug[subpath]
                     else:
-                        url = None
-                        if msubpath in pb.index.network_tree.node_lookup:
-                            url = pb.index.network_tree.node_lookup[msubpath]["url"]
-                        elif msubpath in pb.index.network_tree.node_lookup_slug:
-                            url = pb.index.network_tree.node_lookup_slug[msubpath]["url"]
-                        else:
-                            parts.append(f'<span style="color: #666;">{subpaths[i]}</span>')
-                            previous_url = ""
-                            continue
-                        if url != previous_url:
-                            parts.append(f'<a href="{url}" ___COLOR___>{subpaths[i]}</a>')
-                        previous_url = url
+                        # try finding folder with same name in markdown folder
+                        # to get proper capitalization, even if we use slugify
+                        name = unquote(subpaths[i])
+                        if name in folder_og_name_lut:
+                            name = folder_og_name_lut[name]
+
+                        parts.append(f'<span style="color: #666;">{name}</span>')
+                        previous_url = ""
                         continue
 
+                    url = lnode["url"]
+                    name = lnode["name"]
+
+                    # in the case of folder notes, we have the folder and note name being the
+                    # same, we don't want to print this twice in the breadcrumbs
+                    if url != previous_url:
+                        parts.append(f'<a href="{url}" ___COLOR___>{name}</a>')
+                    previous_url = url
+
+                # set all links to be normal text color except for the last link
                 parts[-1] = parts[-1].replace("___COLOR___", "")
                 for i, link in enumerate(parts):
                     parts[i] = link.replace("___COLOR___", 'style="color: var(--normal-text-color);"')
 
+                # combine parts into snippet
                 snippet = " / ".join(parts)
                 snippet = f"""
                 <div style="width:100%; text-align: right;display: block;margin: 0.5rem;">
