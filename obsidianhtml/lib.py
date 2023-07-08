@@ -96,7 +96,14 @@ def ConvertTitleToMarkdownId(title):
 
 
 def slugify_path(value, separator="-", unicode=False, skip_chars_re=r"/\."):
-    return slugify(value, separator, unicode, skip_chars_re)
+    # avoids "test?.html" turning into "test-.html" instead of "test.html"
+    suffix = ""
+    if value.endswith(".html"):
+        value = re.sub(r'\.html$', '', value)
+        suffix = ".html"
+    
+    slugified_value = slugify(value, separator, unicode, skip_chars_re)
+    return f'{slugified_value}{suffix}'
 
 
 def slugify(value, separator="-", unicode=False, skip_chars_re=""):
