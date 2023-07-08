@@ -149,12 +149,24 @@ function getParentContainer(el){
 
 function load_page() {
     // let page know that js is enabled
+    // ----------------------------------------------------------------------------
     signal_js_enabled(document.body)
 
-    if (documentation_mode) {
-        //httpGetAsync(html_url_prefix + '/obs.html/data/graph.json', load_dirtree_as_left_pane, 0, false);
-    }
 
+    // Continuous observers
+    // ----------------------------------------------------------------------------
+    const resize_ob = new ResizeObserver(function(entries) {
+        // resize the container height every time the header height changes
+        let containers = document.querySelectorAll(".container");
+        containers.forEach(container => {
+            setContentHeight(container);
+        });
+    });
+    resize_ob.observe(document.getElementById('header'));
+
+
+    // Custom hooks and loads
+    // ----------------------------------------------------------------------------
     let collection = document.getElementsByClassName("container")
     if (collection.length > 0) {
         LoadTableOfContents(collection[0])
@@ -188,9 +200,10 @@ function load_page() {
                     // we scroll to the anchor
                     // we do this manually because scrolling divs suck
                     let levelcont = document.getElementsByClassName("container")[0];
+                    let header = document.getElementById("header")
                     var el = levelcont.querySelectorAll(link.replaceAll(':', '\\:'))[0];
                     if (el) {
-                        getParentContainer(el).scrollTop = el.offsetTop - rem(6);
+                        getParentContainer(el).scrollTop = el.offsetTop - (rem(1) + header.getBoundingClientRect().height) 
                         el.classList.add('fade-it');
                         setTimeout(function() {
                             el.classList.remove('fade-it');
@@ -340,6 +353,9 @@ function SetContainer(container) {
     // requires_js can be set on elements that need to be hidden unless js is enabled
     // this block will remove the requires_js class from all elements
     signal_js_enabled(container)
+
+    // adjust container height so content does not fall off screen
+    setContentHeight(container)
 
     // set graph svg and button to have unique id across tabs
     let graph_div = container.querySelectorAll(".graph_div");
@@ -542,6 +558,10 @@ function disable(el){
     }
 }
 
+function setContentHeight(container){
+    const height = document.getElementById('header').offsetHeight;
+    container.style.height = `calc(100vh - ${height}px - 2rem)`;
+}
 
 // standard
 function cl_toggle_id(id, class_name){
