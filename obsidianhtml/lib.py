@@ -430,3 +430,51 @@ def bisect(input, separator, squash_tail=False):
         return rest, value
 
     raise Exception(f'500: Bisect resulted in {len(parts)} parts where 1 or 2 were expected. Input: "{input}", separator: "{separator}", parts: {parts}')
+
+
+def strip_frontmatter(content):
+    """
+        [enter yaml]
+          if first non-empty line = "---" (no whitespace allowed) -> enter yaml
+          else -> return none
+        [exit yaml]
+          if line = "---" (no whitespace allowed) -> exit yaml        
+        [in yaml]
+          write line to text with newline
+    """
+
+    first_line = True
+    in_yaml = False
+    text = []
+    
+    lines = content.split("\n")
+    for line in lines:
+        if first_line:
+            # don't test on newlines
+            if len(line) == 0:
+                continue
+
+            # first line not a newline, begin in earnest
+            first_line = False
+
+            # first line is exactly "---" -> we have a yaml block
+            if line == "---":
+                in_yaml = True
+                continue
+
+            # first line is not exactly "---" -> we don't have a yaml block
+            return content
+
+        
+        # exit yaml block
+        if line == "---":
+            in_yaml = False
+            continue
+        
+        # don't record yaml lines
+        if in_yaml:
+            continue
+
+        text.append(line)
+
+    return "\n".join(text)

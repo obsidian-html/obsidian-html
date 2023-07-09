@@ -83,6 +83,7 @@ class FileObject:
         self.path["note"]["folder_path"] = source_folder_path
         self.path["note"]["file_absolute_path"] = source_file_absolute_path
         self.path["note"]["file_relative_path"] = source_file_absolute_path.relative_to(source_folder_path)
+        self.path["note"]["og_file_relative_path"] = self.path["note"]["file_relative_path"]
         self.path["note"]["suffix"] = self.path["note"]["file_absolute_path"].suffix[1:]
 
         # Markdown
@@ -94,12 +95,14 @@ class FileObject:
             self.metadata["is_entrypoint"] = True
             self.path["markdown"]["file_absolute_path"] = target_folder_path.joinpath("index.md")
             self.path["markdown"]["file_relative_path"] = self.path["markdown"]["file_absolute_path"].relative_to(target_folder_path)
+            self.path["markdown"]["og_file_relative_path"] = self.path["note"]["file_relative_path"]
 
             # also add self to pb.index.files under the key 'index.md' so it is findable
             self.pb.index.files["index.md"] = self
         else:
             self.path["markdown"]["file_absolute_path"] = target_folder_path.joinpath(self.path["note"]["file_relative_path"])
             self.path["markdown"]["file_relative_path"] = self.path["note"]["file_relative_path"]
+            self.path["markdown"]["og_file_relative_path"] = self.path["note"]["file_relative_path"]
 
         self.path["markdown"]["suffix"] = self.path["markdown"]["file_absolute_path"].suffix[1:]
 
@@ -122,28 +125,35 @@ class FileObject:
             self.path["markdown"]["folder_path"] = source_folder_path
             self.path["markdown"]["file_absolute_path"] = source_file_absolute_path
             self.path["markdown"]["file_relative_path"] = source_file_absolute_path.relative_to(source_folder_path)
+            self.path["markdown"]["og_file_relative_path"] = source_file_absolute_path.relative_to(source_folder_path)
             self.path["markdown"]["suffix"] = source_file_absolute_path.suffix[1:]
 
         # html
         self.path["html"] = {}
         self.path["html"]["folder_path"] = target_folder_path
 
-        if self.path["markdown"]["file_relative_path"] == self.pb.paths["rel_md_entrypoint_path"]:
-            # rewrite path to index.html if the markdown note is configured as the entrypoint.
-            self.metadata["is_entrypoint"] = True
-            self.path["html"]["file_absolute_path"] = target_folder_path.joinpath("index.html")
-            self.path["html"]["file_relative_path"] = self.path["html"]["file_absolute_path"].relative_to(target_folder_path)
-        else:
-            # rewrite markdown suffix to html suffix
-            target_rel_path_posix = self.path["markdown"]["file_relative_path"].as_posix()
-            if target_rel_path_posix[-3:] == ".md":
-                target_rel_path = Path(target_rel_path_posix[:-3] + ".html")
-            else:
-                target_rel_path = Path(target_rel_path_posix)
+        def convert_md_to_hmtl(rel_path_posix):
+            if rel_path_posix[-3:] == ".md":
+                return Path(rel_path_posix[:-3] + ".html")
+            return Path(rel_path_posix)
 
-            self.path["html"]["file_absolute_path"] = target_folder_path.joinpath(target_rel_path)
-            self.path["html"]["file_relative_path"] = target_rel_path
-            self.path["html"]["suffix"] = self.path["html"]["file_absolute_path"].suffix[1:]
+        src_rel_path_posix = self.path["markdown"]["file_relative_path"].as_posix()
+        src_og_rel_path_posix = self.path["markdown"]["og_file_relative_path"].as_posix()
+
+        if src_rel_path_posix == self.pb.paths["rel_md_entrypoint_path"]:
+            # rewrite path to index.md if the markdown note is configured as the entrypoint.
+            self.metadata["is_entrypoint"] = True
+            target_rel_path_posix = "index.md"
+
+        # rewrite .md to .html
+        src_rel_path = convert_md_to_hmtl(src_rel_path_posix)
+        src_og_rel_path = convert_md_to_hmtl(src_og_rel_path_posix)
+
+        # calc paths
+        self.path["html"]["file_absolute_path"] = target_folder_path.joinpath(src_rel_path)
+        self.path["html"]["file_relative_path"] = src_rel_path
+        self.path["html"]["og_file_relative_path"] = src_og_rel_path
+        self.path["html"]["suffix"] = self.path["html"]["file_absolute_path"].suffix[1:]
 
         # slugify paths
         if self.pb.gc("toggles/slugify_html_links", cached=True):

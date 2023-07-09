@@ -238,7 +238,6 @@ def convert_markdown_to_html(pb):
         for el in file_path.as_posix().split("/")[:-1]:
             slug_el = slugify(el)
             if slug_el not in folder_og_name_lut:
-                print(slug_el, el)
                 folder_og_name_lut[slug_el] = el
 
     print("\t> SECOND PASS HTML")
