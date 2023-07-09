@@ -333,6 +333,9 @@ function SetContainer(container) {
     // Set click to get header link
     SetHeaders(container);
 
+    // wrap images in links so we can easily open the actual size (unless it is already wrapped by a link)
+    wrap_imgs_with_links(container);
+
     // Load mermaid code
     // if (mermaid_enabled){
     //     mermaid.init()
@@ -612,3 +615,34 @@ function style_checklist(element){
         }
     }
 }
+
+function isPartOfLink(element) {
+	// Check if any parent element is a link
+	let parentElement = element.parentElement;
+	while (parentElement !== null) {
+	  if (parentElement.tagName === 'A') {
+		return true;
+	  }
+	  parentElement = parentElement.parentElement;
+	}
+  
+	// If no link element found, return false
+	return false;
+}
+
+function wrap_imgs_with_links(container) {
+	[...container.getElementsByTagName("img")].forEach(img => {
+		// don't wrap if image already is wrapped in a link
+		if (isPartOfLink(img)){ return; }
+
+		// create link wrapper
+		let wrapper = document.createElement('a');
+		wrapper.setAttribute('href',img.src);
+		wrapper.setAttribute("target", "_blank");
+		
+		// put img in link
+		img.parentNode.insertBefore(wrapper, img);
+		wrapper.appendChild(img);
+	});
+}
+
