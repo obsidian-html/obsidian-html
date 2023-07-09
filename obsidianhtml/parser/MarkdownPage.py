@@ -5,7 +5,7 @@ from pathlib import Path
 import frontmatter  # remove yaml frontmatter from md files
 import urllib.parse  # convert link characters like %
 
-from ..lib import slugify, MalformedTags, OpenIncludedFile, bisect
+from ..lib import slugify, MalformedTags, OpenIncludedFile, bisect, strip_frontmatter
 from .. import note2md
 from ..core import FileObject
 
@@ -43,37 +43,10 @@ class MarkdownPage:
 
         # Load contents of entrypoint and strip frontmatter yaml.
         with open(self.src_path, encoding="utf-8") as f:
-            self.metadata, self.page = frontmatter.parse(f.read())
+            self.page = strip_frontmatter(f.read())
 
-        self.SanitizeFrontmatter()
+        self.metadata = self.pb.metadata[fo.path[input_type]["og_file_relative_path"].as_posix()]
 
-    def SanitizeFrontmatter(self):
-        # imitate obsidian shenannigans
-        if "tags" in self.metadata.keys():
-            tags = self.metadata["tags"]
-            if isinstance(tags, str):
-                if " " in tags.strip() or "," in tags:
-                    self.metadata["tags"] = [x.rstrip(",") for x in tags.replace(",", " ").split(" ") if x != ""]
-                elif tags.strip() == "":
-                    self.metadata["tags"] = []
-                else:
-                    self.metadata["tags"] = [
-                        tags,
-                    ]
-            elif tags is None:
-                self.metadata["tags"] = []
-
-    def parse_inline_tags(self):
-        # get frontmatter tags
-        if "tags" not in self.metadata.keys():
-            self.metadata["tags"] = []
-        frontmatter_tags = self.metadata["tags"]
-
-        # get inline tags
-        inline_tags = get_inline_tags(self.page)
-
-        # merge, and remove duplicates
-        self.metadata["tags"] = list(set(frontmatter_tags + inline_tags))
 
     def HasTag(self, ttag):
         tags = self.metadata["tags"]

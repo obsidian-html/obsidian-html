@@ -61,7 +61,6 @@ def CompileTagPageMarkdown(pb):
         # make mdpage object
         md = fo.load_markdown_page("note")
         md.StripCodeSections()
-        md.parse_inline_tags()
 
         metadata = md.metadata
         node_name = md.GetNodeName()

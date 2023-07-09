@@ -84,6 +84,10 @@ class ParseMetadataModule(ObsidianHtmlModule):
                 exit(1)
             output[rel_path] = metadata
 
+        # add virtual files
+        if "not_created.md" not in output.keys():
+            output["not_created.md"] = {}
+
         self.modfile("index/metadata.json", output).to_json().write()
 
     def integrate_load(self, pb):
@@ -92,4 +96,6 @@ class ParseMetadataModule(ObsidianHtmlModule):
 
     def integrate_save(self, pb):
         """Used to integrate a module with the current flow, to become deprecated when all elements use modular structure"""
-        pass
+        metadata = self.modfile("index/metadata.json").read().from_json()
+        pb.metadata = metadata
+
