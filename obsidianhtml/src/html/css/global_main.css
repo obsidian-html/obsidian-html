@@ -375,6 +375,12 @@ h4+table {
     margin-top: 0rem;
 }
 
+td img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 
 /* ---------------------------------------   Link colors / decoration  ---------------------------------------------*/
 
