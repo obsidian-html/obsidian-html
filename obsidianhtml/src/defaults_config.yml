@@ -51,6 +51,9 @@ module_list:
     - name: load_paths
       description: Determine all paths of interest based on input.
 
+    - name: process_config_auto
+      description: Fills in auto values that can be read from the vault config.
+
     - name: html_templater
       description: Prepare and export templates used to create html output.
       persistent: True
@@ -264,7 +267,8 @@ toggles:
 
   # For compatibility with vaults/notes that have the 'Strict Line Breaks' option enabled
   # This is off by default in Obsidian; setting it to True will not insert <br> tags into multi-line paragraphs
-  strict_line_breaks: False
+  # Can be true, false, or "auto". The latter will read the vault's app.json for the value.
+  strict_line_breaks: auto
 
   # gitlab is case insensitive, this setting should be true when converting a wiki from that source
   # might also be useful if you have markdown links in your vault

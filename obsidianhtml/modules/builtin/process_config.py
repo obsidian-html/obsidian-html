@@ -1,6 +1,7 @@
 from ..base_classes import ObsidianHtmlModule
 
 import yaml
+import json
 from pathlib import Path
 
 
@@ -123,3 +124,74 @@ class ProcessConfigModule(ObsidianHtmlModule):
         pb.config = self.config
         pb.configured_html_prefix = self.config["html_url_prefix"]  # REFACTOR: REPLACE
         pb.capabilities_needed = self.retrieve("capabilities_needed")
+
+
+class ProcessConfigAutoModule(ObsidianHtmlModule):
+    """
+    Some values in the config can have value "auto". This module aims to fill in these values.
+    """
+
+    @staticmethod
+    def requires():
+        return tuple(["config.yml", "paths.json"])
+
+    @staticmethod
+    def provides():
+        return tuple(["config.yml"])
+
+    @staticmethod
+    def alters():
+        return tuple()
+
+    def strict_line_breaks_auto(self, config, original_obsidian_folder):
+        """ 
+            When auto is set, it will attempt to read (vault)/.obsidian/app.json, and look for 'strictLineBreaks'.
+            If the app.json file is not found, it will default to false (the default in obsidian)
+            If the strictLineBreaks key is not found, it will default to false
+        """
+
+        # do not execute if value is not auto
+        if config["toggles"]["strict_line_breaks"] != "auto":
+            return
+
+        # get the value of strictLineBreaks in obsidian vault
+        def get_strict_line_value(original_obsidian_folder):
+            app_json_path = Path(original_obsidian_folder).joinpath(".obsidian/app.json")
+            if not app_json_path.exists():
+                return False
+            with open(app_json_path, 'r') as f:
+                obs_conf = json.loads(f.read())
+            if "strictLineBreaks" not in obs_conf.keys():
+                return False
+
+            return obs_conf["strictLineBreaks"]
+
+        val = get_strict_line_value(original_obsidian_folder)
+
+        # set value in config
+        config["toggles"]["strict_line_breaks"] = val
+
+
+    def accept(self, module_data_folder):
+        """This function is run before run(), if it returns False, then the module run is skipped entirely. Any other value will be accepted"""
+        return
+
+    def run(self):
+        print("run_auto")
+
+        # read modfiles
+        config = self.config.unwrap()
+        paths = self.modfile("paths.json").read().from_json()
+
+        # fill in auto values
+        self.strict_line_breaks_auto(config, original_obsidian_folder=paths["original_obsidian_folder"])
+
+        # Export config
+        self.modfile("config.yml", config).to_yaml().write()
+
+
+    def integrate_load(self, pb):
+        pass
+
+    def integrate_save(self, pb):
+        pb.config = self.config
