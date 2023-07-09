@@ -45,7 +45,12 @@ class MarkdownPage:
         with open(self.src_path, encoding="utf-8") as f:
             self.page = strip_frontmatter(f.read())
 
-        self.metadata = self.pb.metadata[fo.path[input_type]["og_file_relative_path"].as_posix()]
+        key = fo.path[input_type]["og_file_relative_path"].as_posix()
+        if key not in self.pb.metadata:
+            self.metadata = {}
+            self.metadata["tags"] = []
+        else:
+            self.metadata = self.pb.metadata[key]
 
 
     def HasTag(self, ttag):
