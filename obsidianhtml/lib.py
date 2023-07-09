@@ -275,7 +275,7 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
     # these dicts are freeform, and thus should not be checked
     excluded_key_paths = ["module_config"]
 
-    def check_leaf(key_path, val):
+    def check_leaf(key_path, val, new_val):
         if val == "<REMOVED>":
             raise Exception(
                 f"\n\tThe setting {key_path} has been removed. Please remove it from your settings file. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information."
@@ -285,6 +285,10 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
                 f"DEPRECATION WARNING: The setting {key_path} is deprecated. See https://obsidian-html.github.io/Configurations/Deprecated%20Configurations/Deprecated%20Configurations.html for more information."
             )
             return False
+        elif key_path == "toggles/strict_line_breaks":
+            if isinstance(new_val, bool) or new_val == "auto":
+                return False
+            raise Exception(f'Error: the value of toggles/strict_line_breaks should be one of: True, False, "auto". Got: {new_val}')
         return True
 
     for k, v in update_dict.items():
@@ -297,7 +301,7 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
         # don't overwrite a dict in the base config with a string, or something else
         # in general, we don't expect types to change
         if type(base_dict[k]) != type(v):
-            if check_leaf(key_path, base_dict[k]):
+            if check_leaf(key_path, base_dict[k], v):
                 raise Exception(f'\n\tThe value of key "{key_path}" is expected to be of type {type(base_dict[k])}, but is of type {type(v)}. {helptext}')
 
         # dict match -> recurse
@@ -312,7 +316,7 @@ def MergeDictRecurse(base_dict, update_dict, path=""):
         if isinstance(update_dict[k], list):
             base_dict[k] = v.copy()
         else:
-            check_leaf(key_path, base_dict[k])
+            check_leaf(key_path, base_dict[k], v)
             base_dict[k] = v
 
     return base_dict.copy()

@@ -90,20 +90,21 @@ class FileObject:
         self.path["markdown"] = {}
         self.path["markdown"]["folder_path"] = target_folder_path
 
+        ## Path rewrites
         if self.path["note"]["file_relative_path"] == self.pb.paths["rel_obsidian_entrypoint"]:
             # rewrite path to index.md if the note is configured as the entrypoint.
             self.metadata["is_entrypoint"] = True
+            
             self.path["markdown"]["file_absolute_path"] = target_folder_path.joinpath("index.md")
             self.path["markdown"]["file_relative_path"] = self.path["markdown"]["file_absolute_path"].relative_to(target_folder_path)
-            self.path["markdown"]["og_file_relative_path"] = self.path["note"]["file_relative_path"]
-
+            
             # also add self to pb.index.files under the key 'index.md' so it is findable
             self.pb.index.files["index.md"] = self
         else:
             self.path["markdown"]["file_absolute_path"] = target_folder_path.joinpath(self.path["note"]["file_relative_path"])
             self.path["markdown"]["file_relative_path"] = self.path["note"]["file_relative_path"]
-            self.path["markdown"]["og_file_relative_path"] = self.path["note"]["file_relative_path"]
 
+        self.path["markdown"]["og_file_relative_path"] = self.path["note"]["file_relative_path"]
         self.path["markdown"]["suffix"] = self.path["markdown"]["file_absolute_path"].suffix[1:]
 
         # Metadata
