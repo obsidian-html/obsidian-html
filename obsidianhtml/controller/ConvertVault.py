@@ -27,6 +27,7 @@ from ..compiler.HTML import compile_navbar_links, create_folder_navigation_view,
 from ..compiler.Templating import ExportStaticFiles
 
 from ..modules import controller as module_controller
+from ..modules.lib import verbose_enough
 
 
 def ConvertVault(config_yaml_location=""):
@@ -89,11 +90,12 @@ def ConvertVault(config_yaml_location=""):
     # Wrap up
     # ---------------------------------------------------------
     if pb.gc("toggles/compile_md") or pb.gc("toggles/compile_html"):
-        print("\nYou can find your output at:")
-        if pb.gc("toggles/compile_md"):
-            print(f"\tmd: {pb.paths['md_folder']}")
-        if pb.gc("toggles/compile_html"):
-            print(f"\thtml: {pb.paths['html_output_folder']}")
+        if verbose_enough("info", pb.verbosity):
+            print("\nYou can find your output at:")
+            if pb.gc("toggles/compile_md"):
+                print(f"\tmd: {pb.paths['md_folder']}")
+            if pb.gc("toggles/compile_html"):
+                print(f"\thtml: {pb.paths['html_output_folder']}")
 
 
 def convert_obsidian_notes_to_markdown(pb):
@@ -106,7 +108,9 @@ def convert_obsidian_notes_to_markdown(pb):
         # Start conversion with entrypoint.
         # ---------------------------------------------------------
         # Note: this will mean that any note not (indirectly) linked by the entrypoint will not be included in the output!
-        print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(pb.paths["obsidian_entrypoint"])})')
+
+        if verbose_enough("info", pb.verbosity):
+            print(f'> COMPILING MARKDOWN FROM OBSIDIAN CODE ({str(pb.paths["obsidian_entrypoint"])})')
 
         if pb.gc("toggles/debug_filetree_keys"):
             for k, v in pb.index.files.items():
@@ -132,7 +136,8 @@ def convert_obsidian_notes_to_markdown(pb):
 
         # Keep going until all other files are processed
         if pb.gc("toggles/process_all", cached=True):
-            print("\t> FEATURE: PROCESS ALL")
+            if verbose_enough("info", pb.verbosity):
+                print("\t> FEATURE: PROCESS ALL")
             unparsed = [x for x in pb.index.files.values() if x.processed_ntm is False]
             i = 0
             l = len(unparsed)
@@ -143,14 +148,16 @@ def convert_obsidian_notes_to_markdown(pb):
                 pb.init_state(action="n2m_process_all", loop_type="note", current_fo=fo, subroutine="crawl_obsidian_notes_and_convert_to_markdown")
                 crawl_obsidian_notes_and_convert_to_markdown(fo, pb, log_level=2)
                 pb.reset_state()
-            print("\t< FEATURE: PROCESS ALL: Done")
+            if verbose_enough("info", pb.verbosity):
+                print("\t< FEATURE: PROCESS ALL: Done")
 
 
 def convert_markdown_to_html(pb):
     if not pb.gc("toggles/compile_html", cached=True):
         return
 
-    print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(pb.paths["md_entrypoint"])})')
+    if verbose_enough("info", pb.verbosity):
+        print(f'> COMPILING HTML FROM MARKDOWN CODE ({str(pb.paths["md_entrypoint"])})')
 
     # Prepare reusable blocks
     compile_navbar_links(pb)
@@ -198,7 +205,8 @@ def convert_markdown_to_html(pb):
 
     # Keep going until all other files are processed
     if pb.gc("toggles/process_all") is True:
-        print("\t> FEATURE: PROCESS ALL")
+        if verbose_enough("info", pb.verbosity):
+            print("\t> FEATURE: PROCESS ALL")
         unparsed = [x for x in pb.index.files.values() if x.processed_mth is False]
         i = 0
         l = len(unparsed)
@@ -211,7 +219,8 @@ def convert_markdown_to_html(pb):
             crawl_markdown_notes_and_convert_to_html(fo, pb, log_level=2)
             pb.reset_state()
 
-        print("\t< FEATURE: PROCESS ALL: Done")
+        if verbose_enough("info", pb.verbosity):
+            print("\t< FEATURE: PROCESS ALL: Done")
 
     # [??] Second pass
     # ------------------------------------------
@@ -240,7 +249,8 @@ def convert_markdown_to_html(pb):
             if slug_el not in folder_og_name_lut:
                 folder_og_name_lut[slug_el] = el
 
-    print("\t> SECOND PASS HTML")
+    if verbose_enough("info", pb.verbosity):
+        print("\t> SECOND PASS HTML")
 
     for fo in pb.index.files.values():
         if not fo.metadata["is_note"]:
@@ -415,7 +425,8 @@ def convert_markdown_to_html(pb):
         with open(dst_abs_path, "w", encoding="utf-8") as f:
             f.write(html)
 
-    print("\t< SECOND PASS HTML: Done")
+    if verbose_enough("info", pb.verbosity):
+        print("\t< SECOND PASS HTML: Done")
 
     # Create system pages
     # -----------------------------------------------------------
@@ -459,17 +470,20 @@ def convert_markdown_to_html(pb):
     # Add Extra stuff to the output directories
     ExportStaticFiles(pb)
 
-    print("< COMPILING HTML FROM MARKDOWN CODE: Done")
+    if verbose_enough("info", pb.verbosity):
+        print("< COMPILING HTML FROM MARKDOWN CODE: Done")
 
 
 def compile_rss_feed(pb):
     if not pb.gc("toggles/features/rss/enabled"):
         return
 
-    print("> COMPILING RSS FEED")
+    if verbose_enough("info", pb.verbosity):
+        print("> COMPILING RSS FEED")
     feed = RssFeed(pb)
     feed.Compile()
-    print("< COMPILING RSS FEED: Done")
+    if verbose_enough("info", pb.verbosity):
+        print("< COMPILING RSS FEED: Done")
 
 
 def export_user_files(pb):
@@ -479,7 +493,8 @@ def export_user_files(pb):
     if not isinstance(file_exports, list):
         raise Exception(f"Config value type of file_exports should be list, instead of {type(file_exports).__name__}.")
 
-    print("> EXPORTING USER FILES")
+    if verbose_enough("info", pb.verbosity):
+        print("> EXPORTING USER FILES")
 
     for ufile in file_exports:
         src = pb.paths["obsidian_folder"].joinpath(ufile["src"]).resolve()
@@ -504,7 +519,8 @@ def export_user_files(pb):
             with open(dst, "w", encoding=encoding) as f:
                 f.write(contents)
 
-    print("< EXPORTING USER FILES: Done")
+    if verbose_enough("info", pb.verbosity):
+        print("< EXPORTING USER FILES: Done")
 
 
 # @extra_info()
@@ -604,7 +620,8 @@ def crawl_markdown_notes_and_convert_to_html(fo: "FileObject", pb, backlink_node
 def run_post_processing(pb):
     post_processing_modules = pb.gc("toggles/features/post_processing")
     if len(post_processing_modules) > 0:
-        print("> POST-PROCESSING:")
+        if verbose_enough("info", pb.verbosity):
+            print("> POST-PROCESSING:")
     for module in post_processing_modules:
         print(f"\t> {module['module']}")
         if module["module"] == "md_markdown_callouts":
@@ -617,4 +634,5 @@ def run_post_processing(pb):
             raise Exception(f"Unknown processing module of {module['module']}")
 
     if len(post_processing_modules) > 0:
-        print("< POST-PROCESSING: Done")
+        if verbose_enough("info", pb.verbosity):
+            print("< POST-PROCESSING: Done")
