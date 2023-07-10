@@ -4,6 +4,7 @@ from functools import cache
 from ..core import Types as T
 from ..lib import get_rel_html_url_prefix, slugify_path, expect_list
 from ..compiler.Templating import PopulateTemplate
+from ..modules.lib import verbose_enough
 
 
 def compile_navbar_links(pb) -> T.PBChange:
@@ -48,7 +49,8 @@ def create_folder_navigation_view(pb) -> T.WriteExportFile:
     rel_output_path = pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path")
     op = pb.paths["html_output_folder"].joinpath(rel_output_path)
 
-    print(f"\t> COMPILING INDEX FROM DIR STRUCTURE ({op})")
+    if verbose_enough("info", pb.verbosity):
+        print(f"\t> COMPILING INDEX FROM DIR STRUCTURE ({op})")
     # Create dirtree to be viewed on its own
     if pb.gc("toggles/relative_path_html", cached=True):
         html_url_prefix = pb.sc(path="html_url_prefix", value=get_rel_html_url_prefix(pb.gc("toggles/features/create_index_from_dir_structure/rel_output_path")))
@@ -68,7 +70,8 @@ def create_folder_navigation_view(pb) -> T.WriteExportFile:
     pb.treeobj.html = pb.treeobj.BuildIndex()
     pb.treeobj.WriteIndex()
 
-    print("\t< COMPILING INDEX FROM DIR STRUCTURE: Done")
+    if verbose_enough("info", pb.verbosity):
+        print("\t< COMPILING INDEX FROM DIR STRUCTURE: Done")
 
 
 def recurseTagList(tagtree, tagpath, pb, level):

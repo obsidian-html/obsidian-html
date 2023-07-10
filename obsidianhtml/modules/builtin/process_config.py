@@ -177,8 +177,6 @@ class ProcessConfigAutoModule(ObsidianHtmlModule):
         return
 
     def run(self):
-        print("run_auto")
-
         # read modfiles
         config = self.config.unwrap()
         paths = self.modfile("paths.json").read().from_json()
@@ -195,3 +193,4 @@ class ProcessConfigAutoModule(ObsidianHtmlModule):
 
     def integrate_save(self, pb):
         pb.config = self.config
+        pb.verbosity = self.config["verbosity"]
