@@ -99,8 +99,14 @@ function load_theme() {
     }
 
     let theme_name = ls_get('theme_name');
+
     if (!theme_name){
-        ls_set('theme_name', 'obs-light');
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            ls_set('theme_name', 'obs-dark');
+          } else {
+           
+            ls_set('theme_name', 'obs-light');
+          }
     }
     set_theme(ls_get('theme_name'));
     disable_antiflash();
