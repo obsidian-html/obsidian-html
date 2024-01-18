@@ -546,7 +546,12 @@ class MarkdownPage:
                 # Wrap up
                 included_page.RestoreCodeSections()
 
-            self.page = self.page.replace(matched_link, "\n" + included_page.page + "\n")
+            included_page.page = f'\n{included_page.page}\n'
+
+            if self.pb.gc("toggles/wrap_inclusions", cached=True):
+                included_page.page = f'\n<div class="inclusion" markdown="1">\n{included_page.page}\n</div>\n'
+
+            self.page = self.page.replace(matched_link, included_page.page)
 
             # [425] Add included references as links in graph view
             # add link to frontmatter yaml so that we can add it to the graphview
