@@ -1,4 +1,6 @@
 # This is a basic workflow to help you get started with Actions
+# See also this link for a more recent template by katylava:
+# - https://github.com/obsidian-html/obsidian-html/discussions/767#discussioncomment-8170344
 
 name: Deploy obsidianhtml output directly to gh-pages branch
 
