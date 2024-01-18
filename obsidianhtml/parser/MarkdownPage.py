@@ -219,7 +219,7 @@ class MarkdownPage:
                 page_folder_depth = 0
 
         # -- [??] Remove spaces in front of codeblock open and close lines
-        # Obisidian allows spaces in front, markdown does not
+        # Obsidian allows spaces in front, markdown does not
         self.page = re.sub(r"(^ *```)", "```", self.page, flags=re.MULTILINE)
 
         # -- [1] Replace code blocks with placeholders so they aren't altered

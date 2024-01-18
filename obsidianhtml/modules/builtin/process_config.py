@@ -125,6 +125,7 @@ class ProcessConfigModule(ObsidianHtmlModule):
         pb.configured_html_prefix = self.config["html_url_prefix"]  # REFACTOR: REPLACE
         pb.capabilities_needed = self.retrieve("capabilities_needed")
 
+        pb.verbosity = self.config["verbosity"]
 
 class ProcessConfigAutoModule(ObsidianHtmlModule):
     """
