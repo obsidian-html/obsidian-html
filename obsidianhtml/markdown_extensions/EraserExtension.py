@@ -2,7 +2,7 @@
 Eraser Extension for Python-Markdown
 ========================================
 
-Obisidian has a comment system: everything between %% is a comment and will not be shown in view mode
+Obsidian has a comment system: everything between %% is a comment and will not be shown in view mode
 
     Text
     %%
