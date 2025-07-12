@@ -60,6 +60,7 @@ function set_rel_paths(){
     // update navbar links
     list = document.getElementsByClassName('navbar-link')
     for (let el of list) {
+        if (el.dataset.external === "true") continue;
         let href = el.getAttribute('href');
         if (href){
             if (href.startsWith(CONFIGURED_HTML_URL_PREFIX + '/')){

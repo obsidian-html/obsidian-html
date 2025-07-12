@@ -24,7 +24,7 @@ def compile_navbar_links(pb) -> T.PBChange:
         # external links
         if "type" in l.keys():
             if l["type"] == "external":
-                el = f'<a class="navbar-link" href="{link}" title="{l["name"]}">{l["name"]}</a>'
+                el = f'<a class="navbar-link" data-external="true" href="{link}" title="{l["name"]}">{l["name"]}</a>'
             else:
                 raise Exception(f"navbar_link type of {l['type']} is unknown. Known types: external (for internal links just remove the type keyvalue pair)")
 
