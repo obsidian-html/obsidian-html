@@ -43,6 +43,7 @@
 
           checkPhase = ''
             export PATH="$PATH:$out/bin"
+            export HOME="$(mktemp -d)"
             ${pkgs.python3}/bin/python3 ci/tests/basic_regression_test.py
           '';
 
